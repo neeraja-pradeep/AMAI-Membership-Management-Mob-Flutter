@@ -1,1 +1,1 @@
-https://www.figma.com/design/ZeK0T32wZkt7c0yo7d9EDh/Dev-mode-Test---Nexotech?node-id=6008-244&t=AVyU42P0VwoNH0l5-1
+https://www.figma.com/design/Z8f1rr51kyelmzYuqwrF0W/AMAI-Web-Application?node-id=10561-10688&t=oKbmRfGZgbslnqJ9-0
