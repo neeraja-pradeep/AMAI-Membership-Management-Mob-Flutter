@@ -14,8 +14,9 @@ Required Dependencies:
 - cookie_jar: [VERSION] (cookie persistence)
 - dio_cookie_manager: [VERSION]
 Package Constraints:
-All dependencies must support null safety
-No deprecated APIs
+ * All dependencies must support null safety
+ * No deprecated APIs
+
 DATA MODELS & SERIALIZATION
 Required Models
 Login Request Model:
