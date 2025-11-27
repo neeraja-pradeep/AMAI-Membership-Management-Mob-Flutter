@@ -1,5 +1,5 @@
 import 'dart:async';
-import 'package:hive/hive.dart';
+
 import 'cache_config.dart';
 import 'cache_entry.dart';
 import 'cache_utils.dart';
@@ -24,12 +24,7 @@ class CacheResult<T> {
 }
 
 /// Source of cached data
-enum CacheSource {
-  memory,
-  hive,
-  network,
-  none,
-}
+enum CacheSource { memory, hive, network, none }
 
 /// Orchestrates the 3-layer cache system
 ///
@@ -176,10 +171,7 @@ class CacheManager {
         );
       }
 
-      return CacheResult<T>(
-        data: data,
-        source: CacheSource.network,
-      );
+      return CacheResult<T>(data: data, source: CacheSource.network);
     } catch (e) {
       // Return cached data if available on error
       final cachedEntry = _memoryCache.get(cacheKey);
@@ -237,7 +229,8 @@ class CacheManager {
     } catch (e) {
       _consecutiveWriteFailures++;
 
-      if (_consecutiveWriteFailures >= CacheConfig.maxConsecutiveWriteFailures) {
+      if (_consecutiveWriteFailures >=
+          CacheConfig.maxConsecutiveWriteFailures) {
         _isHiveDisabled = true;
       }
     }
@@ -289,7 +282,8 @@ class CacheManager {
       entries.sort((a, b) => a.lastAccessed.compareTo(b.lastAccessed));
 
       // Delete oldest 20%
-      final deleteCount = (entries.length * CacheConfig.evictionPercentage).toInt();
+      final deleteCount = (entries.length * CacheConfig.evictionPercentage)
+          .toInt();
       for (int i = 0; i < deleteCount && i < entries.length; i++) {
         await box.delete(entries[i].key);
       }

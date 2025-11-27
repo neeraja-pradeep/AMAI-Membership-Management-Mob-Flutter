@@ -6,14 +6,13 @@ part of 'registration_request.dart';
 // JsonSerializableGenerator
 // **************************************************************************
 
-_$RegistrationRequestImpl _$$RegistrationRequestImplFromJson(
-        Map<String, dynamic> json) =>
-    _$RegistrationRequestImpl(
+RegistrationRequest _$RegistrationRequestFromJson(Map<String, dynamic> json) =>
+    RegistrationRequest(
       role: json['role'] as String,
     );
 
-Map<String, dynamic> _$$RegistrationRequestImplToJson(
-        _$RegistrationRequestImpl instance) =>
+Map<String, dynamic> _$RegistrationRequestToJson(
+        RegistrationRequest instance) =>
     <String, dynamic>{
       'role': instance.role,
     };

@@ -1,14 +1,15 @@
 /// Session domain entity
 ///
 /// Represents an authenticated session with tokens and expiry information
+///
+/// NOTE: session_id is stored in HTTP-only cookies by the server
+/// and managed by Dio's cookie manager. It is not part of this entity.
 class Session {
-  final String sessionId;
   final String xcsrfToken;
   final DateTime expiresAt;
   final String? ifModifiedSince;
 
   const Session({
-    required this.sessionId,
     required this.xcsrfToken,
     required this.expiresAt,
     this.ifModifiedSince,
@@ -37,13 +38,14 @@ class Session {
       identical(this, other) ||
       other is Session &&
           runtimeType == other.runtimeType &&
-          sessionId == other.sessionId;
+          xcsrfToken == other.xcsrfToken &&
+          expiresAt == other.expiresAt;
 
   @override
-  int get hashCode => sessionId.hashCode;
+  int get hashCode => xcsrfToken.hashCode ^ expiresAt.hashCode;
 
   @override
   String toString() {
-    return 'Session(sessionId: $sessionId, expiresAt: $expiresAt, valid: $isValid)';
+    return 'Session(xcsrfToken: ${xcsrfToken.substring(0, 8)}..., expiresAt: $expiresAt, valid: $isValid)';
   }
 }

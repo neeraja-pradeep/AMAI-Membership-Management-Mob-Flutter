@@ -1,4 +1,5 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../../../core/error/auth_exception.dart';
 import '../../infrastructure/repositories/auth_repository_provider.dart';
 import '../states/auth_state.dart';
 import '../usecases/check_auth_usecase.dart';
@@ -20,7 +21,7 @@ class AuthStateNotifier extends StateNotifier<AuthState> {
   }) : _loginUseCase = loginUseCase,
        _logoutUseCase = logoutUseCase,
        _checkAuthUseCase = checkAuthUseCase,
-       super(const AuthState.initial()) {
+       super(const AuthStateInitial()) {
     // Check authentication on initialization
     checkAuthentication();
   }
@@ -30,7 +31,7 @@ class AuthStateNotifier extends StateNotifier<AuthState> {
   /// SCENARIO 2: App Restart with Internet (12h old cache)
   /// SCENARIO 3: App Restart No Internet (12h old cache)
   Future<void> checkAuthentication() async {
-    state = const AuthState.initial();
+    state = const AuthStateInitial();
 
     try {
       final result = await _checkAuthUseCase.execute();
@@ -41,16 +42,16 @@ class AuthStateNotifier extends StateNotifier<AuthState> {
         // Check if session is expiring soon or stale
         final isStale = result.session!.isExpiringSoon;
 
-        state = AuthState.authenticated(
+        state = AuthStateAuthenticated(
           user: result.user!,
           session: result.session!,
           isStale: isStale,
         );
       } else {
-        state = const AuthState.unauthenticated();
+        state = const AuthStateUnauthenticated();
       }
     } catch (e) {
-      state = const AuthState.unauthenticated();
+      state = const AuthStateUnauthenticated();
     }
   }
 
@@ -62,7 +63,7 @@ class AuthStateNotifier extends StateNotifier<AuthState> {
     required String password,
     bool rememberMe = false,
   }) async {
-    state = const AuthState.loading();
+    state = const AuthStateLoading();
 
     try {
       final result = await _loginUseCase.execute(
@@ -71,12 +72,21 @@ class AuthStateNotifier extends StateNotifier<AuthState> {
         rememberMe: rememberMe,
       );
 
-      state = AuthState.authenticated(
+      state = AuthStateAuthenticated(
         user: result.user,
         session: result.session,
       );
+    } on AuthException catch (e) {
+      // Extract metadata from specific exception types
+      state = AuthStateError(
+        message: e.message,
+        code: e.code,
+        fieldErrors: e.fieldErrors,
+        attemptCount: e is UnauthorizedException ? e.attemptCount : null,
+        retryAfter: e is TooManyRequestsException ? e.retryAfter : null,
+      );
     } catch (e) {
-      state = AuthState.error(
+      state = AuthStateError(
         message: e.toString().replaceAll('Exception: ', ''),
       );
     }
@@ -85,47 +95,52 @@ class AuthStateNotifier extends StateNotifier<AuthState> {
   /// Logout current user
   ///
   /// CACHE INVALIDATION: User logout  Delete ALL auth_* keys
+  /// CACHE INVALIDATION: User logout → Delete ALL auth_* keys
   Future<void> logout() async {
     try {
       await _logoutUseCase.execute();
-      state = const AuthState.unauthenticated();
+      state = const AuthStateUnauthenticated();
     } catch (e) {
       // Even if logout fails, transition to unauthenticated
-      state = const AuthState.unauthenticated();
+      state = const AuthStateUnauthenticated();
     }
   }
 
   /// Mark session as expired
   void markSessionExpired() {
-    state = const AuthState.sessionExpired();
+    state = const AuthStateSessionExpired();
   }
 
   /// Mark as offline
   void markOffline() {
-    state.whenOrNull(
-      authenticated: (user, session, isStale, _) {
-        state = AuthState.authenticated(
-          user: user,
-          session: session,
-          isStale: isStale,
-          isOffline: true,
-        );
-      },
-    );
+    if (state case AuthStateAuthenticated(
+      :final user,
+      :final session,
+      :final isStale,
+    )) {
+      state = AuthStateAuthenticated(
+        user: user,
+        session: session,
+        isStale: isStale,
+        isOffline: true,
+      );
+    }
   }
 
   /// Mark as online
   void markOnline() {
-    state.whenOrNull(
-      authenticated: (user, session, isStale, _) {
-        state = AuthState.authenticated(
-          user: user,
-          session: session,
-          isStale: isStale,
-          isOffline: false,
-        );
-      },
-    );
+    if (state case AuthStateAuthenticated(
+      :final user,
+      :final session,
+      :final isStale,
+    )) {
+      state = AuthStateAuthenticated(
+        user: user,
+        session: session,
+        isStale: isStale,
+        isOffline: false,
+      );
+    }
   }
 }
 
@@ -149,38 +164,41 @@ final authProvider = StateNotifierProvider<AuthStateNotifier, AuthState>((ref) {
 /// Convenience provider for current user
 final currentUserProvider = Provider((ref) {
   final authState = ref.watch(authProvider);
-  return authState.whenOrNull(authenticated: (user, _, __, ___) => user);
+  return switch (authState) {
+    AuthStateAuthenticated(:final user) => user,
+    _ => null,
+  };
 });
 
 /// Convenience provider for current session
 final currentSessionProvider = Provider((ref) {
   final authState = ref.watch(authProvider);
-  return authState.whenOrNull(authenticated: (_, session, __, ___) => session);
+  return switch (authState) {
+    AuthStateAuthenticated(:final session) => session,
+    _ => null,
+  };
 });
 
 /// Convenience provider for authentication status
 final isAuthenticatedProvider = Provider<bool>((ref) {
   final authState = ref.watch(authProvider);
-  return authState.maybeWhen(
-    authenticated: (_, __, ___, ____) => true,
-    orElse: () => false,
-  );
+  return authState is AuthStateAuthenticated;
 });
 
 /// Convenience provider for offline status
 final isOfflineProvider = Provider<bool>((ref) {
   final authState = ref.watch(authProvider);
-  return authState.maybeWhen(
-    authenticated: (_, __, ___, isOffline) => isOffline,
-    orElse: () => false,
-  );
+  return switch (authState) {
+    AuthStateAuthenticated(:final isOffline) => isOffline,
+    _ => false,
+  };
 });
 
 /// Convenience provider for stale data warning
 final isStaleProvider = Provider<bool>((ref) {
   final authState = ref.watch(authProvider);
-  return authState.maybeWhen(
-    authenticated: (_, __, isStale, ___) => isStale,
-    orElse: () => false,
-  );
+  return switch (authState) {
+    AuthStateAuthenticated(:final isStale) => isStale,
+    _ => false,
+  };
 });

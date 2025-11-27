@@ -62,18 +62,20 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
 
     // Listen to auth state changes
     ref.listen<AuthState>(authProvider, (previous, next) {
-      next.whenOrNull(
-        authenticated: (user, session, _, __) {
+      switch (next) {
+        case AuthStateAuthenticated():
           // Navigate to home screen on successful login
           // Navigator.pushReplacementNamed(context, '/home');
-        },
-        error: (message, code) {
+          break;
+        case AuthStateError(:final message):
           // Show error snackbar
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(content: Text(message), backgroundColor: Colors.red),
           );
-        },
-      );
+          break;
+        default:
+          break;
+      }
     });
 
     return Scaffold(
@@ -163,10 +165,14 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                           SizedBox(
                             height: 50.h,
                             child: ElevatedButton(
+<<<<<<< HEAD
                               onPressed: authState.maybeWhen(
                                 loading: () => null,
                                 orElse: () => _handleLogin,
                               ),
+=======
+                              onPressed: authState is AuthStateLoading ? null : _handleLogin,
+>>>>>>> e27d218873393ebefcd9d531f2a4f57070a800f5
                               style: ElevatedButton.styleFrom(
                                 backgroundColor: const Color(0xFF1976D2),
                                 shape: RoundedRectangleBorder(
@@ -174,26 +180,25 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                                 ),
                                 elevation: 0,
                               ),
-                              child: authState.maybeWhen(
-                                loading: () => SizedBox(
-                                  width: 24.w,
-                                  height: 24.h,
-                                  child: const CircularProgressIndicator(
-                                    strokeWidth: 2,
-                                    valueColor: AlwaysStoppedAnimation<Color>(
-                                      Colors.white,
+                              child: authState is AuthStateLoading
+                                  ? SizedBox(
+                                      width: 24.w,
+                                      height: 24.h,
+                                      child: const CircularProgressIndicator(
+                                        strokeWidth: 2,
+                                        valueColor: AlwaysStoppedAnimation<Color>(
+                                          Colors.white,
+                                        ),
+                                      ),
+                                    )
+                                  : Text(
+                                      'Login',
+                                      style: TextStyle(
+                                        fontSize: 16.sp,
+                                        fontWeight: FontWeight.w600,
+                                        color: Colors.white,
+                                      ),
                                     ),
-                                  ),
-                                ),
-                                orElse: () => Text(
-                                  'Login',
-                                  style: TextStyle(
-                                    fontSize: 16.sp,
-                                    fontWeight: FontWeight.w600,
-                                    color: Colors.white,
-                                  ),
-                                ),
-                              ),
                             ),
                           ),
 

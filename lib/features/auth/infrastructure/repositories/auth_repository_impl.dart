@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'package:connectivity_plus/connectivity_plus.dart';
+import '../../../../core/error/auth_exception.dart';
 import '../../../../core/storage/hive/cache_manager.dart';
 import '../../domain/entities/session.dart';
 import '../../domain/entities/user.dart';
@@ -90,7 +91,6 @@ class AuthRepositoryImpl implements AuthRepository {
       // Convert to entities
       final user = loginResponse.user.toEntity();
       final session = Session(
-        sessionId: loginResponse.sessionId,
         xcsrfToken: loginResponse.xcsrfToken,
         expiresAt: DateTime.parse(loginResponse.expiresAt),
         ifModifiedSince: loginResponse.ifModifiedSince,
@@ -125,10 +125,11 @@ class AuthRepositoryImpl implements AuthRepository {
   }) async {
     try {
       // Save to Hive (async)
+      // NOTE: session_id is stored in HTTP-only cookies by Dio, not in Hive
       await Future.wait([
         _authLocalDs.saveUser(user),
         _authLocalDs.saveSession(session),
-        if (rememberMe) _authLocalDs.saveAccessToken(session.sessionId),
+        if (rememberMe) _authLocalDs.saveAccessToken(session.xcsrfToken),
       ]);
     } catch (e) {
       // Silent failure - user already navigated
@@ -156,8 +157,9 @@ class AuthRepositoryImpl implements AuthRepository {
 
     // Check if session expired by timestamp
     if (sessionEntity.isExpired) {
-      // CACHE INVALIDATION: Session expired � Delete session tokens only, keep user profile
+      // CACHE INVALIDATION: Session expired → Delete session tokens only, keep user profile
       await _authLocalDs.deleteSession();
+      // Note: Cookies are automatically cleared by the server or expire naturally
       _cachedSession = null;
       return false;
     }
@@ -201,16 +203,26 @@ class AuthRepositoryImpl implements AuthRepository {
       // Reset retry attempts on successful validation
       _retryAttempts = 0;
       _retryTimer?.cancel();
-    } catch (e) {
-      // API call failed
-      if (e.toString().contains('401')) {
-        // CACHE INVALIDATION: 401 � Clear session, show login screen
-        await logout();
-      } else {
+    } on AuthException catch (e) {
+      // Handle auth-specific errors
+      if (e is UnauthorizedException || e is ForbiddenException) {
+        // CACHE INVALIDATION: 401/403 → Session expired, clear session only
+        await _authLocalDs.deleteSession();
+        _cachedSession = null;
+        // Cookies are handled by AuthApi
+      } else if (e is NoInternetException ||
+          e is TimeoutException ||
+          e is DnsException) {
         // SCENARIO 3: Network error - Fail silently
         // Retry on network reconnection (handled by connectivity listener)
         _retryAttempts++;
+      } else {
+        // Other errors - log and continue using cached data
+        _retryAttempts++;
       }
+    } catch (e) {
+      // Unknown error - increment retry
+      _retryAttempts++;
     }
   }
 
@@ -300,27 +312,30 @@ class AuthRepositoryImpl implements AuthRepository {
     }
   }
 
-  /// CACHE INVALIDATION: User logout � Delete ALL auth_* keys
+  /// CACHE INVALIDATION: User logout → Delete ALL auth_* keys + cookies
   @override
   Future<void> logout() async {
     try {
-      // Call logout API
+      // Call logout API (this also clears cookies via AuthApi)
       await _authApi.logout();
     } catch (e) {
       // Continue with local cleanup even if API fails
     }
 
-    // CACHE INVALIDATION: Delete ALL auth keys
+    // CACHE INVALIDATION: Delete ALL auth keys from Hive
     await _authLocalDs.clearAll();
+
+    // Clear all API cache
     await _cacheManager.clearAll();
 
     // Clear in-memory cache
     _cachedUser = null;
     _cachedSession = null;
 
-    // Cancel retry timer
+    // Cancel retry timer and reset attempts
     _retryTimer?.cancel();
     _retryAttempts = 0;
+    _authApi.resetLoginAttempts();
   }
 
   @override
