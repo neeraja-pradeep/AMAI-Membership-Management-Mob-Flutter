@@ -1,5 +1,6 @@
 import 'package:dio/dio.dart';
 import 'package:uuid/uuid.dart';
+import '../../../../../core/error/auth_exception.dart';
 import '../../../../../core/network/api_client.dart';
 import '../../../../../core/network/endpoints.dart';
 import '../../models/error_response.dart';
@@ -13,6 +14,7 @@ import '../../models/registration_request.dart';
 class AuthApi {
   final ApiClient _apiClient;
   final Uuid _uuid = const Uuid();
+  int _loginAttemptCount = 0;
 
   AuthApi(this._apiClient);
 
@@ -73,14 +75,16 @@ class AuthApi {
         _apiClient.addHeader('X-CSRFToken', xcsrfToken);
       }
 
+      // Reset attempt count on successful login
+      _loginAttemptCount = 0;
+
       return loginResponse;
     } on DioException catch (e) {
-      // Handle API errors
-      if (e.response?.data != null) {
-        final errorResponse = ErrorResponse.fromJson(e.response!.data);
-        throw Exception(errorResponse.userMessage);
+      // Increment attempt count for 401 errors
+      if (e.response?.statusCode == 401) {
+        _loginAttemptCount++;
       }
-      rethrow;
+      throw _handleDioException(e, loginAttemptCount: _loginAttemptCount);
     }
   }
 
@@ -103,11 +107,7 @@ class AuthApi {
 
       return true;
     } on DioException catch (e) {
-      if (e.response?.data != null) {
-        final errorResponse = ErrorResponse.fromJson(e.response!.data);
-        throw Exception(errorResponse.userMessage);
-      }
-      rethrow;
+      throw _handleDioException(e);
     }
   }
 
@@ -140,5 +140,146 @@ class AuthApi {
   Future<bool> refreshSession() async {
     // TODO: Implement actual session refresh endpoint when available
     return true;
+  }
+
+  /// Reset login attempt counter (call after successful login or timeout)
+  void resetLoginAttempts() {
+    _loginAttemptCount = 0;
+  }
+
+  /// Handle Dio exceptions and convert to custom auth exceptions
+  ///
+  /// Maps DioException to appropriate AuthException based on error type
+  AuthException _handleDioException(
+    DioException e, {
+    int loginAttemptCount = 0,
+  }) {
+    // Network errors (no response from server)
+    if (e.type == DioExceptionType.connectionTimeout ||
+        e.type == DioExceptionType.sendTimeout ||
+        e.type == DioExceptionType.receiveTimeout) {
+      return TimeoutException(
+        message: 'Request timed out. Please check your connection and try again.',
+      );
+    }
+
+    if (e.type == DioExceptionType.connectionError) {
+      if (e.message?.contains('SocketException') ?? false) {
+        if (e.message?.contains('Failed host lookup') ?? false) {
+          return DnsException(
+            message: 'Unable to reach server. Please check your internet connection.',
+          );
+        }
+        return NoInternetException(
+          message: 'No internet connection. Please check your network settings.',
+        );
+      }
+      return NoInternetException(
+        message: 'Connection failed. Please check your internet connection.',
+      );
+    }
+
+    // HTTP errors (server responded with error)
+    final response = e.response;
+    if (response == null) {
+      return UnknownHttpException(
+        message: 'An unexpected error occurred. Please try again.',
+        code: 'UNKNOWN',
+      );
+    }
+
+    final statusCode = response.statusCode ?? 0;
+    ErrorResponse? errorResponse;
+
+    // Try to parse error response
+    try {
+      if (response.data != null && response.data is Map<String, dynamic>) {
+        errorResponse = ErrorResponse.fromJson(response.data);
+      }
+    } catch (_) {
+      // Parsing failed, will use default messages
+    }
+
+    final message = errorResponse?.userMessage ??
+                   errorResponse?.message ??
+                   'An error occurred';
+    final code = errorResponse?.errorCode;
+    final fieldErrors = errorResponse?.fieldErrors;
+
+    // Map status codes to specific exceptions
+    switch (statusCode) {
+      case 400:
+        return BadRequestException(
+          message: message,
+          code: code,
+          fieldErrors: fieldErrors?.map(
+            (key, value) => MapEntry(key, value.join(', ')),
+          ),
+        );
+
+      case 401:
+        return UnauthorizedException(
+          message: message,
+          code: code,
+          attemptCount: loginAttemptCount,
+        );
+
+      case 403:
+        return ForbiddenException(
+          message: message.isEmpty
+              ? 'Access forbidden. Your session may have expired.'
+              : message,
+          code: code,
+        );
+
+      case 422:
+        return UnprocessableEntityException(
+          message: message,
+          code: code,
+          fieldErrors: fieldErrors?.map(
+            (key, value) => MapEntry(key, value.join(', ')),
+          ),
+        );
+
+      case 429:
+        final retryAfter = errorResponse?.retryAfter ??
+                          int.tryParse(response.headers.value('retry-after') ?? '') ??
+                          60;
+        return TooManyRequestsException(
+          message: message.isEmpty
+              ? 'Too many requests. Please wait before trying again.'
+              : message,
+          code: code,
+          retryAfter: retryAfter,
+        );
+
+      case 500:
+      case 502:
+      case 503:
+        return ServerException(
+          message: message.isEmpty
+              ? 'Server error. Please try again later.'
+              : message,
+          code: code ?? 'SERVER_ERROR_$statusCode',
+        );
+
+      default:
+        if (statusCode >= 400 && statusCode < 500) {
+          return BadRequestException(
+            message: message,
+            code: code ?? 'CLIENT_ERROR_$statusCode',
+          );
+        } else if (statusCode >= 500) {
+          return ServerException(
+            message: message,
+            code: code ?? 'SERVER_ERROR_$statusCode',
+          );
+        } else {
+          return UnknownHttpException(
+            message: message,
+            code: code ?? 'HTTP_ERROR_$statusCode',
+          );
+        }
+    }
   }
 }
