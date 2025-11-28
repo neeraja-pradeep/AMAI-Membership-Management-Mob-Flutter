@@ -22,6 +22,12 @@ class AuthApi {
   ///
   /// POST /api/accounts/login/
   ///
+  /// CRITICAL PATTERN: Cookie-based session and CSRF
+  /// - Backend sets session and CSRF cookies (HTTP-only)
+  /// - Dio CookieManager stores cookies automatically
+  /// - ApiClient interceptor extracts CSRF from cookies on every request
+  /// - NO manual token extraction or storage
+  ///
   /// Returns LoginResponse on success
   /// Throws DioException on failure
   Future<LoginResponse> login({
@@ -45,35 +51,18 @@ class AuthApi {
         data: request.toJson(),
       );
 
-      // Extract session ID from cookies
-      final cookies = await _apiClient.getCookies(
-        Uri.parse(Endpoints.fullUrl(Endpoints.login)),
-      );
-      final sessionCookie = cookies.firstWhere(
-        (cookie) => cookie.name == 'sessionid',
-        orElse: () => throw Exception('Session cookie not found'),
-      );
+      // CRITICAL PATTERN: Cookies are stored automatically by Dio CookieManager
+      // Backend sets:
+      // - sessionid cookie (HTTP-only)
+      // - csrftoken cookie (HTTP-only)
+      // Both stored in .cookies/ directory via path_provider
 
-      // Extract XCSRF token from response headers
-      final xcsrfToken = response.headers.value('x-csrftoken') ??
-          response.data?['xcsrf_token'] as String? ??
-          '';
+      // CRITICAL PATTERN: NO manual CSRF token extraction
+      // CSRF token will be extracted from cookies by ApiClient interceptor
+      // on every subsequent request automatically
 
-      // Extract If-Modified-Since header
-      final ifModifiedSince = response.headers.value('last-modified');
-
-      // Build login response
-      final loginResponse = LoginResponse.fromJson({
-        ...response.data!,
-        'session_id': sessionCookie.value,
-        'xcsrf_token': xcsrfToken,
-        'if_modified_since': ifModifiedSince,
-      });
-
-      // Add XCSRF token to future requests
-      if (xcsrfToken.isNotEmpty) {
-        _apiClient.addHeader('X-CSRFToken', xcsrfToken);
-      }
+      // Build login response (user data only - no tokens)
+      final loginResponse = LoginResponse.fromJson(response.data!);
 
       // Reset attempt count on successful login
       _loginAttemptCount = 0;
@@ -115,20 +104,24 @@ class AuthApi {
   ///
   /// POST /api/accounts/logout/
   ///
+  /// CRITICAL PATTERN: Cookie-based session and CSRF
+  /// - Clears all cookies (session + CSRF)
+  /// - NO manual header removal needed
+  ///
   /// Returns true on success
   Future<bool> logout() async {
     try {
       await _apiClient.post<Map<String, dynamic>>(Endpoints.logout);
 
-      // Clear cookies and headers
+      // CRITICAL PATTERN: Clear all cookies (session + CSRF)
+      // This removes both sessionid and csrftoken cookies
+      // NO manual header removal needed - cookies handle everything
       await _apiClient.clearCookies();
-      _apiClient.removeHeader('X-CSRFToken');
 
       return true;
     } on DioException {
       // Even if logout fails on server, clear local data
       await _apiClient.clearCookies();
-      _apiClient.removeHeader('X-CSRFToken');
       return false;
     }
   }
