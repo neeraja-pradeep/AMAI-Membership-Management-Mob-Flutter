@@ -1,9 +1,5 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:myapp/core/network/api_client.dart';
-import 'package:myapp/core/network/api_client_provider.dart';
-import 'package:myapp/features/auth/domain/repositories/registration_repository.dart';
-import 'package:myapp/features/auth/infrastructure/data_sources/remote/registration_api.dart';
-import 'package:myapp/features/auth/infrastructure/repositories/registration_repository_impl.dart';
+
 import '../../../../core/error/auth_exception.dart';
 import '../../infrastructure/repositories/auth_repository_provider.dart';
 import '../states/auth_state.dart';
@@ -206,21 +202,4 @@ final isStaleProvider = Provider<bool>((ref) {
     AuthStateAuthenticated(:final isStale) => isStale,
     _ => false,
   };
-});
-
-/// 1️⃣: Api client (shared)
-final registrationApiClientProvider = Provider<ApiClient>((ref) {
-  return ref.watch(apiClientProvider);
-});
-
-/// 2️⃣: Feature-specific API wrapper
-final registrationApiProvider = Provider<RegistrationApi>((ref) {
-  final client = ref.watch(registrationApiClientProvider);
-  return RegistrationApi(apiClient: client);
-});
-
-/// 3️⃣: Repository provider (abstract → implementation)
-final registrationRepositoryProvider = Provider<RegistrationRepository>((ref) {
-  final api = ref.watch(registrationApiProvider);
-  return RegistrationRepositoryImpl(api: api);
 });

@@ -7,7 +7,7 @@ import 'registration_repository_impl.dart';
 /// Registration API provider
 final registrationApiProvider = Provider<RegistrationApi>((ref) {
   final apiClient = ref.watch(apiClientProvider);
-  return RegistrationApi(apiClient);
+  return RegistrationApi(apiClient: apiClient);
 });
 
 /// Registration local data source provider
