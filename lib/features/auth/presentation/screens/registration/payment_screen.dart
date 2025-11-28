@@ -41,7 +41,18 @@ class _PaymentScreenState extends ConsumerState<PaymentScreen> {
 
     // Only RegistrationStateInProgress contains registration data
     if (state is! RegistrationStateInProgress) {
-      return 'Registration state is invalid. Please restart registration.';
+      // Provide more helpful error message based on actual state
+      if (state is RegistrationStateInitial) {
+        return 'Registration not started. Please go back to Step 1 (Personal Details).';
+      } else if (state is RegistrationStateResumePrompt) {
+        return 'Please choose to resume or start fresh registration from Step 1.';
+      } else if (state is RegistrationStateValidationError) {
+        return 'Validation error: ${state.message}';
+      } else if (state is RegistrationStateError) {
+        return 'Registration error: ${state.message}';
+      } else {
+        return 'Invalid state (${state.runtimeType}). Please restart from Step 1.';
+      }
     }
 
     final registration = state.registration;

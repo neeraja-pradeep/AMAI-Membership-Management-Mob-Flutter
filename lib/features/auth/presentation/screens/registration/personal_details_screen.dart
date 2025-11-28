@@ -76,8 +76,22 @@ class _PersonalDetailsScreenState extends ConsumerState<PersonalDetailsScreen> {
   void _loadExistingData() {
     final state = ref.read(registrationProvider);
 
-    // Only proceed if registration exists
-    if (state is! RegistrationStateInProgress) return;
+    // Handle different state types
+    if (state is RegistrationStateResumePrompt) {
+      // User has existing registration, resume it
+      ref.read(registrationProvider.notifier).resumeRegistration(
+        state.existingRegistration,
+      );
+      // Reload after resuming
+      Future.microtask(() => _loadExistingData());
+      return;
+    }
+
+    // If registration hasn't been started yet, start it now
+    if (state is! RegistrationStateInProgress) {
+      ref.read(registrationProvider.notifier).startNewRegistration();
+      return; // State is now initialized, but no data to load yet
+    }
 
     final personalDetails = state.registration.personalDetails;
 
