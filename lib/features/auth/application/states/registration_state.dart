@@ -1,5 +1,6 @@
 import '../../domain/entities/registration/practitioner_registration.dart';
 import '../../domain/entities/registration/registration_step.dart';
+import '../../domain/entities/registration/document_upload.dart';
 
 // Import PaymentDetails from practitioner_registration.dart
 // (PaymentDetails is defined in the same file as PractitionerRegistration)
@@ -175,6 +176,56 @@ final class RegistrationStatePaymentFailed extends RegistrationState {
   @override
   String toString() {
     return 'RegistrationState.paymentFailed(message: $message)';
+  }
+}
+
+/// Payment status unclear (gateway didn't redirect back)
+final class RegistrationStatePaymentUnclear extends RegistrationState {
+  final String sessionId;
+  final PractitionerRegistration currentRegistration;
+
+  const RegistrationStatePaymentUnclear({
+    required this.sessionId,
+    required this.currentRegistration,
+  });
+
+  @override
+  String toString() {
+    return 'RegistrationState.paymentUnclear(sessionId: $sessionId)';
+  }
+}
+
+/// Duplicate registration attempt
+final class RegistrationStateDuplicateRegistration extends RegistrationState {
+  final String message;
+  final String email;
+  final String phone;
+
+  const RegistrationStateDuplicateRegistration({
+    required this.message,
+    required this.email,
+    required this.phone,
+  });
+
+  @override
+  String toString() {
+    return 'RegistrationState.duplicateRegistration(email: $email)';
+  }
+}
+
+/// File missing from temp directory
+final class RegistrationStateFileMissing extends RegistrationState {
+  final List<DocumentType> missingFiles;
+  final PractitionerRegistration currentRegistration;
+
+  const RegistrationStateFileMissing({
+    required this.missingFiles,
+    required this.currentRegistration,
+  });
+
+  @override
+  String toString() {
+    return 'RegistrationState.fileMissing(count: ${missingFiles.length})';
   }
 }
 
