@@ -1,3 +1,4 @@
+import 'dart:io';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:uuid/uuid.dart';
 
@@ -7,6 +8,8 @@ import '../../domain/entities/registration/personal_details.dart';
 import '../../domain/entities/registration/professional_details.dart';
 import '../../domain/entities/registration/address_details.dart';
 import '../../domain/entities/registration/document_upload.dart';
+import '../../domain/entities/registration/registration_error.dart';
+import '../../domain/repositories/registration_repository.dart';
 import '../../infrastructure/data_sources/local/registration_local_ds.dart';
 import '../states/registration_state.dart';
 
@@ -14,17 +17,30 @@ import '../states/registration_state.dart';
 ///
 /// FORM DATA CACHING INTEGRATION:
 /// - Auto-saves to Hive on every "Next" button
-/// - Checks for incomplete registration on init
+/// - Checks for incomplete registration on init (survives app restarts)
 /// - Shows resume prompt if incomplete registration exists (<24h)
 /// - Clears cache on successful submission
 /// - Preserves data on failed submission for retry
+///
+/// FILE UPLOAD REQUIREMENTS:
+/// - File uploads are one-time (deleted after successful submission)
+/// - Files stored in app temporary directory during registration
+/// - Files deleted from temp after successful submission
+///
+/// PAYMENT FLOW REQUIREMENTS:
+/// - Payment is one-way (no retry after success)
+/// - Once payment succeeds, submission cannot be retried
+/// - Payment status validated before final submission
 class RegistrationStateNotifier extends StateNotifier<RegistrationState> {
+  final RegistrationRepository _repository;
   final RegistrationLocalDs _localDs;
   final Uuid _uuid = const Uuid();
 
   RegistrationStateNotifier({
+    required RegistrationRepository repository,
     required RegistrationLocalDs localDs,
-  })  : _localDs = localDs,
+  })  : _repository = repository,
+        _localDs = localDs,
         super(const RegistrationStateInitial()) {
     _checkExistingRegistration();
   }
@@ -319,13 +335,32 @@ class RegistrationStateNotifier extends StateNotifier<RegistrationState> {
 
   /// Submit registration (final step)
   ///
-  /// SCENARIO 3: Successful registration → Clear cache
+  /// SCENARIO 3: Successful registration → Clear cache + delete files
   /// SCENARIO 4: Failed submission → Keep data for retry
+  ///
+  /// CRITICAL REQUIREMENTS:
+  /// 1. Payment is one-way (no retry after success)
+  /// 2. Files deleted after successful submission
+  /// 3. Session validated before submission
   Future<void> submitRegistration() async {
     final current = state;
     if (current is! RegistrationStateInProgress) return;
 
     final registration = current.registration;
+
+    // REQUIREMENT: Payment is one-way (prevent retry after success)
+    if (registration.paymentDetails?.status == PaymentStatus.completed) {
+      // Payment already completed - check if already submitted
+      final isDuplicate = await _checkIfAlreadySubmitted(registration.personalDetails!.email);
+      if (isDuplicate) {
+        state = RegistrationStateDuplicateRegistration(
+          message: 'This registration has already been submitted',
+          email: registration.personalDetails!.email,
+          phone: registration.personalDetails!.phone,
+        );
+        return;
+      }
+    }
 
     // Validate entire registration
     if (!registration.isComplete) {
@@ -341,38 +376,138 @@ class RegistrationStateNotifier extends StateNotifier<RegistrationState> {
     );
 
     try {
-      // TODO: Call repository to submit registration
-      // final registrationId = await _repository.submitRegistration(
-      //   registration: registration,
-      // );
+      // CRITICAL: Validate session before submission
+      final sessionValid = await _repository.validateSession();
+      if (!sessionValid) {
+        state = RegistrationStateSessionExpired(
+          message: 'Your session expired. Please login again',
+          currentRegistration: registration,
+        );
+        return;
+      }
+
+      // Submit registration via repository
+      final registrationId = await _repository.submitRegistration(
+        registration: registration,
+      );
 
       // SCENARIO 3: Successful registration
+      // 1. Mark as complete in cache
       await _localDs.markRegistrationComplete();
 
-      // Mock success for now
-      await Future.delayed(const Duration(seconds: 2));
+      // 2. REQUIREMENT: Delete uploaded files (one-time use)
+      await _deleteUploadedFiles(registration.documents);
 
+      // 3. Set success state
       state = RegistrationStateSuccess(
-        registrationId: registration.registrationId,
+        registrationId: registrationId,
         message: 'Registration completed successfully!',
       );
-    } catch (e) {
+    } on RegistrationError catch (e) {
       // SCENARIO 4: Failed submission - keep data for retry
       await _localDs.markSubmissionFailed();
 
+      // Map error to appropriate state
+      _handleRegistrationError(e, registration);
+    } catch (e) {
+      // Unexpected error
+      await _localDs.markSubmissionFailed();
+
       state = RegistrationStateError(
-        message: e.toString(),
+        message: 'An unexpected error occurred. Please try again',
+        code: 'UNKNOWN_ERROR',
         currentRegistration: registration,
+        canRetry: true,
       );
     }
   }
 
+  /// Check if registration already submitted (for payment retry prevention)
+  Future<bool> _checkIfAlreadySubmitted(String email) async {
+    try {
+      return await _repository.checkDuplicateEmail(email: email);
+    } catch (e) {
+      // If check fails, allow submission attempt
+      return false;
+    }
+  }
+
+  /// Delete uploaded files after successful submission
+  ///
+  /// REQUIREMENT: File uploads are one-time (deleted after submission)
+  Future<void> _deleteUploadedFiles(List<DocumentUpload> documents) async {
+    for (final doc in documents) {
+      try {
+        final file = File(doc.filePath);
+        if (await file.exists()) {
+          await file.delete();
+        }
+      } catch (e) {
+        // Silently fail - files will be cleaned up by OS eventually
+      }
+    }
+  }
+
+  /// Handle registration errors and map to appropriate states
+  void _handleRegistrationError(RegistrationError error, PractitionerRegistration registration) {
+    switch (error.type) {
+      case RegistrationErrorType.sessionExpired:
+        state = RegistrationStateSessionExpired(
+          message: error.message,
+          currentRegistration: registration,
+        );
+
+      case RegistrationErrorType.duplicateEmail:
+      case RegistrationErrorType.duplicatePhone:
+        state = RegistrationStateDuplicateFound(
+          message: error.message,
+          duplicateField: error.duplicateField ?? 'email',
+          currentRegistration: registration,
+        );
+
+      case RegistrationErrorType.serverValidation:
+        state = RegistrationStateValidationError(
+          message: error.message,
+          fieldErrors: error.fieldErrors,
+          currentRegistration: registration,
+        );
+
+      case RegistrationErrorType.paymentFailed:
+        state = RegistrationStatePaymentFailed(
+          message: error.message,
+          currentRegistration: registration,
+          paymentDetails: registration.paymentDetails!,
+        );
+
+      default:
+        state = RegistrationStateError(
+          message: error.message,
+          code: error.code,
+          currentRegistration: registration,
+          canRetry: error.canRetry,
+        );
+    }
+  }
+
   /// Retry failed submission
+  ///
+  /// REQUIREMENT: Payment is one-way (prevent retry after successful payment)
   Future<void> retrySubmission() async {
     final current = state;
     if (current is! RegistrationStateError) return;
 
     if (current.currentRegistration != null) {
+      // REQUIREMENT: Prevent retry if payment already successful
+      if (current.currentRegistration!.paymentDetails?.status == PaymentStatus.completed) {
+        state = RegistrationStateError(
+          message: 'Cannot retry - payment already completed. Please contact support',
+          code: 'PAYMENT_ALREADY_COMPLETED',
+          currentRegistration: current.currentRegistration,
+          canRetry: false,
+        );
+        return;
+      }
+
       state = RegistrationStateInProgress(
         registration: current.currentRegistration!,
         hasUnsavedChanges: false,
