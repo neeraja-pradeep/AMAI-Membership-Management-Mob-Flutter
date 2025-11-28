@@ -13,6 +13,9 @@ import '../utils/file_security_validator.dart';
 class RegistrationRepositoryImpl implements RegistrationRepository {
   final RegistrationApi _api;
 
+  // TODO: Set to false when backend is ready
+  static const bool _useMockMode = true;
+
   const RegistrationRepositoryImpl({required RegistrationApi api}) : _api = api;
 
   @override
@@ -114,6 +117,15 @@ class RegistrationRepositoryImpl implements RegistrationRepository {
   Future<String> submitRegistration({
     required PractitionerRegistration registration,
   }) async {
+    // MOCK MODE: For development without backend
+    if (_useMockMode) {
+      // Simulate network delay
+      await Future.delayed(const Duration(seconds: 1));
+
+      // Return mock registration ID
+      return 'REG_${DateTime.now().millisecondsSinceEpoch}';
+    }
+
     try {
       // Convert registration to JSON
       final registrationData = _convertRegistrationToJson(registration);
@@ -129,6 +141,11 @@ class RegistrationRepositoryImpl implements RegistrationRepository {
 
   @override
   Future<bool> validateSession() async {
+    // MOCK MODE: Always return true for development
+    if (_useMockMode) {
+      return true;
+    }
+
     try {
       return await _api.validateSession();
     } catch (e) {
@@ -138,6 +155,11 @@ class RegistrationRepositoryImpl implements RegistrationRepository {
 
   @override
   Future<bool> checkDuplicateEmail({required String email}) async {
+    // MOCK MODE: Always return false (no duplicates) for development
+    if (_useMockMode) {
+      return false;
+    }
+
     try {
       return await _api.checkDuplicateEmail(email: email);
     } on DioException catch (e) {
@@ -153,6 +175,11 @@ class RegistrationRepositoryImpl implements RegistrationRepository {
 
   @override
   Future<bool> checkDuplicatePhone({required String phone}) async {
+    // MOCK MODE: Always return false (no duplicates) for development
+    if (_useMockMode) {
+      return false;
+    }
+
     try {
       return await _api.checkDuplicatePhone(phone: phone);
     } on DioException catch (e) {
