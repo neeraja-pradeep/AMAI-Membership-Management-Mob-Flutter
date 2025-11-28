@@ -1,6 +1,9 @@
 import '../../domain/entities/registration/practitioner_registration.dart';
 import '../../domain/entities/registration/registration_step.dart';
 
+// Import PaymentDetails from practitioner_registration.dart
+// (PaymentDetails is defined in the same file as PractitionerRegistration)
+
 /// Registration state for multi-step form
 ///
 /// Tracks current step, validation status, and data persistence
@@ -108,16 +111,70 @@ final class RegistrationStateError extends RegistrationState {
   final String message;
   final String? code;
   final PractitionerRegistration? currentRegistration;
+  final bool canRetry;
 
   const RegistrationStateError({
     required this.message,
     this.code,
     this.currentRegistration,
+    this.canRetry = true,
   });
 
   @override
   String toString() {
-    return 'RegistrationState.error(message: $message, code: $code)';
+    return 'RegistrationState.error(message: $message, code: $code, canRetry: $canRetry)';
+  }
+}
+
+/// Duplicate email/phone found state
+final class RegistrationStateDuplicateFound extends RegistrationState {
+  final String message;
+  final String duplicateField; // 'email' or 'phone'
+  final PractitionerRegistration currentRegistration;
+
+  const RegistrationStateDuplicateFound({
+    required this.message,
+    required this.duplicateField,
+    required this.currentRegistration,
+  });
+
+  @override
+  String toString() {
+    return 'RegistrationState.duplicateFound(field: $duplicateField, message: $message)';
+  }
+}
+
+/// Session expired during registration
+final class RegistrationStateSessionExpired extends RegistrationState {
+  final String message;
+  final PractitionerRegistration currentRegistration;
+
+  const RegistrationStateSessionExpired({
+    required this.message,
+    required this.currentRegistration,
+  });
+
+  @override
+  String toString() {
+    return 'RegistrationState.sessionExpired(message: $message)';
+  }
+}
+
+/// Payment failed state
+final class RegistrationStatePaymentFailed extends RegistrationState {
+  final String message;
+  final PractitionerRegistration currentRegistration;
+  final PaymentDetails paymentDetails;
+
+  const RegistrationStatePaymentFailed({
+    required this.message,
+    required this.currentRegistration,
+    required this.paymentDetails,
+  });
+
+  @override
+  String toString() {
+    return 'RegistrationState.paymentFailed(message: $message)';
   }
 }
 
