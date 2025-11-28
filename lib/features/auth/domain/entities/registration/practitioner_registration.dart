@@ -1,3 +1,4 @@
+import 'membership_details.dart';
 import 'personal_details.dart';
 import 'professional_details.dart';
 import 'address_details.dart';
@@ -70,18 +71,28 @@ class PractitionerRegistration {
   final DateTime createdAt;
   final DateTime lastUpdatedAt;
 
-  // Step data (nullable until completed)
+  // Application ID from backend (Step 1)
+  final String? applicationId;
+
+  // NEW: 3-step registration data
+  final MembershipDetails? membershipDetails;
+
+  // DEPRECATED: Old 5-step fields (kept for backward compatibility)
   final PersonalDetails? personalDetails;
   final ProfessionalDetails? professionalDetails;
+
+  // Step data (nullable until completed)
   final AddressDetails? addressDetails;
   final DocumentUploads? documentUploads;
   final PaymentDetails? paymentDetails;
 
   const PractitionerRegistration({
     required this.registrationId,
-    this.currentStep = RegistrationStep.personalDetails,
+    this.currentStep = RegistrationStep.membershipDetails,
     required this.createdAt,
     required this.lastUpdatedAt,
+    this.applicationId,
+    this.membershipDetails,
     this.personalDetails,
     this.professionalDetails,
     this.addressDetails,
@@ -99,16 +110,12 @@ class PractitionerRegistration {
   /// Check if current step is complete
   bool isStepComplete(RegistrationStep step) {
     switch (step) {
-      case RegistrationStep.personalDetails:
-        return personalDetails?.isComplete ?? false;
-      case RegistrationStep.professionalDetails:
-        return professionalDetails?.isComplete ?? false;
+      case RegistrationStep.membershipDetails:
+        return membershipDetails?.isComplete ?? false;
       case RegistrationStep.addressDetails:
         return addressDetails?.isComplete ?? false;
       case RegistrationStep.documentUploads:
         return documentUploads?.isComplete ?? false;
-      case RegistrationStep.payment:
-        return paymentDetails?.isComplete ?? false;
     }
   }
 
@@ -130,51 +137,34 @@ class PractitionerRegistration {
   /// REQUIREMENT: Multi-step validation - all previous screens must remain valid
   bool arePreviousStepsValid() {
     switch (currentStep) {
-      case RegistrationStep.personalDetails:
+      case RegistrationStep.membershipDetails:
         // No previous steps
         return true;
 
-      case RegistrationStep.professionalDetails:
-        // Must have valid personal details
-        return personalDetails?.isComplete ?? false;
-
       case RegistrationStep.addressDetails:
-        // Must have valid personal + professional details
-        return (personalDetails?.isComplete ?? false) &&
-            (professionalDetails?.isComplete ?? false);
+        // Must have valid membership details
+        return membershipDetails?.isComplete ?? false;
 
       case RegistrationStep.documentUploads:
-        // Must have valid personal + professional + address details
-        return (personalDetails?.isComplete ?? false) &&
-            (professionalDetails?.isComplete ?? false) &&
+        // Must have valid membership + address details
+        return (membershipDetails?.isComplete ?? false) &&
             (addressDetails?.isComplete ?? false);
-
-      case RegistrationStep.payment:
-        // Must have all previous steps valid
-        return (personalDetails?.isComplete ?? false) &&
-            (professionalDetails?.isComplete ?? false) &&
-            (addressDetails?.isComplete ?? false) &&
-            (documentUploads?.isComplete ?? false);
     }
   }
 
-  /// Check if entire registration is complete
+  /// Check if entire registration is complete (3 steps)
   bool get isComplete {
-    return personalDetails != null &&
-        professionalDetails != null &&
+    return membershipDetails != null &&
         addressDetails != null &&
-        documentUploads != null &&
-        paymentDetails?.isComplete == true;
+        documentUploads != null;
   }
 
   /// Get completion percentage (0.0 to 1.0)
   double get completionPercentage {
     int completedSteps = 0;
-    if (personalDetails?.isComplete == true) completedSteps++;
-    if (professionalDetails?.isComplete == true) completedSteps++;
+    if (membershipDetails?.isComplete == true) completedSteps++;
     if (addressDetails?.isComplete == true) completedSteps++;
     if (documentUploads?.isComplete == true) completedSteps++;
-    if (paymentDetails?.isComplete == true) completedSteps++;
 
     return completedSteps / RegistrationStep.totalSteps;
   }
@@ -184,6 +174,8 @@ class PractitionerRegistration {
     RegistrationStep? currentStep,
     DateTime? createdAt,
     DateTime? lastUpdatedAt,
+    String? applicationId,
+    MembershipDetails? membershipDetails,
     PersonalDetails? personalDetails,
     ProfessionalDetails? professionalDetails,
     AddressDetails? addressDetails,
@@ -195,6 +187,8 @@ class PractitionerRegistration {
       currentStep: currentStep ?? this.currentStep,
       createdAt: createdAt ?? this.createdAt,
       lastUpdatedAt: lastUpdatedAt ?? this.lastUpdatedAt,
+      applicationId: applicationId ?? this.applicationId,
+      membershipDetails: membershipDetails ?? this.membershipDetails,
       personalDetails: personalDetails ?? this.personalDetails,
       professionalDetails: professionalDetails ?? this.professionalDetails,
       addressDetails: addressDetails ?? this.addressDetails,

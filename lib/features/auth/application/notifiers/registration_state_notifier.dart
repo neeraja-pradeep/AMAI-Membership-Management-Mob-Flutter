@@ -4,6 +4,7 @@ import 'package:uuid/uuid.dart';
 
 import '../../domain/entities/registration/practitioner_registration.dart';
 import '../../domain/entities/registration/registration_step.dart';
+import '../../domain/entities/registration/membership_details.dart';
 import '../../domain/entities/registration/personal_details.dart';
 import '../../domain/entities/registration/professional_details.dart';
 import '../../domain/entities/registration/address_details.dart';
@@ -155,7 +156,33 @@ class RegistrationStateNotifier extends StateNotifier<RegistrationState> {
     );
   }
 
-  /// Update personal details (Step 1)
+  /// Update membership details (NEW Step 1 for 3-step flow)
+  void updateMembershipDetails(MembershipDetails details) {
+    final current = state;
+    if (current is! RegistrationStateInProgress) return;
+
+    final updated = current.registration.copyWith(
+      membershipDetails: details,
+      lastUpdatedAt: DateTime.now(),
+    );
+
+    state = current.copyWith(registration: updated, hasUnsavedChanges: true);
+  }
+
+  /// Update application ID (returned from Step 1 backend)
+  void updateApplicationId(String applicationId) {
+    final current = state;
+    if (current is! RegistrationStateInProgress) return;
+
+    final updated = current.registration.copyWith(
+      applicationId: applicationId,
+      lastUpdatedAt: DateTime.now(),
+    );
+
+    state = current.copyWith(registration: updated, hasUnsavedChanges: true);
+  }
+
+  /// Update personal details (DEPRECATED - old Step 1)
   void updatePersonalDetails(PersonalDetails details) {
     final current = state;
     if (current is! RegistrationStateInProgress) return;
@@ -168,7 +195,7 @@ class RegistrationStateNotifier extends StateNotifier<RegistrationState> {
     state = current.copyWith(registration: updated, hasUnsavedChanges: true);
   }
 
-  /// Update professional details (Step 2)
+  /// Update professional details (DEPRECATED - old Step 2)
   void updateProfessionalDetails(ProfessionalDetails details) {
     final current = state;
     if (current is! RegistrationStateInProgress) return;
