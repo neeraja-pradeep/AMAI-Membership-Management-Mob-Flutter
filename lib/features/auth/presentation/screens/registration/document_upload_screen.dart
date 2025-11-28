@@ -3,7 +3,6 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:myapp/features/auth/application/states/registration_state.dart';
 // NOTE: file_picker package required - add to pubspec.yaml
 // import 'package:file_picker/file_picker.dart';
 

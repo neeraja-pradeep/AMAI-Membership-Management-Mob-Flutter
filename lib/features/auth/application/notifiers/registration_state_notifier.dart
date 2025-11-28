@@ -1,6 +1,5 @@
 import 'dart:io';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:myapp/features/auth/application/providers/auth_provider.dart';
 import 'package:uuid/uuid.dart';
 
 import '../../domain/entities/registration/practitioner_registration.dart';

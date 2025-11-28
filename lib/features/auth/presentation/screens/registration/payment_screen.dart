@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:myapp/features/auth/application/states/registration_state.dart';
 
 import '../../../../../app/router/app_router.dart';
 import '../../../application/notifiers/registration_state_notifier.dart';

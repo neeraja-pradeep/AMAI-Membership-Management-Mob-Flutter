@@ -172,6 +172,7 @@ class RegistrationRepositoryImpl implements RegistrationRepository {
       final response = await _api.verifyPayment(sessionId: sessionId);
 
       return PaymentDetails(
+        sessionId: sessionId,
         amount: (response['amount'] as num).toDouble(),
         currency: response['currency'] as String,
         status: PaymentStatus.values.firstWhere(
@@ -180,6 +181,9 @@ class RegistrationRepositoryImpl implements RegistrationRepository {
         ),
         transactionId: response['transaction_id'] as String?,
         paymentMethod: response['payment_method'] as String?,
+        completedAt: response['completed_at'] != null
+            ? DateTime.parse(response['completed_at'] as String)
+            : null,
       );
     } on DioException catch (e) {
       if (e.response?.statusCode == 404) {
@@ -341,7 +345,21 @@ class RegistrationRepositoryImpl implements RegistrationRepository {
             }
           : null,
       'professional_details': registration.professionalDetails != null
-          ? {}
+          ? {
+              'medical_council_registration_number':
+                  registration.professionalDetails!.medicalCouncilRegistrationNumber,
+              'medical_council': registration.professionalDetails!.medicalCouncil,
+              'registration_date': registration.professionalDetails!.registrationDate
+                  .toIso8601String(),
+              'qualification': registration.professionalDetails!.qualification,
+              'specialization': registration.professionalDetails!.specialization,
+              'institute_name': registration.professionalDetails!.instituteName,
+              'years_of_experience':
+                  registration.professionalDetails!.yearsOfExperience,
+              'current_workplace':
+                  registration.professionalDetails!.currentWorkplace,
+              'designation': registration.professionalDetails!.designation,
+            }
           : null,
       'address_details': registration.addressDetails != null
           ? {
@@ -352,6 +370,29 @@ class RegistrationRepositoryImpl implements RegistrationRepository {
               'district_id': registration.addressDetails!.districtId,
               'city': registration.addressDetails!.city,
               'pincode': registration.addressDetails!.pincode,
+            }
+          : null,
+      'documents': registration.documentUploads?.documents
+              .map((doc) => {
+                    'type': doc.type.name,
+                    'local_file_path': doc.localFilePath,
+                    'file_name': doc.fileName,
+                    'file_size_bytes': doc.fileSizeBytes,
+                    'uploaded_at': doc.uploadedAt.toIso8601String(),
+                    'server_url': doc.serverUrl,
+                  })
+              .toList() ??
+          [],
+      'payment_details': registration.paymentDetails != null
+          ? {
+              'session_id': registration.paymentDetails!.sessionId,
+              'amount': registration.paymentDetails!.amount,
+              'currency': registration.paymentDetails!.currency,
+              'status': registration.paymentDetails!.status.name,
+              'transaction_id': registration.paymentDetails!.transactionId,
+              'payment_method': registration.paymentDetails!.paymentMethod,
+              'completed_at':
+                  registration.paymentDetails!.completedAt?.toIso8601String(),
             }
           : null,
     };
