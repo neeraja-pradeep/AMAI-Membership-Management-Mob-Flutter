@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:myapp/features/auth/presentation/screen/login_screen.dart';
 
+import '../../features/auth/presentation/screens/registration/membership_form_screen.dart';
 import '../../features/auth/presentation/screens/registration/personal_details_screen.dart';
 import '../../features/auth/presentation/screens/registration/professional_details_screen.dart';
 import '../../features/auth/presentation/screens/registration/address_details_screen.dart';
@@ -22,20 +23,24 @@ class AppRouter {
   static const String login = '/login';
   static const String register = '/register';
 
-  /// Registration flow routes (part of auth)
+  /// NEW: 3-step registration flow
+  /// Step 1: Membership Details
+  static const String registrationMembership = '/registration/membership';
+
+  /// Step 2: Address Details
+  static const String registrationAddress = '/registration/address';
+
+  /// Step 3: Document Uploads
+  static const String registrationDocuments = '/registration/documents';
+
+  /// DEPRECATED: Old 5-step registration routes (kept for backward compatibility)
   /// Screen 1: Personal Details
   static const String registrationPersonal = '/registration/personal';
 
   /// Screen 2: Professional Details
   static const String registrationProfessional = '/registration/professional';
 
-  /// Screen 3: Address Details
-  static const String registrationAddress = '/registration/address';
-
-  /// Screen 4: Document Uploads
-  static const String registrationDocuments = '/registration/documents';
-
-  /// Screen 5: Payment
+  /// Screen 4: Payment (separate from 3-step registration)
   static const String registrationPayment = '/registration/payment';
 
   /// Registration Success Screen
@@ -49,47 +54,37 @@ class AppRouter {
   // ROUTE HELPERS
   // ============================================================================
 
-  /// Get all registration routes
+  /// Get all registration routes (NEW 3-step flow)
   static List<String> get registrationRoutes => [
-    registrationPersonal,
-    registrationProfessional,
+    registrationMembership,
     registrationAddress,
     registrationDocuments,
-    registrationPayment,
     registrationSuccess,
   ];
 
-  /// Get route by registration step number (1-5)
+  /// Get route by registration step number (1-3)
   static String getRouteByStep(int stepNumber) {
     switch (stepNumber) {
       case 1:
-        return registrationPersonal;
+        return registrationMembership;
       case 2:
-        return registrationProfessional;
-      case 3:
         return registrationAddress;
-      case 4:
+      case 3:
         return registrationDocuments;
-      case 5:
-        return registrationPayment;
       default:
         throw ArgumentError('Invalid step number: $stepNumber');
     }
   }
 
-  /// Get step number from route
+  /// Get step number from route (NEW 3-step flow)
   static int getStepFromRoute(String route) {
     switch (route) {
-      case registrationPersonal:
+      case registrationMembership:
         return 1;
-      case registrationProfessional:
-        return 2;
       case registrationAddress:
-        return 3;
+        return 2;
       case registrationDocuments:
-        return 4;
-      case registrationPayment:
-        return 5;
+        return 3;
       default:
         throw ArgumentError('Invalid route: $route');
     }
@@ -119,18 +114,22 @@ class AppRouter {
         // TODO: Import and return LoginScreen
         return _buildRoute(const LoginScreen());
 
-      // Registration routes
-      case registrationPersonal:
-        return _buildRoute(const PersonalDetailsScreen());
-
-      case registrationProfessional:
-        return _buildRoute(const ProfessionalDetailsScreen());
+      // NEW: 3-step registration routes
+      case registrationMembership:
+        return _buildRoute(const MembershipFormScreen());
 
       case registrationAddress:
         return _buildRoute(const AddressDetailsScreen());
 
       case registrationDocuments:
         return _buildRoute(const DocumentUploadScreen());
+
+      // DEPRECATED: Old 5-step registration routes (backward compatibility)
+      case registrationPersonal:
+        return _buildRoute(const PersonalDetailsScreen());
+
+      case registrationProfessional:
+        return _buildRoute(const ProfessionalDetailsScreen());
 
       case registrationPayment:
         return _buildRoute(const PaymentScreen());

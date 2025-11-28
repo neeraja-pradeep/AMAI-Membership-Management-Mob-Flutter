@@ -103,8 +103,22 @@ class _MembershipFormScreenState extends ConsumerState<MembershipFormScreen> {
       return; // State is now initialized, but no data to load yet
     }
 
-    // TODO: Load membershipDetails from state once state is updated
-    // For now, we're building the UI first
+    final membershipDetails = state.registration.membershipDetails;
+
+    if (membershipDetails != null) {
+      _emailController.text = membershipDetails.email;
+      _passwordController.text = membershipDetails.password;
+      _phoneController.text = membershipDetails.phone;
+      _waPhoneController.text = membershipDetails.waPhone;
+      _firstNameController.text = membershipDetails.firstName;
+      _lastNameController.text = membershipDetails.lastName;
+      setState(() {
+        _selectedMembershipType = membershipDetails.membershipType;
+        _selectedBloodGroup = membershipDetails.bloodGroup;
+        _selectedBamsYear = membershipDetails.bamsStartYear;
+      });
+      _institutionController.text = membershipDetails.institutionName;
+    }
   }
 
   /// Auto-save progress on field changes
@@ -128,8 +142,7 @@ class _MembershipFormScreenState extends ConsumerState<MembershipFormScreen> {
       institutionName: _institutionController.text.trim(),
     );
 
-    // TODO: Add updateMembershipDetails method to state notifier
-    // ref.read(registrationProvider.notifier).updateMembershipDetails(membershipDetails);
+    ref.read(registrationProvider.notifier).updateMembershipDetails(membershipDetails);
   }
 
   /// Handle next button press
@@ -139,8 +152,7 @@ class _MembershipFormScreenState extends ConsumerState<MembershipFormScreen> {
       _saveMembershipDetails();
 
       // Auto-save to Hive
-      // TODO: Uncomment after state notifier is updated
-      // await ref.read(registrationProvider.notifier).autoSaveProgress();
+      await ref.read(registrationProvider.notifier).autoSaveProgress();
 
       // Navigate to next step (Address Form)
       if (mounted) {
