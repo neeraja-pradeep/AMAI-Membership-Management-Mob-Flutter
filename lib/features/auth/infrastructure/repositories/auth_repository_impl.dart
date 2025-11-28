@@ -91,7 +91,7 @@ class AuthRepositoryImpl implements AuthRepository {
       // Convert to entities
       final user = loginResponse.user.toEntity();
       final session = Session(
-        xcsrfToken: loginResponse.xcsrfToken,
+        xcsrfToken: loginResponse.xcsrfToken!,
         expiresAt: DateTime.parse(loginResponse.expiresAt),
         ifModifiedSince: loginResponse.ifModifiedSince,
       );

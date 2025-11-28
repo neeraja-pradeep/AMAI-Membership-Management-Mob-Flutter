@@ -7,20 +7,27 @@ part 'login_response.g.dart';
 ///
 /// Received from API after successful authentication
 ///
-/// NOTE: session_id is stored in HTTP-only cookies by the server
-/// and managed by Dio's cookie manager. It may be present in the
-/// response but is not used by the app (cookies are used instead).
+/// CRITICAL PATTERN: Cookie-based session and CSRF
+/// - session_id: Backend sets HTTP-only cookie, ignored in response
+/// - xcsrf_token: Backend sets HTTP-only cookie, ignored in response
+/// - Both managed by Dio CookieManager automatically
+/// - NO manual storage or handling of session/CSRF tokens
 @JsonSerializable()
 class LoginResponse {
   final bool success;
 
   /// Session ID - OPTIONAL and IGNORED
   /// The actual session is managed via HTTP-only cookies by Dio
+  /// Backend may send in response but app uses cookies instead
   @JsonKey(name: 'session_id')
   final String? sessionId;
 
+  /// CSRF Token - OPTIONAL and IGNORED
+  /// The actual CSRF token is managed via HTTP-only cookies by Dio
+  /// Backend may send in response but app uses cookies instead
+  /// ApiClient interceptor extracts from cookies on every request
   @JsonKey(name: 'xcsrf_token')
-  final String xcsrfToken;
+  final String? xcsrfToken;
 
   final UserModel user;
 
@@ -33,7 +40,7 @@ class LoginResponse {
   const LoginResponse({
     required this.success,
     this.sessionId,
-    required this.xcsrfToken,
+    this.xcsrfToken,
     required this.user,
     required this.expiresAt,
     this.ifModifiedSince,
@@ -85,6 +92,9 @@ class LoginResponse {
 
   @override
   String toString() {
-    return 'LoginResponse(success: $success, xcsrfToken: ${xcsrfToken.substring(0, 8)}..., user: $user, expiresAt: $expiresAt)';
+    final tokenPreview = xcsrfToken != null && xcsrfToken!.length >= 8
+        ? '${xcsrfToken!.substring(0, 8)}...'
+        : 'null';
+    return 'LoginResponse(success: $success, xcsrfToken: $tokenPreview, user: $user, expiresAt: $expiresAt)';
   }
 }

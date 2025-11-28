@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:myapp/features/auth/presentation/screens/registration/personal_details_screen.dart';
 import '../../application/providers/auth_provider.dart';
 import '../../application/states/auth_state.dart';
 import '../components/email_field.dart';
@@ -165,14 +166,10 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                           SizedBox(
                             height: 50.h,
                             child: ElevatedButton(
-<<<<<<< HEAD
-                              onPressed: authState.maybeWhen(
-                                loading: () => null,
-                                orElse: () => _handleLogin,
-                              ),
-=======
-                              onPressed: authState is AuthStateLoading ? null : _handleLogin,
->>>>>>> e27d218873393ebefcd9d531f2a4f57070a800f5
+                              onPressed: authState is AuthStateLoading
+                                  ? null
+                                  : _handleLogin,
+
                               style: ElevatedButton.styleFrom(
                                 backgroundColor: const Color(0xFF1976D2),
                                 shape: RoundedRectangleBorder(
@@ -186,9 +183,10 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                                       height: 24.h,
                                       child: const CircularProgressIndicator(
                                         strokeWidth: 2,
-                                        valueColor: AlwaysStoppedAnimation<Color>(
-                                          Colors.white,
-                                        ),
+                                        valueColor:
+                                            AlwaysStoppedAnimation<Color>(
+                                              Colors.white,
+                                            ),
                                       ),
                                     )
                                   : Text(
@@ -206,7 +204,22 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
 
                           // Register button
                           TextButton(
-                            onPressed: _showRoleSelectionPopup,
+                            onPressed: () async {
+                              final selectedRole = await showDialog(
+                                context: context,
+                                builder: (context) =>
+                                    const RoleSelectionPopup(),
+                              );
+
+                              if (selectedRole != null) {
+                                Navigator.of(context).push(
+                                  MaterialPageRoute(
+                                    builder: (context) =>
+                                        const PersonalDetailsScreen(),
+                                  ),
+                                );
+                              }
+                            },
                             child: Text(
                               'Don\'t have an account? Register',
                               style: TextStyle(
