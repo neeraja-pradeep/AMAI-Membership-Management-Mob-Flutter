@@ -109,7 +109,50 @@ class PractitionerRegistration {
   }
 
   /// Check if can proceed to next step
-  bool get canProceedToNext => isStepComplete(currentStep);
+  ///
+  /// REQUIREMENT: Multi-step validation
+  /// - Validates current step is complete
+  /// - Validates all previous steps remain valid
+  bool get canProceedToNext {
+    // Current step must be complete
+    if (!isStepComplete(currentStep)) return false;
+
+    // REQUIREMENT: Validate all previous steps
+    return arePreviousStepsValid();
+  }
+
+  /// Validate all steps before current step
+  ///
+  /// REQUIREMENT: Multi-step validation - all previous screens must remain valid
+  bool arePreviousStepsValid() {
+    switch (currentStep) {
+      case RegistrationStep.personalDetails:
+        // No previous steps
+        return true;
+
+      case RegistrationStep.professionalDetails:
+        // Must have valid personal details
+        return personalDetails?.isComplete ?? false;
+
+      case RegistrationStep.addressDetails:
+        // Must have valid personal + professional details
+        return (personalDetails?.isComplete ?? false) &&
+            (professionalDetails?.isComplete ?? false);
+
+      case RegistrationStep.documentUploads:
+        // Must have valid personal + professional + address details
+        return (personalDetails?.isComplete ?? false) &&
+            (professionalDetails?.isComplete ?? false) &&
+            (addressDetails?.isComplete ?? false);
+
+      case RegistrationStep.payment:
+        // Must have all previous steps valid
+        return (personalDetails?.isComplete ?? false) &&
+            (professionalDetails?.isComplete ?? false) &&
+            (addressDetails?.isComplete ?? false) &&
+            (documentUploads?.isComplete ?? false);
+    }
+  }
 
   /// Check if entire registration is complete
   bool get isComplete {
