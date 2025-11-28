@@ -13,7 +13,7 @@ import '../../../application/states/registration_state.dart';
 import '../../../domain/entities/registration/document_upload.dart';
 import '../../components/step_progress_indicator.dart';
 
-/// Document Upload Screen (Step 4)
+/// Document Upload Screen (Step 3 of 3)
 ///
 /// Allows users to upload required documents:
 /// - Medical Council Certificate (required)
@@ -21,6 +21,11 @@ import '../../components/step_progress_indicator.dart';
 /// - Identity Proof (required)
 /// - Profile Photo (required)
 /// - Additional Certificates (optional)
+///
+/// Matches backend POST /api/membership/application-documents/ requirements
+/// - application: Application ID from Step 1
+/// - document_file: File (multipart)
+/// - document_type: Type of document
 ///
 /// CRITICAL REQUIREMENTS:
 /// - File size validation (max 5MB per file)
@@ -230,8 +235,8 @@ class _DocumentUploadScreenState extends ConsumerState<DocumentUploadScreen> {
             children: [
               // Progress indicator
               const StepProgressIndicator(
-                currentStep: 4,
-                totalSteps: 5,
+                currentStep: 3,
+                totalSteps: 3,
                 stepTitle: 'Document Uploads',
               ),
 

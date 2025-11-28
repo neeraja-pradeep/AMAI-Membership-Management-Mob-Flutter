@@ -1,42 +1,45 @@
-/// Address details entity for Step 3
+/// Address details entity for Step 2
 ///
-/// Contains practitioner's address information
+/// Contains user's address information
+/// Matches backend POST /api/accounts/addresses/ requirements
 ///
 /// REQUIREMENT: Dependent dropdowns - validate parent selection first
 /// - Country → State → District hierarchy
 /// - State selection requires valid countryId
 /// - District selection requires valid stateId
 class AddressDetails {
-  final String addressLine1;
-  final String? addressLine2;
-  final String countryId; // Selected country ID (for dependent dropdown validation)
-  final String stateId; // Selected state ID (depends on countryId)
-  final String districtId; // Selected district ID (depends on stateId)
-  final String city;
-  final String pincode;
+  final String addressLine1; // House No. / Building Name
+  final String addressLine2; // Street / Locality / Area
+  final String city; // Post Office
+  final String postalCode; // Post Code (renamed from pincode)
+  final String countryId; // Country ID
+  final String stateId; // State ID (depends on countryId)
+  final String districtId; // District ID (depends on stateId)
+  final bool isPrimary; // Is primary address
 
   const AddressDetails({
     required this.addressLine1,
-    this.addressLine2,
+    required this.addressLine2,
+    required this.city,
+    required this.postalCode,
     required this.countryId,
     required this.stateId,
     required this.districtId,
-    required this.city,
-    required this.pincode,
+    this.isPrimary = true, // Default to primary address
   });
 
   /// Get full address as single string
   String get fullAddress {
     final parts = [
       addressLine1,
-      if (addressLine2 != null && addressLine2!.isNotEmpty) addressLine2!,
+      addressLine2,
       city,
       districtId, // District name will be displayed in UI
       stateId, // State name will be displayed in UI
-      pincode,
+      postalCode,
       countryId, // Country name will be displayed in UI
     ];
-    return parts.join(', ');
+    return parts.where((p) => p.isNotEmpty).join(', ');
   }
 
   /// Check if all required fields are filled
@@ -47,11 +50,12 @@ class AddressDetails {
   /// - District requires state
   bool get isComplete {
     return addressLine1.isNotEmpty &&
+        addressLine2.isNotEmpty &&
         countryId.isNotEmpty && // Parent selection
         stateId.isNotEmpty && // Depends on countryId
         districtId.isNotEmpty && // Depends on stateId
         city.isNotEmpty &&
-        pincode.isNotEmpty;
+        postalCode.isNotEmpty;
   }
 
   /// Validate dependent dropdown hierarchy
@@ -73,20 +77,50 @@ class AddressDetails {
   AddressDetails copyWith({
     String? addressLine1,
     String? addressLine2,
+    String? city,
+    String? postalCode,
     String? countryId,
     String? stateId,
     String? districtId,
-    String? city,
-    String? pincode,
+    bool? isPrimary,
   }) {
     return AddressDetails(
       addressLine1: addressLine1 ?? this.addressLine1,
       addressLine2: addressLine2 ?? this.addressLine2,
+      city: city ?? this.city,
+      postalCode: postalCode ?? this.postalCode,
       countryId: countryId ?? this.countryId,
       stateId: stateId ?? this.stateId,
       districtId: districtId ?? this.districtId,
-      city: city ?? this.city,
-      pincode: pincode ?? this.pincode,
+      isPrimary: isPrimary ?? this.isPrimary,
+    );
+  }
+
+  /// Convert to JSON for API
+  Map<String, dynamic> toJson() {
+    return {
+      'address_line1': addressLine1,
+      'address_line2': addressLine2,
+      'city': city,
+      'postal_code': postalCode,
+      'country': countryId,
+      'state': stateId,
+      'district': districtId,
+      'is_primary': isPrimary,
+    };
+  }
+
+  /// Create from JSON
+  factory AddressDetails.fromJson(Map<String, dynamic> json) {
+    return AddressDetails(
+      addressLine1: json['address_line1'] as String,
+      addressLine2: json['address_line2'] as String,
+      city: json['city'] as String,
+      postalCode: json['postal_code'] as String,
+      countryId: json['country'] as String,
+      stateId: json['state'] as String,
+      districtId: json['district'] as String,
+      isPrimary: json['is_primary'] as bool? ?? true,
     );
   }
 
@@ -122,24 +156,26 @@ class AddressDetails {
           runtimeType == other.runtimeType &&
           addressLine1 == other.addressLine1 &&
           addressLine2 == other.addressLine2 &&
+          city == other.city &&
+          postalCode == other.postalCode &&
           countryId == other.countryId &&
           stateId == other.stateId &&
           districtId == other.districtId &&
-          city == other.city &&
-          pincode == other.pincode;
+          isPrimary == other.isPrimary;
 
   @override
   int get hashCode =>
       addressLine1.hashCode ^
-      (addressLine2?.hashCode ?? 0) ^
+      addressLine2.hashCode ^
+      city.hashCode ^
+      postalCode.hashCode ^
       countryId.hashCode ^
       stateId.hashCode ^
       districtId.hashCode ^
-      city.hashCode ^
-      pincode.hashCode;
+      isPrimary.hashCode;
 
   @override
   String toString() {
-    return 'AddressDetails(city: $city, country: $countryId, state: $stateId, district: $districtId, pincode: $pincode)';
+    return 'AddressDetails(city: $city, country: $countryId, state: $stateId, district: $districtId, postalCode: $postalCode, isPrimary: $isPrimary)';
   }
 }

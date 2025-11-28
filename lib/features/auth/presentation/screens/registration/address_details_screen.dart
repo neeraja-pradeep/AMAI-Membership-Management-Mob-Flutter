@@ -11,14 +11,16 @@ import '../../components/dropdown_field.dart';
 import '../../components/step_progress_indicator.dart';
 import '../../components/text_input_field.dart';
 
-/// Address Details Screen (Step 3)
+/// Address Details Screen (Step 2 of 3)
 ///
 /// Collects practitioner's address information with dependent dropdowns:
-/// - Address Line 1
-/// - Address Line 2 (optional)
+/// - Address Line 1 (House No./Building Name)
+/// - Address Line 2 (Street/Locality/Area)
 /// - Country → State → District (dependent hierarchy)
-/// - City
-/// - Pincode
+/// - City (Post Office)
+/// - Postal Code
+///
+/// Matches backend POST /api/accounts/addresses/ requirements
 ///
 /// CRITICAL REQUIREMENT: Dependent Dropdown Validation
 /// - State selection requires valid Country
@@ -40,7 +42,7 @@ class _AddressDetailsScreenState extends ConsumerState<AddressDetailsScreen> {
   late final TextEditingController _addressLine1Controller;
   late final TextEditingController _addressLine2Controller;
   late final TextEditingController _cityController;
-  late final TextEditingController _pincodeController;
+  late final TextEditingController _postalCodeController;
 
   // Dependent dropdown state
   String? _selectedCountry;
@@ -71,7 +73,7 @@ class _AddressDetailsScreenState extends ConsumerState<AddressDetailsScreen> {
     _addressLine1Controller = TextEditingController();
     _addressLine2Controller = TextEditingController();
     _cityController = TextEditingController();
-    _pincodeController = TextEditingController();
+    _postalCodeController = TextEditingController();
 
     // Load existing data if available
     WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -84,7 +86,7 @@ class _AddressDetailsScreenState extends ConsumerState<AddressDetailsScreen> {
     _addressLine1Controller.dispose();
     _addressLine2Controller.dispose();
     _cityController.dispose();
-    _pincodeController.dispose();
+    _postalCodeController.dispose();
     super.dispose();
   }
 
@@ -112,12 +114,12 @@ class _AddressDetailsScreenState extends ConsumerState<AddressDetailsScreen> {
 
     if (addressDetails != null) {
       _addressLine1Controller.text = addressDetails.addressLine1;
-      _addressLine2Controller.text = addressDetails.addressLine2 ?? '';
+      _addressLine2Controller.text = addressDetails.addressLine2;
       _selectedCountry = addressDetails.countryId;
       _selectedState = addressDetails.stateId;
       _selectedDistrict = addressDetails.districtId;
       _cityController.text = addressDetails.city;
-      _pincodeController.text = addressDetails.pincode;
+      _postalCodeController.text = addressDetails.postalCode;
     }
   }
 
@@ -131,14 +133,13 @@ class _AddressDetailsScreenState extends ConsumerState<AddressDetailsScreen> {
   void _saveAddressDetails() {
     final addressDetails = AddressDetails(
       addressLine1: _addressLine1Controller.text.trim(),
-      addressLine2: _addressLine2Controller.text.trim().isNotEmpty
-          ? _addressLine2Controller.text.trim()
-          : null,
+      addressLine2: _addressLine2Controller.text.trim(),
       countryId: _selectedCountry ?? '',
       stateId: _selectedState ?? '',
       districtId: _selectedDistrict ?? '',
       city: _cityController.text.trim(),
-      pincode: _pincodeController.text.trim(),
+      postalCode: _postalCodeController.text.trim(),
+      isPrimary: true, // Default to primary address
     );
 
     ref
@@ -242,8 +243,8 @@ class _AddressDetailsScreenState extends ConsumerState<AddressDetailsScreen> {
             children: [
               // Progress indicator
               const StepProgressIndicator(
-                currentStep: 3,
-                totalSteps: 5,
+                currentStep: 2,
+                totalSteps: 3,
                 stepTitle: 'Address Details',
               ),
 
@@ -296,14 +297,20 @@ class _AddressDetailsScreenState extends ConsumerState<AddressDetailsScreen> {
 
                         SizedBox(height: 16.h),
 
-                        // Address Line 2 (optional)
+                        // Address Line 2 (required)
                         TextInputField(
                           controller: _addressLine2Controller,
-                          labelText: 'Address Line 2 (Optional)',
-                          hintText: 'Landmark, area',
+                          labelText: 'Address Line 2',
+                          hintText: 'Street, Locality, Area',
                           prefixIcon: Icons.location_on_outlined,
                           maxLines: 2,
                           onChanged: (_) => _autoSave(),
+                          validator: (value) {
+                            if (value == null || value.trim().isEmpty) {
+                              return 'Address Line 2 is required';
+                            }
+                            return null;
+                          },
                         ),
 
                         SizedBox(height: 16.h),
@@ -376,15 +383,16 @@ class _AddressDetailsScreenState extends ConsumerState<AddressDetailsScreen> {
 
                         SizedBox(height: 16.h),
 
-                        // City
+                        // City (Post Office)
                         TextInputField(
                           controller: _cityController,
-                          labelText: 'City',
+                          labelText: 'City / Post Office',
+                          hintText: 'Post Office name',
                           prefixIcon: Icons.location_city,
                           onChanged: (_) => _autoSave(),
                           validator: (value) {
                             if (value == null || value.trim().isEmpty) {
-                              return 'City is required';
+                              return 'City / Post Office is required';
                             }
                             return null;
                           },
@@ -392,11 +400,11 @@ class _AddressDetailsScreenState extends ConsumerState<AddressDetailsScreen> {
 
                         SizedBox(height: 16.h),
 
-                        // Pincode
+                        // Postal Code
                         TextInputField(
-                          controller: _pincodeController,
-                          labelText: 'Pincode',
-                          hintText: '6-digit pincode',
+                          controller: _postalCodeController,
+                          labelText: 'Postal Code',
+                          hintText: '6-digit postal code',
                           prefixIcon: Icons.markunread_mailbox_outlined,
                           keyboardType: TextInputType.number,
                           maxLength: 6,
@@ -406,10 +414,10 @@ class _AddressDetailsScreenState extends ConsumerState<AddressDetailsScreen> {
                           onChanged: (_) => _autoSave(),
                           validator: (value) {
                             if (value == null || value.trim().isEmpty) {
-                              return 'Pincode is required';
+                              return 'Postal code is required';
                             }
                             if (value.trim().length != 6) {
-                              return 'Pincode must be 6 digits';
+                              return 'Postal code must be 6 digits';
                             }
                             return null;
                           },
