@@ -40,6 +40,48 @@ class Endpoints {
   /// Get user addresses
   static const String getAddresses = '/api/accounts/addresses/';
 
+  // ==================== Registration ====================
+
+  /// GET /api/registration/councils/
+  /// Fetch medical councils for dropdown
+  static const String councils = '/api/registration/councils/';
+
+  /// GET /api/registration/specializations/
+  /// Fetch specializations for dropdown
+  static const String specializations = '/api/registration/specializations/';
+
+  /// GET /api/registration/countries/
+  /// Fetch countries for dropdown
+  static const String countries = '/api/registration/countries/';
+
+  /// GET /api/registration/states/
+  /// Fetch states for dropdown (requires country_id query param)
+  static const String states = '/api/registration/states/';
+
+  /// GET /api/registration/districts/
+  /// Fetch districts for dropdown (requires state_id query param)
+  static const String districts = '/api/registration/districts/';
+
+  /// POST /api/registration/upload/
+  /// Upload registration document
+  static const String registrationUpload = '/api/registration/upload/';
+
+  /// POST /api/registration/submit/
+  /// Submit complete registration
+  static const String registrationSubmit = '/api/registration/submit/';
+
+  /// GET /api/registration/check-duplicate/
+  /// Check for duplicate email or phone
+  static const String registrationCheckDuplicate = '/api/registration/check-duplicate/';
+
+  /// POST /api/registration/verify-payment/
+  /// Verify payment status after gateway redirect
+  static const String registrationVerifyPayment = '/api/registration/verify-payment/';
+
+  /// GET /api/session/validate/
+  /// Validate current session
+  static const String sessionValidate = '/api/session/validate/';
+
   // ==================== Helpers ====================
 
   /// Build full URL from path
