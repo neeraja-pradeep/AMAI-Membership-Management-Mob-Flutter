@@ -35,6 +35,35 @@ class _PaymentScreenState extends ConsumerState<PaymentScreen> {
   final double _paymentAmount = 1000.00;
   final String _currency = 'INR';
 
+  @override
+  void initState() {
+    super.initState();
+
+    // Ensure registration state is initialized
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _ensureRegistrationInitialized();
+    });
+  }
+
+  /// Ensure registration state is initialized
+  void _ensureRegistrationInitialized() {
+    final state = ref.read(registrationProvider);
+
+    // Handle different state types
+    if (state is RegistrationStateResumePrompt) {
+      // User has existing registration, resume it
+      ref.read(registrationProvider.notifier).resumeRegistration(
+        state.existingRegistration,
+      );
+      return;
+    }
+
+    // If registration hasn't been started yet, start it now
+    if (state is! RegistrationStateInProgress) {
+      ref.read(registrationProvider.notifier).startNewRegistration();
+    }
+  }
+
   /// Validate all steps with detailed error messages
   String? _validateAllSteps() {
     final state = ref.read(registrationProvider);

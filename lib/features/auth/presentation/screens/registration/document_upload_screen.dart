@@ -47,14 +47,28 @@ class _DocumentUploadScreenState extends ConsumerState<DocumentUploadScreen> {
   void _loadExistingDocuments() {
     final state = ref.read(registrationProvider);
 
-    // Only RegistrationStateInProgress contains registration data
-    if (state is RegistrationStateInProgress) {
-      final documentUploads = state.registration.documentUploads;
+    // Handle different state types
+    if (state is RegistrationStateResumePrompt) {
+      // User has existing registration, resume it
+      ref.read(registrationProvider.notifier).resumeRegistration(
+        state.existingRegistration,
+      );
+      // Reload after resuming
+      Future.microtask(() => _loadExistingDocuments());
+      return;
+    }
 
-      if (documentUploads != null) {
-        for (final doc in documentUploads.documents) {
-          _uploadedFiles[doc.type] = File(doc.localFilePath);
-        }
+    // If registration hasn't been started yet, start it now
+    if (state is! RegistrationStateInProgress) {
+      ref.read(registrationProvider.notifier).startNewRegistration();
+      return; // State is now initialized, but no data to load yet
+    }
+
+    final documentUploads = state.registration.documentUploads;
+
+    if (documentUploads != null) {
+      for (final doc in documentUploads.documents) {
+        _uploadedFiles[doc.type] = File(doc.localFilePath);
       }
     }
   }

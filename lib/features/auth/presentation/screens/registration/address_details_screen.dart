@@ -91,19 +91,33 @@ class _AddressDetailsScreenState extends ConsumerState<AddressDetailsScreen> {
   void _loadExistingData() {
     final state = ref.read(registrationProvider);
 
-    // Only RegistrationStateInProgress has registration data
-    if (state is RegistrationStateInProgress) {
-      final addressDetails = state.registration.addressDetails;
+    // Handle different state types
+    if (state is RegistrationStateResumePrompt) {
+      // User has existing registration, resume it
+      ref.read(registrationProvider.notifier).resumeRegistration(
+        state.existingRegistration,
+      );
+      // Reload after resuming
+      Future.microtask(() => _loadExistingData());
+      return;
+    }
 
-      if (addressDetails != null) {
-        _addressLine1Controller.text = addressDetails.addressLine1;
-        _addressLine2Controller.text = addressDetails.addressLine2 ?? '';
-        _selectedCountry = addressDetails.countryId;
-        _selectedState = addressDetails.stateId;
-        _selectedDistrict = addressDetails.districtId;
-        _cityController.text = addressDetails.city;
-        _pincodeController.text = addressDetails.pincode;
-      }
+    // If registration hasn't been started yet, start it now
+    if (state is! RegistrationStateInProgress) {
+      ref.read(registrationProvider.notifier).startNewRegistration();
+      return; // State is now initialized, but no data to load yet
+    }
+
+    final addressDetails = state.registration.addressDetails;
+
+    if (addressDetails != null) {
+      _addressLine1Controller.text = addressDetails.addressLine1;
+      _addressLine2Controller.text = addressDetails.addressLine2 ?? '';
+      _selectedCountry = addressDetails.countryId;
+      _selectedState = addressDetails.stateId;
+      _selectedDistrict = addressDetails.districtId;
+      _cityController.text = addressDetails.city;
+      _pincodeController.text = addressDetails.pincode;
     }
   }
 
