@@ -14,45 +14,49 @@ enum PaymentStatus {
 
 /// Payment details entity for Step 5
 class PaymentDetails {
+  final String sessionId; // Payment gateway session ID
   final double amount;
   final String currency;
   final PaymentStatus status;
   final String? transactionId;
   final String? paymentMethod; // 'card', 'upi', 'netbanking', etc.
-  final DateTime? paymentDate;
+  final DateTime? completedAt; // When payment was completed
 
   const PaymentDetails({
+    required this.sessionId,
     required this.amount,
     this.currency = 'INR',
     this.status = PaymentStatus.pending,
     this.transactionId,
     this.paymentMethod,
-    this.paymentDate,
+    this.completedAt,
   });
 
   bool get isComplete => status == PaymentStatus.completed;
 
   PaymentDetails copyWith({
+    String? sessionId,
     double? amount,
     String? currency,
     PaymentStatus? status,
     String? transactionId,
     String? paymentMethod,
-    DateTime? paymentDate,
+    DateTime? completedAt,
   }) {
     return PaymentDetails(
+      sessionId: sessionId ?? this.sessionId,
       amount: amount ?? this.amount,
       currency: currency ?? this.currency,
       status: status ?? this.status,
       transactionId: transactionId ?? this.transactionId,
       paymentMethod: paymentMethod ?? this.paymentMethod,
-      paymentDate: paymentDate ?? this.paymentDate,
+      completedAt: completedAt ?? this.completedAt,
     );
   }
 
   @override
   String toString() {
-    return 'PaymentDetails(amount: $amount $currency, status: $status, txnId: $transactionId)';
+    return 'PaymentDetails(sessionId: $sessionId, amount: $amount $currency, status: $status, txnId: $transactionId)';
   }
 }
 

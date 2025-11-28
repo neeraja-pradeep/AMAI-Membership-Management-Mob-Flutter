@@ -12,6 +12,7 @@ import '../../domain/entities/registration/document_upload.dart';
 import '../../domain/entities/registration/registration_error.dart';
 import '../../domain/repositories/registration_repository.dart';
 import '../../infrastructure/data_sources/local/registration_local_ds.dart';
+import '../../infrastructure/repositories/registration_repository_provider.dart';
 import '../states/registration_state.dart';
 
 /// Registration state notifier with auto-save to Hive
@@ -671,12 +672,15 @@ class RegistrationStateNotifier extends StateNotifier<RegistrationState> {
 }
 
 /// Provider for RegistrationStateNotifier
-
 final registrationProvider =
-    StateNotifierProvider<RegistrationStateNotifier, RegistrationState>((ref) {
-      final repo = ref.read(registrationRepositoryProvider);
-      return RegistrationStateNotifier(
-        repository: repo,
-        localDs: RegistrationLocalDs(),
-      );
-    });
+    StateNotifierProvider<RegistrationStateNotifier, RegistrationState>(
+  (ref) {
+    final repository = ref.watch(registrationRepositoryProvider);
+    final localDs = ref.watch(registrationLocalDsProvider);
+
+    return RegistrationStateNotifier(
+      repository: repository,
+      localDs: localDs,
+    );
+  },
+);
