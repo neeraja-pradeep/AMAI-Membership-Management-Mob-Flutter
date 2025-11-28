@@ -17,4 +17,9 @@ class HiveBoxes {
 
   /// Settings box for app preferences
   static const String settingsBox = 'settings';
+
+  /// Registration box for practitioner registration form data
+  /// SECURITY: Encrypted with SecureHiveStorage
+  /// EXPIRY: 24 hours
+  static const String registrationBox = 'registration';
 }
