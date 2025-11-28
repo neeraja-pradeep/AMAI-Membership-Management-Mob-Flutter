@@ -1,5 +1,9 @@
 # Form Data Caching Scenarios - Implementation Documentation
 
+> **⚠️ IMPORTANT - FILE PATHS UPDATED:**
+> Registration is now part of the Auth module. All file paths in this document reflect the OLD structure.
+> **See [REGISTRATION_ARCHITECTURE.md](REGISTRATION_ARCHITECTURE.md) for updated paths and imports.**
+
 ## Overview
 Detailed implementation of Hive-based form data caching for practitioner registration with 24-hour expiry and incomplete registration recovery.
 

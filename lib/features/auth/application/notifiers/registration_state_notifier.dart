@@ -1,12 +1,12 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:uuid/uuid.dart';
 
-import '../../domain/entities/practitioner_registration.dart';
-import '../../domain/entities/registration_step.dart';
-import '../../domain/entities/personal_details.dart';
-import '../../domain/entities/professional_details.dart';
-import '../../domain/entities/address_details.dart';
-import '../../domain/entities/document_upload.dart';
+import '../../domain/entities/registration/practitioner_registration.dart';
+import '../../domain/entities/registration/registration_step.dart';
+import '../../domain/entities/registration/personal_details.dart';
+import '../../domain/entities/registration/professional_details.dart';
+import '../../domain/entities/registration/address_details.dart';
+import '../../domain/entities/registration/document_upload.dart';
 import '../../infrastructure/data_sources/local/registration_local_ds.dart';
 import '../states/registration_state.dart';
 

@@ -1,5 +1,9 @@
 # Registration Navigation & Routing - Implementation Guide
 
+> **⚠️ IMPORTANT - FILE PATHS AND ROUTING UPDATED:**
+> Registration is now part of the Auth module and routing is centralized in `app_router.dart`.
+> **See [REGISTRATION_ARCHITECTURE.md](REGISTRATION_ARCHITECTURE.md) for updated paths, imports, and routing.**
+
 ## Overview
 Complete guide for implementing navigation flow across all 5 registration screens with exit confirmation, back button handling, and success navigation.
 

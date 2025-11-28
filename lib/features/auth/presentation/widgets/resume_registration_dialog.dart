@@ -3,10 +3,10 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:intl/intl.dart';
 
-import '../../domain/entities/practitioner_registration.dart';
-import '../../domain/entities/registration_step.dart';
+import '../../../../app/router/app_router.dart';
+import '../../domain/entities/registration/practitioner_registration.dart';
+import '../../domain/entities/registration/registration_step.dart';
 import '../../application/notifiers/registration_state_notifier.dart';
-import '../routes/registration_routes.dart';
 
 /// Resume registration dialog
 ///
@@ -162,11 +162,11 @@ class ResumeRegistrationDialog extends ConsumerWidget {
   /// Navigate to appropriate step screen
   void _navigateToStep(BuildContext context, RegistrationStep currentStep) {
     final route = switch (currentStep) {
-      RegistrationStep.personalDetails => RegistrationRoutes.personal,
-      RegistrationStep.professionalDetails => RegistrationRoutes.professional,
-      RegistrationStep.addressDetails => RegistrationRoutes.address,
-      RegistrationStep.documentUploads => RegistrationRoutes.documents,
-      RegistrationStep.payment => RegistrationRoutes.payment,
+      RegistrationStep.personalDetails => AppRouter.registrationPersonal,
+      RegistrationStep.professionalDetails => AppRouter.registrationProfessional,
+      RegistrationStep.addressDetails => AppRouter.registrationAddress,
+      RegistrationStep.documentUploads => AppRouter.registrationDocuments,
+      RegistrationStep.payment => AppRouter.registrationPayment,
     };
 
     Navigator.pushNamed(context, route);

@@ -1,5 +1,9 @@
 # State Management Integration - Implementation Guide
 
+> **⚠️ IMPORTANT - FILE PATHS UPDATED:**
+> Registration is now part of the Auth module. All file paths in this document reflect the OLD structure.
+> **See [REGISTRATION_ARCHITECTURE.md](REGISTRATION_ARCHITECTURE.md) for updated paths and imports.**
+
 ## Overview
 Complete guide for integrating `RegistrationStateNotifier` with UI screens to enable multi-step registration with automatic form caching, 24-hour expiry, and resume functionality.
 

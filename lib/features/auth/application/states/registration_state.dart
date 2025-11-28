@@ -1,5 +1,5 @@
-import '../../domain/entities/practitioner_registration.dart';
-import '../../domain/entities/registration_step.dart';
+import '../../domain/entities/registration/practitioner_registration.dart';
+import '../../domain/entities/registration/registration_step.dart';
 
 /// Registration state for multi-step form
 ///
