@@ -4,7 +4,9 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:intl/intl.dart';
 
 import '../../domain/entities/practitioner_registration.dart';
+import '../../domain/entities/registration_step.dart';
 import '../../application/notifiers/registration_state_notifier.dart';
+import '../routes/registration_routes.dart';
 
 /// Resume registration dialog
 ///
@@ -158,23 +160,16 @@ class ResumeRegistrationDialog extends ConsumerWidget {
   }
 
   /// Navigate to appropriate step screen
-  void _navigateToStep(BuildContext context, dynamic currentStep) {
-    // TODO: Implement navigation based on step
-    // This will be implemented when UI screens are created
+  void _navigateToStep(BuildContext context, RegistrationStep currentStep) {
+    final route = switch (currentStep) {
+      RegistrationStep.personalDetails => RegistrationRoutes.personal,
+      RegistrationStep.professionalDetails => RegistrationRoutes.professional,
+      RegistrationStep.addressDetails => RegistrationRoutes.address,
+      RegistrationStep.documentUploads => RegistrationRoutes.documents,
+      RegistrationStep.payment => RegistrationRoutes.payment,
+    };
 
-    // Example navigation logic:
-    // switch (currentStep) {
-    //   case RegistrationStep.personalDetails:
-    //     Navigator.pushNamed(context, '/registration/personal');
-    //   case RegistrationStep.professionalDetails:
-    //     Navigator.pushNamed(context, '/registration/professional');
-    //   case RegistrationStep.addressDetails:
-    //     Navigator.pushNamed(context, '/registration/address');
-    //   case RegistrationStep.documentUploads:
-    //     Navigator.pushNamed(context, '/registration/documents');
-    //   case RegistrationStep.payment:
-    //     Navigator.pushNamed(context, '/registration/payment');
-    // }
+    Navigator.pushNamed(context, route);
   }
 }
 
