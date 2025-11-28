@@ -1,28 +1,24 @@
 # Registration & Authentication Module Integration
 
 ## Overview
-The Registration module builds on the Authentication module's session management and XCSRF token handling. This document details how registration integrates with authentication patterns and ensures consistency across the codebase.
+The Registration module builds on the Authentication module's session management and CSRF token handling. This document details how registration integrates with authentication patterns and ensures consistency across the codebase.
 
 ---
 
 ## 🔐 Authentication Module Pattern (Foundation)
 
-### **Session Management**
+### **CRITICAL PATTERN: Cookie-Based Session & CSRF**
 
-The authentication module establishes the following pattern for session management:
-
-**Session Storage:**
+**Session & CSRF Storage (BOTH in cookies):**
 ```dart
 // Session ID: HTTP-only cookies (managed by Dio's CookieManager)
+// CSRF Token: HTTP-only cookies (managed by Dio's CookieManager)
 // Location: app's document directory via path_provider
-// File: .cookies/ directory (NOT in Hive)
-
-// Session entity (stored in encrypted Hive):
-class Session {
-  final String xcsrfToken;        // XCSRF token for CSRF protection
-  final DateTime expiresAt;       // Session expiry timestamp
-  final String? ifModifiedSince;  // Caching header
-}
+// File: .cookies/ directory
+//
+// CRITICAL: NO Hive storage for session or CSRF token
+// CRITICAL: NO manual token extraction from response headers/body
+// CRITICAL: Tokens come from cookies ONLY
 ```
 
 **Cookie Jar Configuration** (`lib/core/network/api_client.dart`):
@@ -34,43 +30,61 @@ Future<void> _initializeCookieJar() async {
     storage: FileStorage(cookiePath),
   );
 
+  // CRITICAL: CookieManager automatically handles session cookies
   _dio.interceptors.add(CookieManager(_cookieJar));
 }
 ```
 
 **Key Principle:**
 - ✅ Session ID: HTTP-only cookies (secure, auto-sent by Dio)
-- ✅ XCSRF Token: Encrypted Hive storage
+- ✅ CSRF Token: HTTP-only cookies (extracted automatically)
 - ❌ Session ID is NEVER stored in Hive or local variables
-- ❌ XCSRF Token is NEVER logged
+- ❌ CSRF Token is NEVER stored in Hive
+- ❌ CSRF Token is NEVER manually extracted from response headers/body
+- ❌ CSRF Token is NEVER logged
 
 ---
 
-### **XCSRF Token Handling**
+### **CSRF Token Handling (Cookie-Based)**
 
-**Extraction on Login** (`lib/features/auth/infrastructure/data_sources/remote/auth_api.dart`):
+**Auto-Extraction via Interceptor** (`lib/core/network/api_client.dart`):
 ```dart
-Future<LoginResponse> login(...) async {
-  final response = await _apiClient.post(Endpoints.login, data: request.toJson());
+// CSRF interceptor - auto-extracts from cookies
+void _setupInterceptors() {
+  _dio.interceptors.add(
+    InterceptorsWrapper(
+      onRequest: (options, handler) async {
+        // CRITICAL: Extract CSRF from cookies, NOT from Hive or response
+        final csrf = await _getCsrfToken();
+        if (csrf != null) {
+          options.headers['X-CSRFToken'] = csrf;
+        }
+        return handler.next(options);
+      },
+    ),
+  );
+}
 
-  // Extract XCSRF token from response headers OR body
-  final xcsrfToken = response.headers.value('x-csrftoken') ??
-                     response.data?['xcsrf_token'] as String? ??
-                     '';
+// CRITICAL: Token comes from cookies ONLY
+Future<String?> _getCsrfToken() async {
+  final cookies = await _cookieJar.loadForRequest(
+    Uri.parse(_dio.options.baseUrl),
+  );
 
-  // Add XCSRF token to ALL future requests
-  if (xcsrfToken.isNotEmpty) {
-    _apiClient.addHeader('X-CSRFToken', xcsrfToken);
-  }
+  final csrfCookie = cookies.firstWhere(
+    (c) => c.name.toLowerCase() == 'csrftoken',
+    orElse: () => Cookie('', ''),
+  );
 
-  return loginResponse;
+  return csrfCookie.value.isEmpty ? null : csrfCookie.value;
 }
 ```
 
 **Usage in Subsequent Requests:**
 ```dart
-// XCSRF token automatically included in headers for ALL POST/PUT/PATCH/DELETE requests
-// No manual intervention needed after login
+// CSRF token automatically included in headers for ALL POST/PUT/PATCH/DELETE requests
+// Extracted from cookies on EVERY request via interceptor
+// No manual intervention needed - fully automatic
 ```
 
 **Cleanup on Logout:**
@@ -78,9 +92,9 @@ Future<LoginResponse> login(...) async {
 Future<bool> logout() async {
   await _apiClient.post(Endpoints.logout);
 
-  // Clear cookies and XCSRF token
+  // CRITICAL: Clear ALL cookies (session + CSRF)
   await _apiClient.clearCookies();
-  _apiClient.removeHeader('X-CSRFToken');
+  // No manual token removal needed - cookies handle everything
 
   return true;
 }
@@ -124,14 +138,14 @@ Future<void> submitRegistration() async {
 }
 ```
 
-#### **2. XCSRF Token Usage**
+#### **2. CSRF Token Usage**
 
-**All registration API calls include XCSRF token:**
+**All registration API calls include CSRF token:**
 ```dart
 // Example: Document upload
 Future<String> uploadDocument(File file, DocumentType type) async {
-  // XCSRF token automatically included in request headers
-  // (added by ApiClient after login)
+  // CRITICAL: CSRF token automatically extracted from cookies and included
+  // (via ApiClient interceptor - NO manual handling)
   final formData = FormData.fromMap({
     'file': await MultipartFile.fromFile(file.path),
     'type': type.name,
@@ -142,7 +156,7 @@ Future<String> uploadDocument(File file, DocumentType type) async {
     data: formData,
   );
   // Headers automatically include:
-  // X-CSRFToken: <token-from-login>
+  // X-CSRFToken: <token-from-cookies>
 
   return response.data['url'];
 }
@@ -154,7 +168,7 @@ Future<String> uploadDocument(File file, DocumentType type) async {
 - PUT `/api/registration/update/{step}`
 - POST `/api/registration/verify`
 
-All automatically include XCSRF token from authentication module.
+All automatically include CSRF token extracted from cookies by ApiClient interceptor.
 
 #### **3. Session Expiry Handling**
 
@@ -213,22 +227,23 @@ ref.listen<RegistrationState>(registrationProvider, (previous, next) {
 ### **Authentication Module Responsibilities:**
 
 - [x] Store session ID in HTTP-only cookies via Dio
-- [x] Store XCSRF token in encrypted Hive
-- [x] Add XCSRF token to request headers on login
-- [x] Remove XCSRF token on logout
-- [x] Clear cookies on logout
+- [x] Store CSRF token in HTTP-only cookies via Dio
+- [x] Auto-extract CSRF token from cookies on every request
+- [x] Auto-add CSRF token to request headers via interceptor
+- [x] Clear cookies on logout (clears both session + CSRF)
 - [x] Provide session validation endpoint
 - [x] Handle 401 errors with UnauthorizedException
 
 ### **Registration Module Responsibilities:**
 
 - [x] Depend on active session from authentication
-- [x] Use XCSRF token automatically (via ApiClient)
+- [x] Use CSRF token automatically (via ApiClient interceptor)
 - [x] Handle session expiry (401 errors)
 - [x] Preserve registration data on session expiry
 - [x] Restore registration flow after re-login
-- [x] Never manually handle XCSRF token (trust ApiClient)
-- [x] Never store session ID locally
+- [x] **NEVER manually handle CSRF token** (trust ApiClient interceptor)
+- [x] **NEVER store CSRF token in Hive** (comes from cookies only)
+- [x] **NEVER store session ID locally** (comes from cookies only)
 
 ---
 
@@ -239,8 +254,9 @@ ref.listen<RegistrationState>(registrationProvider, (previous, next) {
 | Aspect | Auth Pattern | Registration Compliance |
 |--------|-------------|------------------------|
 | **Session ID Storage** | HTTP-only cookies via Dio | ✅ Never stored in Hive or variables |
-| **XCSRF Token Storage** | Encrypted Hive | ✅ Uses same SecureHiveStorage |
-| **XCSRF in Requests** | Auto-added by ApiClient | ✅ All POST requests include it |
+| **CSRF Token Storage** | HTTP-only cookies via Dio | ✅ Never stored in Hive or variables |
+| **CSRF Extraction** | Auto from cookies via interceptor | ✅ Never manual extraction |
+| **CSRF in Requests** | Auto-added by ApiClient interceptor | ✅ All POST requests include it |
 | **Sensitive Data Logging** | NEVER logged | ✅ Council numbers, docs never logged |
 | **Password Handling** | NEVER stored | ✅ N/A (registration post-login) |
 | **Session Validation** | Before critical operations | ✅ Before final submission |
@@ -260,20 +276,19 @@ ref.listen<RegistrationState>(registrationProvider, (previous, next) {
 │      │                                                          │
 │      ├─> POST /api/accounts/login/                             │
 │      │   Request: { email, password, deviceId }                │
-│      │   Response: { user, xcsrf_token }                       │
+│      │   Response: { user, ... }                               │
 │      │                                                          │
-│      ├─> Extract session ID from cookies (auto-handled by Dio) │
+│      ├─> Backend sets cookies (auto-handled by Dio):          │
 │      │   Cookie: sessionid=<session-id>; HttpOnly; Secure      │
+│      │   Cookie: csrftoken=<csrf-token>; HttpOnly; Secure      │
 │      │                                                          │
-│      ├─> Extract XCSRF token from response                     │
-│      │   Header: x-csrftoken: <token>                          │
-│      │   OR Body: { xcsrf_token: <token> }                     │
+│      ├─> Cookies stored in app directory:                      │
+│      │   Path: /app-documents/.cookies/                        │
+│      │   Managed by: PersistCookieJar + path_provider          │
 │      │                                                          │
-│      ├─> Store in encrypted Hive:                              │
-│      │   Session(xcsrfToken, expiresAt, ifModifiedSince)       │
-│      │                                                          │
-│      └─> Add to ApiClient headers:                             │
-│          ApiClient.addHeader('X-CSRFToken', xcsrfToken)         │
+│      └─> CRITICAL: NO manual token extraction or storage       │
+│          - CSRF token comes from cookies ONLY                  │
+│          - NO Hive storage for session or CSRF                 │
 │                                                                 │
 └────────────────────────────────────────────────────────────────┘
                               │
@@ -292,7 +307,8 @@ ref.listen<RegistrationState>(registrationProvider, (previous, next) {
 │  [Step 2: Professional Details]                                │
 │      │                                                          │
 │      ├─> Load dropdowns: GET /api/councils                     │
-│      │   Headers: { X-CSRFToken: <token> } ← Auto-included     │
+│      │   Headers: { X-CSRFToken: <from-cookies> } ← Auto      │
+│      │   (CSRF extracted from cookies by interceptor)         │
 │      │                                                          │
 │      ├─> Fill form data                                        │
 │      └─> Save to Hive                                          │
@@ -300,14 +316,16 @@ ref.listen<RegistrationState>(registrationProvider, (previous, next) {
 │  [Step 3: Address Details]                                     │
 │      │                                                          │
 │      ├─> Cascade dropdowns: GET /api/states?country=India      │
-│      │   Headers: { X-CSRFToken: <token> }                     │
+│      │   Headers: { X-CSRFToken: <from-cookies> }             │
+│      │   (CSRF extracted from cookies by interceptor)         │
 │      │                                                          │
 │      └─> Save to Hive                                          │
 │                                                                 │
 │  [Step 4: Document Upload]                                     │
 │      │                                                          │
 │      ├─> Upload file: POST /api/registration/upload            │
-│      │   Headers: { X-CSRFToken: <token> } ← Auto-included     │
+│      │   Headers: { X-CSRFToken: <from-cookies> } ← Auto      │
+│      │   (CSRF extracted from cookies by interceptor)         │
 │      │   Multipart: { file, type }                             │
 │      │                                                          │
 │      ├─> IF 401 Unauthorized:                                  │
@@ -320,7 +338,8 @@ ref.listen<RegistrationState>(registrationProvider, (previous, next) {
 │  [Step 5: Payment]                                             │
 │      │                                                          │
 │      ├─> Validate session: GET /api/session/validate           │
-│      │   Headers: { X-CSRFToken: <token> }                     │
+│      │   Headers: { X-CSRFToken: <from-cookies> }             │
+│      │   (CSRF extracted from cookies by interceptor)         │
 │      │                                                          │
 │      ├─> IF session expired:                                   │
 │      │   └─> RegistrationStateSessionExpired                   │
@@ -329,7 +348,8 @@ ref.listen<RegistrationState>(registrationProvider, (previous, next) {
 │      ├─> Process payment with gateway                          │
 │      │                                                          │
 │      └─> Submit registration: POST /api/registration/submit    │
-│          Headers: { X-CSRFToken: <token> } ← Auto-included     │
+│          Headers: { X-CSRFToken: <from-cookies> } ← Auto      │
+│          (CSRF extracted from cookies by interceptor)         │
 │          Body: { all registration data }                       │
 │                                                                 │
 │  [Success]                                                      │
@@ -436,16 +456,22 @@ Future<void> callApi() async {
 ### **Registration Module is FULLY COMPLIANT with Auth Module:**
 
 ✅ **Session ID**: Never stored locally, managed by Dio cookies
-✅ **XCSRF Token**: Stored in encrypted Hive, auto-added to requests
-✅ **API Calls**: All use shared ApiClient with automatic header injection
+✅ **CSRF Token**: Never stored in Hive, extracted from cookies by interceptor
+✅ **API Calls**: All use shared ApiClient with automatic CSRF header injection
+✅ **CSRF Handling**: Fully automatic via cookie-based interceptor pattern
 ✅ **Session Validation**: Done before critical operations
 ✅ **401 Handling**: Prompts re-login and preserves data
-✅ **Security**: No sensitive data logged, proper encryption
-✅ **Documentation**: All docs reference correct patterns
+✅ **Security**: No sensitive data logged, no manual token handling
+✅ **Documentation**: All docs reference correct cookie-based patterns
 
-### **No Changes Needed:**
+### **Critical Pattern Enforced:**
 
-The registration module already follows the authentication module's patterns correctly. All documentation is accurate and aligned.
+The registration module follows the **cookie-based session and CSRF pattern**:
+- **NO** manual CSRF token extraction from response headers/body
+- **NO** CSRF token storage in Hive
+- **NO** manual `addHeader()` calls for CSRF token
+- **YES** automatic CSRF extraction from cookies via interceptor
+- **YES** automatic CSRF inclusion in all requests via interceptor
 
 ---
 
@@ -453,36 +479,37 @@ The registration module already follows the authentication module's patterns cor
 
 ### **If Backend Changes Session Management:**
 
-If the backend changes how sessions or XCSRF tokens work, update BOTH modules:
+If the backend changes how sessions or CSRF tokens work, update ApiClient ONLY:
 
-1. **Update Auth Module** (`lib/features/auth/`):
-   - `auth_api.dart` - Extraction logic
-   - `session.dart` - Entity definition
-   - `auth_local_ds.dart` - Storage logic
+1. **Update ApiClient** (`lib/core/network/api_client.dart`):
+   - Update `_getCsrfToken()` if cookie name changes
+   - Update interceptor if header name changes
+   - Update cookie jar configuration if storage changes
 
-2. **Update ApiClient** (`lib/core/network/api_client.dart`):
-   - Header injection logic
-   - Cookie management
-
-3. **Registration Module Auto-Adapts**:
-   - No changes needed (uses ApiClient)
-   - Unless new registration-specific requirements
+2. **Registration Module Auto-Adapts**:
+   - **NO** changes needed in registration code
+   - **NO** changes needed in repository or API layers
+   - All registration API calls use ApiClient interceptor
+   - Fully automatic adaptation to ApiClient changes
 
 ### **Testing Integration:**
 
 ```dart
-// Test that registration uses auth session
-test('Registration includes XCSRF token from auth', () async {
-  // 1. Login (establishes session)
+// Test that registration uses cookie-based CSRF
+test('Registration includes CSRF token from cookies', () async {
+  // 1. Login (backend sets session + CSRF cookies)
   await authApi.login(email: 'test@test.com', password: 'password');
 
-  // 2. Verify XCSRF token in ApiClient headers
-  expect(apiClient.headers['X-CSRFToken'], isNotEmpty);
+  // 2. Verify cookies are stored
+  final cookies = await apiClient.getCookies(Uri.parse(baseUrl));
+  final csrfCookie = cookies.firstWhere((c) => c.name == 'csrftoken');
+  expect(csrfCookie.value, isNotEmpty);
 
   // 3. Call registration endpoint
   await registrationApi.submitStep(data);
 
-  // 4. Verify request included XCSRF token
+  // 4. Verify request included CSRF token from cookies
+  // (automatically added by interceptor)
   verify(() => dio.post(
     any(),
     options: argThat(
@@ -497,4 +524,4 @@ test('Registration includes XCSRF token from auth', () async {
 
 **Conclusion:**
 
-The Registration module correctly builds on the Authentication module's session and XCSRF token management. No code changes are needed. This document serves as a reference for maintaining consistency between the two modules.
+The Registration module correctly follows the **cookie-based session and CSRF pattern** established by the ApiClient. All session and CSRF handling is automatic via Dio's cookie manager and ApiClient's CSRF interceptor. No manual token handling is required anywhere in the registration code.

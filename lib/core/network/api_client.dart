@@ -88,13 +88,30 @@ class ApiClient {
 
   /// Setup request/response interceptors
   ///
-  /// SECURITY: Passwords and tokens are NEVER logged
+  /// CRITICAL PATTERN: CSRF token auto-extraction from cookies
+  /// - No manual token storage in Hive
+  /// - No manual token extraction from response headers/body
+  /// - CSRF token comes from cookies ONLY
   void _setupInterceptors() {
+    // CSRF interceptor - MUST come before logging
+    // Automatically extracts CSRF token from cookies and adds to requests
     _dio.interceptors.add(
       InterceptorsWrapper(
-        onRequest: (options, handler) {
-          // Log request in debug mode (SECURITY: Never log passwords/tokens)
-          if (kDebugMode) {
+        onRequest: (options, handler) async {
+          final csrf = await _getCsrfToken();
+          if (csrf != null) {
+            options.headers['X-CSRFToken'] = csrf;
+          }
+          return handler.next(options);
+        },
+      ),
+    );
+
+    // Logging interceptor
+    if (kDebugMode) {
+      _dio.interceptors.add(
+        InterceptorsWrapper(
+          onRequest: (options, handler) {
             final path = options.path;
             final method = options.method;
             // Don't log request body for login/register (contains passwords)
@@ -103,25 +120,36 @@ class ApiClient {
             } else {
               print('[API] $method $path [BODY HIDDEN FOR SECURITY]');
             }
-          }
-          return handler.next(options);
-        },
-        onResponse: (response, handler) {
-          // Log response in debug mode (SECURITY: Never log sensitive data)
-          if (kDebugMode) {
+            return handler.next(options);
+          },
+          onResponse: (response, handler) {
             print('[API] ${response.statusCode} ${response.requestOptions.path}');
-          }
-          return handler.next(response);
-        },
-        onError: (error, handler) {
-          // Log errors (SECURITY: Never expose stack traces in production)
-          if (kDebugMode) {
+            return handler.next(response);
+          },
+          onError: (error, handler) {
             print('[API ERROR] ${error.requestOptions.path}: ${error.message}');
-          }
-          return handler.next(error);
-        },
-      ),
+            return handler.next(error);
+          },
+        ),
+      );
+    }
+  }
+
+  /// Extract CSRF token from cookies
+  ///
+  /// CRITICAL PATTERN: Token comes from cookies, NOT from Hive or response headers
+  /// This is the ONLY source of CSRF token in the entire application
+  Future<String?> _getCsrfToken() async {
+    final cookies = await _cookieJar.loadForRequest(
+      Uri.parse(_dio.options.baseUrl),
     );
+
+    final csrfCookie = cookies.firstWhere(
+      (c) => c.name.toLowerCase() == 'csrftoken',
+      orElse: () => Cookie('', ''),
+    );
+
+    return csrfCookie.value.isEmpty ? null : csrfCookie.value;
   }
 
   /// GET request
@@ -140,12 +168,15 @@ class ApiClient {
   }
 
   /// POST request
+  ///
+  /// Supports progress tracking for file uploads via onSendProgress
   Future<Response<T>> post<T>(
     String path, {
     dynamic data,
     Map<String, dynamic>? queryParameters,
     Options? options,
     CancelToken? cancelToken,
+    ProgressCallback? onSendProgress,
   }) async {
     return _dio.post<T>(
       path,
@@ -153,6 +184,7 @@ class ApiClient {
       queryParameters: queryParameters,
       options: options,
       cancelToken: cancelToken,
+      onSendProgress: onSendProgress,
     );
   }
 
@@ -190,17 +222,10 @@ class ApiClient {
     );
   }
 
-  /// Add custom header (e.g., XCSRF token)
-  void addHeader(String key, String value) {
-    _dio.options.headers[key] = value;
-  }
-
-  /// Remove header
-  void removeHeader(String key) {
-    _dio.options.headers.remove(key);
-  }
-
   /// Clear all cookies
+  ///
+  /// CRITICAL PATTERN: This clears both session AND CSRF token cookies
+  /// Used on logout to completely clear authentication state
   Future<void> clearCookies() async {
     await _cookieJar.deleteAll();
   }
