@@ -62,6 +62,7 @@ dependencies:
   # Responsive UI
   flutter_screenutil: ^5.9.3
   confetti: ^0.8.0
+  file_picker: ^10.3.7
 
 dev_dependencies:
   flutter_test:

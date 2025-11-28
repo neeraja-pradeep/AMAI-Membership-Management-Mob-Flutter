@@ -1,5 +1,6 @@
 import 'dart:io';
 
+import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -50,9 +51,9 @@ class _DocumentUploadScreenState extends ConsumerState<DocumentUploadScreen> {
     // Handle different state types
     if (state is RegistrationStateResumePrompt) {
       // User has existing registration, resume it
-      ref.read(registrationProvider.notifier).resumeRegistration(
-        state.existingRegistration,
-      );
+      ref
+          .read(registrationProvider.notifier)
+          .resumeRegistration(state.existingRegistration);
       // Reload after resuming
       Future.microtask(() => _loadExistingDocuments());
       return;
@@ -76,7 +77,7 @@ class _DocumentUploadScreenState extends ConsumerState<DocumentUploadScreen> {
   /// Pick file for document type
   Future<void> _pickFile(DocumentType type) async {
     // TODO: Uncomment when file_picker is added to pubspec.yaml
-    /*
+
     try {
       final result = await FilePicker.platform.pickFiles(
         type: FileType.custom,
@@ -119,7 +120,6 @@ class _DocumentUploadScreenState extends ConsumerState<DocumentUploadScreen> {
         );
       }
     }
-    */
 
     // MOCK: For now, show message that file picker is not implemented
     ScaffoldMessenger.of(context).showSnackBar(
@@ -158,7 +158,9 @@ class _DocumentUploadScreenState extends ConsumerState<DocumentUploadScreen> {
     final documentUploads = DocumentUploads(documents: documents);
 
     // Update registration state
-    ref.read(registrationProvider.notifier).updateDocumentUploads(documentUploads);
+    ref
+        .read(registrationProvider.notifier)
+        .updateDocumentUploads(documentUploads);
   }
 
   /// Check if all required documents are uploaded

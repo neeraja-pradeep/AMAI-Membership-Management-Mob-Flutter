@@ -79,9 +79,9 @@ class _PersonalDetailsScreenState extends ConsumerState<PersonalDetailsScreen> {
     // Handle different state types
     if (state is RegistrationStateResumePrompt) {
       // User has existing registration, resume it
-      ref.read(registrationProvider.notifier).resumeRegistration(
-        state.existingRegistration,
-      );
+      ref
+          .read(registrationProvider.notifier)
+          .resumeRegistration(state.existingRegistration);
       // Reload after resuming
       Future.microtask(() => _loadExistingData());
       return;
@@ -109,6 +109,7 @@ class _PersonalDetailsScreenState extends ConsumerState<PersonalDetailsScreen> {
   /// Auto-save progress on field changes
   void _autoSave() {
     // Save without validation - validation only happens on "Next" button
+
     _savePersonalDetails();
   }
 
