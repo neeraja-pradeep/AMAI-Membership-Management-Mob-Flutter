@@ -13,8 +13,8 @@ import '../utils/file_security_validator.dart';
 class RegistrationRepositoryImpl implements RegistrationRepository {
   final RegistrationApi _api;
 
-  // TODO: Set to false when backend is ready
-  static const bool _useMockMode = true;
+  // Backend is now ready - using real API
+  static const bool _useMockMode = false;
 
   const RegistrationRepositoryImpl({required RegistrationApi api}) : _api = api;
 

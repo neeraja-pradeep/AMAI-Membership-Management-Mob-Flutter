@@ -92,7 +92,7 @@ class RegistrationApi {
     return response.data['url'] as String;
   }
 
-  /// Submit complete registration
+  /// Submit complete registration (old endpoint - kept for compatibility)
   ///
   /// XCSRF token automatically included in request headers by ApiClient
   Future<String> submitRegistration({
@@ -105,6 +105,57 @@ class RegistrationApi {
 
     // Return registration ID
     return response.data['registration_id'] as String;
+  }
+
+  /// Submit membership registration (Form 1)
+  /// POST /api/membership/register/
+  /// Returns application ID
+  Future<Map<String, dynamic>> submitMembershipRegistration({
+    required Map<String, dynamic> data,
+  }) async {
+    final response = await _apiClient.post(
+      Endpoints.register,
+      data: data,
+    );
+
+    return response.data as Map<String, dynamic>;
+  }
+
+  /// Submit address (Form 2)
+  /// POST /api/accounts/addresses/
+  Future<Map<String, dynamic>> submitAddress({
+    required Map<String, dynamic> data,
+  }) async {
+    final response = await _apiClient.post(
+      Endpoints.addresses,
+      data: data,
+    );
+
+    return response.data as Map<String, dynamic>;
+  }
+
+  /// Upload application document (Form 3)
+  /// POST /api/membership/application-documents/
+  Future<Map<String, dynamic>> uploadApplicationDocument({
+    required File documentFile,
+    required String application,
+    required String documentType,
+  }) async {
+    final formData = FormData.fromMap({
+      'application': application,
+      'document_file': await MultipartFile.fromFile(
+        documentFile.path,
+        filename: documentFile.path.split('/').last,
+      ),
+      'document_type': documentType,
+    });
+
+    final response = await _apiClient.post(
+      Endpoints.applicationDocuments,
+      data: formData,
+    );
+
+    return response.data as Map<String, dynamic>;
   }
 
   /// Validate current session
