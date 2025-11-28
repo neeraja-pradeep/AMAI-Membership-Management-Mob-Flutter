@@ -94,10 +94,8 @@ class _PersonalDetailsScreenState extends ConsumerState<PersonalDetailsScreen> {
 
   /// Auto-save progress on field changes
   void _autoSave() {
-    // Only auto-save if form is valid
-    if (_formKey.currentState?.validate() ?? false) {
-      _savePersonalDetails();
-    }
+    // Save without validation - validation only happens on "Next" button
+    _savePersonalDetails();
   }
 
   /// Save personal details to registration state

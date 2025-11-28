@@ -109,9 +109,8 @@ class _AddressDetailsScreenState extends ConsumerState<AddressDetailsScreen> {
 
   /// Auto-save progress on field changes
   void _autoSave() {
-    if (_formKey.currentState?.validate() ?? false) {
-      _saveAddressDetails();
-    }
+    // Save without validation - validation only happens on "Next" button
+    _saveAddressDetails();
   }
 
   /// Save address details to registration state

@@ -34,25 +34,40 @@ class _PaymentScreenState extends ConsumerState<PaymentScreen> {
   // Mock payment amount (TODO: Fetch from backend)
   final double _paymentAmount = 1000.00;
   final String _currency = 'INR';
-  bool _validateAllSteps() {
+
+  /// Validate all steps with detailed error messages
+  String? _validateAllSteps() {
     final state = ref.read(registrationProvider);
 
     // Only RegistrationStateInProgress contains registration data
-    if (state is! RegistrationStateInProgress) return false;
+    if (state is! RegistrationStateInProgress) {
+      return 'Registration state is invalid. Please restart registration.';
+    }
 
     final registration = state.registration;
 
-    // Check all steps are complete
-    final personalComplete = registration.personalDetails?.isComplete ?? false;
-    final professionalComplete =
-        registration.professionalDetails?.isComplete ?? false;
-    final addressComplete = registration.addressDetails?.isComplete ?? false;
-    final documentsComplete = registration.documentUploads?.isComplete ?? false;
+    // Check each step individually and return specific error
+    if (registration.personalDetails == null ||
+        !registration.personalDetails!.isComplete) {
+      return 'Step 1: Personal Details is incomplete. Please go back and complete it.';
+    }
 
-    return personalComplete &&
-        professionalComplete &&
-        addressComplete &&
-        documentsComplete;
+    if (registration.professionalDetails == null ||
+        !registration.professionalDetails!.isComplete) {
+      return 'Step 2: Professional Details is incomplete. Please go back and complete it.';
+    }
+
+    if (registration.addressDetails == null ||
+        !registration.addressDetails!.isComplete) {
+      return 'Step 3: Address Details is incomplete. Please go back and complete it.';
+    }
+
+    if (registration.documentUploads == null ||
+        !registration.documentUploads!.isComplete) {
+      return 'Step 4: Document Uploads is incomplete. Please go back and upload required documents.';
+    }
+
+    return null; // All steps complete
   }
 
   /// Handle payment processing
@@ -67,11 +82,14 @@ class _PaymentScreenState extends ConsumerState<PaymentScreen> {
       return;
     }
 
-    if (!_validateAllSteps()) {
+    // Validate all steps with detailed error message
+    final validationError = _validateAllSteps();
+    if (validationError != null) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Please complete all previous steps first'),
+        SnackBar(
+          content: Text(validationError),
           backgroundColor: Colors.red,
+          duration: const Duration(seconds: 4), // Longer duration for detailed message
         ),
       );
       return;

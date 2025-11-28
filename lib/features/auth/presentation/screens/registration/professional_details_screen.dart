@@ -110,9 +110,8 @@ class _ProfessionalDetailsScreenState
 
   /// Auto-save progress on field changes
   void _autoSave() {
-    if (_formKey.currentState?.validate() ?? false) {
-      _saveProfessionalDetails();
-    }
+    // Save without validation - validation only happens on "Next" button
+    _saveProfessionalDetails();
   }
 
   /// Save professional details to registration state
