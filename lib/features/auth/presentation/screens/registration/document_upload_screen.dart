@@ -9,6 +9,7 @@ import 'package:myapp/features/auth/application/states/registration_state.dart';
 
 import '../../../../../app/router/app_router.dart';
 import '../../../application/notifiers/registration_state_notifier.dart';
+import '../../../application/states/registration_state.dart';
 import '../../../domain/entities/registration/document_upload.dart';
 import '../../components/step_progress_indicator.dart';
 
@@ -47,6 +48,7 @@ class _DocumentUploadScreenState extends ConsumerState<DocumentUploadScreen> {
   void _loadExistingDocuments() {
     final state = ref.read(registrationProvider);
 
+    // Only RegistrationStateInProgress contains registration data
     if (state is RegistrationStateInProgress) {
       final documentUploads = state.registration.documentUploads;
 
@@ -125,8 +127,25 @@ class _DocumentUploadScreenState extends ConsumerState<DocumentUploadScreen> {
 
   /// Save documents to registration state
   void _saveDocuments() {
-    // TODO: Implement document saving to registration state
-    // This would create DocumentUpload entities and save to DocumentUploads
+    // Convert uploaded files to DocumentUpload entities
+    final documents = _uploadedFiles.entries.map((entry) {
+      final type = entry.key;
+      final file = entry.value!;
+
+      return DocumentUpload(
+        type: type,
+        localFilePath: file.path,
+        fileName: file.path.split('/').last,
+        fileSizeBytes: file.lengthSync(),
+        uploadedAt: DateTime.now(),
+      );
+    }).toList();
+
+    // Create DocumentUploads entity
+    final documentUploads = DocumentUploads(documents: documents);
+
+    // Update registration state
+    ref.read(registrationProvider.notifier).updateDocumentUploads(documentUploads);
   }
 
   /// Check if all required documents are uploaded

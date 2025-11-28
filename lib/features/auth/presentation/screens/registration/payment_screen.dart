@@ -5,6 +5,8 @@ import 'package:myapp/features/auth/application/states/registration_state.dart';
 
 import '../../../../../app/router/app_router.dart';
 import '../../../application/notifiers/registration_state_notifier.dart';
+import '../../../application/states/registration_state.dart';
+import '../../../domain/entities/registration/practitioner_registration.dart';
 import '../../components/step_progress_indicator.dart';
 
 /// Payment Screen (Step 5 - Final)
@@ -80,35 +82,68 @@ class _PaymentScreenState extends ConsumerState<PaymentScreen> {
       _isProcessing = true;
     });
 
-    // TODO: Implement actual payment gateway integration
-    // For now, simulate payment processing
-    await Future.delayed(const Duration(seconds: 2));
+    try {
+      // TODO: Implement actual payment gateway integration
+      // For now, simulate payment processing with mock session ID
+      await Future.delayed(const Duration(seconds: 2));
 
-    // TODO: Update payment details in registration state
-    // final paymentDetails = PaymentDetails(
-    //   amount: _paymentAmount,
-    //   currency: _currency,
-    //   status: PaymentStatus.completed,
-    //   transactionId: 'TXN_${DateTime.now().millisecondsSinceEpoch}',
-    //   paymentMethod: _selectedPaymentMethod,
-    //   paymentDate: DateTime.now(),
-    // );
+      // Mock payment session ID (in real implementation, this comes from payment gateway)
+      final sessionId = 'SESSION_${DateTime.now().millisecondsSinceEpoch}';
 
-    // Submit registration to backend
-    // await ref.read(registrationProvider.notifier).submitRegistration();
-
-    setState(() {
-      _isProcessing = false;
-    });
-
-    if (mounted) {
-      // Navigate to success screen
-      Navigator.pushNamedAndRemoveUntil(
-        context,
-        AppRouter.registrationSuccess,
-        (route) => false, // Remove all previous routes
-        arguments: 'REG_${DateTime.now().millisecondsSinceEpoch}',
+      // Create payment details with completed status
+      final paymentDetails = PaymentDetails(
+        sessionId: sessionId,
+        amount: _paymentAmount,
+        currency: _currency,
+        status: PaymentStatus.completed,
+        transactionId: 'TXN_${DateTime.now().millisecondsSinceEpoch}',
+        paymentMethod: _selectedPaymentMethod,
+        completedAt: DateTime.now(),
       );
+
+      // Update payment details in registration state
+      ref.read(registrationProvider.notifier).updatePaymentDetails(paymentDetails);
+
+      // Submit registration to backend
+      await ref.read(registrationProvider.notifier).submitRegistration();
+
+      // Listen to registration state for success/error
+      final finalState = ref.read(registrationProvider);
+
+      if (mounted) {
+        if (finalState is RegistrationStateSuccess) {
+          // Navigate to success screen with registration ID
+          Navigator.pushNamedAndRemoveUntil(
+            context,
+            AppRouter.registrationSuccess,
+            (route) => false, // Remove all previous routes
+            arguments: finalState.registrationId,
+          );
+        } else if (finalState is RegistrationStateError) {
+          // Show error message
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(finalState.message),
+              backgroundColor: Colors.red,
+            ),
+          );
+        }
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Payment failed: $e'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    } finally {
+      if (mounted) {
+        setState(() {
+          _isProcessing = false;
+        });
+      }
     }
   }
 

@@ -644,18 +644,20 @@ class RegistrationStateNotifier extends StateNotifier<RegistrationState> {
   /// Convert PaymentDetails entity to JSON
   Map<String, dynamic> _paymentToJson(PaymentDetails details) {
     return {
+      'sessionId': details.sessionId,
       'amount': details.amount,
       'currency': details.currency,
       'status': details.status.name,
       'transactionId': details.transactionId,
       'paymentMethod': details.paymentMethod,
-      'paymentDate': details.paymentDate?.toIso8601String(),
+      'completedAt': details.completedAt?.toIso8601String(),
     };
   }
 
   /// Convert JSON to PaymentDetails entity
   PaymentDetails _paymentFromJson(Map<String, dynamic> json) {
     return PaymentDetails(
+      sessionId: json['sessionId'] as String,
       amount: (json['amount'] as num).toDouble(),
       currency: json['currency'] as String? ?? 'INR',
       status: PaymentStatus.values.firstWhere(
@@ -664,8 +666,8 @@ class RegistrationStateNotifier extends StateNotifier<RegistrationState> {
       ),
       transactionId: json['transactionId'] as String?,
       paymentMethod: json['paymentMethod'] as String?,
-      paymentDate: json['paymentDate'] != null
-          ? DateTime.parse(json['paymentDate'] as String)
+      completedAt: json['completedAt'] != null
+          ? DateTime.parse(json['completedAt'] as String)
           : null,
     );
   }
