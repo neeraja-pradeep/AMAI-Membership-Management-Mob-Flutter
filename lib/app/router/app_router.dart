@@ -1,5 +1,12 @@
 import 'package:flutter/material.dart';
 
+import '../../features/auth/presentation/screens/registration/personal_details_screen.dart';
+import '../../features/auth/presentation/screens/registration/professional_details_screen.dart';
+import '../../features/auth/presentation/screens/registration/address_details_screen.dart';
+import '../../features/auth/presentation/screens/registration/document_upload_screen.dart';
+import '../../features/auth/presentation/screens/registration/payment_screen.dart';
+import '../../features/auth/presentation/screens/registration/registration_success_screen.dart';
+
 /// Application router with all route definitions
 ///
 /// Handles navigation for all features including auth and registration
@@ -115,44 +122,24 @@ class AppRouter {
 
       // Registration routes
       case registrationPersonal:
-        // TODO: Import and return PersonalDetailsScreen
-        return _buildRoute(
-          const Scaffold(body: Center(child: Text('Personal Details'))),
-        );
+        return _buildRoute(const PersonalDetailsScreen());
 
       case registrationProfessional:
-        // TODO: Import and return ProfessionalDetailsScreen
-        return _buildRoute(
-          const Scaffold(body: Center(child: Text('Professional Details'))),
-        );
+        return _buildRoute(const ProfessionalDetailsScreen());
 
       case registrationAddress:
-        // TODO: Import and return AddressDetailsScreen
-        return _buildRoute(
-          const Scaffold(body: Center(child: Text('Address Details'))),
-        );
+        return _buildRoute(const AddressDetailsScreen());
 
       case registrationDocuments:
-        // TODO: Import and return DocumentUploadScreen
-        return _buildRoute(
-          const Scaffold(body: Center(child: Text('Document Uploads'))),
-        );
+        return _buildRoute(const DocumentUploadScreen());
 
       case registrationPayment:
-        // TODO: Import and return PaymentScreen
-        return _buildRoute(
-          const Scaffold(body: Center(child: Text('Payment'))),
-        );
+        return _buildRoute(const PaymentScreen());
 
       case registrationSuccess:
         final registrationId = settings.arguments as String?;
-        // TODO: Import and return RegistrationSuccessScreen
         return _buildRoute(
-          Scaffold(
-            body: Center(
-              child: Text('Registration Success\nID: $registrationId'),
-            ),
-          ),
+          RegistrationSuccessScreen(registrationId: registrationId),
         );
 
       // Dashboard route
