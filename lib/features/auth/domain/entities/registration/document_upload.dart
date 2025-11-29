@@ -15,6 +15,13 @@ enum DocumentType {
 /// Document upload entity for Step 4
 ///
 /// Represents a single uploaded document
+///
+/// API Endpoint: POST https://amai.nexogms.com/api/membership/application-documents/
+///
+/// Required fields:
+/// - application (Application ID from Step 2 registration)
+/// - document_file (The file to upload - multipart/form-data)
+/// - document_type (Type of document being uploaded)
 class DocumentUpload {
   final DocumentType type;
   final String localFilePath;

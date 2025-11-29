@@ -74,7 +74,7 @@ class PractitionerRegistration {
   // Application ID from backend (returned after Step 2)
   final String? applicationId;
 
-  // CURRENT: 4-step registration data (Personal → Professional → Address → Documents)
+  // CURRENT: 5-step registration data (Personal → Professional → Address → Documents → Payment)
   final PersonalDetails? personalDetails;
   final ProfessionalDetails? professionalDetails;
 
@@ -118,6 +118,8 @@ class PractitionerRegistration {
         return addressDetails?.isComplete ?? false;
       case RegistrationStep.documentUploads:
         return documentUploads?.isComplete ?? false;
+      case RegistrationStep.payment:
+        return paymentDetails?.isComplete ?? false;
       case RegistrationStep.membershipDetails:
         // DEPRECATED: Old flow
         return membershipDetails?.isComplete ?? false;
@@ -170,17 +172,31 @@ class PractitionerRegistration {
         // Old flow compatibility
         return (membershipDetails?.isComplete ?? false) &&
             (addressDetails?.isComplete ?? false);
+
+      case RegistrationStep.payment:
+        // Must have valid personal + professional + address + documents
+        if (personalDetails != null && professionalDetails != null) {
+          return (personalDetails?.isComplete ?? false) &&
+              (professionalDetails?.isComplete ?? false) &&
+              (addressDetails?.isComplete ?? false) &&
+              (documentUploads?.isComplete ?? false);
+        }
+        // Old flow compatibility
+        return (membershipDetails?.isComplete ?? false) &&
+            (addressDetails?.isComplete ?? false) &&
+            (documentUploads?.isComplete ?? false);
     }
   }
 
-  /// Check if entire registration is complete (4 steps for new flow, 3 for old)
+  /// Check if entire registration is complete (5 steps for new flow, 3 for old)
   bool get isComplete {
-    // New flow: Personal → Professional → Address → Documents
+    // New flow: Personal → Professional → Address → Documents → Payment
     if (personalDetails != null && professionalDetails != null) {
       return personalDetails != null &&
           professionalDetails != null &&
           addressDetails != null &&
-          documentUploads != null;
+          documentUploads != null &&
+          paymentDetails != null;
     }
     // Old flow: Membership → Address → Documents
     return membershipDetails != null &&
@@ -194,11 +210,12 @@ class PractitionerRegistration {
 
     // Count completed steps based on flow
     if (personalDetails != null || professionalDetails != null) {
-      // New flow (4 steps)
+      // New flow (5 steps)
       if (personalDetails?.isComplete == true) completedSteps++;
       if (professionalDetails?.isComplete == true) completedSteps++;
       if (addressDetails?.isComplete == true) completedSteps++;
       if (documentUploads?.isComplete == true) completedSteps++;
+      if (paymentDetails?.isComplete == true) completedSteps++;
     } else {
       // Old flow (3 steps)
       if (membershipDetails?.isComplete == true) completedSteps++;

@@ -1,7 +1,18 @@
-/// Address details entity for Step 2
+/// Address details entity for Step 3
 ///
 /// Contains user's address information
-/// Matches backend POST /api/accounts/addresses/ requirements
+///
+/// API Endpoint: POST https://amai.nexogms.com/api/accounts/addresses/
+///
+/// Required fields:
+/// - address_line1 (House No. / Building Name)
+/// - address_line2 (Street / Locality / Area)
+/// - city (Post Office)
+/// - postal_code (Post Code)
+/// - country (Country ID)
+/// - state (State ID)
+/// - district (District ID)
+/// - is_primary (Boolean - default true)
 ///
 /// REQUIREMENT: Dependent dropdowns - validate parent selection first
 /// - Country → State → District hierarchy

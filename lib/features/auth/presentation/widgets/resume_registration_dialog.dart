@@ -153,6 +153,7 @@ class ResumeRegistrationDialog extends ConsumerWidget {
       RegistrationStep.addressDetails => AppRouter.registrationAddress,
       RegistrationStep.documentUploads => AppRouter.registrationDocuments,
       RegistrationStep.payment => AppRouter.registrationPayment,
+      RegistrationStep.membershipDetails => AppRouter.registrationMembership,
     };
 
     Navigator.pushNamed(context, route);
