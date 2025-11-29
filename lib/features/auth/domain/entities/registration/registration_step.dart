@@ -1,11 +1,15 @@
 /// Registration step enumeration
 ///
-/// Represents the 3-step practitioner registration flow
-/// Matches backend API: Membership → Address → Documents
+/// Represents the 4-step practitioner registration flow
+/// Personal → Professional (API call) → Address → Documents
 enum RegistrationStep {
-  membershipDetails(1, 'Membership Details'),
-  addressDetails(2, 'Address Details'),
-  documentUploads(3, 'Document Uploads');
+  personalDetails(1, 'Personal Details'),
+  professionalDetails(2, 'Professional Details'),
+  addressDetails(3, 'Address Details'),
+  documentUploads(4, 'Document Uploads'),
+
+  // DEPRECATED: Old 3-step flow (kept for backward compatibility)
+  membershipDetails(1, 'Membership Details');
 
   const RegistrationStep(this.stepNumber, this.displayName);
 
@@ -13,7 +17,7 @@ enum RegistrationStep {
   final String displayName;
 
   /// Check if this is the first step
-  bool get isFirst => this == RegistrationStep.membershipDetails;
+  bool get isFirst => this == RegistrationStep.personalDetails;
 
   /// Check if this is the last step
   bool get isLast => this == RegistrationStep.documentUploads;

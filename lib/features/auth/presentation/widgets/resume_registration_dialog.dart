@@ -66,7 +66,7 @@ class ResumeRegistrationDialog extends ConsumerWidget {
 
             // Current step
             Text(
-              'Step ${currentStep.stepNumber} of ${currentStep.stepNumber}: ${currentStep.displayName}',
+              'Step ${currentStep.stepNumber} of ${RegistrationStep.totalSteps}: ${currentStep.displayName}',
               style: TextStyle(fontSize: 14.sp, color: Colors.grey[600]),
             ),
             SizedBox(height: 16.h),

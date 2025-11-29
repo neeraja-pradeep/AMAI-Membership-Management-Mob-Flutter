@@ -71,15 +71,15 @@ class PractitionerRegistration {
   final DateTime createdAt;
   final DateTime lastUpdatedAt;
 
-  // Application ID from backend (Step 1)
+  // Application ID from backend (returned after Step 2)
   final String? applicationId;
 
-  // NEW: 3-step registration data
-  final MembershipDetails? membershipDetails;
-
-  // DEPRECATED: Old 5-step fields (kept for backward compatibility)
+  // CURRENT: 4-step registration data (Personal → Professional → Address → Documents)
   final PersonalDetails? personalDetails;
   final ProfessionalDetails? professionalDetails;
+
+  // DEPRECATED: Old 3-step flow (Membership → Address → Documents)
+  final MembershipDetails? membershipDetails;
 
   // Step data (nullable until completed)
   final AddressDetails? addressDetails;
@@ -88,13 +88,13 @@ class PractitionerRegistration {
 
   const PractitionerRegistration({
     required this.registrationId,
-    this.currentStep = RegistrationStep.membershipDetails,
+    this.currentStep = RegistrationStep.personalDetails,
     required this.createdAt,
     required this.lastUpdatedAt,
     this.applicationId,
-    this.membershipDetails,
     this.personalDetails,
     this.professionalDetails,
+    this.membershipDetails,
     this.addressDetails,
     this.documentUploads,
     this.paymentDetails,
@@ -110,12 +110,17 @@ class PractitionerRegistration {
   /// Check if current step is complete
   bool isStepComplete(RegistrationStep step) {
     switch (step) {
-      case RegistrationStep.membershipDetails:
-        return membershipDetails?.isComplete ?? false;
+      case RegistrationStep.personalDetails:
+        return personalDetails?.isComplete ?? false;
+      case RegistrationStep.professionalDetails:
+        return professionalDetails?.isComplete ?? false;
       case RegistrationStep.addressDetails:
         return addressDetails?.isComplete ?? false;
       case RegistrationStep.documentUploads:
         return documentUploads?.isComplete ?? false;
+      case RegistrationStep.membershipDetails:
+        // DEPRECATED: Old flow
+        return membershipDetails?.isComplete ?? false;
     }
   }
 
@@ -137,23 +142,47 @@ class PractitionerRegistration {
   /// REQUIREMENT: Multi-step validation - all previous screens must remain valid
   bool arePreviousStepsValid() {
     switch (currentStep) {
+      case RegistrationStep.personalDetails:
       case RegistrationStep.membershipDetails:
         // No previous steps
         return true;
 
+      case RegistrationStep.professionalDetails:
+        // Must have valid personal details
+        return personalDetails?.isComplete ?? false;
+
       case RegistrationStep.addressDetails:
-        // Must have valid membership details
+        // Must have valid personal + professional details OR membership details (old flow)
+        if (personalDetails != null && professionalDetails != null) {
+          return (personalDetails?.isComplete ?? false) &&
+              (professionalDetails?.isComplete ?? false);
+        }
+        // Old flow compatibility
         return membershipDetails?.isComplete ?? false;
 
       case RegistrationStep.documentUploads:
-        // Must have valid membership + address details
+        // Must have valid personal + professional + address details
+        if (personalDetails != null && professionalDetails != null) {
+          return (personalDetails?.isComplete ?? false) &&
+              (professionalDetails?.isComplete ?? false) &&
+              (addressDetails?.isComplete ?? false);
+        }
+        // Old flow compatibility
         return (membershipDetails?.isComplete ?? false) &&
             (addressDetails?.isComplete ?? false);
     }
   }
 
-  /// Check if entire registration is complete (3 steps)
+  /// Check if entire registration is complete (4 steps for new flow, 3 for old)
   bool get isComplete {
+    // New flow: Personal → Professional → Address → Documents
+    if (personalDetails != null && professionalDetails != null) {
+      return personalDetails != null &&
+          professionalDetails != null &&
+          addressDetails != null &&
+          documentUploads != null;
+    }
+    // Old flow: Membership → Address → Documents
     return membershipDetails != null &&
         addressDetails != null &&
         documentUploads != null;
@@ -162,9 +191,20 @@ class PractitionerRegistration {
   /// Get completion percentage (0.0 to 1.0)
   double get completionPercentage {
     int completedSteps = 0;
-    if (membershipDetails?.isComplete == true) completedSteps++;
-    if (addressDetails?.isComplete == true) completedSteps++;
-    if (documentUploads?.isComplete == true) completedSteps++;
+
+    // Count completed steps based on flow
+    if (personalDetails != null || professionalDetails != null) {
+      // New flow (4 steps)
+      if (personalDetails?.isComplete == true) completedSteps++;
+      if (professionalDetails?.isComplete == true) completedSteps++;
+      if (addressDetails?.isComplete == true) completedSteps++;
+      if (documentUploads?.isComplete == true) completedSteps++;
+    } else {
+      // Old flow (3 steps)
+      if (membershipDetails?.isComplete == true) completedSteps++;
+      if (addressDetails?.isComplete == true) completedSteps++;
+      if (documentUploads?.isComplete == true) completedSteps++;
+    }
 
     return completedSteps / RegistrationStep.totalSteps;
   }
@@ -175,9 +215,9 @@ class PractitionerRegistration {
     DateTime? createdAt,
     DateTime? lastUpdatedAt,
     String? applicationId,
-    MembershipDetails? membershipDetails,
     PersonalDetails? personalDetails,
     ProfessionalDetails? professionalDetails,
+    MembershipDetails? membershipDetails,
     AddressDetails? addressDetails,
     DocumentUploads? documentUploads,
     PaymentDetails? paymentDetails,
@@ -188,9 +228,9 @@ class PractitionerRegistration {
       createdAt: createdAt ?? this.createdAt,
       lastUpdatedAt: lastUpdatedAt ?? this.lastUpdatedAt,
       applicationId: applicationId ?? this.applicationId,
-      membershipDetails: membershipDetails ?? this.membershipDetails,
       personalDetails: personalDetails ?? this.personalDetails,
       professionalDetails: professionalDetails ?? this.professionalDetails,
+      membershipDetails: membershipDetails ?? this.membershipDetails,
       addressDetails: addressDetails ?? this.addressDetails,
       documentUploads: documentUploads ?? this.documentUploads,
       paymentDetails: paymentDetails ?? this.paymentDetails,

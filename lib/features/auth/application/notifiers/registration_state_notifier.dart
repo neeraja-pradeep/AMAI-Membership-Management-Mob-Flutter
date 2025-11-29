@@ -559,9 +559,13 @@ class RegistrationStateNotifier extends StateNotifier<RegistrationState> {
       'firstName': details.firstName,
       'lastName': details.lastName,
       'email': details.email,
+      'password': details.password,
       'phone': details.phone,
+      'waPhone': details.waPhone,
       'dateOfBirth': details.dateOfBirth.toIso8601String(),
       'gender': details.gender,
+      'bloodGroup': details.bloodGroup,
+      'membershipType': details.membershipType,
       'profileImagePath': details.profileImagePath,
     };
   }
@@ -572,9 +576,13 @@ class RegistrationStateNotifier extends StateNotifier<RegistrationState> {
       firstName: json['firstName'] as String,
       lastName: json['lastName'] as String,
       email: json['email'] as String,
+      password: json['password'] as String,
       phone: json['phone'] as String,
+      waPhone: json['waPhone'] as String,
       dateOfBirth: DateTime.parse(json['dateOfBirth'] as String),
       gender: json['gender'] as String,
+      bloodGroup: json['bloodGroup'] as String,
+      membershipType: json['membershipType'] as String,
       profileImagePath: json['profileImagePath'] as String?,
     );
   }
@@ -582,32 +590,26 @@ class RegistrationStateNotifier extends StateNotifier<RegistrationState> {
   /// Convert ProfessionalDetails entity to JSON
   Map<String, dynamic> _professionalToJson(ProfessionalDetails details) {
     return {
-      'medicalCouncilRegistrationNumber':
-          details.medicalCouncilRegistrationNumber,
-      'medicalCouncil': details.medicalCouncil,
-      'registrationDate': details.registrationDate.toIso8601String(),
-      'qualification': details.qualification,
-      'specialization': details.specialization,
-      'instituteName': details.instituteName,
-      'yearsOfExperience': details.yearsOfExperience,
-      'currentWorkplace': details.currentWorkplace,
-      'designation': details.designation,
+      'medicalCouncilState': details.medicalCouncilState,
+      'medicalCouncilNo': details.medicalCouncilNo,
+      'centralCouncilNo': details.centralCouncilNo,
+      'ugCollege': details.ugCollege,
+      'zoneId': details.zoneId,
+      'professionalDetails1': details.professionalDetails1,
+      'professionalDetails2': details.professionalDetails2,
     };
   }
 
   /// Convert JSON to ProfessionalDetails entity
   ProfessionalDetails _professionalFromJson(Map<String, dynamic> json) {
     return ProfessionalDetails(
-      medicalCouncilRegistrationNumber:
-          json['medicalCouncilRegistrationNumber'] as String,
-      medicalCouncil: json['medicalCouncil'] as String,
-      registrationDate: DateTime.parse(json['registrationDate'] as String),
-      qualification: json['qualification'] as String,
-      specialization: json['specialization'] as String?,
-      instituteName: json['instituteName'] as String?,
-      yearsOfExperience: json['yearsOfExperience'] as int,
-      currentWorkplace: json['currentWorkplace'] as String?,
-      designation: json['designation'] as String?,
+      medicalCouncilState: json['medicalCouncilState'] as String,
+      medicalCouncilNo: json['medicalCouncilNo'] as String,
+      centralCouncilNo: json['centralCouncilNo'] as String,
+      ugCollege: json['ugCollege'] as String,
+      zoneId: json['zoneId'] as String,
+      professionalDetails1: json['professionalDetails1'] as String,
+      professionalDetails2: json['professionalDetails2'] as String,
     );
   }
 
