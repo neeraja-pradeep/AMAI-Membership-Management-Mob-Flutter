@@ -68,6 +68,16 @@ abstract class RegistrationRepository {
   /// Throws [RegistrationError] on network failure
   Future<bool> checkDuplicatePhone({required String phone});
 
+  /// Submit membership registration (NEW: Step 1)
+  ///
+  /// POST /api/membership/register/
+  /// Submits combined Personal + Professional data
+  /// Returns backend response with application ID
+  /// Throws [RegistrationError] on failure
+  Future<Map<String, dynamic>> submitMembershipRegistration(
+    Map<String, dynamic> membershipData,
+  );
+
   /// Verify payment status
   ///
   /// Returns payment details or throws [RegistrationError]

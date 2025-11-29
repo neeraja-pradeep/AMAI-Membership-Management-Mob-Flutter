@@ -247,6 +247,14 @@ class RegistrationStateNotifier extends StateNotifier<RegistrationState> {
     state = current.copyWith(registration: updated, hasUnsavedChanges: true);
   }
 
+  /// Submit membership registration to backend (NEW: Combined Personal + Professional)
+  /// Calls POST /api/membership/register/ with all required data
+  Future<Map<String, dynamic>> submitMembershipRegistration(
+    Map<String, dynamic> membershipData,
+  ) async {
+    return await _repository.submitMembershipRegistration(membershipData);
+  }
+
   /// Go to next step (with validation and auto-save)
   ///
   /// SCENARIO 1: User clicks "Next"

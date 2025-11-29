@@ -13,18 +13,18 @@ import '../../components/dropdown_field.dart';
 import '../../components/step_progress_indicator.dart';
 import '../../components/text_input_field.dart';
 
-/// Professional Details Screen (Step 2)
+/// Professional Details Screen (Step 2 of 2)
 ///
 /// Collects practitioner's professional credentials:
-/// - Medical Council Registration Number
-/// - Medical Council
-/// - Registration Date
-/// - Qualification
-/// - Specialization (optional)
-/// - Institute Name (optional)
-/// - Years of Experience
-/// - Current Workplace (optional)
-/// - Designation (optional)
+/// - Medical Council State
+/// - Medical Council Number
+/// - Central Council Number
+/// - UG College
+/// - Zone ID
+/// - Professional Details 1 & 2
+///
+/// CRITICAL: When "Next" is clicked, combines PersonalDetails + ProfessionalDetails
+/// and calls POST /api/membership/register/ to create the account
 class ProfessionalDetailsScreen extends ConsumerStatefulWidget {
   const ProfessionalDetailsScreen({super.key});
 
@@ -38,31 +38,28 @@ class _ProfessionalDetailsScreenState
   final _formKey = GlobalKey<FormState>();
 
   // Controllers
-  late final TextEditingController _regNumberController;
-  late final TextEditingController _regDateController;
-  late final TextEditingController _specializationController;
-  late final TextEditingController _instituteController;
-  late final TextEditingController _experienceController;
-  late final TextEditingController _workplaceController;
-  late final TextEditingController _designationController;
+  late final TextEditingController _medicalCouncilNoController;
+  late final TextEditingController _centralCouncilNoController;
+  late final TextEditingController _ugCollegeController;
+  late final TextEditingController _zoneIdController;
+  late final TextEditingController _professionalDetails1Controller;
+  late final TextEditingController _professionalDetails2Controller;
 
   // State
-  String? _selectedCouncil;
-  String? _selectedQualification;
-  DateTime? _registrationDate;
+  String? _selectedMedicalCouncilState;
+  bool _isSubmitting = false;
 
   @override
   void initState() {
     super.initState();
 
     // Initialize controllers
-    _regNumberController = TextEditingController();
-    _regDateController = TextEditingController();
-    _specializationController = TextEditingController();
-    _instituteController = TextEditingController();
-    _experienceController = TextEditingController(text: '0');
-    _workplaceController = TextEditingController();
-    _designationController = TextEditingController();
+    _medicalCouncilNoController = TextEditingController();
+    _centralCouncilNoController = TextEditingController();
+    _ugCollegeController = TextEditingController();
+    _zoneIdController = TextEditingController();
+    _professionalDetails1Controller = TextEditingController();
+    _professionalDetails2Controller = TextEditingController();
 
     // Load existing data if available
     WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -72,13 +69,12 @@ class _ProfessionalDetailsScreenState
 
   @override
   void dispose() {
-    _regNumberController.dispose();
-    _regDateController.dispose();
-    _specializationController.dispose();
-    _instituteController.dispose();
-    _experienceController.dispose();
-    _workplaceController.dispose();
-    _designationController.dispose();
+    _medicalCouncilNoController.dispose();
+    _centralCouncilNoController.dispose();
+    _ugCollegeController.dispose();
+    _zoneIdController.dispose();
+    _professionalDetails1Controller.dispose();
+    _professionalDetails2Controller.dispose();
     super.dispose();
   }
 
@@ -105,20 +101,15 @@ class _ProfessionalDetailsScreenState
     final professionalDetails = state.registration.professionalDetails;
 
     if (professionalDetails != null) {
-      _regNumberController.text =
-          professionalDetails.medicalCouncilRegistrationNumber;
-      _selectedCouncil = professionalDetails.medicalCouncil;
-      _registrationDate = professionalDetails.registrationDate;
-      _regDateController.text = DateFormat(
-        'yyyy-MM-dd',
-      ).format(_registrationDate!);
-      _selectedQualification = professionalDetails.qualification;
-      _specializationController.text = professionalDetails.specialization ?? '';
-      _instituteController.text = professionalDetails.instituteName ?? '';
-      _experienceController.text = professionalDetails.yearsOfExperience
-          .toString();
-      _workplaceController.text = professionalDetails.currentWorkplace ?? '';
-      _designationController.text = professionalDetails.designation ?? '';
+      setState(() {
+        _selectedMedicalCouncilState = professionalDetails.medicalCouncilState;
+      });
+      _medicalCouncilNoController.text = professionalDetails.medicalCouncilNo;
+      _centralCouncilNoController.text = professionalDetails.centralCouncilNo;
+      _ugCollegeController.text = professionalDetails.ugCollege;
+      _zoneIdController.text = professionalDetails.zoneId;
+      _professionalDetails1Controller.text = professionalDetails.professionalDetails1;
+      _professionalDetails2Controller.text = professionalDetails.professionalDetails2;
     }
   }
 
@@ -131,23 +122,13 @@ class _ProfessionalDetailsScreenState
   /// Save professional details to registration state
   void _saveProfessionalDetails() {
     final professionalDetails = ProfessionalDetails(
-      medicalCouncilRegistrationNumber: _regNumberController.text.trim(),
-      medicalCouncil: _selectedCouncil ?? '',
-      registrationDate: _registrationDate ?? DateTime.now(),
-      qualification: _selectedQualification ?? '',
-      specialization: _specializationController.text.trim().isNotEmpty
-          ? _specializationController.text.trim()
-          : null,
-      instituteName: _instituteController.text.trim().isNotEmpty
-          ? _instituteController.text.trim()
-          : null,
-      yearsOfExperience: int.tryParse(_experienceController.text) ?? 0,
-      currentWorkplace: _workplaceController.text.trim().isNotEmpty
-          ? _workplaceController.text.trim()
-          : null,
-      designation: _designationController.text.trim().isNotEmpty
-          ? _designationController.text.trim()
-          : null,
+      medicalCouncilState: _selectedMedicalCouncilState ?? '',
+      medicalCouncilNo: _medicalCouncilNoController.text.trim(),
+      centralCouncilNo: _centralCouncilNoController.text.trim(),
+      ugCollege: _ugCollegeController.text.trim(),
+      zoneId: _zoneIdController.text.trim(),
+      professionalDetails1: _professionalDetails1Controller.text.trim(),
+      professionalDetails2: _professionalDetails2Controller.text.trim(),
     );
 
     ref
@@ -155,18 +136,91 @@ class _ProfessionalDetailsScreenState
         .updateProfessionalDetails(professionalDetails);
   }
 
-  /// Handle next button press
+  /// Handle next button press - calls backend API with combined data
   Future<void> _handleNext() async {
     if (_formKey.currentState?.validate() ?? false) {
-      // Save current step
-      _saveProfessionalDetails();
+      setState(() {
+        _isSubmitting = true;
+      });
 
-      // Auto-save to Hive
-      await ref.read(registrationProvider.notifier).autoSaveProgress();
+      try {
+        // Save current step
+        _saveProfessionalDetails();
 
-      // Navigate to next step
-      if (mounted) {
-        Navigator.pushNamed(context, AppRouter.registrationAddress);
+        // Get current state
+        final state = ref.read(registrationProvider);
+        if (state is! RegistrationStateInProgress) {
+          throw Exception('Registration not in progress');
+        }
+
+        // Get personal details from state
+        final personalDetails = state.registration.personalDetails;
+        if (personalDetails == null) {
+          throw Exception('Personal details not found. Please go back and fill personal information.');
+        }
+
+        // Get professional details from state
+        final professionalDetails = state.registration.professionalDetails;
+        if (professionalDetails == null) {
+          throw Exception('Professional details not saved');
+        }
+
+        // Combine personal + professional data into MembershipDetails
+        final membershipData = {
+          'membership_type': personalDetails.membershipType,
+          'first_name': personalDetails.firstName,
+          'email': personalDetails.email,
+          'password': personalDetails.password,
+          'phone': personalDetails.phone,
+          'wa_phone': personalDetails.waPhone,
+          'date_of_birth': '${personalDetails.dateOfBirth.year}-${personalDetails.dateOfBirth.month.toString().padLeft(2, '0')}-${personalDetails.dateOfBirth.day.toString().padLeft(2, '0')}',
+          'gender': personalDetails.gender,
+          'blood_group': personalDetails.bloodGroup,
+          'medical_council_state': professionalDetails.medicalCouncilState,
+          'medical_council_no': professionalDetails.medicalCouncilNo,
+          'central_council_no': professionalDetails.centralCouncilNo,
+          'ug_college': professionalDetails.ugCollege,
+          'zone_id': professionalDetails.zoneId,
+          'professional_details1': professionalDetails.professionalDetails1,
+          'professional_details2': professionalDetails.professionalDetails2,
+        };
+
+        // Call registration API
+        final response = await ref
+            .read(registrationProvider.notifier)
+            .submitMembershipRegistration(membershipData);
+
+        // Auto-save to Hive
+        await ref.read(registrationProvider.notifier).autoSaveProgress();
+
+        // Navigate to next step (Address) on success
+        if (mounted) {
+          // Show success message
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('Registration successful! Please continue with address details.'),
+              backgroundColor: Colors.green,
+            ),
+          );
+
+          Navigator.pushNamed(context, AppRouter.registrationAddress);
+        }
+      } catch (e) {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text('Registration failed: ${e.toString()}'),
+              backgroundColor: Colors.red,
+              duration: const Duration(seconds: 5),
+            ),
+          );
+        }
+      } finally {
+        if (mounted) {
+          setState(() {
+            _isSubmitting = false;
+          });
+        }
       }
     }
   }
@@ -201,7 +255,7 @@ class _ProfessionalDetailsScreenState
               // Progress indicator
               const StepProgressIndicator(
                 currentStep: 2,
-                totalSteps: 5,
+                totalSteps: 2,
                 stepTitle: 'Professional Details',
               ),
 
@@ -236,15 +290,44 @@ class _ProfessionalDetailsScreenState
 
                         SizedBox(height: 32.h),
 
-                        // Medical Council Registration Number
+                        // Medical Council State
+                        DropdownField<String>(
+                          labelText: 'Medical Council State',
+                          prefixIcon: Icons.location_city_outlined,
+                          value: _selectedMedicalCouncilState,
+                          items: const [
+                            DropdownMenuItem(value: 'Kerala', child: Text('Kerala')),
+                            DropdownMenuItem(value: 'Karnataka', child: Text('Karnataka')),
+                            DropdownMenuItem(value: 'Tamil Nadu', child: Text('Tamil Nadu')),
+                            DropdownMenuItem(value: 'Maharashtra', child: Text('Maharashtra')),
+                            DropdownMenuItem(value: 'Delhi', child: Text('Delhi')),
+                            DropdownMenuItem(value: 'Other', child: Text('Other')),
+                          ],
+                          onChanged: (value) {
+                            setState(() {
+                              _selectedMedicalCouncilState = value;
+                            });
+                            _autoSave();
+                          },
+                          validator: (value) {
+                            if (value == null || value.isEmpty) {
+                              return 'Medical council state is required';
+                            }
+                            return null;
+                          },
+                        ),
+
+                        SizedBox(height: 16.h),
+
+                        // Medical Council Number
                         TextInputField(
-                          controller: _regNumberController,
-                          labelText: 'Medical Council Registration Number',
+                          controller: _medicalCouncilNoController,
+                          labelText: 'Medical Council Number',
                           prefixIcon: Icons.badge_outlined,
                           onChanged: (_) => _autoSave(),
                           validator: (value) {
                             if (value == null || value.trim().isEmpty) {
-                              return 'Registration number is required';
+                              return 'Medical council number is required';
                             }
                             return null;
                           },
@@ -252,154 +335,15 @@ class _ProfessionalDetailsScreenState
 
                         SizedBox(height: 16.h),
 
-                        // Medical Council
-                        DropdownField<String>(
-                          labelText: 'Medical Council',
-                          prefixIcon: Icons.account_balance_outlined,
-                          value: _selectedCouncil,
-                          items: const [
-                            DropdownMenuItem(
-                              value: 'MCI',
-                              child: Text('Medical Council of India (MCI)'),
-                            ),
-                            DropdownMenuItem(
-                              value: 'State Medical Council',
-                              child: Text('State Medical Council'),
-                            ),
-                            DropdownMenuItem(
-                              value: 'Other',
-                              child: Text('Other'),
-                            ),
-                          ],
-                          onChanged: (value) {
-                            setState(() {
-                              _selectedCouncil = value;
-                            });
-                            _autoSave();
-                          },
-                          validator: (value) {
-                            if (value == null || value.isEmpty) {
-                              return 'Medical council is required';
-                            }
-                            return null;
-                          },
-                        ),
-
-                        SizedBox(height: 16.h),
-
-                        // Registration Date
-                        DatePickerField(
-                          controller: _regDateController,
-                          labelText: 'Registration Date',
-                          prefixIcon: Icons.event_outlined,
-                          initialDate: _registrationDate,
-                          firstDate: DateTime(1970),
-                          lastDate: DateTime.now(),
-                          onDateSelected: (date) {
-                            setState(() {
-                              _registrationDate = date;
-                            });
-                            _autoSave();
-                          },
-                          validator: (value) {
-                            if (value == null || value.isEmpty) {
-                              return 'Registration date is required';
-                            }
-                            return null;
-                          },
-                        ),
-
-                        SizedBox(height: 16.h),
-
-                        // Qualification
-                        DropdownField<String>(
-                          labelText: 'Qualification',
-                          prefixIcon: Icons.school_outlined,
-                          value: _selectedQualification,
-                          items: const [
-                            DropdownMenuItem(
-                              value: 'MBBS',
-                              child: Text('MBBS'),
-                            ),
-                            DropdownMenuItem(
-                              value: 'MD',
-                              child: Text('MD (Doctor of Medicine)'),
-                            ),
-                            DropdownMenuItem(
-                              value: 'MS',
-                              child: Text('MS (Master of Surgery)'),
-                            ),
-                            DropdownMenuItem(
-                              value: 'BDS',
-                              child: Text('BDS (Bachelor of Dental Surgery)'),
-                            ),
-                            DropdownMenuItem(
-                              value: 'MDS',
-                              child: Text('MDS (Master of Dental Surgery)'),
-                            ),
-                            DropdownMenuItem(
-                              value: 'Other',
-                              child: Text('Other'),
-                            ),
-                          ],
-                          onChanged: (value) {
-                            setState(() {
-                              _selectedQualification = value;
-                            });
-                            _autoSave();
-                          },
-                          validator: (value) {
-                            if (value == null || value.isEmpty) {
-                              return 'Qualification is required';
-                            }
-                            return null;
-                          },
-                        ),
-
-                        SizedBox(height: 16.h),
-
-                        // Specialization (optional)
+                        // Central Council Number
                         TextInputField(
-                          controller: _specializationController,
-                          labelText: 'Specialization (Optional)',
-                          hintText: 'e.g., Cardiology, Pediatrics',
-                          prefixIcon: Icons.medical_services_outlined,
-                          onChanged: (_) => _autoSave(),
-                        ),
-
-                        SizedBox(height: 16.h),
-
-                        // Institute Name (optional)
-                        TextInputField(
-                          controller: _instituteController,
-                          labelText: 'Institute Name (Optional)',
-                          hintText: 'Where you obtained your degree',
-                          prefixIcon: Icons.business_outlined,
-                          onChanged: (_) => _autoSave(),
-                        ),
-
-                        SizedBox(height: 16.h),
-
-                        // Years of Experience
-                        TextInputField(
-                          controller: _experienceController,
-                          labelText: 'Years of Experience',
-                          prefixIcon: Icons.work_outline,
-                          keyboardType: TextInputType.number,
-                          inputFormatters: [
-                            FilteringTextInputFormatter.digitsOnly,
-                          ],
+                          controller: _centralCouncilNoController,
+                          labelText: 'Central Council Number',
+                          prefixIcon: Icons.confirmation_number_outlined,
                           onChanged: (_) => _autoSave(),
                           validator: (value) {
                             if (value == null || value.trim().isEmpty) {
-                              return 'Experience is required';
-                            }
-                            final years = int.tryParse(value);
-                            if (years == null || years < 0) {
-                              return 'Invalid number of years';
-                            }
-                            if (years > 70) {
-                              return 'Please enter a valid number';
+                              return 'Central council number is required';
                             }
                             return null;
                           },
@@ -407,59 +351,130 @@ class _ProfessionalDetailsScreenState
 
                         SizedBox(height: 16.h),
 
-                        // Current Workplace (optional)
+                        // UG College
                         TextInputField(
-                          controller: _workplaceController,
-                          labelText: 'Current Workplace (Optional)',
-                          hintText: 'Hospital or clinic name',
-                          prefixIcon: Icons.local_hospital_outlined,
+                          controller: _ugCollegeController,
+                          labelText: 'UG College',
+                          hintText: 'Your undergraduate college name',
+                          prefixIcon: Icons.school_outlined,
                           onChanged: (_) => _autoSave(),
+                          validator: (value) {
+                            if (value == null || value.trim().isEmpty) {
+                              return 'UG college is required';
+                            }
+                            return null;
+                          },
                         ),
 
                         SizedBox(height: 16.h),
 
-                        // Designation (optional)
+                        // Zone ID
                         TextInputField(
-                          controller: _designationController,
-                          labelText: 'Designation (Optional)',
-                          hintText: 'e.g., Consultant, Senior Surgeon',
-                          prefixIcon: Icons.assignment_ind_outlined,
+                          controller: _zoneIdController,
+                          labelText: 'Zone ID',
+                          prefixIcon: Icons.pin_outlined,
                           onChanged: (_) => _autoSave(),
+                          validator: (value) {
+                            if (value == null || value.trim().isEmpty) {
+                              return 'Zone ID is required';
+                            }
+                            return null;
+                          },
+                        ),
+
+                        SizedBox(height: 16.h),
+
+                        // Professional Details 1
+                        TextInputField(
+                          controller: _professionalDetails1Controller,
+                          labelText: 'Professional Details 1',
+                          hintText: 'Additional professional information',
+                          prefixIcon: Icons.description_outlined,
+                          maxLines: 3,
+                          onChanged: (_) => _autoSave(),
+                          validator: (value) {
+                            if (value == null || value.trim().isEmpty) {
+                              return 'Professional details 1 is required';
+                            }
+                            return null;
+                          },
+                        ),
+
+                        SizedBox(height: 16.h),
+
+                        // Professional Details 2
+                        TextInputField(
+                          controller: _professionalDetails2Controller,
+                          labelText: 'Professional Details 2',
+                          hintText: 'Additional professional information',
+                          prefixIcon: Icons.description_outlined,
+                          maxLines: 3,
+                          onChanged: (_) => _autoSave(),
+                          validator: (value) {
+                            if (value == null || value.trim().isEmpty) {
+                              return 'Professional details 2 is required';
+                            }
+                            return null;
+                          },
                         ),
 
                         SizedBox(height: 32.h),
 
-                        // Next button
+                        // Next button (Submit to backend)
                         SizedBox(
                           height: 50.h,
                           child: ElevatedButton(
-                            onPressed: _handleNext,
+                            onPressed: _isSubmitting ? null : _handleNext,
                             style: ElevatedButton.styleFrom(
                               backgroundColor: const Color(0xFF1976D2),
+                              disabledBackgroundColor: Colors.grey,
                               shape: RoundedRectangleBorder(
                                 borderRadius: BorderRadius.circular(12.r),
                               ),
                               elevation: 0,
                             ),
-                            child: Row(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: [
-                                Text(
-                                  'Next',
-                                  style: TextStyle(
-                                    fontSize: 16.sp,
-                                    fontWeight: FontWeight.w600,
-                                    color: Colors.white,
+                            child: _isSubmitting
+                                ? Row(
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    children: [
+                                      SizedBox(
+                                        width: 20.w,
+                                        height: 20.h,
+                                        child: const CircularProgressIndicator(
+                                          color: Colors.white,
+                                          strokeWidth: 2,
+                                        ),
+                                      ),
+                                      SizedBox(width: 12.w),
+                                      Text(
+                                        'Submitting...',
+                                        style: TextStyle(
+                                          fontSize: 16.sp,
+                                          fontWeight: FontWeight.w600,
+                                          color: Colors.white,
+                                        ),
+                                      ),
+                                    ],
+                                  )
+                                : Row(
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    children: [
+                                      Text(
+                                        'Submit Registration',
+                                        style: TextStyle(
+                                          fontSize: 16.sp,
+                                          fontWeight: FontWeight.w600,
+                                          color: Colors.white,
+                                        ),
+                                      ),
+                                      SizedBox(width: 8.w),
+                                      Icon(
+                                        Icons.arrow_forward,
+                                        size: 20.sp,
+                                        color: Colors.white,
+                                      ),
+                                    ],
                                   ),
-                                ),
-                                SizedBox(width: 8.w),
-                                Icon(
-                                  Icons.arrow_forward,
-                                  size: 20.sp,
-                                  color: Colors.white,
-                                ),
-                              ],
-                            ),
                           ),
                         ),
 
