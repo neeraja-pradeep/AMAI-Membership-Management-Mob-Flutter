@@ -15,7 +15,7 @@ import 'package:myapp/features/home/infrastructure/repositories/home_repository_
 /// Provider for API client
 /// TODO: Replace with actual user ID from auth state
 final apiClientProvider = Provider<ApiClient>((ref) {
-  return ApiClient(userId: 2); // Superadmin ID from docs
+  return ApiClient(userId: 19); // Practitioner user ID
 });
 
 /// Provider for Connectivity
