@@ -1,73 +1,120 @@
-/// Membership details entity for Step 1
+/// Membership details entity for complete practitioner registration
 ///
 /// Contains all information required for membership registration
 /// Matches backend POST /api/membership/register/ requirements
+///
+/// UPDATED: Now includes personal + professional details in one entity
 class MembershipDetails {
+  // Personal Information Fields
   final String email;
   final String password;
+  final String firstName;
   final String phone;
   final String waPhone; // WhatsApp phone
-  final String firstName;
-  final String lastName;
-  final MembershipType membershipType;
+  final DateTime dateOfBirth;
+  final String gender; // 'male', 'female', 'other'
   final String bloodGroup;
-  final int bamsStartYear;
-  final String institutionName;
+  final MembershipType membershipType;
+
+  // Professional Details Fields
+  final String medicalCouncilState;
+  final String medicalCouncilNo;
+  final String centralCouncilNo;
+  final String ugCollege;
+  final String zoneId;
+  final String professionalDetails1;
+  final String professionalDetails2;
+
+  // Optional fields (kept for backward compatibility)
+  final String? lastName;
+  final int? bamsStartYear;
+  final String? institutionName;
 
   const MembershipDetails({
     required this.email,
     required this.password,
+    required this.firstName,
     required this.phone,
     required this.waPhone,
-    required this.firstName,
-    required this.lastName,
-    required this.membershipType,
+    required this.dateOfBirth,
+    required this.gender,
     required this.bloodGroup,
-    required this.bamsStartYear,
-    required this.institutionName,
+    required this.membershipType,
+    required this.medicalCouncilState,
+    required this.medicalCouncilNo,
+    required this.centralCouncilNo,
+    required this.ugCollege,
+    required this.zoneId,
+    required this.professionalDetails1,
+    required this.professionalDetails2,
+    this.lastName,
+    this.bamsStartYear,
+    this.institutionName,
   });
 
   /// Get full name
-  String get fullName => '$firstName $lastName';
+  String get fullName => lastName != null ? '$firstName $lastName' : firstName;
 
   /// Check if all required fields are filled
   bool get isComplete {
     return email.isNotEmpty &&
         password.isNotEmpty &&
         password.length >= 8 && // Minimum password length
+        firstName.isNotEmpty &&
         phone.isNotEmpty &&
         phone.length == 10 && // Indian phone number
         waPhone.isNotEmpty &&
         waPhone.length == 10 &&
-        firstName.isNotEmpty &&
-        lastName.isNotEmpty &&
+        gender.isNotEmpty &&
         bloodGroup.isNotEmpty &&
-        bamsStartYear > 1900 &&
-        bamsStartYear <= DateTime.now().year &&
-        institutionName.isNotEmpty;
+        medicalCouncilState.isNotEmpty &&
+        medicalCouncilNo.isNotEmpty &&
+        centralCouncilNo.isNotEmpty &&
+        ugCollege.isNotEmpty &&
+        zoneId.isNotEmpty &&
+        professionalDetails1.isNotEmpty &&
+        professionalDetails2.isNotEmpty;
   }
 
   MembershipDetails copyWith({
     String? email,
     String? password,
+    String? firstName,
     String? phone,
     String? waPhone,
-    String? firstName,
-    String? lastName,
-    MembershipType? membershipType,
+    DateTime? dateOfBirth,
+    String? gender,
     String? bloodGroup,
+    MembershipType? membershipType,
+    String? medicalCouncilState,
+    String? medicalCouncilNo,
+    String? centralCouncilNo,
+    String? ugCollege,
+    String? zoneId,
+    String? professionalDetails1,
+    String? professionalDetails2,
+    String? lastName,
     int? bamsStartYear,
     String? institutionName,
   }) {
     return MembershipDetails(
       email: email ?? this.email,
       password: password ?? this.password,
+      firstName: firstName ?? this.firstName,
       phone: phone ?? this.phone,
       waPhone: waPhone ?? this.waPhone,
-      firstName: firstName ?? this.firstName,
-      lastName: lastName ?? this.lastName,
-      membershipType: membershipType ?? this.membershipType,
+      dateOfBirth: dateOfBirth ?? this.dateOfBirth,
+      gender: gender ?? this.gender,
       bloodGroup: bloodGroup ?? this.bloodGroup,
+      membershipType: membershipType ?? this.membershipType,
+      medicalCouncilState: medicalCouncilState ?? this.medicalCouncilState,
+      medicalCouncilNo: medicalCouncilNo ?? this.medicalCouncilNo,
+      centralCouncilNo: centralCouncilNo ?? this.centralCouncilNo,
+      ugCollege: ugCollege ?? this.ugCollege,
+      zoneId: zoneId ?? this.zoneId,
+      professionalDetails1: professionalDetails1 ?? this.professionalDetails1,
+      professionalDetails2: professionalDetails2 ?? this.professionalDetails2,
+      lastName: lastName ?? this.lastName,
       bamsStartYear: bamsStartYear ?? this.bamsStartYear,
       institutionName: institutionName ?? this.institutionName,
     );
@@ -76,16 +123,22 @@ class MembershipDetails {
   /// Convert to JSON for API
   Map<String, dynamic> toJson() {
     return {
+      'membership_type': membershipType.value,
+      'first_name': firstName,
       'email': email,
       'password': password,
       'phone': phone,
       'wa_phone': waPhone,
-      'first_name': firstName,
-      'last_name': lastName,
-      'membership_type': membershipType.value,
+      'date_of_birth': '${dateOfBirth.year}-${dateOfBirth.month.toString().padLeft(2, '0')}-${dateOfBirth.day.toString().padLeft(2, '0')}', // YYYY-MM-DD format
+      'gender': gender,
       'blood_group': bloodGroup,
-      'bams_start_year': bamsStartYear,
-      'institution_name': institutionName,
+      'medical_council_state': medicalCouncilState,
+      'medical_council_no': medicalCouncilNo,
+      'central_council_no': centralCouncilNo,
+      'ug_college': ugCollege,
+      'zone_id': zoneId,
+      'professional_details1': professionalDetails1,
+      'professional_details2': professionalDetails2,
     };
   }
 
@@ -94,14 +147,23 @@ class MembershipDetails {
     return MembershipDetails(
       email: json['email'] as String,
       password: json['password'] as String,
+      firstName: json['first_name'] as String,
       phone: json['phone'] as String,
       waPhone: json['wa_phone'] as String,
-      firstName: json['first_name'] as String,
-      lastName: json['last_name'] as String,
-      membershipType: MembershipType.fromValue(json['membership_type'] as String),
+      dateOfBirth: DateTime.parse(json['date_of_birth'] as String),
+      gender: json['gender'] as String,
       bloodGroup: json['blood_group'] as String,
-      bamsStartYear: json['bams_start_year'] as int,
-      institutionName: json['institution_name'] as String,
+      membershipType: MembershipType.fromValue(json['membership_type'] as String),
+      medicalCouncilState: json['medical_council_state'] as String,
+      medicalCouncilNo: json['medical_council_no'] as String,
+      centralCouncilNo: json['central_council_no'] as String,
+      ugCollege: json['ug_college'] as String,
+      zoneId: json['zone_id'] as String,
+      professionalDetails1: json['professional_details1'] as String,
+      professionalDetails2: json['professional_details2'] as String,
+      lastName: json['last_name'] as String?,
+      bamsStartYear: json['bams_start_year'] as int?,
+      institutionName: json['institution_name'] as String?,
     );
   }
 
@@ -111,28 +173,11 @@ class MembershipDetails {
       other is MembershipDetails &&
           runtimeType == other.runtimeType &&
           email == other.email &&
-          password == other.password &&
-          phone == other.phone &&
-          waPhone == other.waPhone &&
           firstName == other.firstName &&
-          lastName == other.lastName &&
-          membershipType == other.membershipType &&
-          bloodGroup == other.bloodGroup &&
-          bamsStartYear == other.bamsStartYear &&
-          institutionName == other.institutionName;
+          phone == other.phone;
 
   @override
-  int get hashCode =>
-      email.hashCode ^
-      password.hashCode ^
-      phone.hashCode ^
-      waPhone.hashCode ^
-      firstName.hashCode ^
-      lastName.hashCode ^
-      membershipType.hashCode ^
-      bloodGroup.hashCode ^
-      bamsStartYear.hashCode ^
-      institutionName.hashCode;
+  int get hashCode => email.hashCode ^ firstName.hashCode ^ phone.hashCode;
 
   @override
   String toString() {
@@ -172,4 +217,26 @@ class BloodGroup {
     'O+',
     'O-',
   ];
+}
+
+/// Gender options
+class Gender {
+  static const String male = 'male';
+  static const String female = 'female';
+  static const String other = 'other';
+
+  static const List<String> options = [male, female, other];
+
+  static String getDisplayName(String value) {
+    switch (value) {
+      case male:
+        return 'Male';
+      case female:
+        return 'Female';
+      case other:
+        return 'Other';
+      default:
+        return value;
+    }
+  }
 }
