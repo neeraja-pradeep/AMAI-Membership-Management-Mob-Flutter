@@ -21,41 +21,27 @@ Note:- The timestamp mentioned here must be the timestamp fetched from the heade
 
 Customer App
 
-Screen : Login 
-a) Login
-Endpoint:
-https://amai.nexogms.com/api/schema/swagger-ui/#/Authentication/auth_login
-POST endpoint: https://amai.nexogms.com/api/accounts/login/
-payload:{
-  "email": "user@example.com",
-  "password": "securepassword123"
-}
+Screen : Home 
+a) AMAI card
+Swagger link: https://amai.nexogms.com/api/schema/swagger-ui/#/membership/membership_memberships_list
 
+Required fields:- is_active, user_first_name, membership_number, end_date
 
-Screen : Registration 
-a) Registration Form 1
-Endpoint:
-https://amai.nexogms.com/api/schema/swagger-ui/#/Membership/membership_register
+POST endpoint: https://amai.nexogms.com/api/membership/memberships/
+ 
+b) Aswas Plus card
 
-Required fields:- email, password,  phone, wa_phone, first_name, last_name, membership_type[student, practitioner, house_surgeon, honorary], blood_group, bams_start_year, institution_name, 
-POST endpoint:https://amai.nexogms.com/api/membership/register/
+Swagger link: https://amai.nexogms.com/api/schema/swagger-ui/#/membership/membership_insurance_policies_list
 
-b) Registration Form 2 -  Address
-Endpoint:
-https://amai.nexogms.com/api/schema/swagger-ui/#/accounts/accounts_addresses_create
+Required fields:- policy_number, end_date, product_description 
+POST endpoint: https://amai.nexogms.com/api/membership/insurance-policies/
 
-Required fields:- address_line1(House No. / Building Name), address_line2(Street / Locality / Area), city(Post Office), postal_code(Post Code), country(Country), state(State), district(District), is_primary 
-Post endpoint:https://amai.nexogms.com/api/accounts/addresses/
+c) Upcoming Events
+Swagger link: https://amai.nexogms.com/api/schema/swagger-ui/#/Events/bookings_events_list
 
-b) Registration Form 3 -  Documents
-Endpoint:
-https://amai.nexogms.com/api/schema/swagger-ui/#/membership/membership_application_documents_create
+Required fields:- banner_image, title, event_date, event_end_date,venue, venue_address
 
-Required Fields: application, document_file, document_type 
-
-Post endpoint:https://amai.nexogms.com/api/membership/application-documents/
-
-
+POST endpoint:https://amai.nexogms.com/api/bookings/events/
 
 
 
