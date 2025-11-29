@@ -1,59 +1,54 @@
 /// Professional details entity for Step 2
 ///
 /// Contains practitioner's professional credentials
+/// UPDATED: Matches backend /api/membership/register/ requirements
 class ProfessionalDetails {
-  final String medicalCouncilRegistrationNumber;
-  final String medicalCouncil; // 'MCI', 'State Medical Council', etc.
-  final DateTime registrationDate;
-  final String qualification; // 'MBBS', 'MD', 'MS', etc.
-  final String? specialization;
-  final String? instituteName;
-  final int yearsOfExperience;
-  final String? currentWorkplace;
-  final String? designation;
+  final String medicalCouncilState; // State medical council
+  final String medicalCouncilNo; // Medical council registration number
+  final String centralCouncilNo; // Central council number
+  final String ugCollege; // UG College name
+  final String zoneId; // Zone ID
+  final String professionalDetails1; // Additional professional details 1
+  final String professionalDetails2; // Additional professional details 2
 
   const ProfessionalDetails({
-    required this.medicalCouncilRegistrationNumber,
-    required this.medicalCouncil,
-    required this.registrationDate,
-    required this.qualification,
-    this.specialization,
-    this.instituteName,
-    required this.yearsOfExperience,
-    this.currentWorkplace,
-    this.designation,
+    required this.medicalCouncilState,
+    required this.medicalCouncilNo,
+    required this.centralCouncilNo,
+    required this.ugCollege,
+    required this.zoneId,
+    required this.professionalDetails1,
+    required this.professionalDetails2,
   });
 
   /// Check if all required fields are filled
   bool get isComplete {
-    return medicalCouncilRegistrationNumber.isNotEmpty &&
-        medicalCouncil.isNotEmpty &&
-        qualification.isNotEmpty &&
-        yearsOfExperience >= 0;
+    return medicalCouncilState.isNotEmpty &&
+        medicalCouncilNo.isNotEmpty &&
+        centralCouncilNo.isNotEmpty &&
+        ugCollege.isNotEmpty &&
+        zoneId.isNotEmpty &&
+        professionalDetails1.isNotEmpty &&
+        professionalDetails2.isNotEmpty;
   }
 
   ProfessionalDetails copyWith({
-    String? medicalCouncilRegistrationNumber,
-    String? medicalCouncil,
-    DateTime? registrationDate,
-    String? qualification,
-    String? specialization,
-    String? instituteName,
-    int? yearsOfExperience,
-    String? currentWorkplace,
-    String? designation,
+    String? medicalCouncilState,
+    String? medicalCouncilNo,
+    String? centralCouncilNo,
+    String? ugCollege,
+    String? zoneId,
+    String? professionalDetails1,
+    String? professionalDetails2,
   }) {
     return ProfessionalDetails(
-      medicalCouncilRegistrationNumber: medicalCouncilRegistrationNumber ??
-          this.medicalCouncilRegistrationNumber,
-      medicalCouncil: medicalCouncil ?? this.medicalCouncil,
-      registrationDate: registrationDate ?? this.registrationDate,
-      qualification: qualification ?? this.qualification,
-      specialization: specialization ?? this.specialization,
-      instituteName: instituteName ?? this.instituteName,
-      yearsOfExperience: yearsOfExperience ?? this.yearsOfExperience,
-      currentWorkplace: currentWorkplace ?? this.currentWorkplace,
-      designation: designation ?? this.designation,
+      medicalCouncilState: medicalCouncilState ?? this.medicalCouncilState,
+      medicalCouncilNo: medicalCouncilNo ?? this.medicalCouncilNo,
+      centralCouncilNo: centralCouncilNo ?? this.centralCouncilNo,
+      ugCollege: ugCollege ?? this.ugCollege,
+      zoneId: zoneId ?? this.zoneId,
+      professionalDetails1: professionalDetails1 ?? this.professionalDetails1,
+      professionalDetails2: professionalDetails2 ?? this.professionalDetails2,
     );
   }
 
@@ -62,31 +57,26 @@ class ProfessionalDetails {
       identical(this, other) ||
       other is ProfessionalDetails &&
           runtimeType == other.runtimeType &&
-          medicalCouncilRegistrationNumber ==
-              other.medicalCouncilRegistrationNumber &&
-          medicalCouncil == other.medicalCouncil &&
-          registrationDate == other.registrationDate &&
-          qualification == other.qualification &&
-          specialization == other.specialization &&
-          instituteName == other.instituteName &&
-          yearsOfExperience == other.yearsOfExperience &&
-          currentWorkplace == other.currentWorkplace &&
-          designation == other.designation;
+          medicalCouncilState == other.medicalCouncilState &&
+          medicalCouncilNo == other.medicalCouncilNo &&
+          centralCouncilNo == other.centralCouncilNo &&
+          ugCollege == other.ugCollege &&
+          zoneId == other.zoneId &&
+          professionalDetails1 == other.professionalDetails1 &&
+          professionalDetails2 == other.professionalDetails2;
 
   @override
   int get hashCode =>
-      medicalCouncilRegistrationNumber.hashCode ^
-      medicalCouncil.hashCode ^
-      registrationDate.hashCode ^
-      qualification.hashCode ^
-      (specialization?.hashCode ?? 0) ^
-      (instituteName?.hashCode ?? 0) ^
-      yearsOfExperience.hashCode ^
-      (currentWorkplace?.hashCode ?? 0) ^
-      (designation?.hashCode ?? 0);
+      medicalCouncilState.hashCode ^
+      medicalCouncilNo.hashCode ^
+      centralCouncilNo.hashCode ^
+      ugCollege.hashCode ^
+      zoneId.hashCode ^
+      professionalDetails1.hashCode ^
+      professionalDetails2.hashCode;
 
   @override
   String toString() {
-    return 'ProfessionalDetails(registration: $medicalCouncilRegistrationNumber, qualification: $qualification, experience: $yearsOfExperience years)';
+    return 'ProfessionalDetails(medicalCouncilNo: $medicalCouncilNo, state: $medicalCouncilState, ugCollege: $ugCollege)';
   }
 }
