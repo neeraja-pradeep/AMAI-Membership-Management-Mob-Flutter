@@ -619,9 +619,11 @@ class RegistrationStateNotifier extends StateNotifier<RegistrationState> {
       'addressLine1': details.addressLine1,
       'addressLine2': details.addressLine2,
       'city': details.city,
-      'state': details.stateId,
-      'pincode': details.pincode,
-      'country': details.countryId,
+      'postalCode': details.postalCode,
+      'countryId': details.countryId,
+      'stateId': details.stateId,
+      'districtId': details.districtId,
+      'isPrimary': details.isPrimary,
     };
   }
 
@@ -629,12 +631,13 @@ class RegistrationStateNotifier extends StateNotifier<RegistrationState> {
   AddressDetails _addressFromJson(Map<String, dynamic> json) {
     return AddressDetails(
       addressLine1: json['addressLine1'] as String,
-      addressLine2: json['addressLine2'] as String?,
+      addressLine2: json['addressLine2'] as String,
       city: json['city'] as String,
-      stateId: json['state'] as String,
-      pincode: json['pincode'] as String,
-      countryId: json['country'] as String,
-      districtId: json['districtId'],
+      postalCode: json['postalCode'] as String,
+      countryId: json['countryId'] as String,
+      stateId: json['stateId'] as String,
+      districtId: json['districtId'] as String,
+      isPrimary: json['isPrimary'] as bool? ?? true,
     );
   }
 
