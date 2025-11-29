@@ -390,40 +390,44 @@ class RegistrationRepositoryImpl implements RegistrationRepository {
               'first_name': registration.personalDetails!.firstName,
               'last_name': registration.personalDetails!.lastName,
               'email': registration.personalDetails!.email,
+              'password': registration.personalDetails!.password,
               'phone': registration.personalDetails!.phone,
+              'wa_phone': registration.personalDetails!.waPhone,
               'date_of_birth': registration.personalDetails!.dateOfBirth
                   .toIso8601String(),
               'gender': registration.personalDetails!.gender,
+              'blood_group': registration.personalDetails!.bloodGroup,
+              'membership_type': registration.personalDetails!.membershipType,
               'profile_image_path':
                   registration.personalDetails!.profileImagePath,
             }
           : null,
       'professional_details': registration.professionalDetails != null
           ? {
-              'medical_council_registration_number':
-                  registration.professionalDetails!.medicalCouncilRegistrationNumber,
-              'medical_council': registration.professionalDetails!.medicalCouncil,
-              'registration_date': registration.professionalDetails!.registrationDate
-                  .toIso8601String(),
-              'qualification': registration.professionalDetails!.qualification,
-              'specialization': registration.professionalDetails!.specialization,
-              'institute_name': registration.professionalDetails!.instituteName,
-              'years_of_experience':
-                  registration.professionalDetails!.yearsOfExperience,
-              'current_workplace':
-                  registration.professionalDetails!.currentWorkplace,
-              'designation': registration.professionalDetails!.designation,
+              'medical_council_state':
+                  registration.professionalDetails!.medicalCouncilState,
+              'medical_council_no':
+                  registration.professionalDetails!.medicalCouncilNo,
+              'central_council_no':
+                  registration.professionalDetails!.centralCouncilNo,
+              'ug_college': registration.professionalDetails!.ugCollege,
+              'zone_id': registration.professionalDetails!.zoneId,
+              'professional_details1':
+                  registration.professionalDetails!.professionalDetails1,
+              'professional_details2':
+                  registration.professionalDetails!.professionalDetails2,
             }
           : null,
       'address_details': registration.addressDetails != null
           ? {
               'address_line1': registration.addressDetails!.addressLine1,
               'address_line2': registration.addressDetails!.addressLine2,
-              'country_id': registration.addressDetails!.countryId,
-              'state_id': registration.addressDetails!.stateId,
-              'district_id': registration.addressDetails!.districtId,
+              'country': registration.addressDetails!.countryId,
+              'state': registration.addressDetails!.stateId,
+              'district': registration.addressDetails!.districtId,
               'city': registration.addressDetails!.city,
-              'pincode': registration.addressDetails!.pincode,
+              'postal_code': registration.addressDetails!.postalCode,
+              'is_primary': registration.addressDetails!.isPrimary,
             }
           : null,
       'documents': registration.documentUploads?.documents

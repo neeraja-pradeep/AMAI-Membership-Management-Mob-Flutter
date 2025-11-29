@@ -122,13 +122,13 @@ class _MembershipFormScreenState extends ConsumerState<MembershipFormScreen> {
       _phoneController.text = membershipDetails.phone;
       _waPhoneController.text = membershipDetails.waPhone;
       _firstNameController.text = membershipDetails.firstName;
-      _lastNameController.text = membershipDetails.lastName;
+      _lastNameController.text = membershipDetails.lastName ?? '';
       setState(() {
         _selectedMembershipType = membershipDetails.membershipType;
         _selectedBloodGroup = membershipDetails.bloodGroup;
         _selectedBamsYear = membershipDetails.bamsStartYear;
       });
-      _institutionController.text = membershipDetails.institutionName;
+      _institutionController.text = membershipDetails.institutionName ?? '';
     }
   }
 
@@ -139,16 +139,35 @@ class _MembershipFormScreenState extends ConsumerState<MembershipFormScreen> {
   }
 
   /// Save membership details to registration state
+  ///
+  /// CRITICAL: This method provides placeholder values for required professional
+  /// fields that are NOT collected by this screen. This makes the entity incomplete
+  /// and validation will fail. This screen should NOT be used in production.
   void _saveMembershipDetails() {
     final membershipDetails = MembershipDetails(
+      // Personal fields collected by this screen
       email: _emailController.text.trim(),
       password: _passwordController.text.trim(),
       phone: _phoneController.text.trim(),
       waPhone: _waPhoneController.text.trim(),
       firstName: _firstNameController.text.trim(),
       lastName: _lastNameController.text.trim(),
+      dateOfBirth: DateTime.now().subtract(const Duration(days: 365 * 25)), // PLACEHOLDER
+      gender: 'other', // PLACEHOLDER - screen doesn't collect this
       membershipType: _selectedMembershipType ?? MembershipType.practitioner,
       bloodGroup: _selectedBloodGroup ?? '',
+
+      // Professional fields NOT collected - using invalid placeholders
+      // These will cause validation failures
+      medicalCouncilState: '', // MISSING FROM SCREEN
+      medicalCouncilNo: '', // MISSING FROM SCREEN
+      centralCouncilNo: '', // MISSING FROM SCREEN
+      ugCollege: '', // MISSING FROM SCREEN
+      zoneId: '', // MISSING FROM SCREEN
+      professionalDetails1: '', // MISSING FROM SCREEN
+      professionalDetails2: '', // MISSING FROM SCREEN
+
+      // Optional fields
       bamsStartYear: _selectedBamsYear ?? DateTime.now().year,
       institutionName: _institutionController.text.trim(),
     );
