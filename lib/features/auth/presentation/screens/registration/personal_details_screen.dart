@@ -15,14 +15,18 @@ import '../../components/step_progress_indicator.dart';
 import '../../components/text_input_field.dart';
 import '../../widgets/exit_confirmation_dialog.dart';
 
-/// Personal Details Screen (Step 1)
+/// Personal Details Screen (Step 1 of 2)
 ///
-/// Collects practitioner's basic personal information:
+/// Collects practitioner's basic personal and membership information:
 /// - First Name, Last Name
-/// - Email, Phone
+/// - Email, Password
+/// - Phone, WhatsApp Phone
 /// - Date of Birth
 /// - Gender
-/// - Optional Profile Image
+/// - Blood Group
+/// - Membership Type
+///
+/// UPDATED: Now includes all fields needed for /api/membership/register/
 class PersonalDetailsScreen extends ConsumerStatefulWidget {
   const PersonalDetailsScreen({super.key});
 
@@ -38,12 +42,17 @@ class _PersonalDetailsScreenState extends ConsumerState<PersonalDetailsScreen> {
   late final TextEditingController _firstNameController;
   late final TextEditingController _lastNameController;
   late final TextEditingController _emailController;
+  late final TextEditingController _passwordController;
   late final TextEditingController _phoneController;
+  late final TextEditingController _waPhoneController;
   late final TextEditingController _dobController;
 
   // State
   String? _selectedGender;
+  String? _selectedBloodGroup;
+  String? _selectedMembershipType;
   DateTime? _dateOfBirth;
+  bool _obscurePassword = true;
 
   @override
   void initState() {
@@ -53,7 +62,9 @@ class _PersonalDetailsScreenState extends ConsumerState<PersonalDetailsScreen> {
     _firstNameController = TextEditingController();
     _lastNameController = TextEditingController();
     _emailController = TextEditingController();
+    _passwordController = TextEditingController();
     _phoneController = TextEditingController();
+    _waPhoneController = TextEditingController();
     _dobController = TextEditingController();
 
     // Load existing data if available
@@ -67,7 +78,9 @@ class _PersonalDetailsScreenState extends ConsumerState<PersonalDetailsScreen> {
     _firstNameController.dispose();
     _lastNameController.dispose();
     _emailController.dispose();
+    _passwordController.dispose();
     _phoneController.dispose();
+    _waPhoneController.dispose();
     _dobController.dispose();
     super.dispose();
   }
@@ -99,10 +112,16 @@ class _PersonalDetailsScreenState extends ConsumerState<PersonalDetailsScreen> {
       _firstNameController.text = personalDetails.firstName;
       _lastNameController.text = personalDetails.lastName;
       _emailController.text = personalDetails.email;
+      _passwordController.text = personalDetails.password;
       _phoneController.text = personalDetails.phone;
+      _waPhoneController.text = personalDetails.waPhone;
       _dateOfBirth = personalDetails.dateOfBirth;
       _dobController.text = DateFormat('yyyy-MM-dd').format(_dateOfBirth!);
-      _selectedGender = personalDetails.gender;
+      setState(() {
+        _selectedGender = personalDetails.gender;
+        _selectedBloodGroup = personalDetails.bloodGroup;
+        _selectedMembershipType = personalDetails.membershipType;
+      });
     }
   }
 
@@ -119,9 +138,13 @@ class _PersonalDetailsScreenState extends ConsumerState<PersonalDetailsScreen> {
       firstName: _firstNameController.text.trim(),
       lastName: _lastNameController.text.trim(),
       email: _emailController.text.trim(),
+      password: _passwordController.text.trim(),
       phone: _phoneController.text.trim(),
+      waPhone: _waPhoneController.text.trim(),
       dateOfBirth: _dateOfBirth ?? DateTime.now(),
       gender: _selectedGender ?? '',
+      bloodGroup: _selectedBloodGroup ?? '',
+      membershipType: _selectedMembershipType ?? 'practitioner',
     );
 
     ref
@@ -166,7 +189,7 @@ class _PersonalDetailsScreenState extends ConsumerState<PersonalDetailsScreen> {
               // Progress indicator
               const StepProgressIndicator(
                 currentStep: 1,
-                totalSteps: 5,
+                totalSteps: 2,
                 stepTitle: 'Personal Details',
               ),
 
@@ -263,6 +286,74 @@ class _PersonalDetailsScreenState extends ConsumerState<PersonalDetailsScreen> {
 
                         SizedBox(height: 16.h),
 
+                        // Password
+                        TextFormField(
+                          controller: _passwordController,
+                          obscureText: _obscurePassword,
+                          onChanged: (_) => _autoSave(),
+                          decoration: InputDecoration(
+                            labelText: 'Password',
+                            hintText: 'Minimum 8 characters',
+                            prefixIcon: Icon(
+                              Icons.lock_outlined,
+                              size: 20.sp,
+                            ),
+                            suffixIcon: IconButton(
+                              icon: Icon(
+                                _obscurePassword
+                                    ? Icons.visibility_off
+                                    : Icons.visibility,
+                                size: 20.sp,
+                              ),
+                              onPressed: () {
+                                setState(() {
+                                  _obscurePassword = !_obscurePassword;
+                                });
+                              },
+                            ),
+                            border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(12.r),
+                              borderSide: BorderSide(
+                                color: Colors.grey[300]!,
+                              ),
+                            ),
+                            enabledBorder: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(12.r),
+                              borderSide: BorderSide(
+                                color: Colors.grey[300]!,
+                              ),
+                            ),
+                            focusedBorder: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(12.r),
+                              borderSide: const BorderSide(
+                                color: Color(0xFF1976D2),
+                                width: 2,
+                              ),
+                            ),
+                            errorBorder: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(12.r),
+                              borderSide: const BorderSide(
+                                color: Colors.red,
+                              ),
+                            ),
+                            contentPadding: EdgeInsets.symmetric(
+                              horizontal: 16.w,
+                              vertical: 16.h,
+                            ),
+                          ),
+                          validator: (value) {
+                            if (value == null || value.isEmpty) {
+                              return 'Password is required';
+                            }
+                            if (value.length < 8) {
+                              return 'Password must be at least 8 characters';
+                            }
+                            return null;
+                          },
+                        ),
+
+                        SizedBox(height: 16.h),
+
                         // Phone
                         TextInputField(
                           controller: _phoneController,
@@ -281,6 +372,31 @@ class _PersonalDetailsScreenState extends ConsumerState<PersonalDetailsScreen> {
                             }
                             if (value.trim().length != 10) {
                               return 'Phone number must be 10 digits';
+                            }
+                            return null;
+                          },
+                        ),
+
+                        SizedBox(height: 16.h),
+
+                        // WhatsApp Phone
+                        TextInputField(
+                          controller: _waPhoneController,
+                          labelText: 'WhatsApp Number',
+                          hintText: '1234567890',
+                          prefixIcon: Icons.chat_outlined,
+                          keyboardType: TextInputType.phone,
+                          maxLength: 10,
+                          inputFormatters: [
+                            FilteringTextInputFormatter.digitsOnly,
+                          ],
+                          onChanged: (_) => _autoSave(),
+                          validator: (value) {
+                            if (value == null || value.trim().isEmpty) {
+                              return 'WhatsApp number is required';
+                            }
+                            if (value.trim().length != 10) {
+                              return 'WhatsApp number must be 10 digits';
                             }
                             return null;
                           },
@@ -363,6 +479,76 @@ class _PersonalDetailsScreenState extends ConsumerState<PersonalDetailsScreen> {
                           validator: (value) {
                             if (value == null || value.isEmpty) {
                               return 'Gender is required';
+                            }
+                            return null;
+                          },
+                        ),
+
+                        SizedBox(height: 16.h),
+
+                        // Blood Group
+                        DropdownField<String>(
+                          labelText: 'Blood Group',
+                          prefixIcon: Icons.water_drop_outlined,
+                          value: _selectedBloodGroup,
+                          items: const [
+                            DropdownMenuItem(value: 'A+', child: Text('A+')),
+                            DropdownMenuItem(value: 'A-', child: Text('A-')),
+                            DropdownMenuItem(value: 'B+', child: Text('B+')),
+                            DropdownMenuItem(value: 'B-', child: Text('B-')),
+                            DropdownMenuItem(value: 'AB+', child: Text('AB+')),
+                            DropdownMenuItem(value: 'AB-', child: Text('AB-')),
+                            DropdownMenuItem(value: 'O+', child: Text('O+')),
+                            DropdownMenuItem(value: 'O-', child: Text('O-')),
+                          ],
+                          onChanged: (value) {
+                            setState(() {
+                              _selectedBloodGroup = value;
+                            });
+                            _autoSave();
+                          },
+                          validator: (value) {
+                            if (value == null || value.isEmpty) {
+                              return 'Blood group is required';
+                            }
+                            return null;
+                          },
+                        ),
+
+                        SizedBox(height: 16.h),
+
+                        // Membership Type
+                        DropdownField<String>(
+                          labelText: 'Membership Type',
+                          prefixIcon: Icons.badge_outlined,
+                          value: _selectedMembershipType,
+                          items: const [
+                            DropdownMenuItem(
+                              value: 'student',
+                              child: Text('Student'),
+                            ),
+                            DropdownMenuItem(
+                              value: 'practitioner',
+                              child: Text('Practitioner'),
+                            ),
+                            DropdownMenuItem(
+                              value: 'house_surgeon',
+                              child: Text('House Surgeon'),
+                            ),
+                            DropdownMenuItem(
+                              value: 'honorary',
+                              child: Text('Honorary'),
+                            ),
+                          ],
+                          onChanged: (value) {
+                            setState(() {
+                              _selectedMembershipType = value;
+                            });
+                            _autoSave();
+                          },
+                          validator: (value) {
+                            if (value == null || value.isEmpty) {
+                              return 'Membership type is required';
                             }
                             return null;
                           },
