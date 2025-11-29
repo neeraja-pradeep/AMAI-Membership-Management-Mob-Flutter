@@ -13,15 +13,15 @@ import '../../components/dropdown_field.dart';
 import '../../components/step_progress_indicator.dart';
 import '../../components/text_input_field.dart';
 
-/// Professional Details Screen (Step 2 of 2)
+/// Professional Details Screen (Step 2 of 5)
 ///
 /// Collects practitioner's professional credentials:
 /// - Medical Council State
 /// - Medical Council Number
 /// - Central Council Number
 /// - UG College
-/// - Zone ID
-/// - Professional Details 1 & 2
+/// - Professional Details 1 (Qualifications - checkboxes)
+/// - Professional Details 2 (Professional Category - checkboxes)
 ///
 /// CRITICAL: When "Next" is clicked, combines PersonalDetails + ProfessionalDetails
 /// and calls POST /api/membership/register/ to create the account
@@ -41,13 +41,43 @@ class _ProfessionalDetailsScreenState
   late final TextEditingController _medicalCouncilNoController;
   late final TextEditingController _centralCouncilNoController;
   late final TextEditingController _ugCollegeController;
-  late final TextEditingController _zoneIdController;
-  late final TextEditingController _professionalDetails1Controller;
-  late final TextEditingController _professionalDetails2Controller;
 
   // State
   String? _selectedMedicalCouncilState;
   bool _isSubmitting = false;
+
+  // Professional Details 1 - Qualifications (checkboxes)
+  final Set<String> _selectedQualifications = {};
+  static const List<String> _qualificationOptions = [
+    'UG',
+    'PG',
+    'PhD',
+    'CCRAS',
+    'PG Diploma',
+    'Other',
+  ];
+
+  // Professional Details 2 - Professional Category (checkboxes)
+  final Set<String> _selectedCategories = {};
+  static const List<String> _categoryOptions = [
+    'RESEARCHER',
+    'PG SCHOLAR',
+    'PG DIPLOMA SCHOLAR',
+    'DEPT OF ISM',
+    'DEPT OF NAM',
+    'DEPT OF NHM',
+    'AIDED COLLEGE',
+    'GOVT COLLEGE',
+    'PVT COLLEGE',
+    'PVT SECTOR SERVICE',
+    'RETD',
+    'PVT PRACTICE',
+    'MANUFACTURER',
+    'MILITARY SERVICE',
+    'CENTRAL GOVT',
+    'ESI',
+    'Other',
+  ];
 
   @override
   void initState() {
@@ -57,9 +87,6 @@ class _ProfessionalDetailsScreenState
     _medicalCouncilNoController = TextEditingController();
     _centralCouncilNoController = TextEditingController();
     _ugCollegeController = TextEditingController();
-    _zoneIdController = TextEditingController();
-    _professionalDetails1Controller = TextEditingController();
-    _professionalDetails2Controller = TextEditingController();
 
     // Load existing data if available
     WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -72,9 +99,6 @@ class _ProfessionalDetailsScreenState
     _medicalCouncilNoController.dispose();
     _centralCouncilNoController.dispose();
     _ugCollegeController.dispose();
-    _zoneIdController.dispose();
-    _professionalDetails1Controller.dispose();
-    _professionalDetails2Controller.dispose();
     super.dispose();
   }
 
@@ -103,13 +127,26 @@ class _ProfessionalDetailsScreenState
     if (professionalDetails != null) {
       setState(() {
         _selectedMedicalCouncilState = professionalDetails.medicalCouncilState;
+
+        // Parse professionalDetails1 (comma-separated string) into checkbox selections
+        if (professionalDetails.professionalDetails1.isNotEmpty) {
+          _selectedQualifications.clear();
+          _selectedQualifications.addAll(
+            professionalDetails.professionalDetails1.split(',').map((e) => e.trim()),
+          );
+        }
+
+        // Parse professionalDetails2 (comma-separated string) into checkbox selections
+        if (professionalDetails.professionalDetails2.isNotEmpty) {
+          _selectedCategories.clear();
+          _selectedCategories.addAll(
+            professionalDetails.professionalDetails2.split(',').map((e) => e.trim()),
+          );
+        }
       });
       _medicalCouncilNoController.text = professionalDetails.medicalCouncilNo;
       _centralCouncilNoController.text = professionalDetails.centralCouncilNo;
       _ugCollegeController.text = professionalDetails.ugCollege;
-      _zoneIdController.text = professionalDetails.zoneId;
-      _professionalDetails1Controller.text = professionalDetails.professionalDetails1;
-      _professionalDetails2Controller.text = professionalDetails.professionalDetails2;
     }
   }
 
@@ -126,9 +163,9 @@ class _ProfessionalDetailsScreenState
       medicalCouncilNo: _medicalCouncilNoController.text.trim(),
       centralCouncilNo: _centralCouncilNoController.text.trim(),
       ugCollege: _ugCollegeController.text.trim(),
-      zoneId: _zoneIdController.text.trim(),
-      professionalDetails1: _professionalDetails1Controller.text.trim(),
-      professionalDetails2: _professionalDetails2Controller.text.trim(),
+      zoneId: '', // Removed - no longer collected
+      professionalDetails1: _selectedQualifications.join(', '), // Convert checkboxes to comma-separated string
+      professionalDetails2: _selectedCategories.join(', '), // Convert checkboxes to comma-separated string
     );
 
     ref
@@ -138,12 +175,42 @@ class _ProfessionalDetailsScreenState
 
   /// Handle next button press - calls backend API with combined data
   Future<void> _handleNext() async {
-    if (_formKey.currentState?.validate() ?? false) {
-      setState(() {
-        _isSubmitting = true;
-      });
+    // Validate form fields
+    if (!(_formKey.currentState?.validate() ?? false)) {
+      return;
+    }
 
-      try {
+    // Validate qualifications checkbox selection
+    if (_selectedQualifications.isEmpty) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Please select at least one qualification'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+      return;
+    }
+
+    // Validate professional category checkbox selection
+    if (_selectedCategories.isEmpty) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Please select at least one professional category'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+      return;
+    }
+
+    setState(() {
+      _isSubmitting = true;
+    });
+
+    try {
         // Save current step
         _saveProfessionalDetails();
 
@@ -366,56 +433,146 @@ class _ProfessionalDetailsScreenState
                           },
                         ),
 
-                        SizedBox(height: 16.h),
+                        SizedBox(height: 24.h),
 
-                        // Zone ID
-                        TextInputField(
-                          controller: _zoneIdController,
-                          labelText: 'Zone ID',
-                          prefixIcon: Icons.pin_outlined,
-                          onChanged: (_) => _autoSave(),
-                          validator: (value) {
-                            if (value == null || value.trim().isEmpty) {
-                              return 'Zone ID is required';
-                            }
-                            return null;
-                          },
+                        // Qualifications (Professional Details 1) - Checkboxes
+                        Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Row(
+                              children: [
+                                Icon(Icons.school_outlined, size: 20.sp, color: const Color(0xFF1976D2)),
+                                SizedBox(width: 8.w),
+                                Text(
+                                  'Qualifications',
+                                  style: TextStyle(
+                                    fontSize: 16.sp,
+                                    fontWeight: FontWeight.w600,
+                                    color: Colors.black87,
+                                  ),
+                                ),
+                                Text(
+                                  ' *',
+                                  style: TextStyle(
+                                    fontSize: 16.sp,
+                                    color: Colors.red,
+                                  ),
+                                ),
+                              ],
+                            ),
+                            SizedBox(height: 12.h),
+                            Wrap(
+                              spacing: 8.w,
+                              runSpacing: 8.h,
+                              children: _qualificationOptions.map((qualification) {
+                                return FilterChip(
+                                  label: Text(qualification),
+                                  selected: _selectedQualifications.contains(qualification),
+                                  onSelected: (selected) {
+                                    setState(() {
+                                      if (selected) {
+                                        _selectedQualifications.add(qualification);
+                                      } else {
+                                        _selectedQualifications.remove(qualification);
+                                      }
+                                    });
+                                    _autoSave();
+                                  },
+                                  backgroundColor: Colors.grey[100],
+                                  selectedColor: const Color(0xFF1976D2).withOpacity(0.2),
+                                  checkmarkColor: const Color(0xFF1976D2),
+                                  labelStyle: TextStyle(
+                                    fontSize: 14.sp,
+                                    color: _selectedQualifications.contains(qualification)
+                                        ? const Color(0xFF1976D2)
+                                        : Colors.black87,
+                                  ),
+                                );
+                              }).toList(),
+                            ),
+                            if (_selectedQualifications.isEmpty)
+                              Padding(
+                                padding: EdgeInsets.only(top: 8.h, left: 12.w),
+                                child: Text(
+                                  'Please select at least one qualification',
+                                  style: TextStyle(
+                                    fontSize: 12.sp,
+                                    color: Colors.grey[600],
+                                  ),
+                                ),
+                              ),
+                          ],
                         ),
 
-                        SizedBox(height: 16.h),
+                        SizedBox(height: 24.h),
 
-                        // Professional Details 1
-                        TextInputField(
-                          controller: _professionalDetails1Controller,
-                          labelText: 'Professional Details 1',
-                          hintText: 'Additional professional information',
-                          prefixIcon: Icons.description_outlined,
-                          maxLines: 3,
-                          onChanged: (_) => _autoSave(),
-                          validator: (value) {
-                            if (value == null || value.trim().isEmpty) {
-                              return 'Professional details 1 is required';
-                            }
-                            return null;
-                          },
-                        ),
-
-                        SizedBox(height: 16.h),
-
-                        // Professional Details 2
-                        TextInputField(
-                          controller: _professionalDetails2Controller,
-                          labelText: 'Professional Details 2',
-                          hintText: 'Additional professional information',
-                          prefixIcon: Icons.description_outlined,
-                          maxLines: 3,
-                          onChanged: (_) => _autoSave(),
-                          validator: (value) {
-                            if (value == null || value.trim().isEmpty) {
-                              return 'Professional details 2 is required';
-                            }
-                            return null;
-                          },
+                        // Professional Category (Professional Details 2) - Checkboxes
+                        Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Row(
+                              children: [
+                                Icon(Icons.work_outline, size: 20.sp, color: const Color(0xFF1976D2)),
+                                SizedBox(width: 8.w),
+                                Text(
+                                  'Professional Category',
+                                  style: TextStyle(
+                                    fontSize: 16.sp,
+                                    fontWeight: FontWeight.w600,
+                                    color: Colors.black87,
+                                  ),
+                                ),
+                                Text(
+                                  ' *',
+                                  style: TextStyle(
+                                    fontSize: 16.sp,
+                                    color: Colors.red,
+                                  ),
+                                ),
+                              ],
+                            ),
+                            SizedBox(height: 12.h),
+                            Wrap(
+                              spacing: 8.w,
+                              runSpacing: 8.h,
+                              children: _categoryOptions.map((category) {
+                                return FilterChip(
+                                  label: Text(category),
+                                  selected: _selectedCategories.contains(category),
+                                  onSelected: (selected) {
+                                    setState(() {
+                                      if (selected) {
+                                        _selectedCategories.add(category);
+                                      } else {
+                                        _selectedCategories.remove(category);
+                                      }
+                                    });
+                                    _autoSave();
+                                  },
+                                  backgroundColor: Colors.grey[100],
+                                  selectedColor: const Color(0xFF1976D2).withOpacity(0.2),
+                                  checkmarkColor: const Color(0xFF1976D2),
+                                  labelStyle: TextStyle(
+                                    fontSize: 14.sp,
+                                    color: _selectedCategories.contains(category)
+                                        ? const Color(0xFF1976D2)
+                                        : Colors.black87,
+                                  ),
+                                );
+                              }).toList(),
+                            ),
+                            if (_selectedCategories.isEmpty)
+                              Padding(
+                                padding: EdgeInsets.only(top: 8.h, left: 12.w),
+                                child: Text(
+                                  'Please select at least one professional category',
+                                  style: TextStyle(
+                                    fontSize: 12.sp,
+                                    color: Colors.grey[600],
+                                  ),
+                                ),
+                              ),
+                          ],
                         ),
 
                         SizedBox(height: 32.h),

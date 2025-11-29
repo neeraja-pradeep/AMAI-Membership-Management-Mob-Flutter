@@ -15,16 +15,18 @@ import '../../components/step_progress_indicator.dart';
 import '../../components/text_input_field.dart';
 import '../../widgets/exit_confirmation_dialog.dart';
 
-/// Personal Details Screen (Step 1 of 2)
+/// Personal Details Screen (Step 1 of 5)
 ///
-/// Collects practitioner's basic personal and membership information:
+/// Collects practitioner's basic personal information:
 /// - First Name, Last Name
 /// - Email, Password
-/// - Phone, WhatsApp Phone
+/// - Phone (+91 prefix), WhatsApp Phone (+91 prefix)
 /// - Date of Birth
 /// - Gender
 /// - Blood Group
-/// - Membership Type
+///
+/// NOTE: Membership type is passed when registration starts (when user selects "Practitioner")
+/// and is stored in the registration state.
 ///
 /// UPDATED: Now includes all fields needed for /api/membership/register/
 class PersonalDetailsScreen extends ConsumerStatefulWidget {
@@ -50,7 +52,6 @@ class _PersonalDetailsScreenState extends ConsumerState<PersonalDetailsScreen> {
   // State
   String? _selectedGender;
   String? _selectedBloodGroup;
-  String? _selectedMembershipType;
   DateTime? _dateOfBirth;
   bool _obscurePassword = true;
 
@@ -120,7 +121,6 @@ class _PersonalDetailsScreenState extends ConsumerState<PersonalDetailsScreen> {
       setState(() {
         _selectedGender = personalDetails.gender;
         _selectedBloodGroup = personalDetails.bloodGroup;
-        _selectedMembershipType = personalDetails.membershipType;
       });
     }
   }
@@ -134,6 +134,15 @@ class _PersonalDetailsScreenState extends ConsumerState<PersonalDetailsScreen> {
 
   /// Save personal details to registration state
   void _savePersonalDetails() {
+    // Get membership type from registration state (set when registration started)
+    final state = ref.read(registrationProvider);
+    String membershipType = 'practitioner'; // default
+
+    if (state is RegistrationStateInProgress) {
+      // Try to get from existing personal details or use default
+      membershipType = state.registration.personalDetails?.membershipType ?? 'practitioner';
+    }
+
     final personalDetails = PersonalDetails(
       firstName: _firstNameController.text.trim(),
       lastName: _lastNameController.text.trim(),
@@ -144,7 +153,7 @@ class _PersonalDetailsScreenState extends ConsumerState<PersonalDetailsScreen> {
       dateOfBirth: _dateOfBirth ?? DateTime.now(),
       gender: _selectedGender ?? '',
       bloodGroup: _selectedBloodGroup ?? '',
-      membershipType: _selectedMembershipType ?? 'practitioner',
+      membershipType: membershipType,
     );
 
     ref
@@ -354,18 +363,49 @@ class _PersonalDetailsScreenState extends ConsumerState<PersonalDetailsScreen> {
 
                         SizedBox(height: 16.h),
 
-                        // Phone
-                        TextInputField(
+                        // Phone with +91 prefix
+                        TextFormField(
                           controller: _phoneController,
-                          labelText: 'Phone Number',
-                          hintText: '1234567890',
-                          prefixIcon: Icons.phone_outlined,
                           keyboardType: TextInputType.phone,
                           maxLength: 10,
                           inputFormatters: [
                             FilteringTextInputFormatter.digitsOnly,
                           ],
                           onChanged: (_) => _autoSave(),
+                          decoration: InputDecoration(
+                            labelText: 'Phone Number',
+                            hintText: '1234567890',
+                            prefixIcon: Icon(Icons.phone_outlined, size: 20.sp),
+                            prefixText: '+91 ',
+                            prefixStyle: TextStyle(
+                              fontSize: 16.sp,
+                              color: Colors.black87,
+                              fontWeight: FontWeight.w500,
+                            ),
+                            border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(12.r),
+                              borderSide: BorderSide(color: Colors.grey[300]!),
+                            ),
+                            enabledBorder: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(12.r),
+                              borderSide: BorderSide(color: Colors.grey[300]!),
+                            ),
+                            focusedBorder: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(12.r),
+                              borderSide: const BorderSide(
+                                color: Color(0xFF1976D2),
+                                width: 2,
+                              ),
+                            ),
+                            errorBorder: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(12.r),
+                              borderSide: const BorderSide(color: Colors.red),
+                            ),
+                            contentPadding: EdgeInsets.symmetric(
+                              horizontal: 16.w,
+                              vertical: 16.h,
+                            ),
+                          ),
                           validator: (value) {
                             if (value == null || value.trim().isEmpty) {
                               return 'Phone number is required';
@@ -379,18 +419,49 @@ class _PersonalDetailsScreenState extends ConsumerState<PersonalDetailsScreen> {
 
                         SizedBox(height: 16.h),
 
-                        // WhatsApp Phone
-                        TextInputField(
+                        // WhatsApp Phone with +91 prefix
+                        TextFormField(
                           controller: _waPhoneController,
-                          labelText: 'WhatsApp Number',
-                          hintText: '1234567890',
-                          prefixIcon: Icons.chat_outlined,
                           keyboardType: TextInputType.phone,
                           maxLength: 10,
                           inputFormatters: [
                             FilteringTextInputFormatter.digitsOnly,
                           ],
                           onChanged: (_) => _autoSave(),
+                          decoration: InputDecoration(
+                            labelText: 'WhatsApp Number',
+                            hintText: '1234567890',
+                            prefixIcon: Icon(Icons.chat_outlined, size: 20.sp),
+                            prefixText: '+91 ',
+                            prefixStyle: TextStyle(
+                              fontSize: 16.sp,
+                              color: Colors.black87,
+                              fontWeight: FontWeight.w500,
+                            ),
+                            border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(12.r),
+                              borderSide: BorderSide(color: Colors.grey[300]!),
+                            ),
+                            enabledBorder: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(12.r),
+                              borderSide: BorderSide(color: Colors.grey[300]!),
+                            ),
+                            focusedBorder: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(12.r),
+                              borderSide: const BorderSide(
+                                color: Color(0xFF1976D2),
+                                width: 2,
+                              ),
+                            ),
+                            errorBorder: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(12.r),
+                              borderSide: const BorderSide(color: Colors.red),
+                            ),
+                            contentPadding: EdgeInsets.symmetric(
+                              horizontal: 16.w,
+                              vertical: 16.h,
+                            ),
+                          ),
                           validator: (value) {
                             if (value == null || value.trim().isEmpty) {
                               return 'WhatsApp number is required';
@@ -510,45 +581,6 @@ class _PersonalDetailsScreenState extends ConsumerState<PersonalDetailsScreen> {
                           validator: (value) {
                             if (value == null || value.isEmpty) {
                               return 'Blood group is required';
-                            }
-                            return null;
-                          },
-                        ),
-
-                        SizedBox(height: 16.h),
-
-                        // Membership Type
-                        DropdownField<String>(
-                          labelText: 'Membership Type',
-                          prefixIcon: Icons.badge_outlined,
-                          value: _selectedMembershipType,
-                          items: const [
-                            DropdownMenuItem(
-                              value: 'student',
-                              child: Text('Student'),
-                            ),
-                            DropdownMenuItem(
-                              value: 'practitioner',
-                              child: Text('Practitioner'),
-                            ),
-                            DropdownMenuItem(
-                              value: 'house_surgeon',
-                              child: Text('House Surgeon'),
-                            ),
-                            DropdownMenuItem(
-                              value: 'honorary',
-                              child: Text('Honorary'),
-                            ),
-                          ],
-                          onChanged: (value) {
-                            setState(() {
-                              _selectedMembershipType = value;
-                            });
-                            _autoSave();
-                          },
-                          validator: (value) {
-                            if (value == null || value.isEmpty) {
-                              return 'Membership type is required';
                             }
                             return null;
                           },
