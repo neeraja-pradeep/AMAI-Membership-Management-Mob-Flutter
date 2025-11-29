@@ -35,22 +35,69 @@ dependencies:
   # Use with the CupertinoIcons class for iOS style icons.
   cupertino_icons: ^1.0.8
 
+  # State Management
+  flutter_riverpod: ^2.5.1
+  riverpod_annotation: ^2.3.5
+
+  # Immutable Data Classes
+  freezed_annotation: ^2.4.1
+  json_annotation: ^4.8.1
+
+  # Networking
+  dio: ^5.4.3+1
+
+  # Local Storage
+  hive: ^2.2.3
+  hive_flutter: ^1.1.0
+
+  # Responsive UI
+  flutter_screenutil: ^5.9.3
+
+  # Functional Programming
+  fpdart: ^1.1.0
+
+  # Routing
+  go_router: ^14.2.0
+
+  # Connectivity
+  connectivity_plus: ^6.0.3
+
+  # Image Caching
+  cached_network_image: ^3.3.1
+
+  # Loading Shimmer
+  shimmer: ^3.0.0
+
+  # Date Formatting
+  intl: ^0.19.0
+
 dev_dependencies:
   flutter_test:
     sdk: flutter
-#  Custom lint plugin (your own rule package)
+
+  # Code Generation
+  build_runner: ^2.4.9
+  freezed: ^2.5.2
+  json_serializable: ^6.7.1
+  riverpod_generator: ^2.4.0
+  hive_generator: ^2.0.1
+
+  # Custom lint plugin (your own rule package)
   naming_conventions_lint:
     path: ../naming_conventions_lint
 
-   #  Lint & Analysis tools
+  # Lint & Analysis tools
   custom_lint: ^0.6.4
-  very_good_analysis: ^10.0.0 
+  very_good_analysis: ^10.0.0
   # The "flutter_lints" package below contains a set of recommended lints to
   # encourage good coding practices. The lint set provided by the package is
   # activated in the `analysis_options.yaml` file located at the root of your
   # package. See that file for information about deactivating specific lint
   # rules and activating additional ones.
   flutter_lints: ^6.0.0
+
+  # Testing
+  mocktail: ^1.0.3
 
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec
