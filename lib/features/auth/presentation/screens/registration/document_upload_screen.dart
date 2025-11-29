@@ -1,37 +1,15 @@
 import 'dart:io';
-
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-// NOTE: file_picker package required - add to pubspec.yaml
-// import 'package:file_picker/file_picker.dart';
+import 'package:myapp/app/theme/colors.dart';
 
 import '../../../../../app/router/app_router.dart';
 import '../../../application/notifiers/registration_state_notifier.dart';
 import '../../../application/states/registration_state.dart';
 import '../../../domain/entities/registration/document_upload.dart';
-import '../../components/step_progress_indicator.dart';
 
-/// Document Upload Screen (Step 3 of 3)
-///
-/// Allows users to upload required documents:
-/// - Medical Council Certificate (required)
-/// - Qualification Certificate (required)
-/// - Identity Proof (required)
-/// - Profile Photo (required)
-/// - Additional Certificates (optional)
-///
-/// Matches backend POST /api/membership/application-documents/ requirements
-/// - application: Application ID from Step 1
-/// - document_file: File (multipart)
-/// - document_type: Type of document
-///
-/// CRITICAL REQUIREMENTS:
-/// - File size validation (max 5MB per file)
-/// - File type validation (PDF, JPG, PNG)
-/// - One-time upload (files deleted after submission)
-/// - All required documents must be uploaded
 class DocumentUploadScreen extends ConsumerStatefulWidget {
   const DocumentUploadScreen({super.key});
 
@@ -41,464 +19,306 @@ class DocumentUploadScreen extends ConsumerStatefulWidget {
 }
 
 class _DocumentUploadScreenState extends ConsumerState<DocumentUploadScreen> {
-  final Map<DocumentType, File?> _uploadedFiles = {};
+  File? profilePhoto;
+  File? certificate;
+  bool acceptedTerms = false;
 
   @override
   void initState() {
     super.initState();
-    _loadExistingDocuments();
+    _restoreSavedFiles();
   }
 
-  /// Load existing documents from registration state
-  void _loadExistingDocuments() {
+  void _restoreSavedFiles() {
     final state = ref.read(registrationProvider);
+    if (state is! RegistrationStateInProgress) return;
 
-    // Handle different state types
-    if (state is RegistrationStateResumePrompt) {
-      // User has existing registration, resume it
-      ref
-          .read(registrationProvider.notifier)
-          .resumeRegistration(state.existingRegistration);
-      // Reload after resuming
-      Future.microtask(() => _loadExistingDocuments());
+    final docs = state.registration.documentUploads?.documents ?? [];
+
+    for (var doc in docs) {
+      if (doc.type == DocumentType.profilePhoto) {
+        profilePhoto = File(doc.localFilePath);
+      } else if (doc.type == DocumentType.medicalCouncilCertificate) {
+        certificate = File(doc.localFilePath);
+      }
+    }
+
+    setState(() {});
+  }
+
+  Future<void> _pickFile({required bool isProfile}) async {
+    final result = await FilePicker.platform.pickFiles(
+      type: FileType.custom,
+      allowedExtensions: isProfile
+          ? ['jpg', 'jpeg', 'png']
+          : ['jpg', 'jpeg', 'png', 'pdf'],
+    );
+
+    if (result == null) return;
+
+    final file = File(result.files.single.path!);
+    final sizeMB = (await file.length()) / (1024 * 1024);
+
+    if (sizeMB > 5) {
+      _showError("File must be under 5MB.");
       return;
     }
 
-    // If registration hasn't been started yet, start it now
-    if (state is! RegistrationStateInProgress) {
-      ref.read(registrationProvider.notifier).startNewRegistration();
-      return; // State is now initialized, but no data to load yet
-    }
-
-    final documentUploads = state.registration.documentUploads;
-
-    if (documentUploads != null) {
-      for (final doc in documentUploads.documents) {
-        _uploadedFiles[doc.type] = File(doc.localFilePath);
-      }
-    }
-  }
-
-  /// Pick file for document type
-  Future<void> _pickFile(DocumentType type) async {
-    // TODO: Uncomment when file_picker is added to pubspec.yaml
-
-    try {
-      final result = await FilePicker.platform.pickFiles(
-        type: FileType.custom,
-        allowedExtensions: ['pdf', 'jpg', 'jpeg', 'png'],
-      );
-
-      if (result != null && result.files.single.path != null) {
-        final file = File(result.files.single.path!);
-
-        // Validate file size (max 5MB)
-        final fileSizeInBytes = await file.length();
-        final fileSizeInMB = fileSizeInBytes / (1024 * 1024);
-
-        if (fileSizeInMB > 5) {
-          if (mounted) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(
-                content: Text('File size must be less than 5MB'),
-                backgroundColor: Colors.red,
-              ),
-            );
-          }
-          return;
-        }
-
-        setState(() {
-          _uploadedFiles[type] = file;
-        });
-
-        // Save to registration state
-        _saveDocuments();
-      }
-    } catch (e) {
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Error picking file: $e'),
-            backgroundColor: Colors.red,
-          ),
-        );
-      }
-    }
-
-    // MOCK: For now, show message that file picker is not implemented
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text('File picker for ${type.displayName} (TODO: Implement)'),
-        backgroundColor: Colors.orange,
-      ),
-    );
-  }
-
-  /// Remove uploaded file
-  void _removeFile(DocumentType type) {
     setState(() {
-      _uploadedFiles.remove(type);
-    });
-    _saveDocuments();
-  }
-
-  /// Save documents to registration state
-  void _saveDocuments() {
-    // Convert uploaded files to DocumentUpload entities
-    final documents = _uploadedFiles.entries.map((entry) {
-      final type = entry.key;
-      final file = entry.value!;
-
-      return DocumentUpload(
-        type: type,
-        localFilePath: file.path,
-        fileName: file.path.split('/').last,
-        fileSizeBytes: file.lengthSync(),
-        uploadedAt: DateTime.now(),
-      );
-    }).toList();
-
-    // Create DocumentUploads entity
-    final documentUploads = DocumentUploads(documents: documents);
-
-    // Update registration state
-    ref
-        .read(registrationProvider.notifier)
-        .updateDocumentUploads(documentUploads);
-  }
-
-  /// Check if all required documents are uploaded
-  bool _areRequiredDocumentsUploaded() {
-    final requiredTypes = DocumentType.values.where((type) => type.isRequired);
-
-    for (final type in requiredTypes) {
-      if (!_uploadedFiles.containsKey(type) || _uploadedFiles[type] == null) {
-        return false;
+      if (isProfile) {
+        profilePhoto = file;
+      } else {
+        certificate = file;
       }
-    }
+    });
 
-    return true;
+    _saveToState();
   }
 
-  /// Handle next button press
-  Future<void> _handleNext() async {
-    if (!_areRequiredDocumentsUploaded()) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Please upload all required documents'),
-          backgroundColor: Colors.red,
+  void _removeFile(bool isProfile) {
+    setState(() {
+      if (isProfile) {
+        profilePhoto = null;
+      } else {
+        certificate = null;
+      }
+    });
+
+    _saveToState();
+  }
+
+  void _saveToState() {
+    final docs = <DocumentUpload>[];
+
+    if (profilePhoto != null) {
+      docs.add(
+        DocumentUpload(
+          type: DocumentType.profilePhoto,
+          localFilePath: profilePhoto!.path,
+          fileName: profilePhoto!.path.split('/').last,
+          fileSizeBytes: profilePhoto!.lengthSync(),
+          uploadedAt: DateTime.now(),
         ),
       );
+    }
+
+    if (certificate != null) {
+      docs.add(
+        DocumentUpload(
+          type: DocumentType.medicalCouncilCertificate,
+          localFilePath: certificate!.path,
+          fileName: certificate!.path.split('/').last,
+          fileSizeBytes: certificate!.lengthSync(),
+          uploadedAt: DateTime.now(),
+        ),
+      );
+    }
+
+    ref
+        .read(registrationProvider.notifier)
+        .updateDocumentUploads(DocumentUploads(documents: docs));
+  }
+
+  Future<void> _next() async {
+    if (profilePhoto == null || certificate == null) {
+      _showError("Please upload all required documents.");
       return;
     }
 
-    // Save documents
-    _saveDocuments();
+    if (!acceptedTerms) {
+      _showError("You must agree to the Terms & Conditions.");
+      return;
+    }
 
-    // Auto-save to Hive
     await ref.read(registrationProvider.notifier).autoSaveProgress();
 
-    // Navigate to payment screen
     if (mounted) {
       Navigator.pushNamed(context, AppRouter.registrationPayment);
     }
   }
 
-  /// Handle back button press
-  void _handleBack() {
-    _saveDocuments();
-    Navigator.pop(context);
+  void _showError(String msg) {
+    ScaffoldMessenger.of(
+      context,
+    ).showSnackBar(SnackBar(backgroundColor: Colors.red, content: Text(msg)));
   }
 
   @override
   Widget build(BuildContext context) {
-    final allRequiredUploaded = _areRequiredDocumentsUploaded();
+    final canProceed =
+        (profilePhoto != null && certificate != null && acceptedTerms);
 
-    return WillPopScope(
-      onWillPop: () async {
-        _handleBack();
-        return false;
-      },
-      child: Scaffold(
+    return Scaffold(
+      appBar: AppBar(
         backgroundColor: Colors.white,
-        appBar: AppBar(
-          backgroundColor: Colors.white,
-          elevation: 0,
-          leading: IconButton(
-            icon: Icon(Icons.arrow_back, color: Colors.grey[800]),
-            onPressed: _handleBack,
-          ),
+        elevation: 0,
+        title: const Text(
+          "Register Here",
+          style: TextStyle(fontWeight: FontWeight.bold),
         ),
-        body: SafeArea(
-          child: Column(
-            children: [
-              // Progress indicator
-              const StepProgressIndicator(
-                currentStep: 3,
-                totalSteps: 3,
-                stepTitle: 'Document Uploads',
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back, color: Colors.black),
+          onPressed: () => Navigator.pop(context),
+        ),
+      ),
+
+      body: Padding(
+        padding: EdgeInsets.all(24.w),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            SizedBox(height: 10.h),
+
+            Center(
+              child: Text(
+                "Step 4 of 4",
+                style: TextStyle(fontSize: 16.sp, fontWeight: FontWeight.w600),
               ),
+            ),
 
-              // Content
-              Expanded(
-                child: SingleChildScrollView(
-                  padding: EdgeInsets.symmetric(horizontal: 24.w),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.stretch,
-                    children: [
-                      SizedBox(height: 24.h),
+            SizedBox(height: 12.h),
 
-                      // Title
-                      Text(
-                        'Upload Documents',
-                        style: TextStyle(
-                          fontSize: 24.sp,
-                          fontWeight: FontWeight.bold,
-                          color: Colors.grey[800],
-                        ),
-                      ),
-                      SizedBox(height: 8.h),
-                      Text(
-                        'Please upload the required documents (max 5MB each)',
-                        style: TextStyle(
-                          fontSize: 14.sp,
-                          color: Colors.grey[600],
-                        ),
-                      ),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: List.generate(4, (i) {
+                final active = i == 3;
+                return AnimatedContainer(
+                  duration: const Duration(milliseconds: 300),
+                  margin: EdgeInsets.symmetric(horizontal: 6.w),
+                  width: active ? 18.w : 12.w,
+                  height: active ? 18.w : 12.w,
+                  decoration: BoxDecoration(
+                    color: active ? AppColors.brown : Colors.grey[300],
+                    shape: BoxShape.circle,
+                  ),
+                );
+              }),
+            ),
 
-                      SizedBox(height: 32.h),
+            SizedBox(height: 24.h),
 
-                      // Document upload cards
-                      ...DocumentType.values.map((type) {
-                        final file = _uploadedFiles[type];
-                        final isUploaded = file != null;
+            Text(
+              "Upload Documents",
+              style: TextStyle(fontSize: 20.sp, fontWeight: FontWeight.bold),
+            ),
 
-                        return Padding(
-                          padding: EdgeInsets.only(bottom: 16.h),
-                          child: _DocumentCard(
-                            documentType: type,
-                            file: file,
-                            isUploaded: isUploaded,
-                            onUpload: () => _pickFile(type),
-                            onRemove: () => _removeFile(type),
-                          ),
-                        );
-                      }).toList(),
+            SizedBox(height: 30.h),
 
-                      SizedBox(height: 16.h),
+            _label("Profile Photo"),
+            _uploadTile(
+              file: profilePhoto,
+              onPick: () => _pickFile(isProfile: true),
+              onRemove: () => _removeFile(true),
+            ),
 
-                      // Requirements note
-                      Container(
-                        padding: EdgeInsets.all(16.r),
-                        decoration: BoxDecoration(
-                          color: Colors.blue[50],
-                          borderRadius: BorderRadius.circular(12.r),
-                          border: Border.all(color: Colors.blue[200]!),
-                        ),
-                        child: Row(
-                          children: [
-                            Icon(
-                              Icons.info_outline,
-                              color: Colors.blue[700],
-                              size: 20.sp,
-                            ),
-                            SizedBox(width: 12.w),
-                            Expanded(
-                              child: Text(
-                                'Accepted formats: PDF, JPG, PNG\nMax file size: 5MB',
-                                style: TextStyle(
-                                  fontSize: 12.sp,
-                                  color: Colors.blue[900],
-                                ),
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
+            SizedBox(height: 25.h),
 
-                      SizedBox(height: 32.h),
+            _label("Medical Council Certificate"),
+            _uploadTile(
+              file: certificate,
+              onPick: () => _pickFile(isProfile: false),
+              onRemove: () => _removeFile(false),
+            ),
 
-                      // Next button
-                      SizedBox(
-                        height: 50.h,
-                        child: ElevatedButton(
-                          onPressed: allRequiredUploaded ? _handleNext : null,
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: const Color(0xFF1976D2),
-                            disabledBackgroundColor: Colors.grey[300],
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(12.r),
-                            ),
-                            elevation: 0,
-                          ),
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              Text(
-                                'Next',
-                                style: TextStyle(
-                                  fontSize: 16.sp,
-                                  fontWeight: FontWeight.w600,
-                                  color: allRequiredUploaded
-                                      ? Colors.white
-                                      : Colors.grey[500],
-                                ),
-                              ),
-                              SizedBox(width: 8.w),
-                              Icon(
-                                Icons.arrow_forward,
-                                size: 20.sp,
-                                color: allRequiredUploaded
-                                    ? Colors.white
-                                    : Colors.grey[500],
-                              ),
-                            ],
-                          ),
-                        ),
-                      ),
+            SizedBox(height: 30.h),
 
-                      SizedBox(height: 24.h),
-                    ],
+            Row(
+              children: [
+                Checkbox(
+                  value: acceptedTerms,
+                  onChanged: (v) => setState(() => acceptedTerms = v!),
+                  activeColor: AppColors.brown,
+                ),
+                Expanded(
+                  child: Text(
+                    "I agree to the Terms & Conditions",
+                    style: TextStyle(fontSize: 14.sp),
+                  ),
+                ),
+              ],
+            ),
+
+            const Spacer(),
+
+            SizedBox(
+              width: double.infinity,
+              height: 50.h,
+              child: ElevatedButton(
+                onPressed: canProceed ? _next : null,
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: canProceed
+                      ? AppColors.brown
+                      : Colors.grey[300],
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12.r),
+                  ),
+                ),
+                child: Text(
+                  "Next",
+                  style: TextStyle(
+                    fontSize: 16.sp,
+                    color: Colors.white,
+                    fontWeight: FontWeight.w600,
                   ),
                 ),
               ),
-            ],
-          ),
+            ),
+          ],
         ),
       ),
     );
   }
-}
 
-/// Document upload card widget
-class _DocumentCard extends StatelessWidget {
-  final DocumentType documentType;
-  final File? file;
-  final bool isUploaded;
-  final VoidCallback onUpload;
-  final VoidCallback onRemove;
-
-  const _DocumentCard({
-    required this.documentType,
-    required this.file,
-    required this.isUploaded,
-    required this.onUpload,
-    required this.onRemove,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: EdgeInsets.all(16.r),
-      decoration: BoxDecoration(
-        color: isUploaded ? Colors.green[50] : Colors.white,
-        borderRadius: BorderRadius.circular(12.r),
-        border: Border.all(
-          color: isUploaded ? Colors.green[300]! : Colors.grey[300]!,
-          width: isUploaded ? 2 : 1,
-        ),
+  Widget _label(String text) {
+    return Padding(
+      padding: EdgeInsets.only(bottom: 8.h),
+      child: Text(
+        text,
+        style: TextStyle(fontSize: 16.sp, fontWeight: FontWeight.w500),
       ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          // Document type header
-          Row(
-            children: [
-              Icon(
-                isUploaded ? Icons.check_circle : Icons.upload_file,
-                color: isUploaded ? Colors.green[700] : Colors.grey[600],
-                size: 24.sp,
-              ),
-              SizedBox(width: 12.w),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      documentType.displayName,
-                      style: TextStyle(
-                        fontSize: 16.sp,
-                        fontWeight: FontWeight.w600,
-                        color: Colors.grey[800],
-                      ),
-                    ),
-                    if (documentType.isRequired)
-                      Text(
-                        'Required',
-                        style: TextStyle(
-                          fontSize: 12.sp,
-                          color: Colors.red[600],
-                          fontWeight: FontWeight.w500,
-                        ),
-                      ),
-                  ],
-                ),
-              ),
-            ],
-          ),
+    );
+  }
 
-          if (isUploaded && file != null) ...[
-            SizedBox(height: 12.h),
-            // File info
-            Container(
-              padding: EdgeInsets.all(12.r),
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(8.r),
-              ),
-              child: Row(
+  Widget _uploadTile({
+    required File? file,
+    required VoidCallback onPick,
+    required VoidCallback onRemove,
+  }) {
+    return InkWell(
+      onTap: onPick,
+      child: Container(
+        width: double.infinity,
+        padding: EdgeInsets.all(18.w),
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(14.r),
+          border: Border.all(color: Colors.grey, style: BorderStyle.solid),
+          // You may use dashed border package if needed.
+        ),
+        child: file == null
+            ? Column(
                 children: [
-                  Icon(
-                    Icons.insert_drive_file,
-                    color: Colors.grey[600],
-                    size: 20.sp,
+                  Icon(Icons.upload_file, size: 40.sp, color: Colors.grey),
+                  SizedBox(height: 8.h),
+                  Text(
+                    "Tap to Upload",
+                    style: TextStyle(fontSize: 15.sp, color: Colors.grey),
                   ),
-                  SizedBox(width: 8.w),
-                  Expanded(
-                    child: Text(
-                      file!.path.split('/').last,
-                      style: TextStyle(
-                        fontSize: 14.sp,
-                        color: Colors.grey[800],
-                      ),
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                  ),
-                  IconButton(
-                    icon: Icon(
-                      Icons.delete,
-                      color: Colors.red[600],
-                      size: 20.sp,
-                    ),
+                ],
+              )
+            : Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Expanded(child: Text(file.path.split('/').last)),
+                  TextButton(onPressed: onPick, child: const Text("Replace")),
+                  TextButton(
                     onPressed: onRemove,
+                    child: const Text(
+                      "Remove",
+                      style: TextStyle(color: Colors.red),
+                    ),
                   ),
                 ],
               ),
-            ),
-          ],
-
-          if (!isUploaded) ...[
-            SizedBox(height: 12.h),
-            // Upload button
-            SizedBox(
-              width: double.infinity,
-              child: OutlinedButton.icon(
-                onPressed: onUpload,
-                icon: Icon(Icons.cloud_upload, size: 18.sp),
-                label: Text('Choose File', style: TextStyle(fontSize: 14.sp)),
-                style: OutlinedButton.styleFrom(
-                  foregroundColor: const Color(0xFF1976D2),
-                  side: const BorderSide(color: Color(0xFF1976D2)),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(8.r),
-                  ),
-                  padding: EdgeInsets.symmetric(vertical: 12.h),
-                ),
-              ),
-            ),
-          ],
-        ],
       ),
     );
   }

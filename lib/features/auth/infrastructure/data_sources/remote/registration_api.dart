@@ -13,14 +13,17 @@ import '../../../domain/repositories/registration_repository.dart';
 class RegistrationApi {
   final ApiClient _apiClient;
 
-  const RegistrationApi({required ApiClient apiClient}) : _apiClient = apiClient;
+  const RegistrationApi({required ApiClient apiClient})
+    : _apiClient = apiClient;
 
   /// Fetch medical councils
   Future<List<MedicalCouncil>> fetchCouncils() async {
     final response = await _apiClient.get(Endpoints.councils);
 
     final data = response.data as List<dynamic>;
-    return data.map((json) => MedicalCouncil.fromJson(json as Map<String, dynamic>)).toList();
+    return data
+        .map((json) => MedicalCouncil.fromJson(json as Map<String, dynamic>))
+        .toList();
   }
 
   /// Fetch specializations
@@ -28,7 +31,9 @@ class RegistrationApi {
     final response = await _apiClient.get(Endpoints.specializations);
 
     final data = response.data as List<dynamic>;
-    return data.map((json) => Specialization.fromJson(json as Map<String, dynamic>)).toList();
+    return data
+        .map((json) => Specialization.fromJson(json as Map<String, dynamic>))
+        .toList();
   }
 
   /// Fetch countries
@@ -36,7 +41,9 @@ class RegistrationApi {
     final response = await _apiClient.get(Endpoints.countries);
 
     final data = response.data as List<dynamic>;
-    return data.map((json) => Country.fromJson(json as Map<String, dynamic>)).toList();
+    return data
+        .map((json) => Country.fromJson(json as Map<String, dynamic>))
+        .toList();
   }
 
   /// Fetch states for country
@@ -47,7 +54,9 @@ class RegistrationApi {
     );
 
     final data = response.data as List<dynamic>;
-    return data.map((json) => State.fromJson(json as Map<String, dynamic>)).toList();
+    return data
+        .map((json) => State.fromJson(json as Map<String, dynamic>))
+        .toList();
   }
 
   /// Fetch districts for state
@@ -58,7 +67,9 @@ class RegistrationApi {
     );
 
     final data = response.data as List<dynamic>;
-    return data.map((json) => District.fromJson(json as Map<String, dynamic>)).toList();
+    return data
+        .map((json) => District.fromJson(json as Map<String, dynamic>))
+        .toList();
   }
 
   /// Upload document file
@@ -104,6 +115,7 @@ class RegistrationApi {
     );
 
     // Return registration ID
+
     return response.data['registration_id'] as String;
   }
 
@@ -113,10 +125,7 @@ class RegistrationApi {
   Future<Map<String, dynamic>> submitMembershipRegistration({
     required Map<String, dynamic> data,
   }) async {
-    final response = await _apiClient.post(
-      Endpoints.register,
-      data: data,
-    );
+    final response = await _apiClient.post(Endpoints.register, data: data);
 
     return response.data as Map<String, dynamic>;
   }
@@ -126,10 +135,7 @@ class RegistrationApi {
   Future<Map<String, dynamic>> submitAddress({
     required Map<String, dynamic> data,
   }) async {
-    final response = await _apiClient.post(
-      Endpoints.addresses,
-      data: data,
-    );
+    final response = await _apiClient.post(Endpoints.addresses, data: data);
 
     return response.data as Map<String, dynamic>;
   }
@@ -192,7 +198,9 @@ class RegistrationApi {
   }
 
   /// Verify payment status
-  Future<Map<String, dynamic>> verifyPayment({required String sessionId}) async {
+  Future<Map<String, dynamic>> verifyPayment({
+    required String sessionId,
+  }) async {
     final response = await _apiClient.post(
       Endpoints.registrationVerifyPayment,
       data: {'session_id': sessionId},

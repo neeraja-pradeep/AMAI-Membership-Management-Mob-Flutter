@@ -124,10 +124,6 @@ class AppRouter {
       case registrationDocuments:
         return _buildRoute(const DocumentUploadScreen());
 
-      // DEPRECATED: Old 5-step registration routes (backward compatibility)
-      case registrationPersonal:
-        return _buildRoute(const PersonalDetailsScreen());
-
       case registrationProfessional:
         return _buildRoute(const ProfessionalDetailsScreen());
 

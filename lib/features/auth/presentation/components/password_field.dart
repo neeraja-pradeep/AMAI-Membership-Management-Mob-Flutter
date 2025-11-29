@@ -1,14 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:myapp/app/theme/colors.dart';
 
 /// Password input field component
 class PasswordField extends StatefulWidget {
   final TextEditingController controller;
 
-  const PasswordField({
-    required this.controller,
-    super.key,
-  });
+  const PasswordField({required this.controller, super.key});
 
   @override
   State<PasswordField> createState() => _PasswordFieldState();
@@ -24,12 +22,8 @@ class _PasswordFieldState extends State<PasswordField> {
       obscureText: _obscureText,
       textInputAction: TextInputAction.done,
       decoration: InputDecoration(
-        labelText: 'Password',
         hintText: 'Enter your password',
-        prefixIcon: Icon(
-          Icons.lock_outlined,
-          size: 20.sp,
-        ),
+
         suffixIcon: IconButton(
           icon: Icon(
             _obscureText ? Icons.visibility_off : Icons.visibility,
@@ -43,33 +37,21 @@ class _PasswordFieldState extends State<PasswordField> {
         ),
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12.r),
-          borderSide: BorderSide(
-            color: Colors.grey[300]!,
-          ),
+          borderSide: BorderSide(color: Colors.grey[300]!),
         ),
         enabledBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12.r),
-          borderSide: BorderSide(
-            color: Colors.grey[300]!,
-          ),
+          borderSide: BorderSide(color: Colors.grey[300]!),
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12.r),
-          borderSide: const BorderSide(
-            color: Color(0xFF1976D2),
-            width: 2,
-          ),
+          borderSide: const BorderSide(color: AppColors.brown, width: 1.5),
         ),
         errorBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12.r),
-          borderSide: const BorderSide(
-            color: Colors.red,
-          ),
+          borderSide: const BorderSide(color: Colors.red),
         ),
-        contentPadding: EdgeInsets.symmetric(
-          horizontal: 16.w,
-          vertical: 16.h,
-        ),
+        contentPadding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 16.h),
       ),
       validator: (value) {
         if (value == null || value.isEmpty) {

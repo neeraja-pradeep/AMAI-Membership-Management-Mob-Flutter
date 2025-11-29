@@ -152,7 +152,9 @@ class _MembershipFormScreenState extends ConsumerState<MembershipFormScreen> {
       waPhone: _waPhoneController.text.trim(),
       firstName: _firstNameController.text.trim(),
       lastName: _lastNameController.text.trim(),
-      dateOfBirth: DateTime.now().subtract(const Duration(days: 365 * 25)), // PLACEHOLDER
+      dateOfBirth: DateTime.now().subtract(
+        const Duration(days: 365 * 25),
+      ), // PLACEHOLDER
       gender: 'other', // PLACEHOLDER - screen doesn't collect this
       membershipType: _selectedMembershipType ?? MembershipType.practitioner,
       bloodGroup: _selectedBloodGroup ?? '',
@@ -166,13 +168,14 @@ class _MembershipFormScreenState extends ConsumerState<MembershipFormScreen> {
       zoneId: '', // MISSING FROM SCREEN
       professionalDetails1: '', // MISSING FROM SCREEN
       professionalDetails2: '', // MISSING FROM SCREEN
-
       // Optional fields
       bamsStartYear: _selectedBamsYear ?? DateTime.now().year,
       institutionName: _institutionController.text.trim(),
     );
 
-    ref.read(registrationProvider.notifier).updateMembershipDetails(membershipDetails);
+    ref
+        .read(registrationProvider.notifier)
+        .updateMembershipDetails(membershipDetails);
   }
 
   /// Handle next button press
@@ -207,12 +210,7 @@ class _MembershipFormScreenState extends ConsumerState<MembershipFormScreen> {
 
     // Generate last 60 years (from 1965 to current year)
     for (int year = currentYear; year >= 1965; year--) {
-      years.add(
-        DropdownMenuItem(
-          value: year,
-          child: Text(year.toString()),
-        ),
-      );
+      years.add(DropdownMenuItem(value: year, child: Text(year.toString())));
     }
 
     return years;
@@ -268,9 +266,9 @@ class _MembershipFormScreenState extends ConsumerState<MembershipFormScreen> {
                         // Email
                         TextInputField(
                           controller: _emailController,
-                          labelText: 'Email',
+
                           hintText: 'your.email@example.com',
-                          prefixIcon: Icons.email_outlined,
+
                           keyboardType: TextInputType.emailAddress,
                           onChanged: (_) => _autoSave(),
                           validator: (value) {
@@ -297,10 +295,7 @@ class _MembershipFormScreenState extends ConsumerState<MembershipFormScreen> {
                           decoration: InputDecoration(
                             labelText: 'Password',
                             hintText: 'Minimum 8 characters',
-                            prefixIcon: Icon(
-                              Icons.lock_outlined,
-                              size: 20.sp,
-                            ),
+                            prefixIcon: Icon(Icons.lock_outlined, size: 20.sp),
                             suffixIcon: IconButton(
                               icon: Icon(
                                 _obscurePassword
@@ -316,15 +311,11 @@ class _MembershipFormScreenState extends ConsumerState<MembershipFormScreen> {
                             ),
                             border: OutlineInputBorder(
                               borderRadius: BorderRadius.circular(12.r),
-                              borderSide: BorderSide(
-                                color: Colors.grey[300]!,
-                              ),
+                              borderSide: BorderSide(color: Colors.grey[300]!),
                             ),
                             enabledBorder: OutlineInputBorder(
                               borderRadius: BorderRadius.circular(12.r),
-                              borderSide: BorderSide(
-                                color: Colors.grey[300]!,
-                              ),
+                              borderSide: BorderSide(color: Colors.grey[300]!),
                             ),
                             focusedBorder: OutlineInputBorder(
                               borderRadius: BorderRadius.circular(12.r),
@@ -335,9 +326,7 @@ class _MembershipFormScreenState extends ConsumerState<MembershipFormScreen> {
                             ),
                             errorBorder: OutlineInputBorder(
                               borderRadius: BorderRadius.circular(12.r),
-                              borderSide: const BorderSide(
-                                color: Colors.red,
-                              ),
+                              borderSide: const BorderSide(color: Colors.red),
                             ),
                             contentPadding: EdgeInsets.symmetric(
                               horizontal: 16.w,
@@ -360,8 +349,7 @@ class _MembershipFormScreenState extends ConsumerState<MembershipFormScreen> {
                         // First Name
                         TextInputField(
                           controller: _firstNameController,
-                          labelText: 'First Name',
-                          prefixIcon: Icons.person_outline,
+
                           onChanged: (_) => _autoSave(),
                           validator: (value) {
                             if (value == null || value.trim().isEmpty) {
@@ -379,8 +367,7 @@ class _MembershipFormScreenState extends ConsumerState<MembershipFormScreen> {
                         // Last Name
                         TextInputField(
                           controller: _lastNameController,
-                          labelText: 'Last Name',
-                          prefixIcon: Icons.person_outline,
+
                           onChanged: (_) => _autoSave(),
                           validator: (value) {
                             if (value == null || value.trim().isEmpty) {
@@ -398,9 +385,9 @@ class _MembershipFormScreenState extends ConsumerState<MembershipFormScreen> {
                         // Phone Number
                         TextInputField(
                           controller: _phoneController,
-                          labelText: 'Phone Number',
+
                           hintText: '1234567890',
-                          prefixIcon: Icons.phone_outlined,
+
                           keyboardType: TextInputType.phone,
                           maxLength: 10,
                           inputFormatters: [
@@ -423,9 +410,9 @@ class _MembershipFormScreenState extends ConsumerState<MembershipFormScreen> {
                         // WhatsApp Phone Number
                         TextInputField(
                           controller: _waPhoneController,
-                          labelText: 'WhatsApp Number',
+
                           hintText: '1234567890',
-                          prefixIcon: Icons.chat_outlined,
+
                           keyboardType: TextInputType.phone,
                           maxLength: 10,
                           inputFormatters: [
@@ -527,9 +514,9 @@ class _MembershipFormScreenState extends ConsumerState<MembershipFormScreen> {
                         // Institution Name
                         TextInputField(
                           controller: _institutionController,
-                          labelText: 'Institution Name',
+
                           hintText: 'Your institution',
-                          prefixIcon: Icons.school_outlined,
+
                           onChanged: (_) => _autoSave(),
                           validator: (value) {
                             if (value == null || value.trim().isEmpty) {

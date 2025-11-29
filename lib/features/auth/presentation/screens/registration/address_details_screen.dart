@@ -2,31 +2,13 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:myapp/app/theme/colors.dart';
 import 'package:myapp/features/auth/application/states/registration_state.dart';
-
 import '../../../../../app/router/app_router.dart';
 import '../../../application/notifiers/registration_state_notifier.dart';
 import '../../../domain/entities/registration/address_details.dart';
-import '../../components/dropdown_field.dart';
-import '../../components/step_progress_indicator.dart';
 import '../../components/text_input_field.dart';
 
-/// Address Details Screen (Step 2 of 3)
-///
-/// Collects practitioner's address information with dependent dropdowns:
-/// - Address Line 1 (House No./Building Name)
-/// - Address Line 2 (Street/Locality/Area)
-/// - Country → State → District (dependent hierarchy)
-/// - City (Post Office)
-/// - Postal Code
-///
-/// Matches backend POST /api/accounts/addresses/ requirements
-///
-/// CRITICAL REQUIREMENT: Dependent Dropdown Validation
-/// - State selection requires valid Country
-/// - District selection requires valid State
-/// - When Country changes, clear State + District
-/// - When State changes, clear District
 class AddressDetailsScreen extends ConsumerStatefulWidget {
   const AddressDetailsScreen({super.key});
 
@@ -38,47 +20,37 @@ class AddressDetailsScreen extends ConsumerStatefulWidget {
 class _AddressDetailsScreenState extends ConsumerState<AddressDetailsScreen> {
   final _formKey = GlobalKey<FormState>();
 
-  // Controllers
   late final TextEditingController _addressLine1Controller;
   late final TextEditingController _addressLine2Controller;
   late final TextEditingController _cityController;
   late final TextEditingController _postalCodeController;
 
-  // Dependent dropdown state
   String? _selectedCountry;
   String? _selectedState;
   String? _selectedDistrict;
 
-  // Mock data for dropdowns (TODO: Replace with API data)
   final Map<String, List<String>> _states = {
-    'India': ['Karnataka', 'Maharashtra', 'Tamil Nadu', 'Delhi'],
-    'USA': ['California', 'New York', 'Texas'],
+    'India': ['Karnataka', 'Kerala', 'Tamil Nadu', 'Delhi'],
+    'USA': ['California', 'Texas'],
   };
 
   final Map<String, List<String>> _districts = {
-    'Karnataka': ['Bangalore', 'Mysore', 'Mangalore'],
-    'Maharashtra': ['Mumbai', 'Pune', 'Nagpur'],
-    'Tamil Nadu': ['Chennai', 'Coimbatore', 'Madurai'],
-    'Delhi': ['Central Delhi', 'North Delhi', 'South Delhi'],
-    'California': ['Los Angeles', 'San Francisco', 'San Diego'],
-    'New York': ['New York City', 'Buffalo', 'Rochester'],
-    'Texas': ['Houston', 'Dallas', 'Austin'],
+    'Kerala': ['Kochi', 'Trivandrum', 'Kottayam'],
+    'Karnataka': ['Bangalore', 'Mysore'],
+    'Tamil Nadu': ['Chennai', 'Coimbatore'],
+    'Delhi': ['New Delhi', 'South Delhi'],
+    'California': ['Los Angeles', 'San Diego'],
+    'Texas': ['Dallas', 'Austin'],
   };
 
   @override
   void initState() {
     super.initState();
-
-    // Initialize controllers
     _addressLine1Controller = TextEditingController();
     _addressLine2Controller = TextEditingController();
     _cityController = TextEditingController();
     _postalCodeController = TextEditingController();
-
-    // Load existing data if available
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      _loadExistingData();
-    });
+    WidgetsBinding.instance.addPostFrameCallback((_) => _loadExistingData());
   }
 
   @override
@@ -93,379 +65,235 @@ class _AddressDetailsScreenState extends ConsumerState<AddressDetailsScreen> {
   void _loadExistingData() {
     final state = ref.read(registrationProvider);
 
-    // Handle different state types
     if (state is RegistrationStateResumePrompt) {
-      // User has existing registration, resume it
-      ref.read(registrationProvider.notifier).resumeRegistration(
-        state.existingRegistration,
-      );
-      // Reload after resuming
+      ref
+          .read(registrationProvider.notifier)
+          .resumeRegistration(state.existingRegistration);
       Future.microtask(() => _loadExistingData());
       return;
     }
 
-    // If registration hasn't been started yet, start it now
-    if (state is! RegistrationStateInProgress) {
-      ref.read(registrationProvider.notifier).startNewRegistration();
-      return; // State is now initialized, but no data to load yet
-    }
+    if (state is! RegistrationStateInProgress) return;
 
-    final addressDetails = state.registration.addressDetails;
+    final data = state.registration.addressDetails;
+    if (data == null) return;
 
-    if (addressDetails != null) {
-      _addressLine1Controller.text = addressDetails.addressLine1;
-      _addressLine2Controller.text = addressDetails.addressLine2;
-      _selectedCountry = addressDetails.countryId;
-      _selectedState = addressDetails.stateId;
-      _selectedDistrict = addressDetails.districtId;
-      _cityController.text = addressDetails.city;
-      _postalCodeController.text = addressDetails.postalCode;
-    }
+    setState(() {
+      _addressLine1Controller.text = data.addressLine1;
+      _addressLine2Controller.text = data.addressLine2;
+      _selectedCountry = data.countryId;
+      _selectedState = data.stateId;
+      _selectedDistrict = data.districtId;
+      _cityController.text = data.city;
+      _postalCodeController.text = data.postalCode;
+    });
   }
 
-  /// Auto-save progress on field changes
-  void _autoSave() {
-    // Save without validation - validation only happens on "Next" button
-    _saveAddressDetails();
-  }
-
-  /// Save address details to registration state
-  void _saveAddressDetails() {
-    final addressDetails = AddressDetails(
+  void _save() {
+    final data = AddressDetails(
       addressLine1: _addressLine1Controller.text.trim(),
       addressLine2: _addressLine2Controller.text.trim(),
-      countryId: _selectedCountry ?? '',
-      stateId: _selectedState ?? '',
-      districtId: _selectedDistrict ?? '',
+      countryId: _selectedCountry ?? "",
+      stateId: _selectedState ?? "",
+      districtId: _selectedDistrict ?? "",
       city: _cityController.text.trim(),
       postalCode: _postalCodeController.text.trim(),
-      isPrimary: true, // Default to primary address
+      isPrimary: true,
     );
-
-    ref
-        .read(registrationProvider.notifier)
-        .updateAddressDetails(addressDetails);
+    ref.read(registrationProvider.notifier).updateAddressDetails(data);
   }
 
-  /// Handle country change - clear dependent dropdowns
-  void _handleCountryChange(String? country) {
-    setState(() {
-      _selectedCountry = country;
-      // CRITICAL: Clear dependent fields when parent changes
-      _selectedState = null;
-      _selectedDistrict = null;
-    });
-    _autoSave();
-  }
-
-  /// Handle state change - clear dependent dropdowns
-  void _handleStateChange(String? state) {
-    setState(() {
-      _selectedState = state;
-      // CRITICAL: Clear dependent fields when parent changes
-      _selectedDistrict = null;
-    });
-    _autoSave();
-  }
-
-  /// Handle district change
-  void _handleDistrictChange(String? district) {
-    setState(() {
-      _selectedDistrict = district;
-    });
-    _autoSave();
-  }
-
-  /// Get available states based on selected country
-  List<DropdownMenuItem<String>> _getAvailableStates() {
-    if (_selectedCountry == null) return [];
-
-    final states = _states[_selectedCountry] ?? [];
-    return states
-        .map((state) => DropdownMenuItem(value: state, child: Text(state)))
-        .toList();
-  }
-
-  /// Get available districts based on selected state
-  List<DropdownMenuItem<String>> _getAvailableDistricts() {
-    if (_selectedState == null) return [];
-
-    final districts = _districts[_selectedState] ?? [];
-    return districts
-        .map(
-          (district) =>
-              DropdownMenuItem(value: district, child: Text(district)),
-        )
-        .toList();
-  }
-
-  /// Handle next button press
   Future<void> _handleNext() async {
-    if (_formKey.currentState?.validate() ?? false) {
-      // Save current step
-      _saveAddressDetails();
-
-      // Auto-save to Hive
-      await ref.read(registrationProvider.notifier).autoSaveProgress();
-
-      // Navigate to next step
-      if (mounted) {
-        Navigator.pushNamed(context, AppRouter.registrationDocuments);
-      }
+    if (!_formKey.currentState!.validate()) {
+      return;
     }
-  }
 
-  /// Handle back button press
-  void _handleBack() {
-    _saveAddressDetails();
-    Navigator.pop(context);
+    _save();
+    await ref.read(registrationProvider.notifier).autoSaveProgress();
+    if (mounted) Navigator.pushNamed(context, AppRouter.registrationDocuments);
   }
 
   @override
   Widget build(BuildContext context) {
-    return WillPopScope(
-      onWillPop: () async {
-        _handleBack();
-        return false;
-      },
-      child: Scaffold(
+    return Scaffold(
+      appBar: AppBar(
         backgroundColor: Colors.white,
-        appBar: AppBar(
-          backgroundColor: Colors.white,
-          elevation: 0,
-          leading: IconButton(
-            icon: Icon(Icons.arrow_back, color: Colors.grey[800]),
-            onPressed: _handleBack,
-          ),
+        elevation: 0,
+        title: const Text(
+          "Register Here",
+          style: TextStyle(fontWeight: FontWeight.bold),
         ),
-        body: SafeArea(
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back, color: Colors.black),
+          onPressed: () => Navigator.pop(context),
+        ),
+      ),
+
+      body: SingleChildScrollView(
+        padding: EdgeInsets.all(24.w),
+        child: Form(
+          key: _formKey,
           child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // Progress indicator
-              const StepProgressIndicator(
-                currentStep: 2,
-                totalSteps: 3,
-                stepTitle: 'Address Details',
-              ),
-
-              // Form content
-              Expanded(
-                child: SingleChildScrollView(
-                  padding: EdgeInsets.symmetric(horizontal: 24.w),
-                  child: Form(
-                    key: _formKey,
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.stretch,
-                      children: [
-                        SizedBox(height: 24.h),
-
-                        // Title
-                        Text(
-                          'Your Address',
-                          style: TextStyle(
-                            fontSize: 24.sp,
-                            fontWeight: FontWeight.bold,
-                            color: Colors.grey[800],
-                          ),
-                        ),
-                        SizedBox(height: 8.h),
-                        Text(
-                          'Please provide your residential address',
-                          style: TextStyle(
-                            fontSize: 14.sp,
-                            color: Colors.grey[600],
-                          ),
-                        ),
-
-                        SizedBox(height: 32.h),
-
-                        // Address Line 1
-                        TextInputField(
-                          controller: _addressLine1Controller,
-                          labelText: 'Address Line 1',
-                          hintText: 'Building name, street name',
-                          prefixIcon: Icons.home_outlined,
-                          maxLines: 2,
-                          onChanged: (_) => _autoSave(),
-                          validator: (value) {
-                            if (value == null || value.trim().isEmpty) {
-                              return 'Address is required';
-                            }
-                            return null;
-                          },
-                        ),
-
-                        SizedBox(height: 16.h),
-
-                        // Address Line 2 (required)
-                        TextInputField(
-                          controller: _addressLine2Controller,
-                          labelText: 'Address Line 2',
-                          hintText: 'Street, Locality, Area',
-                          prefixIcon: Icons.location_on_outlined,
-                          maxLines: 2,
-                          onChanged: (_) => _autoSave(),
-                          validator: (value) {
-                            if (value == null || value.trim().isEmpty) {
-                              return 'Address Line 2 is required';
-                            }
-                            return null;
-                          },
-                        ),
-
-                        SizedBox(height: 16.h),
-
-                        // Country (parent dropdown)
-                        DropdownField<String>(
-                          labelText: 'Country',
-                          prefixIcon: Icons.public_outlined,
-                          value: _selectedCountry,
-                          items: const [
-                            DropdownMenuItem(
-                              value: 'India',
-                              child: Text('India'),
-                            ),
-                            DropdownMenuItem(
-                              value: 'USA',
-                              child: Text('United States'),
-                            ),
-                          ],
-                          onChanged: _handleCountryChange,
-                          validator: (value) {
-                            if (value == null || value.isEmpty) {
-                              return 'Country is required';
-                            }
-                            return null;
-                          },
-                        ),
-
-                        SizedBox(height: 16.h),
-
-                        // State (depends on country)
-                        DropdownField<String>(
-                          labelText: 'State',
-                          prefixIcon: Icons.map_outlined,
-                          value: _selectedState,
-                          items: _getAvailableStates(),
-                          enabled: _selectedCountry != null,
-                          onChanged: _handleStateChange,
-                          validator: (value) {
-                            if (_selectedCountry == null) {
-                              return 'Please select a country first';
-                            }
-                            if (value == null || value.isEmpty) {
-                              return 'State is required';
-                            }
-                            return null;
-                          },
-                        ),
-
-                        SizedBox(height: 16.h),
-
-                        // District (depends on state)
-                        DropdownField<String>(
-                          labelText: 'District',
-                          prefixIcon: Icons.location_city_outlined,
-                          value: _selectedDistrict,
-                          items: _getAvailableDistricts(),
-                          enabled: _selectedState != null,
-                          onChanged: _handleDistrictChange,
-                          validator: (value) {
-                            if (_selectedState == null) {
-                              return 'Please select a state first';
-                            }
-                            if (value == null || value.isEmpty) {
-                              return 'District is required';
-                            }
-                            return null;
-                          },
-                        ),
-
-                        SizedBox(height: 16.h),
-
-                        // City (Post Office)
-                        TextInputField(
-                          controller: _cityController,
-                          labelText: 'City / Post Office',
-                          hintText: 'Post Office name',
-                          prefixIcon: Icons.location_city,
-                          onChanged: (_) => _autoSave(),
-                          validator: (value) {
-                            if (value == null || value.trim().isEmpty) {
-                              return 'City / Post Office is required';
-                            }
-                            return null;
-                          },
-                        ),
-
-                        SizedBox(height: 16.h),
-
-                        // Postal Code
-                        TextInputField(
-                          controller: _postalCodeController,
-                          labelText: 'Postal Code',
-                          hintText: '6-digit postal code',
-                          prefixIcon: Icons.markunread_mailbox_outlined,
-                          keyboardType: TextInputType.number,
-                          maxLength: 6,
-                          inputFormatters: [
-                            FilteringTextInputFormatter.digitsOnly,
-                          ],
-                          onChanged: (_) => _autoSave(),
-                          validator: (value) {
-                            if (value == null || value.trim().isEmpty) {
-                              return 'Postal code is required';
-                            }
-                            if (value.trim().length != 6) {
-                              return 'Postal code must be 6 digits';
-                            }
-                            return null;
-                          },
-                        ),
-
-                        SizedBox(height: 32.h),
-
-                        // Next button
-                        SizedBox(
-                          height: 50.h,
-                          child: ElevatedButton(
-                            onPressed: _handleNext,
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: const Color(0xFF1976D2),
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(12.r),
-                              ),
-                              elevation: 0,
-                            ),
-                            child: Row(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: [
-                                Text(
-                                  'Next',
-                                  style: TextStyle(
-                                    fontSize: 16.sp,
-                                    fontWeight: FontWeight.w600,
-                                    color: Colors.white,
-                                  ),
-                                ),
-                                SizedBox(width: 8.w),
-                                Icon(
-                                  Icons.arrow_forward,
-                                  size: 20.sp,
-                                  color: Colors.white,
-                                ),
-                              ],
-                            ),
-                          ),
-                        ),
-
-                        SizedBox(height: 24.h),
-                      ],
-                    ),
+              SizedBox(height: 10.h),
+              Center(
+                child: Text(
+                  "Step 3 of 4",
+                  style: TextStyle(
+                    fontSize: 16.sp,
+                    fontWeight: FontWeight.w600,
                   ),
                 ),
               ),
+
+              SizedBox(height: 20.h),
+              Text(
+                "Address Details",
+                style: TextStyle(fontSize: 20.sp, fontWeight: FontWeight.bold),
+              ),
+              SizedBox(height: 25.h),
+
+              // Address Line 1
+              _buildLabel("Address Line 1"),
+              SizedBox(height: 6.h),
+              TextInputField(
+                controller: _addressLine1Controller,
+                hintText: "Building, House No",
+                validator: (v) => v!.trim().isEmpty ? "Required" : null,
+              ),
+
+              SizedBox(height: 18.h),
+              _buildLabel("Address Line 2"),
+              SizedBox(height: 6.h),
+              TextInputField(
+                controller: _addressLine2Controller,
+                hintText: "Street, Locality",
+                validator: (v) => v!.trim().isEmpty ? "Required" : null,
+              ),
+
+              SizedBox(height: 18.h),
+              _buildLabel("Country"),
+              SizedBox(height: 6.h),
+              _buildDropdown(["India", "USA"], _selectedCountry, (val) {
+                setState(() {
+                  _selectedCountry = val;
+                  _selectedState = null;
+                  _selectedDistrict = null;
+                });
+                _save();
+              }),
+
+              SizedBox(height: 18.h),
+              _buildLabel("State"),
+              SizedBox(height: 6.h),
+              _buildDropdown(_states[_selectedCountry] ?? [], _selectedState, (
+                val,
+              ) {
+                setState(() {
+                  _selectedState = val;
+                  _selectedDistrict = null;
+                });
+                _save();
+              }),
+
+              SizedBox(height: 18.h),
+              _buildLabel("District"),
+              SizedBox(height: 6.h),
+              _buildDropdown(
+                _districts[_selectedState] ?? [],
+                _selectedDistrict,
+                (val) {
+                  setState(() => _selectedDistrict = val);
+                  _save();
+                },
+              ),
+
+              SizedBox(height: 18.h),
+              _buildLabel("City / Post Office"),
+              SizedBox(height: 6.h),
+              TextInputField(
+                controller: _cityController,
+                hintText: "City, PO Name",
+                validator: (v) => v!.trim().isEmpty ? "Required" : null,
+              ),
+
+              SizedBox(height: 18.h),
+              _buildLabel("Postal Code"),
+              SizedBox(height: 6.h),
+              TextInputField(
+                controller: _postalCodeController,
+                hintText: "6-digit postal code",
+                keyboardType: TextInputType.number,
+                inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+                validator: (v) {
+                  if (v == null || v.isEmpty) return "Required";
+                  if (v.trim().length != 6)
+                    return "Postal code must be 6 digits";
+                  return null;
+                },
+              ),
+
+              SizedBox(height: 40.h),
+              _buildNextButton(),
             ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildLabel(String text) {
+    return Text(
+      text,
+      style: TextStyle(fontSize: 16.sp, fontWeight: FontWeight.w500),
+    );
+  }
+
+  Widget _buildDropdown(
+    List<String> items,
+    String? value,
+    Function(String?) onChanged,
+  ) {
+    if (value != null && !items.contains(value)) value = null;
+
+    return Container(
+      padding: EdgeInsets.symmetric(horizontal: 16.w),
+      decoration: BoxDecoration(
+        border: Border.all(color: Colors.grey[300]!),
+        borderRadius: BorderRadius.circular(12.r),
+      ),
+      child: DropdownButtonFormField(
+        value: value,
+        decoration: const InputDecoration(border: InputBorder.none),
+        hint: const Text("Select"),
+        items: items
+            .map((e) => DropdownMenuItem(value: e, child: Text(e)))
+            .toList(),
+        validator: (v) => v == null ? "Required" : null,
+        onChanged: onChanged,
+      ),
+    );
+  }
+
+  Widget _buildNextButton() {
+    return SizedBox(
+      height: 50.h,
+      width: double.infinity,
+      child: ElevatedButton(
+        onPressed: _handleNext,
+        style: ElevatedButton.styleFrom(
+          backgroundColor: AppColors.brown,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12.r),
+          ),
+        ),
+        child: Text(
+          "Next",
+          style: TextStyle(
+            color: Colors.white,
+            fontSize: 16.sp,
+            fontWeight: FontWeight.w600,
           ),
         ),
       ),

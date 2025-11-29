@@ -594,7 +594,7 @@ class RegistrationStateNotifier extends StateNotifier<RegistrationState> {
       'medicalCouncilNo': details.medicalCouncilNo,
       'centralCouncilNo': details.centralCouncilNo,
       'ugCollege': details.ugCollege,
-      'zoneId': details.zoneId,
+
       'professionalDetails1': details.professionalDetails1,
       'professionalDetails2': details.professionalDetails2,
     };
@@ -607,7 +607,7 @@ class RegistrationStateNotifier extends StateNotifier<RegistrationState> {
       medicalCouncilNo: json['medicalCouncilNo'] as String,
       centralCouncilNo: json['centralCouncilNo'] as String,
       ugCollege: json['ugCollege'] as String,
-      zoneId: json['zoneId'] as String,
+
       professionalDetails1: json['professionalDetails1'] as String,
       professionalDetails2: json['professionalDetails2'] as String,
     );
@@ -714,14 +714,12 @@ class RegistrationStateNotifier extends StateNotifier<RegistrationState> {
 
 /// Provider for RegistrationStateNotifier
 final registrationProvider =
-    StateNotifierProvider<RegistrationStateNotifier, RegistrationState>(
-  (ref) {
-    final repository = ref.watch(registrationRepositoryProvider);
-    final localDs = ref.watch(registrationLocalDsProvider);
+    StateNotifierProvider<RegistrationStateNotifier, RegistrationState>((ref) {
+      final repository = ref.watch(registrationRepositoryProvider);
+      final localDs = ref.watch(registrationLocalDsProvider);
 
-    return RegistrationStateNotifier(
-      repository: repository,
-      localDs: localDs,
-    );
-  },
-);
+      return RegistrationStateNotifier(
+        repository: repository,
+        localDs: localDs,
+      );
+    });

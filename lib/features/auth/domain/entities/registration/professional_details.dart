@@ -7,7 +7,7 @@ class ProfessionalDetails {
   final String medicalCouncilNo; // Medical council registration number
   final String centralCouncilNo; // Central council number
   final String ugCollege; // UG College name
-  final String zoneId; // Zone ID
+
   final String professionalDetails1; // Additional professional details 1
   final String professionalDetails2; // Additional professional details 2
 
@@ -16,7 +16,7 @@ class ProfessionalDetails {
     required this.medicalCouncilNo,
     required this.centralCouncilNo,
     required this.ugCollege,
-    required this.zoneId,
+
     required this.professionalDetails1,
     required this.professionalDetails2,
   });
@@ -27,7 +27,6 @@ class ProfessionalDetails {
         medicalCouncilNo.isNotEmpty &&
         centralCouncilNo.isNotEmpty &&
         ugCollege.isNotEmpty &&
-        zoneId.isNotEmpty &&
         professionalDetails1.isNotEmpty &&
         professionalDetails2.isNotEmpty;
   }
@@ -46,7 +45,7 @@ class ProfessionalDetails {
       medicalCouncilNo: medicalCouncilNo ?? this.medicalCouncilNo,
       centralCouncilNo: centralCouncilNo ?? this.centralCouncilNo,
       ugCollege: ugCollege ?? this.ugCollege,
-      zoneId: zoneId ?? this.zoneId,
+
       professionalDetails1: professionalDetails1 ?? this.professionalDetails1,
       professionalDetails2: professionalDetails2 ?? this.professionalDetails2,
     );
@@ -61,7 +60,6 @@ class ProfessionalDetails {
           medicalCouncilNo == other.medicalCouncilNo &&
           centralCouncilNo == other.centralCouncilNo &&
           ugCollege == other.ugCollege &&
-          zoneId == other.zoneId &&
           professionalDetails1 == other.professionalDetails1 &&
           professionalDetails2 == other.professionalDetails2;
 
@@ -71,7 +69,6 @@ class ProfessionalDetails {
       medicalCouncilNo.hashCode ^
       centralCouncilNo.hashCode ^
       ugCollege.hashCode ^
-      zoneId.hashCode ^
       professionalDetails1.hashCode ^
       professionalDetails2.hashCode;
 

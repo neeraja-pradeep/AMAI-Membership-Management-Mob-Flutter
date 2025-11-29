@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:myapp/app/theme/colors.dart';
 import '../../domain/entities/user_role.dart';
 
 /// Role selection popup
@@ -27,34 +28,22 @@ class _RoleSelectionPopupState extends State<RoleSelectionPopup> {
   @override
   Widget build(BuildContext context) {
     return Dialog(
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(20.r),
-      ),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20.r)),
       child: Padding(
         padding: EdgeInsets.all(24.w),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.stretch,
+
           children: [
             // Title
             Text(
-              'Select Your Role',
+              'Register as',
               textAlign: TextAlign.center,
               style: TextStyle(
                 fontSize: 22.sp,
                 fontWeight: FontWeight.bold,
-                color: const Color(0xFF1976D2),
-              ),
-            ),
-
-            SizedBox(height: 8.h),
-
-            Text(
-              'Choose your membership type to continue',
-              textAlign: TextAlign.center,
-              style: TextStyle(
-                fontSize: 14.sp,
-                color: Colors.grey[600],
+                color: AppColors.brown,
               ),
             ),
 
@@ -103,7 +92,7 @@ class _RoleSelectionPopupState extends State<RoleSelectionPopup> {
               child: ElevatedButton(
                 onPressed: _selectedRole != null ? _handleContinue : null,
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color(0xFF1976D2),
+                  backgroundColor: AppColors.brown,
                   disabledBackgroundColor: Colors.grey[300],
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(12.r),
@@ -115,7 +104,9 @@ class _RoleSelectionPopupState extends State<RoleSelectionPopup> {
                   style: TextStyle(
                     fontSize: 16.sp,
                     fontWeight: FontWeight.w600,
-                    color: _selectedRole != null ? Colors.white : Colors.grey[500],
+                    color: _selectedRole != null
+                        ? Colors.white
+                        : Colors.grey[500],
                   ),
                 ),
               ),
@@ -130,10 +121,7 @@ class _RoleSelectionPopupState extends State<RoleSelectionPopup> {
               },
               child: Text(
                 'Cancel',
-                style: TextStyle(
-                  fontSize: 14.sp,
-                  color: Colors.grey[700],
-                ),
+                style: TextStyle(fontSize: 14.sp, color: Colors.grey[700]),
               ),
             ),
           ],
@@ -160,14 +148,11 @@ class _RoleOption extends StatelessWidget {
     return GestureDetector(
       onTap: onTap,
       child: Container(
-        padding: EdgeInsets.symmetric(
-          horizontal: 16.w,
-          vertical: 16.h,
-        ),
+        padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 16.h),
         decoration: BoxDecoration(
-          color: isSelected ? const Color(0xFF1976D2).withOpacity(0.1) : Colors.white,
+          color: Colors.white,
           border: Border.all(
-            color: isSelected ? const Color(0xFF1976D2) : Colors.grey[300]!,
+            color: isSelected ? AppColors.brown : Colors.grey[300]!,
             width: isSelected ? 2 : 1,
           ),
           borderRadius: BorderRadius.circular(12.r),
@@ -181,17 +166,13 @@ class _RoleOption extends StatelessWidget {
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
                 border: Border.all(
-                  color: isSelected ? const Color(0xFF1976D2) : Colors.grey[400]!,
+                  color: isSelected ? AppColors.brown : Colors.grey[400]!,
                   width: 2,
                 ),
-                color: isSelected ? const Color(0xFF1976D2) : Colors.white,
+                color: isSelected ? AppColors.brown : Colors.white,
               ),
               child: isSelected
-                  ? Icon(
-                      Icons.check,
-                      size: 16.sp,
-                      color: Colors.white,
-                    )
+                  ? Icon(Icons.check, size: 16.sp, color: Colors.white)
                   : null,
             ),
 
@@ -204,7 +185,7 @@ class _RoleOption extends StatelessWidget {
                 style: TextStyle(
                   fontSize: 16.sp,
                   fontWeight: isSelected ? FontWeight.w600 : FontWeight.normal,
-                  color: isSelected ? const Color(0xFF1976D2) : Colors.grey[800],
+                  color: isSelected ? AppColors.brown : Colors.grey[800],
                 ),
               ),
             ),

@@ -117,15 +117,6 @@ class RegistrationRepositoryImpl implements RegistrationRepository {
   Future<String> submitRegistration({
     required PractitionerRegistration registration,
   }) async {
-    // MOCK MODE: For development without backend
-    if (_useMockMode) {
-      // Simulate network delay
-      await Future.delayed(const Duration(seconds: 1));
-
-      // Return mock registration ID
-      return 'REG_${DateTime.now().millisecondsSinceEpoch}';
-    }
-
     try {
       // Convert registration to JSON
       final registrationData = _convertRegistrationToJson(registration);
@@ -411,7 +402,7 @@ class RegistrationRepositoryImpl implements RegistrationRepository {
               'central_council_no':
                   registration.professionalDetails!.centralCouncilNo,
               'ug_college': registration.professionalDetails!.ugCollege,
-              'zone_id': registration.professionalDetails!.zoneId,
+
               'professional_details1':
                   registration.professionalDetails!.professionalDetails1,
               'professional_details2':
@@ -430,15 +421,18 @@ class RegistrationRepositoryImpl implements RegistrationRepository {
               'is_primary': registration.addressDetails!.isPrimary,
             }
           : null,
-      'documents': registration.documentUploads?.documents
-              .map((doc) => {
-                    'type': doc.type.name,
-                    'local_file_path': doc.localFilePath,
-                    'file_name': doc.fileName,
-                    'file_size_bytes': doc.fileSizeBytes,
-                    'uploaded_at': doc.uploadedAt.toIso8601String(),
-                    'server_url': doc.serverUrl,
-                  })
+      'documents':
+          registration.documentUploads?.documents
+              .map(
+                (doc) => {
+                  'type': doc.type.name,
+                  'local_file_path': doc.localFilePath,
+                  'file_name': doc.fileName,
+                  'file_size_bytes': doc.fileSizeBytes,
+                  'uploaded_at': doc.uploadedAt.toIso8601String(),
+                  'server_url': doc.serverUrl,
+                },
+              )
               .toList() ??
           [],
       'payment_details': registration.paymentDetails != null
@@ -449,8 +443,8 @@ class RegistrationRepositoryImpl implements RegistrationRepository {
               'status': registration.paymentDetails!.status.name,
               'transaction_id': registration.paymentDetails!.transactionId,
               'payment_method': registration.paymentDetails!.paymentMethod,
-              'completed_at':
-                  registration.paymentDetails!.completedAt?.toIso8601String(),
+              'completed_at': registration.paymentDetails!.completedAt
+                  ?.toIso8601String(),
             }
           : null,
     };
