@@ -15,7 +15,14 @@ import '../../widgets/exit_confirmation_dialog.dart';
 
 /// Membership Form Screen (Step 1 of 3)
 ///
-/// Collects membership registration information:
+/// **DEPRECATED / INCOMPLETE**: This screen uses MembershipDetails entity which
+/// requires BOTH personal AND professional fields, but this screen only collects
+/// personal fields. Missing professional fields cause validation failures.
+///
+/// **Current Approach**: Use PersonalDetailsScreen + ProfessionalDetailsScreen
+/// (2-step flow) which properly separates concerns and matches backend requirements.
+///
+/// Fields collected:
 /// - Email & Password (for account creation)
 /// - Phone & WhatsApp Phone
 /// - First Name & Last Name
@@ -24,7 +31,11 @@ import '../../widgets/exit_confirmation_dialog.dart';
 /// - BAMS Start Year
 /// - Institution Name
 ///
-/// Matches backend POST /api/membership/register/ requirements
+/// Missing fields (required by MembershipDetails.isComplete):
+/// - medicalCouncilState, medicalCouncilNo, centralCouncilNo
+/// - ugCollege, zoneId, professionalDetails1, professionalDetails2
+///
+/// TODO: Either complete this screen OR remove in favor of Personal + Professional screens
 class MembershipFormScreen extends ConsumerStatefulWidget {
   const MembershipFormScreen({super.key});
 
