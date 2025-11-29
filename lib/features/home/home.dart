@@ -14,3 +14,5 @@ export 'application/states/membership_state.dart';
 export 'presentation/screens/home_screen.dart';
 export 'presentation/components/membership_card_widget.dart';
 export 'presentation/components/status_badge.dart';
+export 'presentation/components/quick_action_item.dart';
+export 'presentation/components/quick_actions_section.dart';

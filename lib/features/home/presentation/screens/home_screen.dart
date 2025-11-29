@@ -6,6 +6,7 @@ import 'package:myapp/app/theme/typography.dart';
 import 'package:myapp/features/home/application/providers/home_providers.dart';
 import 'package:myapp/features/home/application/states/membership_state.dart';
 import 'package:myapp/features/home/presentation/components/membership_card_widget.dart';
+import 'package:myapp/features/home/presentation/components/quick_actions_section.dart';
 
 /// Home screen - primary landing screen after authentication
 /// Displays membership card, quick actions, events, and announcements
@@ -44,8 +45,24 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                 SizedBox(height: 24.h),
                 _buildMembershipCard(),
                 SizedBox(height: 24.h),
-                // Placeholder for other sections
-                _buildSectionPlaceholder('Quick Actions'),
+                // Quick Actions section
+                QuickActionsSection(
+                  onViewAll: () {
+                    // TODO: Navigate to all quick actions
+                  },
+                  onMembershipTap: () {
+                    // TODO: Navigate to membership
+                  },
+                  onAswasePlusTap: () {
+                    // TODO: Navigate to Aswas Plus
+                  },
+                  onAcademyTap: () {
+                    // TODO: Navigate to Academy
+                  },
+                  onContactsTap: () {
+                    // TODO: Navigate to Contacts
+                  },
+                ),
                 SizedBox(height: 24.h),
                 _buildSectionPlaceholder('Upcoming Events'),
                 SizedBox(height: 24.h),
