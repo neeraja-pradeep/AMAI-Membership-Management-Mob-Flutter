@@ -123,18 +123,11 @@ class AswasCardWidget extends StatelessWidget {
     );
   }
 
-  /// Builds the footer with coverage and validity
+  /// Builds the footer with validity
   Widget _buildFooter() {
     return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      mainAxisAlignment: MainAxisAlignment.end,
       children: [
-        if (aswasPlus.displayCoverageAmount.isNotEmpty)
-          _buildInfoColumn(
-            label: 'Coverage',
-            value: aswasPlus.displayCoverageAmount,
-          )
-        else
-          const SizedBox.shrink(),
         _buildInfoColumn(
           label: 'Valid Till',
           value: aswasPlus.displayValidUntil,
