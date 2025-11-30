@@ -44,5 +44,13 @@ Required fields:- banner_image, title, event_date, event_end_date,venue, venue_a
 POST endpoint:https://amai.nexogms.com/api/bookings/events/
 
 
+d) Announcements
+Endpoint:
+https://amai.nexogms.com/api/schema/swagger-ui/#/Library%20-%20Publications/announcement_list
+
+Required Fields: title, created_at
+
+GET endpoint: https://amai.nexogms.com/api/library/announcements/
+
 
 
