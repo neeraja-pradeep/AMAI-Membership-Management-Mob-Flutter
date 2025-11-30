@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:myapp/app/theme/colors.dart';
+import 'package:myapp/features/home/infrastructure/data_sources/local/home_local_ds.dart';
 import 'package:myapp/features/home/presentation/screens/home_screen.dart';
 
 Future<void> main() async {
@@ -10,6 +11,9 @@ Future<void> main() async {
 
   // Initialize Hive
   await Hive.initFlutter();
+
+  // Open Hive boxes before app runs (prevents race conditions)
+  await Hive.openBox(HomeBoxKeys.boxName);
 
   runApp(
     const ProviderScope(

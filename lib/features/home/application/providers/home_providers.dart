@@ -23,9 +23,10 @@ final connectivityProvider = Provider<Connectivity>((ref) {
   return Connectivity();
 });
 
-/// Provider for Home Hive Box
-final homeBoxProvider = FutureProvider<Box<dynamic>>((ref) async {
-  return Hive.openBox(HomeBoxKeys.boxName);
+/// Provider for Home Hive Box (opened in main.dart before app runs)
+final homeBoxProvider = Provider<Box<dynamic>>((ref) {
+  // Box is already opened in main.dart, just get the reference
+  return Hive.box(HomeBoxKeys.boxName);
 });
 
 // ============== Data Source Providers ==============
@@ -36,23 +37,19 @@ final homeApiProvider = Provider<HomeApi>((ref) {
   return HomeApiImpl(apiClient: apiClient);
 });
 
-/// Provider for Home Local Data Source
-final homeLocalDataSourceProvider = Provider<HomeLocalDataSource?>((ref) {
-  final boxAsync = ref.watch(homeBoxProvider);
-  return boxAsync.whenOrNull(
-    data: (box) => HomeLocalDataSourceImpl(box: box),
-  );
+/// Provider for Home Local Data Source (timestamp only)
+final homeLocalDataSourceProvider = Provider<HomeLocalDataSource>((ref) {
+  final box = ref.watch(homeBoxProvider);
+  return HomeLocalDataSourceImpl(box: box);
 });
 
 // ============== Repository Providers ==============
 
 /// Provider for Home Repository
-final homeRepositoryProvider = Provider<HomeRepository?>((ref) {
+final homeRepositoryProvider = Provider<HomeRepository>((ref) {
   final homeApi = ref.watch(homeApiProvider);
   final localDataSource = ref.watch(homeLocalDataSourceProvider);
   final connectivity = ref.watch(connectivityProvider);
-
-  if (localDataSource == null) return null;
 
   return HomeRepositoryImpl(
     homeApi: homeApi,
@@ -64,98 +61,86 @@ final homeRepositoryProvider = Provider<HomeRepository?>((ref) {
 // ============== Usecase Providers ==============
 
 /// Provider for Fetch Membership Usecase
-final fetchMembershipUsecaseProvider = Provider<FetchMembershipUsecase?>((ref) {
+final fetchMembershipUsecaseProvider = Provider<FetchMembershipUsecase>((ref) {
   final repository = ref.watch(homeRepositoryProvider);
-  if (repository == null) return null;
   return FetchMembershipUsecase(repository: repository);
-});
-
-/// Provider for Get Cached Membership Usecase
-final getCachedMembershipUsecaseProvider =
-    Provider<GetCachedMembershipUsecase?>((ref) {
-  final repository = ref.watch(homeRepositoryProvider);
-  if (repository == null) return null;
-  return GetCachedMembershipUsecase(repository: repository);
 });
 
 // ============== State Providers ==============
 
 /// Provider for Membership State
+/// Data is kept in-memory, only timestamp is persisted in Hive
 final membershipStateProvider =
     StateNotifierProvider<MembershipNotifier, MembershipState>((ref) {
   return MembershipNotifier(ref);
 });
 
 /// Notifier for managing membership state
+/// Handles fresh fetch on app launch and if-modified-since on refresh
 class MembershipNotifier extends StateNotifier<MembershipState> {
   MembershipNotifier(this._ref) : super(const MembershipState.initial());
 
   final Ref _ref;
 
-  /// Initialize by loading cached data first, then fetching fresh data
+  /// Initialize by fetching fresh data from API
+  /// Called on app launch - does NOT use if-modified-since
   Future<void> initialize() async {
-    // First, try to show cached data
-    await _loadCachedData();
+    state = const MembershipState.loading();
 
-    // Then fetch fresh data from API
-    await fetchMembershipCard();
-  }
-
-  /// Load cached membership card data
-  Future<void> _loadCachedData() async {
-    final usecase = _ref.read(getCachedMembershipUsecaseProvider);
-    if (usecase == null) return;
-
+    final usecase = _ref.read(fetchMembershipUsecaseProvider);
     final result = await usecase();
+
     result.fold(
-      (_) {}, // Ignore cache errors
-      (cachedCard) {
-        if (cachedCard != null) {
-          state = MembershipState.loaded(membershipCard: cachedCard);
+      (failure) {
+        state = MembershipState.error(failure: failure);
+      },
+      (membershipCard) {
+        if (membershipCard != null) {
+          state = MembershipState.loaded(membershipCard: membershipCard);
+        } else {
+          state = const MembershipState.empty();
         }
       },
     );
   }
 
-  /// Fetch membership card from API
-  Future<void> fetchMembershipCard() async {
-    final usecase = _ref.read(fetchMembershipUsecaseProvider);
-    if (usecase == null) {
-      state = const MembershipState.error(
-        failure: CacheFailure(message: 'Service not ready. Please try again.'),
-      );
-      return;
-    }
-
-    // Set loading state, preserving previous data
+  /// Refresh membership card using if-modified-since
+  /// Called on pull-to-refresh - uses stored timestamp
+  Future<void> refresh() async {
     final previousData = state.currentData;
     state = MembershipState.loading(previousData: previousData);
 
-    final result = await usecase();
+    final usecase = _ref.read(fetchMembershipUsecaseProvider);
+    final result = await usecase.refresh();
 
     result.fold(
       (failure) {
-        // Error state - show error but keep cached data visible
+        // On error, keep previous data visible with error banner
         state = MembershipState.error(
           failure: failure,
           cachedData: previousData,
         );
       },
       (membershipCard) {
-        state = MembershipState.loaded(membershipCard: membershipCard);
+        if (membershipCard != null) {
+          // Got fresh data (200 OK)
+          state = MembershipState.loaded(membershipCard: membershipCard);
+        } else {
+          // 304 Not Modified - keep in-memory data
+          if (previousData != null) {
+            state = MembershipState.loaded(membershipCard: previousData);
+          } else {
+            state = const MembershipState.empty();
+          }
+        }
       },
     );
   }
 
-  /// Refresh membership card (pull-to-refresh)
-  Future<void> refresh() async {
-    await fetchMembershipCard();
-  }
-
-  /// Clear state and cache
+  /// Clear state and timestamp
   Future<void> clear() async {
     final repository = _ref.read(homeRepositoryProvider);
-    await repository?.clearCache();
+    await repository.clearTimestamp();
     state = const MembershipState.initial();
   }
 }

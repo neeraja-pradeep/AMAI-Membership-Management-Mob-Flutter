@@ -6,10 +6,9 @@ import 'package:myapp/features/home/domain/entities/membership_card.dart';
 import 'package:myapp/features/home/domain/repositories/home_repository.dart';
 import 'package:myapp/features/home/infrastructure/data_sources/local/home_local_ds.dart';
 import 'package:myapp/features/home/infrastructure/data_sources/remote/home_api.dart';
-import 'package:myapp/features/home/infrastructure/models/membership_card_model.dart';
 
 /// Implementation of HomeRepository
-/// Handles API calls, caching, and if-modified-since logic
+/// Data is kept in-memory (Riverpod state), only timestamp is persisted in Hive
 class HomeRepositoryImpl implements HomeRepository {
   const HomeRepositoryImpl({
     required this.homeApi,
@@ -23,47 +22,33 @@ class HomeRepositoryImpl implements HomeRepository {
 
   @override
   Future<Either<Failure, MembershipCard?>> getMembershipCard({
-    required String ifModifiedSince,
+    String? ifModifiedSince,
   }) async {
     // Check connectivity
     final connectivityResult = await connectivity.checkConnectivity();
     final isOnline = !connectivityResult.contains(ConnectivityResult.none);
 
     if (!isOnline) {
-      // Offline - return cached data
-      final cachedResult = await getCachedMembershipCard();
-      return cachedResult.fold(
-        (failure) => left(const NetworkFailure()),
-        (cachedCard) {
-          if (cachedCard != null) {
-            return right(cachedCard);
-          }
-          return left(const NetworkFailure(
-            message: 'No cached data available while offline.',
-          ));
-        },
-      );
+      // Offline - return network failure (UI should show in-memory data if available)
+      return left(const NetworkFailure());
     }
 
     try {
       // Online - make API call
       final response = await homeApi.fetchMembershipCard(
-        ifModifiedSince: ifModifiedSince,
+        ifModifiedSince: ifModifiedSince ?? '',
       );
 
       // Handle 304 Not Modified
       if (response.isNotModified) {
-        return right(null); // Signal to use cached data
+        return right(null); // Signal to use in-memory data
       }
 
       // Handle successful response with data
       if (response.isSuccess && response.data != null) {
         final membershipCard = response.data!.toDomain();
 
-        // Cache the new data
-        await cacheMembershipCard(membershipCard);
-
-        // Store new timestamp
+        // Store new timestamp for future if-modified-since requests
         if (response.timestamp != null) {
           await storeTimestamp(response.timestamp!);
         }
@@ -81,34 +66,6 @@ class HomeRepositoryImpl implements HomeRepository {
   }
 
   @override
-  Future<Either<Failure, MembershipCard?>> getCachedMembershipCard() async {
-    try {
-      final cachedModel = await localDataSource.getCachedMembershipCard();
-
-      if (cachedModel == null) {
-        return right(null);
-      }
-
-      return right(cachedModel.toDomain());
-    } catch (e) {
-      return left(const CacheFailure());
-    }
-  }
-
-  @override
-  Future<Either<Failure, Unit>> cacheMembershipCard(MembershipCard card) async {
-    try {
-      final model = MembershipCardModel.fromDomain(card);
-      await localDataSource.cacheMembershipCard(model);
-      return right(unit);
-    } catch (e) {
-      return left(const CacheFailure(
-        message: 'Failed to cache membership card.',
-      ));
-    }
-  }
-
-  @override
   Future<String?> getStoredTimestamp() async {
     return localDataSource.getTimestamp();
   }
@@ -119,7 +76,7 @@ class HomeRepositoryImpl implements HomeRepository {
   }
 
   @override
-  Future<void> clearCache() async {
-    await localDataSource.clearCache();
+  Future<void> clearTimestamp() async {
+    await localDataSource.clearTimestamp();
   }
 }
