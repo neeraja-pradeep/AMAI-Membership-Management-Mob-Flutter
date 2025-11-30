@@ -1,5 +1,6 @@
 import 'package:myapp/core/network/api_client.dart';
 import 'package:myapp/core/network/endpoints.dart';
+import 'package:myapp/features/home/infrastructure/models/announcement_model.dart';
 import 'package:myapp/features/home/infrastructure/models/aswas_card_model.dart';
 import 'package:myapp/features/home/infrastructure/models/event_model.dart';
 import 'package:myapp/features/home/infrastructure/models/membership_card_model.dart';
@@ -55,6 +56,17 @@ abstract class HomeApi {
   /// - List<EventModel> on success (200)
   /// - null data on not modified (304)
   Future<HomeApiResponse<List<EventModel>>> fetchEvents({
+    required String ifModifiedSince,
+  });
+
+  /// Fetches announcements
+  ///
+  /// [ifModifiedSince] - Timestamp for conditional request
+  ///
+  /// Returns HomeApiResponse containing:
+  /// - List<AnnouncementModel> on success (200)
+  /// - null data on not modified (304)
+  Future<HomeApiResponse<List<AnnouncementModel>>> fetchAnnouncements({
     required String ifModifiedSince,
   });
 }
@@ -165,6 +177,41 @@ class HomeApiImpl implements HomeApi {
 
     return HomeApiResponse<List<EventModel>>(
       data: events ?? [],
+      statusCode: response.statusCode,
+      timestamp: response.timestamp,
+    );
+  }
+
+  @override
+  Future<HomeApiResponse<List<AnnouncementModel>>> fetchAnnouncements({
+    required String ifModifiedSince,
+  }) async {
+    final response = await apiClient.get<Map<String, dynamic>>(
+      Endpoints.announcements,
+      ifModifiedSince: ifModifiedSince.isNotEmpty ? ifModifiedSince : null,
+      fromJson: (json) => json as Map<String, dynamic>,
+    );
+
+    // Handle 304 Not Modified
+    if (response.isNotModified) {
+      return HomeApiResponse<List<AnnouncementModel>>(
+        data: null,
+        statusCode: response.statusCode,
+        timestamp: null,
+      );
+    }
+
+    // Parse the response
+    List<AnnouncementModel>? announcements;
+
+    if (response.data != null) {
+      // API returns paginated list, get active announcements only
+      final listResponse = AnnouncementListResponse.fromJson(response.data!);
+      announcements = listResponse.activeAnnouncements;
+    }
+
+    return HomeApiResponse<List<AnnouncementModel>>(
+      data: announcements ?? [],
       statusCode: response.statusCode,
       timestamp: response.timestamp,
     );

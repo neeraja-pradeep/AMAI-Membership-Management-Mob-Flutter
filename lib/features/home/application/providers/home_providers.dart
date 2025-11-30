@@ -2,9 +2,11 @@ import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:myapp/core/network/api_client.dart';
+import 'package:myapp/features/home/application/states/announcements_state.dart';
 import 'package:myapp/features/home/application/states/aswas_state.dart';
 import 'package:myapp/features/home/application/states/events_state.dart';
 import 'package:myapp/features/home/application/states/membership_state.dart';
+import 'package:myapp/features/home/application/usecases/fetch_announcements_usecase.dart';
 import 'package:myapp/features/home/application/usecases/fetch_aswas_usecase.dart';
 import 'package:myapp/features/home/application/usecases/fetch_events_usecase.dart';
 import 'package:myapp/features/home/application/usecases/fetch_membership_usecase.dart';
@@ -79,6 +81,13 @@ final fetchAswasUsecaseProvider = Provider<FetchAswasUsecase>((ref) {
 final fetchEventsUsecaseProvider = Provider<FetchEventsUsecase>((ref) {
   final repository = ref.watch(homeRepositoryProvider);
   return FetchEventsUsecase(repository: repository);
+});
+
+/// Provider for Fetch Announcements Usecase
+final fetchAnnouncementsUsecaseProvider =
+    Provider<FetchAnnouncementsUsecase>((ref) {
+  final repository = ref.watch(homeRepositoryProvider);
+  return FetchAnnouncementsUsecase(repository: repository);
 });
 
 // ============== State Providers ==============
@@ -319,5 +328,88 @@ class EventsNotifier extends StateNotifier<EventsState> {
     final repository = _ref.read(homeRepositoryProvider);
     await repository.clearEventsTimestamp();
     state = const EventsState.initial();
+  }
+}
+
+// ============== Announcements State Providers ==============
+
+/// Provider for Announcements State
+/// Data is kept in-memory, only timestamp is persisted in Hive
+final announcementsStateProvider =
+    StateNotifierProvider<AnnouncementsNotifier, AnnouncementsState>((ref) {
+  return AnnouncementsNotifier(ref);
+});
+
+/// Notifier for managing announcements state
+/// Handles fresh fetch on app launch and if-modified-since on refresh
+class AnnouncementsNotifier extends StateNotifier<AnnouncementsState> {
+  AnnouncementsNotifier(this._ref) : super(const AnnouncementsState.initial());
+
+  final Ref _ref;
+
+  /// Initialize by fetching fresh data from API
+  /// Called on app launch - does NOT use if-modified-since
+  Future<void> initialize() async {
+    state = const AnnouncementsState.loading();
+
+    final usecase = _ref.read(fetchAnnouncementsUsecaseProvider);
+    final result = await usecase();
+
+    result.fold(
+      (failure) {
+        state = AnnouncementsState.error(failure: failure);
+      },
+      (announcements) {
+        if (announcements != null && announcements.isNotEmpty) {
+          state = AnnouncementsState.loaded(announcements: announcements);
+        } else {
+          state = const AnnouncementsState.empty();
+        }
+      },
+    );
+  }
+
+  /// Refresh announcements using if-modified-since
+  /// Called on pull-to-refresh - uses stored timestamp
+  Future<void> refresh() async {
+    final previousData = state.currentData;
+    state = AnnouncementsState.loading(previousData: previousData);
+
+    final usecase = _ref.read(fetchAnnouncementsUsecaseProvider);
+    final result = await usecase.refresh();
+
+    result.fold(
+      (failure) {
+        // On error, keep previous data visible with error banner
+        state = AnnouncementsState.error(
+          failure: failure,
+          cachedData: previousData,
+        );
+      },
+      (announcements) {
+        if (announcements != null) {
+          // Got fresh data (200 OK)
+          if (announcements.isNotEmpty) {
+            state = AnnouncementsState.loaded(announcements: announcements);
+          } else {
+            state = const AnnouncementsState.empty();
+          }
+        } else {
+          // 304 Not Modified - keep in-memory data
+          if (previousData != null && previousData.isNotEmpty) {
+            state = AnnouncementsState.loaded(announcements: previousData);
+          } else {
+            state = const AnnouncementsState.empty();
+          }
+        }
+      },
+    );
+  }
+
+  /// Clear state and timestamp
+  Future<void> clear() async {
+    final repository = _ref.read(homeRepositoryProvider);
+    await repository.clearAnnouncementsTimestamp();
+    state = const AnnouncementsState.initial();
   }
 }

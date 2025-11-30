@@ -39,4 +39,12 @@ class Endpoints {
 
   /// Single event endpoint
   static String eventById(int id) => '$apiPrefix/bookings/events/$id/';
+
+  // ============== Library Endpoints ==============
+
+  /// Announcements list endpoint
+  static const String announcements = '$apiPrefix/library/announcements/';
+
+  /// Single announcement endpoint
+  static String announcementById(int id) => '$apiPrefix/library/announcements/$id/';
 }

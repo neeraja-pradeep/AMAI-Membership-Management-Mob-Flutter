@@ -1,5 +1,6 @@
 import 'package:fpdart/fpdart.dart';
 import 'package:myapp/core/error/failure.dart';
+import 'package:myapp/features/home/domain/entities/announcement.dart';
 import 'package:myapp/features/home/domain/entities/aswas_plus.dart';
 import 'package:myapp/features/home/domain/entities/membership_card.dart';
 import 'package:myapp/features/home/domain/entities/upcoming_event.dart';
@@ -75,6 +76,29 @@ abstract class HomeRepository {
 
   /// Clears stored events timestamp
   Future<void> clearEventsTimestamp();
+
+  // ============== Announcements ==============
+
+  /// Fetches announcements from API
+  ///
+  /// [ifModifiedSince] - Timestamp for conditional request (304 handling)
+  ///
+  /// Returns:
+  /// - Right(List<Announcement>) on 200 OK with announcements
+  /// - Right(null) on 304 Not Modified (use in-memory data)
+  /// - Left(Failure) on error
+  Future<Either<Failure, List<Announcement>?>> getAnnouncements({
+    String? ifModifiedSince,
+  });
+
+  /// Gets stored announcements timestamp for If-Modified-Since header
+  Future<String?> getAnnouncementsTimestamp();
+
+  /// Stores announcements timestamp from successful API response
+  Future<void> storeAnnouncementsTimestamp(String timestamp);
+
+  /// Clears stored announcements timestamp
+  Future<void> clearAnnouncementsTimestamp();
 
   // ============== Clear All ==============
 

@@ -4,9 +4,11 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:myapp/app/theme/colors.dart';
 import 'package:myapp/app/theme/typography.dart';
 import 'package:myapp/features/home/application/providers/home_providers.dart';
+import 'package:myapp/features/home/application/states/announcements_state.dart';
 import 'package:myapp/features/home/application/states/aswas_state.dart';
 import 'package:myapp/features/home/application/states/events_state.dart';
 import 'package:myapp/features/home/application/states/membership_state.dart';
+import 'package:myapp/features/home/presentation/components/announcements_section.dart';
 import 'package:myapp/features/home/presentation/components/aswas_card_widget.dart';
 import 'package:myapp/features/home/presentation/components/membership_card_widget.dart';
 import 'package:myapp/features/home/presentation/components/quick_actions_section.dart';
@@ -30,6 +32,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
       ref.read(membershipStateProvider.notifier).initialize();
       ref.read(aswasStateProvider.notifier).initialize();
       ref.read(eventsStateProvider.notifier).initialize();
+      ref.read(announcementsStateProvider.notifier).initialize();
     });
   }
 
@@ -75,7 +78,8 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                 // Upcoming Events section
                 _buildUpcomingEvents(),
                 SizedBox(height: 24.h),
-                _buildSectionPlaceholder('Announcements'),
+                // Announcements section
+                _buildAnnouncements(),
                 SizedBox(height: 100.h), // Bottom padding for navigation
               ],
             ),
@@ -91,6 +95,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
       ref.read(membershipStateProvider.notifier).refresh(),
       ref.read(aswasStateProvider.notifier).refresh(),
       ref.read(eventsStateProvider.notifier).refresh(),
+      ref.read(announcementsStateProvider.notifier).refresh(),
     ]);
   }
 
@@ -380,6 +385,57 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
         return const UpcomingEventsEmptyState();
       },
       empty: () => const UpcomingEventsEmptyState(),
+    );
+  }
+
+  /// Builds the Announcements section
+  Widget _buildAnnouncements() {
+    final state = ref.watch(announcementsStateProvider);
+
+    return state.when(
+      initial: () => const AnnouncementsSectionShimmer(),
+      loading: (previousData) {
+        // Show previous data while loading, or shimmer if no data
+        if (previousData != null && previousData.isNotEmpty) {
+          return AnnouncementsSection(
+            announcements: previousData,
+            onViewAllTap: () {
+              // TODO: Navigate to all announcements
+            },
+            onAnnouncementTap: (announcement) {
+              // TODO: Navigate to announcement details
+            },
+          );
+        }
+        return const AnnouncementsSectionShimmer();
+      },
+      loaded: (announcements) {
+        return AnnouncementsSection(
+          announcements: announcements,
+          onViewAllTap: () {
+            // TODO: Navigate to all announcements
+          },
+          onAnnouncementTap: (announcement) {
+            // TODO: Navigate to announcement details
+          },
+        );
+      },
+      error: (failure, cachedData) {
+        // Show cached data if available, otherwise empty state
+        if (cachedData != null && cachedData.isNotEmpty) {
+          return AnnouncementsSection(
+            announcements: cachedData,
+            onViewAllTap: () {
+              // TODO: Navigate to all announcements
+            },
+            onAnnouncementTap: (announcement) {
+              // TODO: Navigate to announcement details
+            },
+          );
+        }
+        return const AnnouncementsEmptyState();
+      },
+      empty: () => const AnnouncementsEmptyState(),
     );
   }
 
