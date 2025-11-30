@@ -7,6 +7,7 @@ class HomeBoxKeys {
   static const String boxName = 'home_box';
   static const String membershipTimestampKey = 'membership_timestamp';
   static const String aswasTimestampKey = 'aswas_timestamp';
+  static const String eventsTimestampKey = 'events_timestamp';
 }
 
 /// Abstract interface for home local data source operations
@@ -33,6 +34,17 @@ abstract class HomeLocalDataSource {
 
   /// Clears aswas plus timestamp
   Future<void> clearAswasTimestamp();
+
+  // ============== Events Timestamp ==============
+
+  /// Stores events timestamp for If-Modified-Since header
+  Future<void> storeEventsTimestamp(String timestamp);
+
+  /// Gets stored events timestamp
+  Future<String?> getEventsTimestamp();
+
+  /// Clears events timestamp
+  Future<void> clearEventsTimestamp();
 
   // ============== Clear All ==============
 
@@ -83,11 +95,30 @@ class HomeLocalDataSourceImpl implements HomeLocalDataSource {
     await box.delete(HomeBoxKeys.aswasTimestampKey);
   }
 
+  // ============== Events Timestamp ==============
+
+  @override
+  Future<void> storeEventsTimestamp(String timestamp) async {
+    await box.put(HomeBoxKeys.eventsTimestampKey, timestamp);
+  }
+
+  @override
+  Future<String?> getEventsTimestamp() async {
+    final timestamp = box.get(HomeBoxKeys.eventsTimestampKey);
+    return timestamp as String?;
+  }
+
+  @override
+  Future<void> clearEventsTimestamp() async {
+    await box.delete(HomeBoxKeys.eventsTimestampKey);
+  }
+
   // ============== Clear All ==============
 
   @override
   Future<void> clearAllTimestamps() async {
     await box.delete(HomeBoxKeys.membershipTimestampKey);
     await box.delete(HomeBoxKeys.aswasTimestampKey);
+    await box.delete(HomeBoxKeys.eventsTimestampKey);
   }
 }

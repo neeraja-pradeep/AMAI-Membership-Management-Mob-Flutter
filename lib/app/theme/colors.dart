@@ -66,6 +66,16 @@ class AppColors {
   static const Color aswasCardText = Color(0xFFFFFFFF);
   static const Color aswasCardAccent = Color(0xFFB2DFDB);
 
+  // ============== Event Card Colors ==============
+  static const Color eventCardBackground = Color(0xFFFFFFFF);
+  static const Color eventCardOverlay = Color(0x80000000);
+  static const Color eventDateBadge = Color(0xFF1E3A5F);
+  static const Color eventDateBadgeText = Color(0xFFFFFFFF);
+  static const Color eventPriceBadge = Color(0xFF4CAF50);
+  static const Color eventPriceBadgeText = Color(0xFFFFFFFF);
+  static const Color eventRegisterButton = Color(0xFF1E3A5F);
+  static const Color eventRegisterButtonText = Color(0xFFFFFFFF);
+
   // ============== Status Badge Colors ==============
   static const Color activeBadge = Color(0xFF4CAF50);
   static const Color activeBadgeText = Color(0xFFFFFFFF);

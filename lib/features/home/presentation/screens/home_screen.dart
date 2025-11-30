@@ -5,10 +5,12 @@ import 'package:myapp/app/theme/colors.dart';
 import 'package:myapp/app/theme/typography.dart';
 import 'package:myapp/features/home/application/providers/home_providers.dart';
 import 'package:myapp/features/home/application/states/aswas_state.dart';
+import 'package:myapp/features/home/application/states/events_state.dart';
 import 'package:myapp/features/home/application/states/membership_state.dart';
 import 'package:myapp/features/home/presentation/components/aswas_card_widget.dart';
 import 'package:myapp/features/home/presentation/components/membership_card_widget.dart';
 import 'package:myapp/features/home/presentation/components/quick_actions_section.dart';
+import 'package:myapp/features/home/presentation/components/upcoming_events_section.dart';
 
 /// Home screen - primary landing screen after authentication
 /// Displays membership card, quick actions, events, and announcements
@@ -27,6 +29,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       ref.read(membershipStateProvider.notifier).initialize();
       ref.read(aswasStateProvider.notifier).initialize();
+      ref.read(eventsStateProvider.notifier).initialize();
     });
   }
 
@@ -69,7 +72,8 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                 SizedBox(height: 24.h),
                 // Aswas Plus card (only shows if active policy exists)
                 _buildAswasCard(),
-                _buildSectionPlaceholder('Upcoming Events'),
+                // Upcoming Events section
+                _buildUpcomingEvents(),
                 SizedBox(height: 24.h),
                 _buildSectionPlaceholder('Announcements'),
                 SizedBox(height: 100.h), // Bottom padding for navigation
@@ -86,6 +90,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     await Future.wait([
       ref.read(membershipStateProvider.notifier).refresh(),
       ref.read(aswasStateProvider.notifier).refresh(),
+      ref.read(eventsStateProvider.notifier).refresh(),
     ]);
   }
 
@@ -315,6 +320,66 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
         return const SizedBox.shrink();
       },
       empty: () => const SizedBox.shrink(), // No policy - don't show anything
+    );
+  }
+
+  /// Builds the Upcoming Events section
+  Widget _buildUpcomingEvents() {
+    final state = ref.watch(eventsStateProvider);
+
+    return state.when(
+      initial: () => const UpcomingEventsSectionShimmer(),
+      loading: (previousData) {
+        // Show previous data while loading, or shimmer if no data
+        if (previousData != null && previousData.isNotEmpty) {
+          return UpcomingEventsSection(
+            events: previousData,
+            onViewAllTap: () {
+              // TODO: Navigate to all events
+            },
+            onEventTap: (event) {
+              // TODO: Navigate to event details
+            },
+            onRegisterTap: (event) {
+              // TODO: Handle event registration
+            },
+          );
+        }
+        return const UpcomingEventsSectionShimmer();
+      },
+      loaded: (events) {
+        return UpcomingEventsSection(
+          events: events,
+          onViewAllTap: () {
+            // TODO: Navigate to all events
+          },
+          onEventTap: (event) {
+            // TODO: Navigate to event details
+          },
+          onRegisterTap: (event) {
+            // TODO: Handle event registration
+          },
+        );
+      },
+      error: (failure, cachedData) {
+        // Show cached data if available, otherwise empty state
+        if (cachedData != null && cachedData.isNotEmpty) {
+          return UpcomingEventsSection(
+            events: cachedData,
+            onViewAllTap: () {
+              // TODO: Navigate to all events
+            },
+            onEventTap: (event) {
+              // TODO: Navigate to event details
+            },
+            onRegisterTap: (event) {
+              // TODO: Handle event registration
+            },
+          );
+        }
+        return const UpcomingEventsEmptyState();
+      },
+      empty: () => const UpcomingEventsEmptyState(),
     );
   }
 

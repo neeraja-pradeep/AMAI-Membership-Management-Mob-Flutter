@@ -1,6 +1,7 @@
 import 'package:myapp/core/network/api_client.dart';
 import 'package:myapp/core/network/endpoints.dart';
 import 'package:myapp/features/home/infrastructure/models/aswas_card_model.dart';
+import 'package:myapp/features/home/infrastructure/models/event_model.dart';
 import 'package:myapp/features/home/infrastructure/models/membership_card_model.dart';
 
 /// API response wrapper for home data with timestamp
@@ -43,6 +44,17 @@ abstract class HomeApi {
   /// - AswasCardModel on success (200) - only if active policy exists
   /// - null data on not modified (304) or no active policy
   Future<HomeApiResponse<AswasCardModel>> fetchAswasPlus({
+    required String ifModifiedSince,
+  });
+
+  /// Fetches upcoming events
+  ///
+  /// [ifModifiedSince] - Timestamp for conditional request
+  ///
+  /// Returns HomeApiResponse containing:
+  /// - List<EventModel> on success (200)
+  /// - null data on not modified (304)
+  Future<HomeApiResponse<List<EventModel>>> fetchEvents({
     required String ifModifiedSince,
   });
 }
@@ -118,6 +130,41 @@ class HomeApiImpl implements HomeApi {
 
     return HomeApiResponse<AswasCardModel>(
       data: aswasCard,
+      statusCode: response.statusCode,
+      timestamp: response.timestamp,
+    );
+  }
+
+  @override
+  Future<HomeApiResponse<List<EventModel>>> fetchEvents({
+    required String ifModifiedSince,
+  }) async {
+    final response = await apiClient.get<Map<String, dynamic>>(
+      Endpoints.events,
+      ifModifiedSince: ifModifiedSince.isNotEmpty ? ifModifiedSince : null,
+      fromJson: (json) => json as Map<String, dynamic>,
+    );
+
+    // Handle 304 Not Modified
+    if (response.isNotModified) {
+      return HomeApiResponse<List<EventModel>>(
+        data: null,
+        statusCode: response.statusCode,
+        timestamp: null,
+      );
+    }
+
+    // Parse the response
+    List<EventModel>? events;
+
+    if (response.data != null) {
+      // API returns paginated list, get upcoming events only
+      final listResponse = EventListResponse.fromJson(response.data!);
+      events = listResponse.upcomingEvents;
+    }
+
+    return HomeApiResponse<List<EventModel>>(
+      data: events ?? [],
       statusCode: response.statusCode,
       timestamp: response.timestamp,
     );

@@ -4,6 +4,7 @@ import 'package:myapp/core/error/failure.dart';
 import 'package:myapp/core/network/network_exceptions.dart';
 import 'package:myapp/features/home/domain/entities/aswas_plus.dart';
 import 'package:myapp/features/home/domain/entities/membership_card.dart';
+import 'package:myapp/features/home/domain/entities/upcoming_event.dart';
 import 'package:myapp/features/home/domain/repositories/home_repository.dart';
 import 'package:myapp/features/home/infrastructure/data_sources/local/home_local_ds.dart';
 import 'package:myapp/features/home/infrastructure/data_sources/remote/home_api.dart';
@@ -148,6 +149,68 @@ class HomeRepositoryImpl implements HomeRepository {
   @override
   Future<void> clearAswasTimestamp() async {
     await localDataSource.clearAswasTimestamp();
+  }
+
+  // ============== Events ==============
+
+  @override
+  Future<Either<Failure, List<UpcomingEvent>?>> getEvents({
+    String? ifModifiedSince,
+  }) async {
+    // Check connectivity
+    final connectivityResult = await connectivity.checkConnectivity();
+    final isOnline = !connectivityResult.contains(ConnectivityResult.none);
+
+    if (!isOnline) {
+      // Offline - return network failure (UI should show in-memory data if available)
+      return left(const NetworkFailure());
+    }
+
+    try {
+      // Online - make API call
+      final response = await homeApi.fetchEvents(
+        ifModifiedSince: ifModifiedSince ?? '',
+      );
+
+      // Handle 304 Not Modified
+      if (response.isNotModified) {
+        return right(null); // Signal to use in-memory data
+      }
+
+      // Handle successful response with data
+      if (response.isSuccess && response.data != null) {
+        final events = response.data!.map((e) => e.toDomain()).toList();
+
+        // Store new timestamp for future if-modified-since requests
+        if (response.timestamp != null) {
+          await storeEventsTimestamp(response.timestamp!);
+        }
+
+        return right(events);
+      }
+
+      // No data returned
+      return right([]);
+    } on NetworkException catch (e) {
+      return left(FailureMapper.fromNetworkException(e));
+    } catch (e) {
+      return left(FailureMapper.fromException(e));
+    }
+  }
+
+  @override
+  Future<String?> getEventsTimestamp() async {
+    return localDataSource.getEventsTimestamp();
+  }
+
+  @override
+  Future<void> storeEventsTimestamp(String timestamp) async {
+    await localDataSource.storeEventsTimestamp(timestamp);
+  }
+
+  @override
+  Future<void> clearEventsTimestamp() async {
+    await localDataSource.clearEventsTimestamp();
   }
 
   // ============== Clear All ==============

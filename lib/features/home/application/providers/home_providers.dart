@@ -3,8 +3,10 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:myapp/core/network/api_client.dart';
 import 'package:myapp/features/home/application/states/aswas_state.dart';
+import 'package:myapp/features/home/application/states/events_state.dart';
 import 'package:myapp/features/home/application/states/membership_state.dart';
 import 'package:myapp/features/home/application/usecases/fetch_aswas_usecase.dart';
+import 'package:myapp/features/home/application/usecases/fetch_events_usecase.dart';
 import 'package:myapp/features/home/application/usecases/fetch_membership_usecase.dart';
 import 'package:myapp/features/home/domain/repositories/home_repository.dart';
 import 'package:myapp/features/home/infrastructure/data_sources/local/home_local_ds.dart';
@@ -71,6 +73,12 @@ final fetchMembershipUsecaseProvider = Provider<FetchMembershipUsecase>((ref) {
 final fetchAswasUsecaseProvider = Provider<FetchAswasUsecase>((ref) {
   final repository = ref.watch(homeRepositoryProvider);
   return FetchAswasUsecase(repository: repository);
+});
+
+/// Provider for Fetch Events Usecase
+final fetchEventsUsecaseProvider = Provider<FetchEventsUsecase>((ref) {
+  final repository = ref.watch(homeRepositoryProvider);
+  return FetchEventsUsecase(repository: repository);
 });
 
 // ============== State Providers ==============
@@ -228,5 +236,88 @@ class AswasNotifier extends StateNotifier<AswasState> {
     final repository = _ref.read(homeRepositoryProvider);
     await repository.clearAswasTimestamp();
     state = const AswasState.initial();
+  }
+}
+
+// ============== Events State Providers ==============
+
+/// Provider for Events State
+/// Data is kept in-memory, only timestamp is persisted in Hive
+final eventsStateProvider =
+    StateNotifierProvider<EventsNotifier, EventsState>((ref) {
+  return EventsNotifier(ref);
+});
+
+/// Notifier for managing events state
+/// Handles fresh fetch on app launch and if-modified-since on refresh
+class EventsNotifier extends StateNotifier<EventsState> {
+  EventsNotifier(this._ref) : super(const EventsState.initial());
+
+  final Ref _ref;
+
+  /// Initialize by fetching fresh data from API
+  /// Called on app launch - does NOT use if-modified-since
+  Future<void> initialize() async {
+    state = const EventsState.loading();
+
+    final usecase = _ref.read(fetchEventsUsecaseProvider);
+    final result = await usecase();
+
+    result.fold(
+      (failure) {
+        state = EventsState.error(failure: failure);
+      },
+      (events) {
+        if (events != null && events.isNotEmpty) {
+          state = EventsState.loaded(events: events);
+        } else {
+          state = const EventsState.empty();
+        }
+      },
+    );
+  }
+
+  /// Refresh events using if-modified-since
+  /// Called on pull-to-refresh - uses stored timestamp
+  Future<void> refresh() async {
+    final previousData = state.currentData;
+    state = EventsState.loading(previousData: previousData);
+
+    final usecase = _ref.read(fetchEventsUsecaseProvider);
+    final result = await usecase.refresh();
+
+    result.fold(
+      (failure) {
+        // On error, keep previous data visible with error banner
+        state = EventsState.error(
+          failure: failure,
+          cachedData: previousData,
+        );
+      },
+      (events) {
+        if (events != null) {
+          // Got fresh data (200 OK)
+          if (events.isNotEmpty) {
+            state = EventsState.loaded(events: events);
+          } else {
+            state = const EventsState.empty();
+          }
+        } else {
+          // 304 Not Modified - keep in-memory data
+          if (previousData != null && previousData.isNotEmpty) {
+            state = EventsState.loaded(events: previousData);
+          } else {
+            state = const EventsState.empty();
+          }
+        }
+      },
+    );
+  }
+
+  /// Clear state and timestamp
+  Future<void> clear() async {
+    final repository = _ref.read(homeRepositoryProvider);
+    await repository.clearEventsTimestamp();
+    state = const EventsState.initial();
   }
 }
