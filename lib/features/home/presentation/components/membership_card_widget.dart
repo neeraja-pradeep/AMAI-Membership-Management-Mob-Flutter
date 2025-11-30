@@ -87,30 +87,14 @@ class MembershipCardWidget extends StatelessWidget {
 
   /// Builds the holder name section
   Widget _buildHolderName() {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          membershipCard.holderName.toUpperCase(),
-          style: TextStyle(
-            fontSize: 24.sp,
-            fontWeight: FontWeight.bold,
-            color: AppColors.membershipCardText,
-            letterSpacing: 0.5,
-          ),
-        ),
-        if (membershipCard.displayMembershipType.isNotEmpty) ...[
-          SizedBox(height: 4.h),
-          Text(
-            membershipCard.displayMembershipType,
-            style: TextStyle(
-              fontSize: 12.sp,
-              fontWeight: FontWeight.w400,
-              color: AppColors.membershipCardAccent,
-            ),
-          ),
-        ],
-      ],
+    return Text(
+      membershipCard.holderName.toUpperCase(),
+      style: TextStyle(
+        fontSize: 24.sp,
+        fontWeight: FontWeight.bold,
+        color: AppColors.membershipCardText,
+        letterSpacing: 0.5,
+      ),
     );
   }
 
@@ -119,9 +103,13 @@ class MembershipCardWidget extends StatelessWidget {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
-        _buildInfoColumn(
-          label: 'Membership No.',
-          value: membershipCard.membershipNumber,
+        Text(
+          membershipCard.membershipNumber,
+          style: TextStyle(
+            fontSize: 14.sp,
+            fontWeight: FontWeight.w600,
+            color: AppColors.membershipCardText,
+          ),
         ),
         _buildInfoColumn(
           label: 'Valid Till',
