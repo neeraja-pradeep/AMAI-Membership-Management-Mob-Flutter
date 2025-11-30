@@ -30,7 +30,7 @@ class FetchMembershipUsecase {
   /// - Left(Failure) on error
   Future<Either<Failure, MembershipCard?>> refresh() async {
     // Get stored timestamp for conditional request
-    final timestamp = await repository.getStoredTimestamp();
+    final timestamp = await repository.getMembershipTimestamp();
 
     // Fetch with if-modified-since
     return repository.getMembershipCard(ifModifiedSince: timestamp);

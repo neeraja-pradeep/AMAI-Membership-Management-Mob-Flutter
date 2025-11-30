@@ -1,5 +1,6 @@
 import 'package:myapp/core/network/api_client.dart';
 import 'package:myapp/core/network/endpoints.dart';
+import 'package:myapp/features/home/infrastructure/models/aswas_card_model.dart';
 import 'package:myapp/features/home/infrastructure/models/membership_card_model.dart';
 
 /// API response wrapper for home data with timestamp
@@ -31,6 +32,17 @@ abstract class HomeApi {
   /// - MembershipCardModel on success (200)
   /// - null data on not modified (304)
   Future<HomeApiResponse<MembershipCardModel>> fetchMembershipCard({
+    required String ifModifiedSince,
+  });
+
+  /// Fetches insurance policies (Aswas Plus) for the current user
+  ///
+  /// [ifModifiedSince] - Timestamp for conditional request
+  ///
+  /// Returns HomeApiResponse containing:
+  /// - AswasCardModel on success (200) - only if active policy exists
+  /// - null data on not modified (304) or no active policy
+  Future<HomeApiResponse<AswasCardModel>> fetchAswasPlus({
     required String ifModifiedSince,
   });
 }
@@ -71,6 +83,41 @@ class HomeApiImpl implements HomeApi {
 
     return HomeApiResponse<MembershipCardModel>(
       data: membershipCard,
+      statusCode: response.statusCode,
+      timestamp: response.timestamp,
+    );
+  }
+
+  @override
+  Future<HomeApiResponse<AswasCardModel>> fetchAswasPlus({
+    required String ifModifiedSince,
+  }) async {
+    final response = await apiClient.get<Map<String, dynamic>>(
+      Endpoints.insurancePolicies,
+      ifModifiedSince: ifModifiedSince.isNotEmpty ? ifModifiedSince : null,
+      fromJson: (json) => json as Map<String, dynamic>,
+    );
+
+    // Handle 304 Not Modified
+    if (response.isNotModified) {
+      return HomeApiResponse<AswasCardModel>(
+        data: null,
+        statusCode: response.statusCode,
+        timestamp: null,
+      );
+    }
+
+    // Parse the response
+    AswasCardModel? aswasCard;
+
+    if (response.data != null) {
+      // API returns paginated list, get the first ACTIVE policy only
+      final listResponse = AswasListResponse.fromJson(response.data!);
+      aswasCard = listResponse.firstActivePolicy;
+    }
+
+    return HomeApiResponse<AswasCardModel>(
+      data: aswasCard,
       statusCode: response.statusCode,
       timestamp: response.timestamp,
     );

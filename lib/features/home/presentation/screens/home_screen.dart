@@ -4,7 +4,9 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:myapp/app/theme/colors.dart';
 import 'package:myapp/app/theme/typography.dart';
 import 'package:myapp/features/home/application/providers/home_providers.dart';
+import 'package:myapp/features/home/application/states/aswas_state.dart';
 import 'package:myapp/features/home/application/states/membership_state.dart';
+import 'package:myapp/features/home/presentation/components/aswas_card_widget.dart';
 import 'package:myapp/features/home/presentation/components/membership_card_widget.dart';
 import 'package:myapp/features/home/presentation/components/quick_actions_section.dart';
 
@@ -24,6 +26,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     // Initialize data fetch when screen loads
     WidgetsBinding.instance.addPostFrameCallback((_) {
       ref.read(membershipStateProvider.notifier).initialize();
+      ref.read(aswasStateProvider.notifier).initialize();
     });
   }
 
@@ -64,6 +67,8 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                   },
                 ),
                 SizedBox(height: 24.h),
+                // Aswas Plus card (only shows if active policy exists)
+                _buildAswasCard(),
                 _buildSectionPlaceholder('Upcoming Events'),
                 SizedBox(height: 24.h),
                 _buildSectionPlaceholder('Announcements'),
@@ -78,7 +83,10 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
 
   /// Pull-to-refresh handler
   Future<void> _onRefresh() async {
-    await ref.read(membershipStateProvider.notifier).refresh();
+    await Future.wait([
+      ref.read(membershipStateProvider.notifier).refresh(),
+      ref.read(aswasStateProvider.notifier).refresh(),
+    ]);
   }
 
   /// Builds the home header with greeting
@@ -233,6 +241,80 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
           // TODO: Navigate to membership application
         },
       ),
+    );
+  }
+
+  /// Builds the Aswas Plus card section
+  /// Only shows if user has an active insurance policy
+  Widget _buildAswasCard() {
+    final state = ref.watch(aswasStateProvider);
+
+    return state.when(
+      initial: () => const SizedBox.shrink(), // Don't show shimmer initially
+      loading: (previousData) {
+        // Show previous data while loading, or nothing if no data
+        if (previousData != null) {
+          return Column(
+            children: [
+              Stack(
+                children: [
+                  AswasCardWidget(aswasPlus: previousData),
+                  Positioned.fill(
+                    child: Container(
+                      margin: EdgeInsets.symmetric(horizontal: 16.w),
+                      decoration: BoxDecoration(
+                        color: AppColors.white.withOpacity(0.5),
+                        borderRadius: BorderRadius.circular(16.r),
+                      ),
+                      child: Center(
+                        child: SizedBox(
+                          width: 24.w,
+                          height: 24.h,
+                          child: const CircularProgressIndicator(
+                            strokeWidth: 2,
+                            valueColor: AlwaysStoppedAnimation<Color>(
+                              AppColors.aswasCardGradientStart,
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+              SizedBox(height: 24.h),
+            ],
+          );
+        }
+        return const SizedBox.shrink(); // No shimmer if no previous data
+      },
+      loaded: (aswasPlus) {
+        return Column(
+          children: [
+            AswasCardWidget(
+              aswasPlus: aswasPlus,
+              onTap: () {
+                // TODO: Navigate to Aswas Plus details
+              },
+            ),
+            SizedBox(height: 24.h),
+          ],
+        );
+      },
+      error: (failure, cachedData) {
+        // Show cached data if available, otherwise nothing
+        // Don't show error banner for Aswas - it's not critical
+        if (cachedData != null) {
+          return Column(
+            children: [
+              AswasCardWidget(aswasPlus: cachedData),
+              SizedBox(height: 24.h),
+            ],
+          );
+        }
+        return const SizedBox.shrink();
+      },
+      empty: () => const SizedBox.shrink(), // No policy - don't show anything
     );
   }
 

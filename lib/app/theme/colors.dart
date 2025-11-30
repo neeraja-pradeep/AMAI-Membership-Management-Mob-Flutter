@@ -60,6 +60,12 @@ class AppColors {
   static const Color membershipCardText = Color(0xFFFFFFFF);
   static const Color membershipCardAccent = Color(0xFFFFB74D);
 
+  // ============== Aswas Plus Card Colors ==============
+  static const Color aswasCardGradientStart = Color(0xFF00695C);
+  static const Color aswasCardGradientEnd = Color(0xFF26A69A);
+  static const Color aswasCardText = Color(0xFFFFFFFF);
+  static const Color aswasCardAccent = Color(0xFFB2DFDB);
+
   // ============== Status Badge Colors ==============
   static const Color activeBadge = Color(0xFF4CAF50);
   static const Color activeBadgeText = Color(0xFFFFFFFF);

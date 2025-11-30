@@ -1,9 +1,10 @@
 import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:hive_flutter/hive_flutter.dart';
-import 'package:myapp/core/error/failure.dart';
 import 'package:myapp/core/network/api_client.dart';
+import 'package:myapp/features/home/application/states/aswas_state.dart';
 import 'package:myapp/features/home/application/states/membership_state.dart';
+import 'package:myapp/features/home/application/usecases/fetch_aswas_usecase.dart';
 import 'package:myapp/features/home/application/usecases/fetch_membership_usecase.dart';
 import 'package:myapp/features/home/domain/repositories/home_repository.dart';
 import 'package:myapp/features/home/infrastructure/data_sources/local/home_local_ds.dart';
@@ -64,6 +65,12 @@ final homeRepositoryProvider = Provider<HomeRepository>((ref) {
 final fetchMembershipUsecaseProvider = Provider<FetchMembershipUsecase>((ref) {
   final repository = ref.watch(homeRepositoryProvider);
   return FetchMembershipUsecase(repository: repository);
+});
+
+/// Provider for Fetch Aswas Usecase
+final fetchAswasUsecaseProvider = Provider<FetchAswasUsecase>((ref) {
+  final repository = ref.watch(homeRepositoryProvider);
+  return FetchAswasUsecase(repository: repository);
 });
 
 // ============== State Providers ==============
@@ -140,7 +147,86 @@ class MembershipNotifier extends StateNotifier<MembershipState> {
   /// Clear state and timestamp
   Future<void> clear() async {
     final repository = _ref.read(homeRepositoryProvider);
-    await repository.clearTimestamp();
+    await repository.clearMembershipTimestamp();
     state = const MembershipState.initial();
+  }
+}
+
+// ============== Aswas Plus State Providers ==============
+
+/// Provider for Aswas Plus State
+/// Data is kept in-memory, only timestamp is persisted in Hive
+final aswasStateProvider =
+    StateNotifierProvider<AswasNotifier, AswasState>((ref) {
+  return AswasNotifier(ref);
+});
+
+/// Notifier for managing Aswas Plus state
+/// Handles fresh fetch on app launch and if-modified-since on refresh
+class AswasNotifier extends StateNotifier<AswasState> {
+  AswasNotifier(this._ref) : super(const AswasState.initial());
+
+  final Ref _ref;
+
+  /// Initialize by fetching fresh data from API
+  /// Called on app launch - does NOT use if-modified-since
+  Future<void> initialize() async {
+    state = const AswasState.loading();
+
+    final usecase = _ref.read(fetchAswasUsecaseProvider);
+    final result = await usecase();
+
+    result.fold(
+      (failure) {
+        state = AswasState.error(failure: failure);
+      },
+      (aswasPlus) {
+        if (aswasPlus != null) {
+          state = AswasState.loaded(aswasPlus: aswasPlus);
+        } else {
+          state = const AswasState.empty();
+        }
+      },
+    );
+  }
+
+  /// Refresh Aswas Plus using if-modified-since
+  /// Called on pull-to-refresh - uses stored timestamp
+  Future<void> refresh() async {
+    final previousData = state.currentData;
+    state = AswasState.loading(previousData: previousData);
+
+    final usecase = _ref.read(fetchAswasUsecaseProvider);
+    final result = await usecase.refresh();
+
+    result.fold(
+      (failure) {
+        // On error, keep previous data visible with error banner
+        state = AswasState.error(
+          failure: failure,
+          cachedData: previousData,
+        );
+      },
+      (aswasPlus) {
+        if (aswasPlus != null) {
+          // Got fresh data (200 OK)
+          state = AswasState.loaded(aswasPlus: aswasPlus);
+        } else {
+          // 304 Not Modified - keep in-memory data
+          if (previousData != null) {
+            state = AswasState.loaded(aswasPlus: previousData);
+          } else {
+            state = const AswasState.empty();
+          }
+        }
+      },
+    );
+  }
+
+  /// Clear state and timestamp
+  Future<void> clear() async {
+    final repository = _ref.read(homeRepositoryProvider);
+    await repository.clearAswasTimestamp();
+    state = const AswasState.initial();
   }
 }
