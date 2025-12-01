@@ -10,6 +10,8 @@ All endpoints are non-authenticated and return JSON responses. Use REST GET call
 
 User IDs
 Superadmin - 2
+Practitioner - 43
+HS - 44
 
 
 Headers -
@@ -27,7 +29,7 @@ Swagger link: https://amai.nexogms.com/api/schema/swagger-ui/#/membership/member
 
 Required fields:- is_active, user_first_name, membership_number, end_date
 
-POST endpoint: https://amai.nexogms.com/api/membership/memberships/
+POST endpoint: https://amai.nexogms.com/api/membership/memberships/{user_id}/
  
 b) Aswas Plus card
 
@@ -51,6 +53,7 @@ https://amai.nexogms.com/api/schema/swagger-ui/#/Library%20-%20Publications/anno
 Required Fields: title, created_at
 
 GET endpoint: https://amai.nexogms.com/api/library/announcements/
+
 
 
 
