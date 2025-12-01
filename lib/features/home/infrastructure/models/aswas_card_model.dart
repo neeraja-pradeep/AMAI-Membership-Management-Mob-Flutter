@@ -51,13 +51,13 @@ class AswasCardModel {
   @JsonKey(name: 'start_date')
   final String? startDate;
 
-  @JsonKey(name: 'user_id')
+  @JsonKey(name: 'user')
   final int? userId;
 
-  @JsonKey(name: 'product_id')
+  @JsonKey(name: 'product')
   final int? productId;
 
-  @JsonKey(name: 'payment_id')
+  @JsonKey(name: 'payment')
   final int? paymentId;
 
   @JsonKey(name: 'created_at')

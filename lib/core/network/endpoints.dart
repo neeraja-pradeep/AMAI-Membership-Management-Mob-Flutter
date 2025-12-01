@@ -10,32 +10,30 @@ class Endpoints {
 
   // ============== Membership Endpoints ==============
 
-  /// Memberships list/create endpoint
-  /// GET: List all memberships
-  /// POST: Create new membership
-  static const String memberships = '$apiPrefix/membership/memberships/';
+  /// Membership detail endpoint by user ID
+  /// GET: Retrieve membership details for a specific user
+  static String membershipByUserId(int userId) =>
+      '$apiPrefix/membership/memberships/$userId/';
 
-  /// Single membership endpoint
-  /// GET: Retrieve membership by ID
-  /// PUT/PATCH: Update membership
-  /// DELETE: Delete membership
+  /// Single membership endpoint (legacy)
   static String membershipById(int id) =>
       '$apiPrefix/membership/memberships/$id/';
 
   // ============== Insurance Endpoints ==============
 
-  /// Insurance policies list/create endpoint
-  static const String insurancePolicies =
-      '$apiPrefix/membership/insurance-policies/';
+  /// Insurance policies by user ID endpoint
+  /// GET: Retrieve insurance policies for a specific user
+  static String insurancePoliciesByUserId(int userId) =>
+      '$apiPrefix/membership/insurance-policies/$userId/';
 
-  /// Single insurance policy endpoint
+  /// Single insurance policy endpoint (legacy)
   static String insurancePolicyById(int id) =>
       '$apiPrefix/membership/insurance-policies/$id/';
 
   // ============== Events Endpoints ==============
 
-  /// Events list/create endpoint
-  static const String events = '$apiPrefix/bookings/events/';
+  /// Upcoming events list endpoint
+  static const String events = '$apiPrefix/bookings/events/upcoming/';
 
   /// Single event endpoint
   static String eventById(int id) => '$apiPrefix/bookings/events/$id/';

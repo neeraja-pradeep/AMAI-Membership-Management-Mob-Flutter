@@ -26,25 +26,29 @@ class HomeApiResponse<T> {
 
 /// Abstract interface for Home API operations
 abstract class HomeApi {
-  /// Fetches membership data for the current user
+  /// Fetches membership data for a specific user
   ///
+  /// [userId] - The user ID to fetch membership for
   /// [ifModifiedSince] - Timestamp for conditional request
   ///
   /// Returns HomeApiResponse containing:
   /// - MembershipCardModel on success (200)
   /// - null data on not modified (304)
   Future<HomeApiResponse<MembershipCardModel>> fetchMembershipCard({
+    required int userId,
     required String ifModifiedSince,
   });
 
-  /// Fetches insurance policies (Aswas Plus) for the current user
+  /// Fetches insurance policies (Aswas Plus) for a specific user
   ///
+  /// [userId] - The user ID to fetch insurance policies for
   /// [ifModifiedSince] - Timestamp for conditional request
   ///
   /// Returns HomeApiResponse containing:
   /// - AswasCardModel on success (200) - only if active policy exists
   /// - null data on not modified (304) or no active policy
   Future<HomeApiResponse<AswasCardModel>> fetchAswasPlus({
+    required int userId,
     required String ifModifiedSince,
   });
 
@@ -79,10 +83,11 @@ class HomeApiImpl implements HomeApi {
 
   @override
   Future<HomeApiResponse<MembershipCardModel>> fetchMembershipCard({
+    required int userId,
     required String ifModifiedSince,
   }) async {
     final response = await apiClient.get<Map<String, dynamic>>(
-      Endpoints.memberships,
+      Endpoints.membershipByUserId(userId),
       ifModifiedSince: ifModifiedSince.isNotEmpty ? ifModifiedSince : null,
       fromJson: (json) => json as Map<String, dynamic>,
     );
@@ -100,9 +105,9 @@ class HomeApiImpl implements HomeApi {
     MembershipCardModel? membershipCard;
 
     if (response.data != null) {
-      // API returns paginated list, get the first membership
-      final listResponse = MembershipListResponse.fromJson(response.data!);
-      membershipCard = listResponse.firstMembership;
+      // API returns membership detail with nested membership object
+      final detailResponse = MembershipDetailResponse.fromJson(response.data!);
+      membershipCard = detailResponse.membership;
     }
 
     return HomeApiResponse<MembershipCardModel>(
@@ -114,12 +119,13 @@ class HomeApiImpl implements HomeApi {
 
   @override
   Future<HomeApiResponse<AswasCardModel>> fetchAswasPlus({
+    required int userId,
     required String ifModifiedSince,
   }) async {
-    final response = await apiClient.get<Map<String, dynamic>>(
-      Endpoints.insurancePolicies,
+    final response = await apiClient.get<List<dynamic>>(
+      Endpoints.insurancePoliciesByUserId(userId),
       ifModifiedSince: ifModifiedSince.isNotEmpty ? ifModifiedSince : null,
-      fromJson: (json) => json as Map<String, dynamic>,
+      fromJson: (json) => json as List<dynamic>,
     );
 
     // Handle 304 Not Modified
@@ -131,13 +137,19 @@ class HomeApiImpl implements HomeApi {
       );
     }
 
-    // Parse the response
+    // Parse the response - API returns direct array of insurance policies
     AswasCardModel? aswasCard;
 
-    if (response.data != null) {
-      // API returns paginated list, get the first ACTIVE policy only
-      final listResponse = AswasListResponse.fromJson(response.data!);
-      aswasCard = listResponse.firstActivePolicy;
+    if (response.data != null && response.data!.isNotEmpty) {
+      // Get the first ACTIVE policy from the array
+      final policies = response.data!
+          .map((json) => AswasCardModel.fromJson(json as Map<String, dynamic>))
+          .where((policy) => policy.policyStatus.toLowerCase() == 'active')
+          .toList();
+
+      if (policies.isNotEmpty) {
+        aswasCard = policies.first;
+      }
     }
 
     return HomeApiResponse<AswasCardModel>(
@@ -151,10 +163,10 @@ class HomeApiImpl implements HomeApi {
   Future<HomeApiResponse<List<EventModel>>> fetchEvents({
     required String ifModifiedSince,
   }) async {
-    final response = await apiClient.get<Map<String, dynamic>>(
+    final response = await apiClient.get<List<dynamic>>(
       Endpoints.events,
       ifModifiedSince: ifModifiedSince.isNotEmpty ? ifModifiedSince : null,
-      fromJson: (json) => json as Map<String, dynamic>,
+      fromJson: (json) => json as List<dynamic>,
     );
 
     // Handle 304 Not Modified
@@ -166,13 +178,19 @@ class HomeApiImpl implements HomeApi {
       );
     }
 
-    // Parse the response
+    // Parse the response - API returns direct array of upcoming events
     List<EventModel>? events;
 
     if (response.data != null) {
-      // API returns paginated list, get upcoming events only
-      final listResponse = EventListResponse.fromJson(response.data!);
-      events = listResponse.upcomingEvents;
+      events = response.data!
+          .map((json) => EventModel.fromJson(json as Map<String, dynamic>))
+          .where((event) => event.isPublished)
+          .toList()
+        ..sort((a, b) {
+          final dateA = DateTime.tryParse(a.eventDate) ?? DateTime.now();
+          final dateB = DateTime.tryParse(b.eventDate) ?? DateTime.now();
+          return dateA.compareTo(dateB);
+        });
     }
 
     return HomeApiResponse<List<EventModel>>(

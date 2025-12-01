@@ -12,6 +12,7 @@ abstract class HomeRepository {
 
   /// Fetches membership card data from API
   ///
+  /// [userId] - The user ID to fetch membership for
   /// [ifModifiedSince] - Timestamp for conditional request (304 handling)
   ///
   /// Returns:
@@ -19,6 +20,7 @@ abstract class HomeRepository {
   /// - Right(null) on 304 Not Modified (use in-memory data)
   /// - Left(Failure) on error
   Future<Either<Failure, MembershipCard?>> getMembershipCard({
+    required int userId,
     String? ifModifiedSince,
   });
 
@@ -35,6 +37,7 @@ abstract class HomeRepository {
 
   /// Fetches Aswas Plus data from API
   ///
+  /// [userId] - The user ID to fetch insurance policies for
   /// [ifModifiedSince] - Timestamp for conditional request (304 handling)
   ///
   /// Returns:
@@ -42,6 +45,7 @@ abstract class HomeRepository {
   /// - Right(null) on 304 Not Modified or no active policy
   /// - Left(Failure) on error
   Future<Either<Failure, AswasPlus?>> getAswasPlus({
+    required int userId,
     String? ifModifiedSince,
   });
 

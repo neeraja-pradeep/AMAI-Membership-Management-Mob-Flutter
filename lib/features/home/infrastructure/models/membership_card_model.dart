@@ -77,34 +77,19 @@ class MembershipCardModel {
   }
 }
 
-/// Response wrapper for paginated membership list
+/// Response wrapper for membership detail endpoint
+/// Extracts membership data from the nested response structure
 @JsonSerializable()
-class MembershipListResponse {
-  const MembershipListResponse({
-    required this.count,
-    required this.results,
-    this.next,
-    this.previous,
+class MembershipDetailResponse {
+  const MembershipDetailResponse({
+    this.membership,
   });
 
-  factory MembershipListResponse.fromJson(Map<String, dynamic> json) =>
-      _$MembershipListResponseFromJson(json);
+  factory MembershipDetailResponse.fromJson(Map<String, dynamic> json) =>
+      _$MembershipDetailResponseFromJson(json);
 
-  @JsonKey(name: 'count')
-  final int count;
+  @JsonKey(name: 'membership')
+  final MembershipCardModel? membership;
 
-  @JsonKey(name: 'results')
-  final List<MembershipCardModel> results;
-
-  @JsonKey(name: 'next')
-  final String? next;
-
-  @JsonKey(name: 'previous')
-  final String? previous;
-
-  Map<String, dynamic> toJson() => _$MembershipListResponseToJson(this);
-
-  /// Gets the first membership card (for current user's membership)
-  MembershipCardModel? get firstMembership =>
-      results.isNotEmpty ? results.first : null;
+  Map<String, dynamic> toJson() => _$MembershipDetailResponseToJson(this);
 }
