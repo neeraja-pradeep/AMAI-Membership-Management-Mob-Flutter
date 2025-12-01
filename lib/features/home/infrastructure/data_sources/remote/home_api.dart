@@ -151,10 +151,10 @@ class HomeApiImpl implements HomeApi {
   Future<HomeApiResponse<List<EventModel>>> fetchEvents({
     required String ifModifiedSince,
   }) async {
-    final response = await apiClient.get<Map<String, dynamic>>(
+    final response = await apiClient.get<List<dynamic>>(
       Endpoints.events,
       ifModifiedSince: ifModifiedSince.isNotEmpty ? ifModifiedSince : null,
-      fromJson: (json) => json as Map<String, dynamic>,
+      fromJson: (json) => json as List<dynamic>,
     );
 
     // Handle 304 Not Modified
@@ -166,13 +166,19 @@ class HomeApiImpl implements HomeApi {
       );
     }
 
-    // Parse the response
+    // Parse the response - API returns direct array of upcoming events
     List<EventModel>? events;
 
     if (response.data != null) {
-      // API returns paginated list, get upcoming events only
-      final listResponse = EventListResponse.fromJson(response.data!);
-      events = listResponse.upcomingEvents;
+      events = response.data!
+          .map((json) => EventModel.fromJson(json as Map<String, dynamic>))
+          .where((event) => event.isPublished)
+          .toList()
+        ..sort((a, b) {
+          final dateA = DateTime.tryParse(a.eventDate) ?? DateTime.now();
+          final dateB = DateTime.tryParse(b.eventDate) ?? DateTime.now();
+          return dateA.compareTo(dateB);
+        });
     }
 
     return HomeApiResponse<List<EventModel>>(

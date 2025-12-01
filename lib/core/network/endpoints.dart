@@ -34,8 +34,8 @@ class Endpoints {
 
   // ============== Events Endpoints ==============
 
-  /// Events list/create endpoint
-  static const String events = '$apiPrefix/bookings/events/';
+  /// Upcoming events list endpoint
+  static const String events = '$apiPrefix/bookings/events/upcoming/';
 
   /// Single event endpoint
   static String eventById(int id) => '$apiPrefix/bookings/events/$id/';
