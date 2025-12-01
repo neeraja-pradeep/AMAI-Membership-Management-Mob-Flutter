@@ -1,3 +1,5 @@
+import 'dart:math';
+
 import 'package:flutter/material.dart';
 
 /// App color palette for AMAI application
@@ -8,6 +10,8 @@ class AppColors {
   static const Color primary = Color(0xFF1E3A5F);
   static const Color primaryLight = Color(0xFF4A6FA5);
   static const Color primaryDark = Color(0xFF0D1F33);
+
+  static const Color newPrimaryLight = Color(0xFF854854);
 
   // ============== Secondary Colors ==============
   static const Color secondary = Color(0xFFFFB74D);
@@ -43,6 +47,17 @@ class AppColors {
   static const Color surface = Color(0xFFFFFFFF);
   static const Color scaffoldBackground = Color(0xFFF5F7FA);
 
+  static const LinearGradient lightBackgroundGradient = LinearGradient(
+    begin: Alignment.topCenter,
+    end: Alignment.bottomCenter,
+    stops: [0.0062, 0.9556],
+    colors: [
+      Color(0xFFFFF6F6), // #FFF6F6
+      Color(0xFFFFFFFF), // #FFFFFF
+    ],
+    transform: GradientRotation(178.93 * pi / 180),
+  );
+
   // ============== Text Colors ==============
   static const Color textPrimary = Color(0xFF212121);
   static const Color textSecondary = Color(0xFF757575);
@@ -63,7 +78,7 @@ class AppColors {
   // ============== Aswas Plus Card Colors ==============
   static const Color aswasCardGradientStart = Color(0xFF00695C);
   static const Color aswasCardGradientEnd = Color(0xFF26A69A);
-  static const Color aswasCardText = Color(0xFFFFFFFF);
+  static const Color aswasCardText = Color(0xFF4C0708);
   static const Color aswasCardAccent = Color(0xFFB2DFDB);
 
   // ============== Event Card Colors ==============
@@ -77,8 +92,8 @@ class AppColors {
   static const Color eventRegisterButtonText = Color(0xFFFFFFFF);
 
   // ============== Status Badge Colors ==============
-  static const Color activeBadge = Color(0xFF4CAF50);
-  static const Color activeBadgeText = Color(0xFFFFFFFF);
+  static const Color activeBadge = Color(0xFFFFDDDD);
+  static const Color activeBadgeText = Color(0xFF4C0708);
   static const Color inactiveBadge = Color(0xFF9E9E9E);
   static const Color inactiveBadgeText = Color(0xFFFFFFFF);
   static const Color expiredBadge = Color(0xFFE53935);

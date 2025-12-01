@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:myapp/app/theme/colors.dart';
 import 'package:myapp/app/theme/typography.dart';
 
@@ -7,7 +8,7 @@ import 'package:myapp/app/theme/typography.dart';
 /// Displays an icon with a label, tappable for navigation
 class QuickActionItem extends StatelessWidget {
   const QuickActionItem({
-    required this.icon,
+    required this.svgAsset,
     required this.label,
     required this.onTap,
     super.key,
@@ -15,8 +16,8 @@ class QuickActionItem extends StatelessWidget {
     this.backgroundColor,
   });
 
-  /// Icon to display
-  final IconData icon;
+  /// SVG asset path to display
+  final String svgAsset;
 
   /// Label text below the icon
   final String label;
@@ -34,8 +35,7 @@ class QuickActionItem extends StatelessWidget {
   Widget build(BuildContext context) {
     return GestureDetector(
       onTap: onTap,
-      child: Container(
-        width: 80.w,
+      child: Padding(
         padding: EdgeInsets.symmetric(vertical: 8.h),
         child: Column(
           mainAxisSize: MainAxisSize.min,
@@ -56,7 +56,7 @@ class QuickActionItem extends StatelessWidget {
       height: 56.h,
       decoration: BoxDecoration(
         color: backgroundColor ?? AppColors.primary.withOpacity(0.1),
-        borderRadius: BorderRadius.circular(16.r),
+        borderRadius: BorderRadius.circular(50.r),
         boxShadow: [
           BoxShadow(
             color: AppColors.cardShadow.withOpacity(0.05),
@@ -65,10 +65,16 @@ class QuickActionItem extends StatelessWidget {
           ),
         ],
       ),
-      child: Icon(
-        icon,
-        size: 28.sp,
-        color: iconColor ?? AppColors.primary,
+      child: Center(
+        child: SvgPicture.asset(
+          svgAsset,
+          width: 26.w,
+          height: 26.h,
+          colorFilter: ColorFilter.mode(
+            iconColor ?? AppColors.primary,
+            BlendMode.srcIn,
+          ),
+        ),
       ),
     );
   }
@@ -78,11 +84,12 @@ class QuickActionItem extends StatelessWidget {
     return Text(
       label,
       textAlign: TextAlign.center,
-      maxLines: 2,
+      maxLines: 1,
       overflow: TextOverflow.ellipsis,
       style: AppTypography.labelSmall.copyWith(
         color: AppColors.textPrimary,
-        fontWeight: FontWeight.w500,
+        fontWeight: FontWeight.w400,
+        fontSize: 16.sp,
       ),
     );
   }

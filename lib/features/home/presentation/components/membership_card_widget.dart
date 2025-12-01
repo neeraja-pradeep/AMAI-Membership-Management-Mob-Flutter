@@ -236,8 +236,9 @@ class MembershipCardEmpty extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       width: double.infinity,
+      height: 180.h,
       margin: EdgeInsets.symmetric(horizontal: 16.w),
-      padding: EdgeInsets.all(24.w),
+      padding: EdgeInsets.symmetric(horizontal: 24.w, vertical: 16.h),
       decoration: BoxDecoration(
         color: AppColors.grey100,
         borderRadius: BorderRadius.circular(16.r),
@@ -247,35 +248,44 @@ class MembershipCardEmpty extends StatelessWidget {
         ),
       ),
       child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
         children: [
           Icon(
             Icons.card_membership_outlined,
-            size: 48.sp,
+            size: 36.sp,
             color: AppColors.grey500,
           ),
-          SizedBox(height: 16.h),
+          SizedBox(height: 12.h),
           Text(
             'No Membership Found',
             style: AppTypography.titleMedium.copyWith(
               color: AppColors.textSecondary,
+              fontSize: 16.sp,
             ),
           ),
-          SizedBox(height: 8.h),
+          SizedBox(height: 4.h),
           Text(
             'Apply for AMAI membership to access exclusive benefits.',
             textAlign: TextAlign.center,
             style: AppTypography.bodySmall.copyWith(
               color: AppColors.textHint,
+              fontSize: 12.sp,
             ),
           ),
           if (onApply != null) ...[
-            SizedBox(height: 16.h),
+            SizedBox(height: 8.h),
             TextButton(
               onPressed: onApply,
+              style: TextButton.styleFrom(
+                padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 4.h),
+                minimumSize: Size.zero,
+                tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+              ),
               child: Text(
                 'Apply Now',
                 style: AppTypography.buttonMedium.copyWith(
                   color: AppColors.primary,
+                  fontSize: 14.sp,
                 ),
               ),
             ),

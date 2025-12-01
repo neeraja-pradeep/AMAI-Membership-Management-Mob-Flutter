@@ -54,6 +54,7 @@ class QuickActionsSection extends StatelessWidget {
             'Quick Actions',
             style: AppTypography.titleMedium.copyWith(
               fontWeight: FontWeight.w600,
+              fontSize: 18.sp,
             ),
           ),
           GestureDetector(
@@ -61,8 +62,9 @@ class QuickActionsSection extends StatelessWidget {
             child: Text(
               'View All',
               style: AppTypography.bodySmall.copyWith(
-                color: AppColors.primary,
-                fontWeight: FontWeight.w500,
+                color: AppColors.newPrimaryLight,
+                fontWeight: FontWeight.w400,
+                fontSize: 16.sp,
               ),
             ),
           ),
@@ -76,16 +78,16 @@ class QuickActionsSection extends StatelessWidget {
     final actions = _getQuickActions();
 
     return SizedBox(
-      height: 100.h,
+      height: 125.h,
       child: ListView.separated(
         scrollDirection: Axis.horizontal,
-        padding: EdgeInsets.symmetric(horizontal: 16.w),
+        padding: EdgeInsets.symmetric(horizontal: 24.w),
         itemCount: actions.length,
-        separatorBuilder: (context, index) => SizedBox(width: 12.w),
+        separatorBuilder: (context, index) => SizedBox(width: 32.w),
         itemBuilder: (context, index) {
           final action = actions[index];
           return QuickActionItem(
-            icon: action.icon,
+            svgAsset: action.svgAsset,
             label: action.label,
             onTap: action.onTap ?? () {},
             iconColor: action.iconColor,
@@ -100,32 +102,39 @@ class QuickActionsSection extends StatelessWidget {
   List<_QuickActionData> _getQuickActions() {
     return [
       _QuickActionData(
-        icon: Icons.card_membership_outlined,
+        svgAsset: 'assets/svg/membership.svg',
         label: 'Membership',
         onTap: onMembershipTap,
-        iconColor: AppColors.primary,
-        backgroundColor: AppColors.primary.withOpacity(0.1),
+        iconColor: AppColors.white,
+        backgroundColor: AppColors.newPrimaryLight,
       ),
       _QuickActionData(
-        icon: Icons.health_and_safety_outlined,
+        svgAsset: 'assets/svg/aswas.svg',
         label: 'Aswas Plus',
         onTap: onAswasePlusTap,
-        iconColor: AppColors.success,
-        backgroundColor: AppColors.success.withOpacity(0.1),
+        iconColor: AppColors.white,
+        backgroundColor: AppColors.newPrimaryLight,
       ),
       _QuickActionData(
-        icon: Icons.school_outlined,
+        svgAsset: 'assets/svg/academy.svg',
         label: 'Academy',
         onTap: onAcademyTap,
-        iconColor: AppColors.secondary,
-        backgroundColor: AppColors.secondary.withOpacity(0.1),
+        iconColor: AppColors.white,
+        backgroundColor: AppColors.newPrimaryLight,
       ),
       _QuickActionData(
-        icon: Icons.contacts_outlined,
+        svgAsset: 'assets/svg/ecommerce.svg',
+        label: 'Ecommerce',
+        onTap: onAcademyTap,
+        iconColor: AppColors.white,
+        backgroundColor: AppColors.newPrimaryLight,
+      ),
+      _QuickActionData(
+        svgAsset: 'assets/svg/contacts.svg',
         label: 'Contacts',
         onTap: onContactsTap,
-        iconColor: AppColors.info,
-        backgroundColor: AppColors.info.withOpacity(0.1),
+        iconColor: AppColors.white,
+        backgroundColor: AppColors.newPrimaryLight,
       ),
     ];
   }
@@ -134,14 +143,14 @@ class QuickActionsSection extends StatelessWidget {
 /// Internal data class for quick action items
 class _QuickActionData {
   const _QuickActionData({
-    required this.icon,
+    required this.svgAsset,
     required this.label,
     this.onTap,
     this.iconColor,
     this.backgroundColor,
   });
 
-  final IconData icon;
+  final String svgAsset;
   final String label;
   final VoidCallback? onTap;
   final Color? iconColor;

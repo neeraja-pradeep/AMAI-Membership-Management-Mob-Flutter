@@ -13,6 +13,7 @@ import 'package:myapp/features/home/presentation/components/aswas_card_widget.da
 import 'package:myapp/features/home/presentation/components/membership_card_widget.dart';
 import 'package:myapp/features/home/presentation/components/quick_actions_section.dart';
 import 'package:myapp/features/home/presentation/components/upcoming_events_section.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 
 /// Home screen - primary landing screen after authentication
 /// Displays membership card, quick actions, events, and announcements
@@ -39,8 +40,11 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppColors.scaffoldBackground,
-      body: SafeArea(
+      // backgroundColor: AppColors.scaffoldBackground,
+      body: Container(
+        decoration: const BoxDecoration(
+          gradient: AppColors.lightBackgroundGradient,
+        ),
         child: RefreshIndicator(
           onRefresh: _onRefresh,
           color: AppColors.primary,
@@ -49,10 +53,8 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                SizedBox(height: 16.h),
-                _buildHeader(),
-                SizedBox(height: 24.h),
-                _buildMembershipCard(),
+                // Top section with background
+                _buildTopSection(),
                 SizedBox(height: 24.h),
                 // Quick Actions section
                 QuickActionsSection(
@@ -72,7 +74,6 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                     // TODO: Navigate to Contacts
                   },
                 ),
-                SizedBox(height: 24.h),
                 // Aswas Plus card (only shows if active policy exists)
                 _buildAswasCard(),
                 // Upcoming Events section
@@ -99,6 +100,37 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     ]);
   }
 
+  /// Builds the top section with background image and header/membership card
+  Widget _buildTopSection() {
+    return Container(
+      height: 330.h,
+      width: double.infinity,
+      decoration: BoxDecoration(
+        color: const Color.fromRGBO(52, 3, 13, 1),
+        borderRadius: BorderRadius.only(
+          bottomLeft: Radius.circular(20.r),
+          bottomRight: Radius.circular(20.r),
+        ),
+        image: const DecorationImage(
+          image: AssetImage('assets/home/bg.png'),
+          fit: BoxFit.cover,
+        ),
+      ),
+      child: SafeArea(
+        bottom: false,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            SizedBox(height: 16.h),
+            _buildHeader(),
+            SizedBox(height: 24.h),
+            _buildMembershipCard(),
+          ],
+        ),
+      ),
+    );
+  }
+
   /// Builds the home header with greeting
   Widget _buildHeader() {
     return Padding(
@@ -109,13 +141,6 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
           Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text(
-                'Welcome back,',
-                style: AppTypography.bodyMedium.copyWith(
-                  color: AppColors.textSecondary,
-                ),
-              ),
-              SizedBox(height: 4.h),
               Consumer(
                 builder: (context, ref, child) {
                   final state = ref.watch(membershipStateProvider);
@@ -123,7 +148,9 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                   return Text(
                     'Hi, $name',
                     style: AppTypography.headlineMedium.copyWith(
-                      color: AppColors.textPrimary,
+                      color: AppColors.white,
+                      fontSize: 18.sp,
+                      fontWeight: FontWeight.w500,
                     ),
                   );
                 },
@@ -132,19 +159,14 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
           ),
           Row(
             children: [
-              _buildIconButton(
-                icon: Icons.notifications_outlined,
+              _buildSvgButton(
+                assetPath: 'assets/svg/bell.svg',
                 onPressed: () {
                   // TODO: Navigate to notifications
                 },
               ),
               SizedBox(width: 8.w),
-              _buildIconButton(
-                icon: Icons.person_outline,
-                onPressed: () {
-                  // TODO: Navigate to profile
-                },
-              ),
+              _buildProfileAvatar(),
             ],
           ),
         ],
@@ -160,25 +182,53 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     return Container(
       width: 44.w,
       height: 44.h,
-      decoration: BoxDecoration(
-        color: AppColors.white,
-        borderRadius: BorderRadius.circular(12.r),
-        boxShadow: [
-          BoxShadow(
-            color: AppColors.cardShadow,
-            blurRadius: 8.r,
-            offset: Offset(0, 2.h),
-          ),
-        ],
-      ),
+      decoration: BoxDecoration(borderRadius: BorderRadius.circular(22.r)),
       child: IconButton(
-        icon: Icon(
-          icon,
-          color: AppColors.grey700,
-          size: 22.sp,
-        ),
+        icon: Icon(icon, color: AppColors.white, size: 22.sp),
         onPressed: onPressed,
         padding: EdgeInsets.zero,
+      ),
+    );
+  }
+
+  //build an icon button for the header with svg
+  Widget _buildSvgButton({
+    required String assetPath,
+    required VoidCallback onPressed,
+  }) {
+    return Container(
+      width: 44.w,
+      height: 44.h,
+      decoration: BoxDecoration(borderRadius: BorderRadius.circular(22.r)),
+      child: IconButton(
+        onPressed: onPressed,
+        padding: EdgeInsets.zero,
+        icon: SvgPicture.asset(
+          assetPath,
+          width: 22.w,
+          height: 22.h,
+          color: AppColors.white, // Remove this if your SVG already has colors
+        ),
+      ),
+    );
+  }
+
+  /// Builds the profile avatar for the header
+  Widget _buildProfileAvatar() {
+    return GestureDetector(
+      onTap: () {
+        // TODO: Navigate to profile
+      },
+      child: Container(
+        width: 44.w,
+        height: 44.h,
+        decoration: BoxDecoration(
+          shape: BoxShape.circle,
+          border: Border.all(color: AppColors.white.withOpacity(0.3), width: 2),
+        ),
+        child: ClipOval(
+          child: Image.asset('assets/home/profile.png', fit: BoxFit.cover),
+        ),
       ),
     );
   }
@@ -208,8 +258,9 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                       height: 24.h,
                       child: const CircularProgressIndicator(
                         strokeWidth: 2,
-                        valueColor:
-                            AlwaysStoppedAnimation<Color>(AppColors.primary),
+                        valueColor: AlwaysStoppedAnimation<Color>(
+                          AppColors.primary,
+                        ),
                       ),
                     ),
                   ),
@@ -451,18 +502,12 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
       ),
       child: Row(
         children: [
-          Icon(
-            Icons.error_outline,
-            color: AppColors.error,
-            size: 20.sp,
-          ),
+          Icon(Icons.error_outline, color: AppColors.error, size: 20.sp),
           SizedBox(width: 12.w),
           Expanded(
             child: Text(
               message,
-              style: AppTypography.bodySmall.copyWith(
-                color: AppColors.error,
-              ),
+              style: AppTypography.bodySmall.copyWith(color: AppColors.error),
             ),
           ),
           TextButton(
@@ -474,9 +519,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
             ),
             child: Text(
               'Retry',
-              style: AppTypography.buttonSmall.copyWith(
-                color: AppColors.error,
-              ),
+              style: AppTypography.buttonSmall.copyWith(color: AppColors.error),
             ),
           ),
         ],
@@ -491,10 +534,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
-            title,
-            style: AppTypography.titleMedium,
-          ),
+          Text(title, style: AppTypography.titleMedium),
           SizedBox(height: 12.h),
           Container(
             width: double.infinity,

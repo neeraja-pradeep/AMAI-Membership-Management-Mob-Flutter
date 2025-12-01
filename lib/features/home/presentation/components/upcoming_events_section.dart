@@ -50,6 +50,8 @@ class UpcomingEventsSection extends StatelessWidget {
             'Upcoming Events',
             style: AppTypography.titleMedium.copyWith(
               color: AppColors.textPrimary,
+              fontSize: 18.sp,
+              fontWeight: FontWeight.w600,
             ),
           ),
           if (events.length > 3)
@@ -66,7 +68,9 @@ class UpcomingEventsSection extends StatelessWidget {
                   Text(
                     'View All',
                     style: AppTypography.buttonSmall.copyWith(
-                      color: AppColors.primary,
+                      color: AppColors.newPrimaryLight,
+                      fontWeight: FontWeight.w400,
+                      fontSize: 16.sp,
                     ),
                   ),
                   SizedBox(width: 4.w),

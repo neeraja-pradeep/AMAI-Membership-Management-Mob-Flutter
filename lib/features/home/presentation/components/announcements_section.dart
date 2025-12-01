@@ -47,6 +47,8 @@ class AnnouncementsSection extends StatelessWidget {
             'Announcements',
             style: AppTypography.titleMedium.copyWith(
               color: AppColors.textPrimary,
+              fontSize: 18.sp,
+              fontWeight: FontWeight.w600,
             ),
           ),
           if (announcements.length > 3)
@@ -63,7 +65,9 @@ class AnnouncementsSection extends StatelessWidget {
                   Text(
                     'View All',
                     style: AppTypography.buttonSmall.copyWith(
-                      color: AppColors.primary,
+                      color: AppColors.newPrimaryLight,
+                      fontWeight: FontWeight.w400,
+                      fontSize: 16.sp,
                     ),
                   ),
                   SizedBox(width: 4.w),
@@ -87,13 +91,32 @@ class AnnouncementsSection extends StatelessWidget {
 
     return Padding(
       padding: EdgeInsets.symmetric(horizontal: 16.w),
-      child: Column(
-        children: displayAnnouncements.map((announcement) {
-          return AnnouncementItem(
-            announcement: announcement,
-            onTap: () => onAnnouncementTap?.call(announcement),
-          );
-        }).toList(),
+      child: Container(
+        decoration: BoxDecoration(
+          border: Border.all(color: AppColors.grey300),
+          color: AppColors.cardBackground,
+          borderRadius: BorderRadius.circular(12.r),
+        ),
+        child: ListView.separated(
+          shrinkWrap: true,
+          physics: const NeverScrollableScrollPhysics(),
+          padding: EdgeInsets.zero,
+          itemCount: displayAnnouncements.length,
+          separatorBuilder: (context, index) => Divider(
+            height: 1,
+            thickness: 1,
+            color: AppColors.grey200,
+            indent: 16.w,
+            endIndent: 16.w,
+          ),
+          itemBuilder: (context, index) {
+            final announcement = displayAnnouncements[index];
+            return AnnouncementItem(
+              announcement: announcement,
+              onTap: () => onAnnouncementTap?.call(announcement),
+            );
+          },
+        ),
       ),
     );
   }
@@ -135,10 +158,24 @@ class AnnouncementsSectionShimmer extends StatelessWidget {
         SizedBox(height: 12.h),
         Padding(
           padding: EdgeInsets.symmetric(horizontal: 16.w),
-          child: Column(
-            children: List.generate(
-              3,
-              (index) => const AnnouncementItemShimmer(),
+          child: Container(
+            decoration: BoxDecoration(
+              color: AppColors.cardBackground,
+              borderRadius: BorderRadius.circular(12.r),
+            ),
+            child: ListView.separated(
+              shrinkWrap: true,
+              physics: const NeverScrollableScrollPhysics(),
+              padding: EdgeInsets.zero,
+              itemCount: 3,
+              separatorBuilder: (context, index) => Divider(
+                height: 1,
+                thickness: 1,
+                color: AppColors.grey200,
+                indent: 16.w,
+                endIndent: 16.w,
+              ),
+              itemBuilder: (context, index) => const AnnouncementItemShimmer(),
             ),
           ),
         ),
