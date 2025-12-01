@@ -26,14 +26,16 @@ class HomeApiResponse<T> {
 
 /// Abstract interface for Home API operations
 abstract class HomeApi {
-  /// Fetches membership data for the current user
+  /// Fetches membership data for a specific user
   ///
+  /// [userId] - The user ID to fetch membership for
   /// [ifModifiedSince] - Timestamp for conditional request
   ///
   /// Returns HomeApiResponse containing:
   /// - MembershipCardModel on success (200)
   /// - null data on not modified (304)
   Future<HomeApiResponse<MembershipCardModel>> fetchMembershipCard({
+    required int userId,
     required String ifModifiedSince,
   });
 
@@ -79,10 +81,11 @@ class HomeApiImpl implements HomeApi {
 
   @override
   Future<HomeApiResponse<MembershipCardModel>> fetchMembershipCard({
+    required int userId,
     required String ifModifiedSince,
   }) async {
     final response = await apiClient.get<Map<String, dynamic>>(
-      Endpoints.memberships,
+      Endpoints.membershipByUserId(userId),
       ifModifiedSince: ifModifiedSince.isNotEmpty ? ifModifiedSince : null,
       fromJson: (json) => json as Map<String, dynamic>,
     );
@@ -100,9 +103,9 @@ class HomeApiImpl implements HomeApi {
     MembershipCardModel? membershipCard;
 
     if (response.data != null) {
-      // API returns paginated list, get the first membership
-      final listResponse = MembershipListResponse.fromJson(response.data!);
-      membershipCard = listResponse.firstMembership;
+      // API returns membership detail with nested membership object
+      final detailResponse = MembershipDetailResponse.fromJson(response.data!);
+      membershipCard = detailResponse.membership;
     }
 
     return HomeApiResponse<MembershipCardModel>(

@@ -10,15 +10,12 @@ class Endpoints {
 
   // ============== Membership Endpoints ==============
 
-  /// Memberships list/create endpoint
-  /// GET: List all memberships
-  /// POST: Create new membership
-  static const String memberships = '$apiPrefix/membership/memberships/';
+  /// Membership detail endpoint by user ID
+  /// GET: Retrieve membership details for a specific user
+  static String membershipByUserId(int userId) =>
+      '$apiPrefix/membership/memberships/$userId/';
 
-  /// Single membership endpoint
-  /// GET: Retrieve membership by ID
-  /// PUT/PATCH: Update membership
-  /// DELETE: Delete membership
+  /// Single membership endpoint (legacy)
   static String membershipById(int id) =>
       '$apiPrefix/membership/memberships/$id/';
 

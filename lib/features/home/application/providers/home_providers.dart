@@ -17,10 +17,17 @@ import 'package:myapp/features/home/infrastructure/repositories/home_repository_
 
 // ============== Core Providers ==============
 
+/// Provider for current user ID
+/// TODO: Replace with actual user ID from auth state
+final userIdProvider = Provider<int>((ref) {
+  return 43; // Practitioner user ID
+});
+
 /// Provider for API client
 /// TODO: Replace with actual user ID from auth state
 final apiClientProvider = Provider<ApiClient>((ref) {
-  return ApiClient(userId: 19); // Practitioner user ID
+  final userId = ref.watch(userIdProvider);
+  return ApiClient(userId: userId);
 });
 
 /// Provider for Connectivity
@@ -111,8 +118,9 @@ class MembershipNotifier extends StateNotifier<MembershipState> {
   Future<void> initialize() async {
     state = const MembershipState.loading();
 
+    final userId = _ref.read(userIdProvider);
     final usecase = _ref.read(fetchMembershipUsecaseProvider);
-    final result = await usecase();
+    final result = await usecase(userId: userId);
 
     result.fold(
       (failure) {
@@ -134,8 +142,9 @@ class MembershipNotifier extends StateNotifier<MembershipState> {
     final previousData = state.currentData;
     state = MembershipState.loading(previousData: previousData);
 
+    final userId = _ref.read(userIdProvider);
     final usecase = _ref.read(fetchMembershipUsecaseProvider);
-    final result = await usecase.refresh();
+    final result = await usecase.refresh(userId: userId);
 
     result.fold(
       (failure) {
