@@ -179,8 +179,9 @@ class _ProfessionalDetailsScreenState
       await ref.read(registrationProvider.notifier).autoSaveProgress();
       debugPrint(responseData.toString());
       final userId = responseData['application']?['user_detail']?['id'];
+      final applicationId = responseData['application']['id'];
 
-      if (userId == null) {
+      if (userId == null && applicationId == null) {
         _showError('Backend Registration Failed');
         return;
       }
@@ -197,7 +198,7 @@ class _ProfessionalDetailsScreenState
       Navigator.pushNamed(
         context,
         AppRouter.registrationAddress,
-        arguments: userId,
+        arguments: {'userId': userId, 'applicationId': applicationId},
       );
     } catch (e) {
       if (mounted) _showError("Registration failed: ${e.toString()}");

@@ -5,6 +5,7 @@ import '../../../../../core/network/endpoints.dart';
 import '../../../domain/entities/registration/practitioner_registration.dart';
 import '../../../domain/entities/registration/document_upload.dart';
 import '../../../domain/repositories/registration_repository.dart';
+import 'package:http_parser/http_parser.dart';
 
 /// Registration API data source
 ///
@@ -75,33 +76,6 @@ class RegistrationApi {
   /// Upload document file
   ///
   /// XCSRF token automatically included in request headers by ApiClient
-  Future<String> uploadDocument({
-    required File file,
-    required DocumentType type,
-    required void Function(double progress) onProgress,
-  }) async {
-    // Create multipart form data
-    final formData = FormData.fromMap({
-      'file': await MultipartFile.fromFile(
-        file.path,
-        filename: file.path.split('/').last,
-      ),
-      'type': type.name,
-    });
-
-    // Upload with progress tracking
-    final response = await _apiClient.post(
-      Endpoints.registrationUpload,
-      data: formData,
-      onSendProgress: (sent, total) {
-        final progress = sent / total;
-        onProgress(progress);
-      },
-    );
-
-    // Return document URL
-    return response.data['url'] as String;
-  }
 
   /// Submit complete registration (old endpoint - kept for compatibility)
   ///
@@ -140,26 +114,52 @@ class RegistrationApi {
     return response.data as Map<String, dynamic>;
   }
 
-  /// Upload application document (Form 3)
-  /// POST /api/membership/application-documents/
   Future<Map<String, dynamic>> uploadApplicationDocument({
     required File documentFile,
-    required String application,
+    required int application,
     required String documentType,
   }) async {
+    final ext = documentFile.path.split('.').last.toLowerCase();
+
+    // ignore: avoid_print
+    print("======== 📂 DOCUMENT UPLOAD INVOKED ========");
+    // ignore: avoid_print
+    print("Application ID: $application");
+    // ignore: avoid_print
+    print("Detected Extension: .$ext");
+    // ignore: avoid_print
+    print("Sending document_type: $documentType");
+
+    final mimeType = switch (ext) {
+      'png' => 'image/png',
+      'pdf' => 'application/pdf',
+      'jpg' || 'jpeg' => 'image/jpeg',
+      _ => 'application/octet-stream',
+    };
+
+    // ignore: avoid_print
+    print("MIME Type: $mimeType");
+
     final formData = FormData.fromMap({
       'application': application,
+      'document_type': documentType,
       'document_file': await MultipartFile.fromFile(
         documentFile.path,
         filename: documentFile.path.split('/').last,
+        contentType: MediaType.parse(mimeType),
       ),
-      'document_type': documentType,
     });
+
+    // ignore: avoid_print
+    print("🚀 Uploading...");
 
     final response = await _apiClient.post(
       Endpoints.applicationDocuments,
       data: formData,
     );
+
+    // ignore: avoid_print
+    print("📥 Response: ${response.data}");
 
     return response.data as Map<String, dynamic>;
   }

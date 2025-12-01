@@ -11,7 +11,9 @@ import '../../../application/states/registration_state.dart';
 import '../../../domain/entities/registration/document_upload.dart';
 
 class DocumentUploadScreen extends ConsumerStatefulWidget {
-  const DocumentUploadScreen({super.key});
+  final int applicationId;
+
+  const DocumentUploadScreen({super.key, required this.applicationId});
 
   @override
   ConsumerState<DocumentUploadScreen> createState() =>
@@ -22,6 +24,8 @@ class _DocumentUploadScreenState extends ConsumerState<DocumentUploadScreen> {
   File? profilePhoto;
   File? certificate;
   bool acceptedTerms = false;
+  bool isUploading = false;
+  double uploadProgress = 0;
 
   @override
   void initState() {
@@ -54,9 +58,12 @@ class _DocumentUploadScreenState extends ConsumerState<DocumentUploadScreen> {
           : ['jpg', 'jpeg', 'png', 'pdf'],
     );
 
-    if (result == null) return;
+    if (result == null) {
+      return;
+    }
 
     final file = File(result.files.single.path!);
+
     final sizeMB = (await file.length()) / (1024 * 1024);
 
     if (sizeMB > 5) {
@@ -65,17 +72,67 @@ class _DocumentUploadScreenState extends ConsumerState<DocumentUploadScreen> {
     }
 
     setState(() {
-      if (isProfile) {
-        profilePhoto = file;
-      } else {
-        certificate = file;
-      }
+      isUploading = true;
+      uploadProgress = 0;
     });
 
-    _saveToState();
+    final extension = ".${file.path.split('.').last.toLowerCase()}";
+
+    try {
+      final state = ref.read(registrationProvider);
+
+      if (state is! RegistrationStateInProgress) {
+        _showError("Registration not in progress.");
+        return;
+      }
+
+      final response = await ref
+          .read(registrationProvider.notifier)
+          .submitDocuments(
+            application: widget.applicationId,
+            documentFile: file,
+            documentType: extension,
+          );
+
+      if (response == null || response["document_url"] == null) {
+        _showError("Upload failed — backend did not accept document.");
+        return;
+      }
+
+      // Save state only after success
+      setState(() {
+        if (isProfile) {
+          profilePhoto = file;
+        } else {
+          certificate = file;
+        }
+      });
+
+      _saveToState();
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            "${isProfile ? "Profile Photo" : "Certificate"} uploaded successfully!",
+          ),
+          backgroundColor: Colors.green,
+        ),
+      );
+    } catch (e) {
+      _showError("Upload failed: $e");
+    } finally {
+      if (mounted) {
+        setState(() {
+          isUploading = false;
+          uploadProgress = 0;
+        });
+      }
+    }
   }
 
   void _removeFile(bool isProfile) {
+    if (isUploading) return;
+
     setState(() {
       if (isProfile) {
         profilePhoto = null;
@@ -121,7 +178,7 @@ class _DocumentUploadScreenState extends ConsumerState<DocumentUploadScreen> {
 
   Future<void> _next() async {
     if (profilePhoto == null || certificate == null) {
-      _showError("Please upload all required documents.");
+      _showError("Ensure both files are successfully uploaded.");
       return;
     }
 
@@ -130,11 +187,7 @@ class _DocumentUploadScreenState extends ConsumerState<DocumentUploadScreen> {
       return;
     }
 
-    await ref.read(registrationProvider.notifier).autoSaveProgress();
-
-    if (mounted) {
-      Navigator.pushNamed(context, AppRouter.registrationPayment);
-    }
+    Navigator.pushNamed(context, AppRouter.registrationPayment);
   }
 
   void _showError(String msg) {
@@ -176,39 +229,24 @@ class _DocumentUploadScreenState extends ConsumerState<DocumentUploadScreen> {
               ),
             ),
 
-            SizedBox(height: 12.h),
-
-            Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: List.generate(4, (i) {
-                final active = i == 3;
-                return AnimatedContainer(
-                  duration: const Duration(milliseconds: 300),
-                  margin: EdgeInsets.symmetric(horizontal: 6.w),
-                  width: active ? 18.w : 12.w,
-                  height: active ? 18.w : 12.w,
-                  decoration: BoxDecoration(
-                    color: active ? AppColors.brown : Colors.grey[300],
-                    shape: BoxShape.circle,
-                  ),
-                );
-              }),
-            ),
-
-            SizedBox(height: 24.h),
-
-            Text(
-              "Upload Documents",
-              style: TextStyle(fontSize: 20.sp, fontWeight: FontWeight.bold),
-            ),
+            if (isUploading)
+              Padding(
+                padding: EdgeInsets.only(top: 12.h),
+                child: LinearProgressIndicator(
+                  value: uploadProgress == 0 ? null : uploadProgress,
+                  backgroundColor: Colors.grey[300],
+                  color: AppColors.brown,
+                  minHeight: 4,
+                ),
+              ),
 
             SizedBox(height: 30.h),
 
             _label("Profile Photo"),
             _uploadTile(
               file: profilePhoto,
-              onPick: () => _pickFile(isProfile: true),
-              onRemove: () => _removeFile(true),
+              onPick: isUploading ? null : () => _pickFile(isProfile: true),
+              onRemove: isUploading ? null : () => _removeFile(true),
             ),
 
             SizedBox(height: 25.h),
@@ -216,8 +254,8 @@ class _DocumentUploadScreenState extends ConsumerState<DocumentUploadScreen> {
             _label("Medical Council Certificate"),
             _uploadTile(
               file: certificate,
-              onPick: () => _pickFile(isProfile: false),
-              onRemove: () => _removeFile(false),
+              onPick: isUploading ? null : () => _pickFile(isProfile: false),
+              onRemove: isUploading ? null : () => _removeFile(false),
             ),
 
             SizedBox(height: 30.h),
@@ -226,7 +264,9 @@ class _DocumentUploadScreenState extends ConsumerState<DocumentUploadScreen> {
               children: [
                 Checkbox(
                   value: acceptedTerms,
-                  onChanged: (v) => setState(() => acceptedTerms = v!),
+                  onChanged: isUploading
+                      ? null
+                      : (v) => setState(() => acceptedTerms = v!),
                   activeColor: AppColors.brown,
                 ),
                 Expanded(
@@ -281,8 +321,8 @@ class _DocumentUploadScreenState extends ConsumerState<DocumentUploadScreen> {
 
   Widget _uploadTile({
     required File? file,
-    required VoidCallback onPick,
-    required VoidCallback onRemove,
+    required VoidCallback? onPick,
+    required VoidCallback? onRemove,
   }) {
     return InkWell(
       onTap: onPick,
@@ -291,8 +331,7 @@ class _DocumentUploadScreenState extends ConsumerState<DocumentUploadScreen> {
         padding: EdgeInsets.all(18.w),
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(14.r),
-          border: Border.all(color: Colors.grey, style: BorderStyle.solid),
-          // You may use dashed border package if needed.
+          border: Border.all(color: Colors.grey),
         ),
         child: file == null
             ? Column(

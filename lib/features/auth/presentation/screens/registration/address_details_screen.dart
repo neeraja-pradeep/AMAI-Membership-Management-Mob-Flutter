@@ -11,7 +11,13 @@ import '../../components/text_input_field.dart';
 
 class AddressDetailsScreen extends ConsumerStatefulWidget {
   final int userId;
-  const AddressDetailsScreen({super.key, required this.userId});
+  final int applicationId;
+
+  const AddressDetailsScreen({
+    super.key,
+    required this.userId,
+    required this.applicationId,
+  });
 
   @override
   ConsumerState<AddressDetailsScreen> createState() =>
@@ -113,7 +119,6 @@ class _AddressDetailsScreenState extends ConsumerState<AddressDetailsScreen> {
 
     try {
       _save();
-      final state = ref.read(registrationProvider);
 
       final addressData = {
         'user': widget.userId, // <-- from previous screen
@@ -149,8 +154,13 @@ class _AddressDetailsScreenState extends ConsumerState<AddressDetailsScreen> {
         ),
       );
 
-      if (mounted)
-        Navigator.pushNamed(context, AppRouter.registrationDocuments);
+      if (!mounted) return;
+
+      Navigator.pushNamed(
+        context,
+        AppRouter.registrationDocuments,
+        arguments: widget.applicationId,
+      );
     } catch (e) {
       if (mounted) _showError("Registration failed: ${e.toString()}");
     } finally {

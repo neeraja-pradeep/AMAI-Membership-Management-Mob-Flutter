@@ -74,46 +74,6 @@ class RegistrationRepositoryImpl implements RegistrationRepository {
   }
 
   @override
-  Future<String> uploadDocument({
-    required File file,
-    required DocumentType type,
-    required void Function(double progress) onProgress,
-  }) async {
-    // 1. Validate file security
-    final validationResult = await FileSecurityValidator.validateFile(file);
-    if (!validationResult.isValid) {
-      throw RegistrationError(
-        type: RegistrationErrorType.invalidFileType,
-        message: validationResult.error ?? 'Invalid file',
-        code: 'INVALID_FILE',
-        canRetry: false,
-      );
-    }
-
-    // 2. Validate file size (5MB limit)
-    final sizeError = await FileSecurityValidator.validateFileSize(
-      file,
-      maxSizeMB: 5,
-    );
-    if (sizeError != null) {
-      throw RegistrationError.fileTooLarge(5);
-    }
-
-    // 3. Upload file
-    try {
-      return await _api.uploadDocument(
-        file: file,
-        type: type,
-        onProgress: onProgress,
-      );
-    } on DioException catch (e) {
-      throw _mapDioExceptionToUploadError(e);
-    } catch (e) {
-      throw RegistrationError.uploadFailure();
-    }
-  }
-
-  @override
   Future<String> submitRegistration({
     required PractitionerRegistration registration,
   }) async {
@@ -203,6 +163,26 @@ class RegistrationRepositoryImpl implements RegistrationRepository {
     try {
       // Submit to API
       return await _api.submitAddress(data: data);
+    } on DioException catch (e) {
+      throw _mapDioExceptionToSubmissionError(e);
+    } catch (e) {
+      throw RegistrationError.serverError();
+    }
+  }
+
+  @override
+  Future<Map<String, dynamic>> submitDocument({
+    required File documentFile,
+    required int application, // <-- CHANGE TYPE HERE
+    required String documentType,
+  }) async {
+    try {
+      // Submit to API
+      return await _api.uploadApplicationDocument(
+        application: application,
+        documentFile: documentFile,
+        documentType: documentType,
+      );
     } on DioException catch (e) {
       throw _mapDioExceptionToSubmissionError(e);
     } catch (e) {

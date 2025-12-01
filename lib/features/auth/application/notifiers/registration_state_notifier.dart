@@ -255,6 +255,18 @@ class RegistrationStateNotifier extends StateNotifier<RegistrationState> {
     return await _repository.submitMembershipRegistration(membershipData);
   }
 
+  Future<Map<String, dynamic>> submitDocuments({
+    required File documentFile,
+    required int application,
+    required String documentType,
+  }) async {
+    return await _repository.submitDocument(
+      application: application,
+      documentFile: documentFile,
+      documentType: documentType,
+    );
+  }
+
   Future<Map<String, dynamic>> submitAddress({
     required Map<String, dynamic> data,
   }) async {

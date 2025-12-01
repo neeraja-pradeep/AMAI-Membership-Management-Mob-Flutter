@@ -36,11 +36,6 @@ abstract class RegistrationRepository {
   ///
   /// Returns document URL on success or throws [RegistrationError]
   /// Handles multipart upload with progress tracking
-  Future<String> uploadDocument({
-    required File file,
-    required DocumentType type,
-    required void Function(double progress) onProgress,
-  });
 
   /// Submit complete registration
   ///
@@ -48,6 +43,12 @@ abstract class RegistrationRepository {
   /// Validates session before submission
   Future<String> submitRegistration({
     required PractitionerRegistration registration,
+  });
+
+  Future<Map<String, dynamic>> submitDocument({
+    required File documentFile,
+    required int application,
+    required String documentType,
   });
 
   /// Validate current session

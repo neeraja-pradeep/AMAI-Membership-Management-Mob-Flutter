@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:myapp/features/auth/presentation/screen/login_screen.dart';
 
-import '../../features/auth/presentation/screens/registration/membership_form_screen.dart';
 import '../../features/auth/presentation/screens/registration/personal_details_screen.dart';
 import '../../features/auth/presentation/screens/registration/professional_details_screen.dart';
 import '../../features/auth/presentation/screens/registration/address_details_screen.dart';
@@ -114,16 +113,18 @@ class AppRouter {
         // TODO: Import and return LoginScreen
         return _buildRoute(const LoginScreen());
 
-      // NEW: 3-step registration routes
-      case registrationMembership:
-        return _buildRoute(const MembershipFormScreen());
-
       case registrationAddress:
-        final userid = settings.arguments as int;
-        return _buildRoute(AddressDetailsScreen(userId: userid));
+        final args = settings.arguments as Map;
+        final userId = args['userId'];
+        final applicationId = args['applicationId'];
 
-      case registrationDocuments:
-        return _buildRoute(const DocumentUploadScreen());
+        return _buildRoute(
+          AddressDetailsScreen(userId: userId, applicationId: applicationId),
+        );
+
+      case AppRouter.registrationDocuments:
+        final applicationId = settings.arguments as int;
+        return _buildRoute(DocumentUploadScreen(applicationId: applicationId));
 
       case registrationProfessional:
         return _buildRoute(const ProfessionalDetailsScreen());
