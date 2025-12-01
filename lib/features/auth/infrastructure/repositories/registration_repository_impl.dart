@@ -188,22 +188,21 @@ class RegistrationRepositoryImpl implements RegistrationRepository {
   Future<Map<String, dynamic>> submitMembershipRegistration(
     Map<String, dynamic> membershipData,
   ) async {
-    // MOCK MODE: For development without backend
-    if (_useMockMode) {
-      // Simulate network delay
-      await Future.delayed(const Duration(seconds: 1));
-
-      // Return mock response with application ID
-      return {
-        'id': 'APP_${DateTime.now().millisecondsSinceEpoch}',
-        'status': 'success',
-        'message': 'Registration submitted successfully',
-      };
-    }
-
     try {
       // Submit to API
       return await _api.submitMembershipRegistration(data: membershipData);
+    } on DioException catch (e) {
+      throw _mapDioExceptionToSubmissionError(e);
+    } catch (e) {
+      throw RegistrationError.serverError();
+    }
+  }
+
+  @override
+  Future<Map<String, dynamic>> submitAddress(Map<String, dynamic> data) async {
+    try {
+      // Submit to API
+      return await _api.submitAddress(data: data);
     } on DioException catch (e) {
       throw _mapDioExceptionToSubmissionError(e);
     } catch (e) {

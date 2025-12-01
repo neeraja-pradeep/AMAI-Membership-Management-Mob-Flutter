@@ -14,7 +14,7 @@ class LoginUseCase {
   ///
   /// Returns User and Session on success
   /// Throws exception on failure
-  Future<({User user, Session session})> execute({
+  Future<bool> execute({
     required String email,
     required String password,
     required bool rememberMe,
@@ -33,18 +33,12 @@ class LoginUseCase {
     }
 
     // Call repository
-    return await _repository.login(
-      email: email,
-      password: password,
-      rememberMe: rememberMe,
-    );
+    return await _repository.login(email: email, password: password);
   }
 
   /// Validate email format
   bool _isValidEmail(String email) {
-    final emailRegex = RegExp(
-      r'^[a-zA-Z0-9.]+@[a-zA-Z0-9]+\.[a-zA-Z]+',
-    );
+    final emailRegex = RegExp(r'^[a-zA-Z0-9.]+@[a-zA-Z0-9]+\.[a-zA-Z]+');
     return emailRegex.hasMatch(email);
   }
 }

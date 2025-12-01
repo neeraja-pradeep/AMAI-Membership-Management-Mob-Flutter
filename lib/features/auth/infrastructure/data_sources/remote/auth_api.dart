@@ -13,7 +13,7 @@ import '../../models/registration_request.dart';
 /// Handles all authentication-related API calls
 class AuthApi {
   final ApiClient _apiClient;
-  final Uuid _uuid = const Uuid();
+
   int _loginAttemptCount = 0;
 
   AuthApi(this._apiClient);
@@ -33,18 +33,11 @@ class AuthApi {
   Future<LoginResponse> login({
     required String email,
     required String password,
-    required bool rememberMe,
   }) async {
     try {
       // Generate device ID (or retrieve from persistent storage)
-      final deviceId = _uuid.v4();
 
-      final request = LoginRequest(
-        email: email,
-        password: password,
-        rememberMe: rememberMe,
-        deviceId: deviceId,
-      );
+      final request = LoginRequest(email: email, password: password);
 
       final response = await _apiClient.post<Map<String, dynamic>>(
         Endpoints.login,
@@ -57,14 +50,14 @@ class AuthApi {
       // - csrftoken cookie (HTTP-only)
       // Both stored in .cookies/ directory via path_provider
 
-      // Extract XCSRF token from response headers
-      final xcsrfToken =
-          response.headers.value('x-csrftoken') ??
-          response.data?['xcsrf_token'] as String? ??
-          '';
+      // // Extract XCSRF token from response headers
+      // final xcsrfToken =
+      //     response.headers.value('x-csrftoken') ??
+      //     response.data?['xcsrf_token'] as String? ??
+      //     '';
 
-      // Extract If-Modified-Since header
-      final ifModifiedSince = response.headers.value('last-modified');
+      // // Extract If-Modified-Since header
+      // final ifModifiedSince = response.headers.value('last-modified');
 
       // Build login response (user data only - no tokens)
       final loginResponse = LoginResponse.fromJson(response.data!);

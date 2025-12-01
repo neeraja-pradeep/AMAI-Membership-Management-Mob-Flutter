@@ -66,9 +66,6 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final isOffline = ref.watch(isOfflineProvider);
-    final isStale = ref.watch(isStaleProvider);
-
     return Scaffold(
       body: Container(
         width: double.infinity,
@@ -174,22 +171,6 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                 ),
               ),
             ),
-
-            if (isOffline)
-              const Positioned(
-                top: 0,
-                left: 0,
-                right: 0,
-                child: OfflineBanner(),
-              ),
-
-            if (isStale)
-              const Positioned(
-                top: 0,
-                left: 0,
-                right: 0,
-                child: StaleDataBanner(),
-              ),
           ],
         ),
       ),

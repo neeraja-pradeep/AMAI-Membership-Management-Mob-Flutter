@@ -56,6 +56,8 @@ abstract class RegistrationRepository {
   /// Used before critical operations (document upload, final submission)
   Future<bool> validateSession();
 
+  Future<Map<String, dynamic>> submitAddress(Map<String, dynamic> data);
+
   /// Check if email is already registered
   ///
   /// Returns true if duplicate found, false otherwise
@@ -106,11 +108,7 @@ class MedicalCouncil {
   }
 
   Map<String, dynamic> toJson() {
-    return {
-      'id': id,
-      'name': name,
-      'country_code': countryCode,
-    };
+    return {'id': id, 'name': name, 'country_code': countryCode};
   }
 
   @override
@@ -119,7 +117,9 @@ class MedicalCouncil {
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
-      other is MedicalCouncil && runtimeType == other.runtimeType && id == other.id;
+      other is MedicalCouncil &&
+          runtimeType == other.runtimeType &&
+          id == other.id;
 
   @override
   int get hashCode => id.hashCode;
@@ -146,11 +146,7 @@ class Specialization {
   }
 
   Map<String, dynamic> toJson() {
-    return {
-      'id': id,
-      'name': name,
-      'category': category,
-    };
+    return {'id': id, 'name': name, 'category': category};
   }
 
   @override
@@ -159,7 +155,9 @@ class Specialization {
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
-      other is Specialization && runtimeType == other.runtimeType && id == other.id;
+      other is Specialization &&
+          runtimeType == other.runtimeType &&
+          id == other.id;
 
   @override
   int get hashCode => id.hashCode;
@@ -171,11 +169,7 @@ class Country {
   final String name;
   final String code; // ISO 3166-1 alpha-2 code
 
-  const Country({
-    required this.id,
-    required this.name,
-    required this.code,
-  });
+  const Country({required this.id, required this.name, required this.code});
 
   factory Country.fromJson(Map<String, dynamic> json) {
     return Country(
@@ -186,11 +180,7 @@ class Country {
   }
 
   Map<String, dynamic> toJson() {
-    return {
-      'id': id,
-      'name': name,
-      'code': code,
-    };
+    return {'id': id, 'name': name, 'code': code};
   }
 
   @override
@@ -211,11 +201,7 @@ class State {
   final String name;
   final String countryId;
 
-  const State({
-    required this.id,
-    required this.name,
-    required this.countryId,
-  });
+  const State({required this.id, required this.name, required this.countryId});
 
   factory State.fromJson(Map<String, dynamic> json) {
     return State(
@@ -226,11 +212,7 @@ class State {
   }
 
   Map<String, dynamic> toJson() {
-    return {
-      'id': id,
-      'name': name,
-      'country_id': countryId,
-    };
+    return {'id': id, 'name': name, 'country_id': countryId};
   }
 
   @override
@@ -251,11 +233,7 @@ class District {
   final String name;
   final String stateId;
 
-  const District({
-    required this.id,
-    required this.name,
-    required this.stateId,
-  });
+  const District({required this.id, required this.name, required this.stateId});
 
   factory District.fromJson(Map<String, dynamic> json) {
     return District(
@@ -266,11 +244,7 @@ class District {
   }
 
   Map<String, dynamic> toJson() {
-    return {
-      'id': id,
-      'name': name,
-      'state_id': stateId,
-    };
+    return {'id': id, 'name': name, 'state_id': stateId};
   }
 
   @override

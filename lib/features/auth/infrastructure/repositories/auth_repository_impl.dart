@@ -75,44 +75,23 @@ class AuthRepositoryImpl implements AuthRepository {
   /// 5. Save to Hive asynchronously (don't block navigation)
   /// 6. Navigate to next screen
   @override
-  Future<({User user, Session session})> login({
-    required String email,
-    required String password,
-    required bool rememberMe,
-  }) async {
+  Future<bool> login({required String email, required String password}) async {
     try {
-      // API call (Scenario 1)
-      final loginResponse = await _authApi.login(
-        email: email,
-        password: password,
-        rememberMe: rememberMe,
-      );
+      final response = await _authApi.login(email: email, password: password);
 
-      // Convert to entities
-      final user = loginResponse.user.toEntity();
-      final session = Session(
-        xcsrfToken: loginResponse.xcsrfToken!,
-        expiresAt: DateTime.parse(loginResponse.expiresAt),
-        ifModifiedSince: loginResponse.ifModifiedSince,
-      );
+      // backend returns: { "detail": "Login successful" }
+      if (response.detail.toLowerCase() == "login successful") {
+        // Store login status locally (so app remembers user)
+        // await _authLocalDs.saveIsLoggedIn(true);
 
-      // Update in-memory cache (Scenario 4)
-      _cachedUser = user;
-      _cachedSession = session;
+        // // (Optional) store email if you need it later
+        // await _authLocalDs.saveEmail(email);
 
-      // Save to Hive ASYNCHRONOUSLY (don't block navigation)
-      _saveAuthDataAsync(
-        user: loginResponse.user,
-        session: SessionModel.fromEntity(session),
-        rememberMe: rememberMe,
-      );
+        return true;
+      }
 
-      // CACHE INVALIDATION: Successful login � Overwrite all keys
-      await _cacheManager.clearAll();
-
-      return (user: user, session: session);
+      return false; // unexpected text from backend
     } catch (e) {
-      // CACHE INVALIDATION: Failed login � Do NOT clear old session data
       rethrow;
     }
   }

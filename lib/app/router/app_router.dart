@@ -119,7 +119,8 @@ class AppRouter {
         return _buildRoute(const MembershipFormScreen());
 
       case registrationAddress:
-        return _buildRoute(const AddressDetailsScreen());
+        final userid = settings.arguments as int;
+        return _buildRoute(AddressDetailsScreen(userId: userid));
 
       case registrationDocuments:
         return _buildRoute(const DocumentUploadScreen());

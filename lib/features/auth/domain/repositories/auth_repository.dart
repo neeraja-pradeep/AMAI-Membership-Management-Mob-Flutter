@@ -10,19 +10,13 @@ abstract class AuthRepository {
   ///
   /// Returns User and Session on success
   /// Throws exception on failure
-  Future<({User user, Session session})> login({
-    required String email,
-    required String password,
-    required bool rememberMe,
-  });
+  Future<bool> login({required String email, required String password});
 
   /// Register with selected role (Phase 1)
   ///
   /// Returns success status
   /// Throws exception on failure
-  Future<bool> registerWithRole({
-    required UserRole role,
-  });
+  Future<bool> registerWithRole({required UserRole role});
 
   /// Get current session from cache
   ///

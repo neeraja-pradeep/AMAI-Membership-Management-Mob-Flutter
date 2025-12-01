@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:myapp/app/theme/colors.dart';
+import 'package:myapp/features/auth/presentation/screens/home_screen.dart';
 import 'package:myapp/features/auth/presentation/screens/registration/personal_details_screen.dart';
 import 'package:myapp/features/auth/presentation/screens/registration/register_screen.dart';
 import '../../application/providers/auth_provider.dart';
@@ -60,8 +61,6 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
   @override
   Widget build(BuildContext context) {
     final authState = ref.watch(authProvider);
-    final isOffline = ref.watch(isOfflineProvider);
-    final isStale = ref.watch(isStaleProvider);
 
     // Listen to auth state changes
     ref.listen<AuthState>(authProvider, (previous, next) {
@@ -69,6 +68,9 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
         case AuthStateAuthenticated():
           // Navigate to home screen on successful login
           // Navigator.pushReplacementNamed(context, '/home');
+          Navigator.of(
+            context,
+          ).push(MaterialPageRoute(builder: (context) => const HomeScreen()));
           break;
         case AuthStateError(:final message):
           // Show error snackbar
@@ -273,22 +275,6 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
             ),
 
             // Offline banner (SCENARIO 3)
-            if (isOffline)
-              const Positioned(
-                top: 0,
-                left: 0,
-                right: 0,
-                child: OfflineBanner(),
-              ),
-
-            // Stale data banner (SCENARIO 5)
-            if (isStale)
-              const Positioned(
-                top: 0,
-                left: 0,
-                right: 0,
-                child: StaleDataBanner(),
-              ),
           ],
         ),
       ),

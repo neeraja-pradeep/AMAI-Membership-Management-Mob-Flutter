@@ -172,11 +172,18 @@ class _ProfessionalDetailsScreenState
         'professional_details2': professionalDetails.professionalDetails2,
       };
 
-      await ref
+      final responseData = await ref
           .read(registrationProvider.notifier)
           .submitMembershipRegistration(membershipData);
 
       await ref.read(registrationProvider.notifier).autoSaveProgress();
+      debugPrint(responseData.toString());
+      final userId = responseData['application']?['user_detail']?['id'];
+
+      if (userId == null) {
+        _showError('Backend Registration Failed');
+        return;
+      }
 
       if (!mounted) return;
 
@@ -187,7 +194,11 @@ class _ProfessionalDetailsScreenState
         ),
       );
 
-      Navigator.pushNamed(context, AppRouter.registrationAddress);
+      Navigator.pushNamed(
+        context,
+        AppRouter.registrationAddress,
+        arguments: userId,
+      );
     } catch (e) {
       if (mounted) _showError("Registration failed: ${e.toString()}");
     } finally {

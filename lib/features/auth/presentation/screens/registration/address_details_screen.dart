@@ -10,7 +10,8 @@ import '../../../domain/entities/registration/address_details.dart';
 import '../../components/text_input_field.dart';
 
 class AddressDetailsScreen extends ConsumerStatefulWidget {
-  const AddressDetailsScreen({super.key});
+  final int userId;
+  const AddressDetailsScreen({super.key, required this.userId});
 
   @override
   ConsumerState<AddressDetailsScreen> createState() =>
@@ -108,9 +109,59 @@ class _AddressDetailsScreenState extends ConsumerState<AddressDetailsScreen> {
       return;
     }
 
-    _save();
     await ref.read(registrationProvider.notifier).autoSaveProgress();
-    if (mounted) Navigator.pushNamed(context, AppRouter.registrationDocuments);
+
+    try {
+      _save();
+      final state = ref.read(registrationProvider);
+
+      final addressData = {
+        'user': widget.userId, // <-- from previous screen
+        'address_line1': _addressLine1Controller.text.trim(),
+        'address_line2': _addressLine2Controller.text.trim(),
+        'country': _selectedCountry,
+        'state': _selectedState,
+        'district': _selectedDistrict,
+        'city': _cityController.text.trim(),
+        'postal_code': _postalCodeController.text.trim(),
+        'is_primary': true,
+      };
+
+      final responseData = await ref
+          .read(registrationProvider.notifier)
+          .submitAddress(data: addressData);
+      debugPrint(responseData.toString());
+      await ref.read(registrationProvider.notifier).autoSaveProgress();
+
+      final addressId = responseData['id'];
+
+      if (addressId == null) {
+        _showError('Backend Registration Failed');
+        return;
+      }
+
+      if (!mounted) return;
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text("Registration saved. Continue with Document details."),
+          backgroundColor: Colors.green,
+        ),
+      );
+
+      if (mounted)
+        Navigator.pushNamed(context, AppRouter.registrationDocuments);
+    } catch (e) {
+      if (mounted) _showError("Registration failed: ${e.toString()}");
+    } finally {
+      // if (mounted) setState(() => _isSubmitting = false);
+    }
+  }
+
+  void _showError(String msg) {
+    ScaffoldMessenger.of(
+      context,
+    ).showSnackBar(SnackBar(content: Text(msg), backgroundColor: Colors.red));
   }
 
   @override
