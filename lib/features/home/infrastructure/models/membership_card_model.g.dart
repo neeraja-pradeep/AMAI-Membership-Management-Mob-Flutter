@@ -33,22 +33,17 @@ Map<String, dynamic> _$MembershipCardModelToJson(
       'updated_at': instance.updatedAt,
     };
 
-MembershipListResponse _$MembershipListResponseFromJson(
+MembershipDetailResponse _$MembershipDetailResponseFromJson(
         Map<String, dynamic> json) =>
-    MembershipListResponse(
-      count: (json['count'] as num).toInt(),
-      results: (json['results'] as List<dynamic>)
-          .map((e) => MembershipCardModel.fromJson(e as Map<String, dynamic>))
-          .toList(),
-      next: json['next'] as String?,
-      previous: json['previous'] as String?,
+    MembershipDetailResponse(
+      membership: json['membership'] == null
+          ? null
+          : MembershipCardModel.fromJson(
+              json['membership'] as Map<String, dynamic>),
     );
 
-Map<String, dynamic> _$MembershipListResponseToJson(
-        MembershipListResponse instance) =>
+Map<String, dynamic> _$MembershipDetailResponseToJson(
+        MembershipDetailResponse instance) =>
     <String, dynamic>{
-      'count': instance.count,
-      'results': instance.results,
-      'next': instance.next,
-      'previous': instance.previous,
+      'membership': instance.membership,
     };

@@ -90,7 +90,8 @@ class UpcomingEventsSection extends StatelessWidget {
   /// Builds the horizontal scrollable events list
   Widget _buildEventsList() {
     return SizedBox(
-      height: 290.h, // Fixed height for horizontal list
+      height: 260.h,
+      // Fixed height for horizontal list
       child: ListView.builder(
         scrollDirection: Axis.horizontal,
         padding: EdgeInsets.symmetric(horizontal: 16.w),
@@ -143,7 +144,7 @@ class UpcomingEventsSectionShimmer extends StatelessWidget {
         ),
         SizedBox(height: 12.h),
         SizedBox(
-          height: 290.h,
+          height: 245.h,
           child: ListView.builder(
             scrollDirection: Axis.horizontal,
             padding: EdgeInsets.symmetric(horizontal: 16.w),
