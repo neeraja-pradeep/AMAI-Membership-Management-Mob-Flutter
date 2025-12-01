@@ -91,6 +91,7 @@ class HomeRepositoryImpl implements HomeRepository {
 
   @override
   Future<Either<Failure, AswasPlus?>> getAswasPlus({
+    required int userId,
     String? ifModifiedSince,
   }) async {
     // Check connectivity
@@ -105,6 +106,7 @@ class HomeRepositoryImpl implements HomeRepository {
     try {
       // Online - make API call
       final response = await homeApi.fetchAswasPlus(
+        userId: userId,
         ifModifiedSince: ifModifiedSince ?? '',
       );
 

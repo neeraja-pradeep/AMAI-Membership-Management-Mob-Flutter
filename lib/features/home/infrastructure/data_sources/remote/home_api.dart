@@ -39,14 +39,16 @@ abstract class HomeApi {
     required String ifModifiedSince,
   });
 
-  /// Fetches insurance policies (Aswas Plus) for the current user
+  /// Fetches insurance policies (Aswas Plus) for a specific user
   ///
+  /// [userId] - The user ID to fetch insurance policies for
   /// [ifModifiedSince] - Timestamp for conditional request
   ///
   /// Returns HomeApiResponse containing:
   /// - AswasCardModel on success (200) - only if active policy exists
   /// - null data on not modified (304) or no active policy
   Future<HomeApiResponse<AswasCardModel>> fetchAswasPlus({
+    required int userId,
     required String ifModifiedSince,
   });
 
@@ -117,12 +119,13 @@ class HomeApiImpl implements HomeApi {
 
   @override
   Future<HomeApiResponse<AswasCardModel>> fetchAswasPlus({
+    required int userId,
     required String ifModifiedSince,
   }) async {
-    final response = await apiClient.get<Map<String, dynamic>>(
-      Endpoints.insurancePolicies,
+    final response = await apiClient.get<List<dynamic>>(
+      Endpoints.insurancePoliciesByUserId(userId),
       ifModifiedSince: ifModifiedSince.isNotEmpty ? ifModifiedSince : null,
-      fromJson: (json) => json as Map<String, dynamic>,
+      fromJson: (json) => json as List<dynamic>,
     );
 
     // Handle 304 Not Modified
@@ -134,13 +137,19 @@ class HomeApiImpl implements HomeApi {
       );
     }
 
-    // Parse the response
+    // Parse the response - API returns direct array of insurance policies
     AswasCardModel? aswasCard;
 
-    if (response.data != null) {
-      // API returns paginated list, get the first ACTIVE policy only
-      final listResponse = AswasListResponse.fromJson(response.data!);
-      aswasCard = listResponse.firstActivePolicy;
+    if (response.data != null && response.data!.isNotEmpty) {
+      // Get the first ACTIVE policy from the array
+      final policies = response.data!
+          .map((json) => AswasCardModel.fromJson(json as Map<String, dynamic>))
+          .where((policy) => policy.policyStatus.toLowerCase() == 'active')
+          .toList();
+
+      if (policies.isNotEmpty) {
+        aswasCard = policies.first;
+      }
     }
 
     return HomeApiResponse<AswasCardModel>(

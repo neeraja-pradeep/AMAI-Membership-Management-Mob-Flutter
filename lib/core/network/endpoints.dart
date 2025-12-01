@@ -21,11 +21,12 @@ class Endpoints {
 
   // ============== Insurance Endpoints ==============
 
-  /// Insurance policies list/create endpoint
-  static const String insurancePolicies =
-      '$apiPrefix/membership/insurance-policies/';
+  /// Insurance policies by user ID endpoint
+  /// GET: Retrieve insurance policies for a specific user
+  static String insurancePoliciesByUserId(int userId) =>
+      '$apiPrefix/membership/insurance-policies/$userId/';
 
-  /// Single insurance policy endpoint
+  /// Single insurance policy endpoint (legacy)
   static String insurancePolicyById(int id) =>
       '$apiPrefix/membership/insurance-policies/$id/';
 

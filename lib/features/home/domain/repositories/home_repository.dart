@@ -37,6 +37,7 @@ abstract class HomeRepository {
 
   /// Fetches Aswas Plus data from API
   ///
+  /// [userId] - The user ID to fetch insurance policies for
   /// [ifModifiedSince] - Timestamp for conditional request (304 handling)
   ///
   /// Returns:
@@ -44,6 +45,7 @@ abstract class HomeRepository {
   /// - Right(null) on 304 Not Modified or no active policy
   /// - Left(Failure) on error
   Future<Either<Failure, AswasPlus?>> getAswasPlus({
+    required int userId,
     String? ifModifiedSince,
   });
 

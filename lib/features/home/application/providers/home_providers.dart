@@ -199,8 +199,9 @@ class AswasNotifier extends StateNotifier<AswasState> {
   Future<void> initialize() async {
     state = const AswasState.loading();
 
+    final userId = _ref.read(userIdProvider);
     final usecase = _ref.read(fetchAswasUsecaseProvider);
-    final result = await usecase();
+    final result = await usecase(userId: userId);
 
     result.fold(
       (failure) {
@@ -222,8 +223,9 @@ class AswasNotifier extends StateNotifier<AswasState> {
     final previousData = state.currentData;
     state = AswasState.loading(previousData: previousData);
 
+    final userId = _ref.read(userIdProvider);
     final usecase = _ref.read(fetchAswasUsecaseProvider);
-    final result = await usecase.refresh();
+    final result = await usecase.refresh(userId: userId);
 
     result.fold(
       (failure) {
