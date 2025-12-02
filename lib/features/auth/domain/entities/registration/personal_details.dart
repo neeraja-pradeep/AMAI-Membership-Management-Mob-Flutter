@@ -1,19 +1,24 @@
 /// Personal details entity for Step 1
 ///
-/// Contains practitioner's basic personal information
-/// UPDATED: Added new required fields for backend integration
+/// Contains practitioner's basic personal information.
+/// UPDATED to support student + house surgeon requirements.
 class PersonalDetails {
   final String firstName;
   final String lastName;
   final String email;
-  final String password; // NEW: Required for account creation
+  final String password;
   final String phone;
-  final String waPhone; // NEW: WhatsApp phone number
+  final String waPhone;
   final DateTime dateOfBirth;
-  final String gender; // 'male', 'female', 'other'
-  final String bloodGroup; // NEW: A+, A-, B+, B-, AB+, AB-, O+, O-
-  final String membershipType; // NEW: student, practitioner, house_surgeon, honorary
-  final String? profileImagePath; // Local file path
+  final String gender;
+  final String bloodGroup;
+  final String membershipType; // student, practitioner, house_surgeon
+  final String? profileImagePath;
+
+  // NEW FIELDS
+  final String? institutionName; // Required for student + house_surgeon
+  final String? bamsStartYear; // Required for student only
+  final String? magazinePreference; // Required for house_surgeon only
 
   const PersonalDetails({
     required this.firstName,
@@ -27,12 +32,17 @@ class PersonalDetails {
     required this.bloodGroup,
     required this.membershipType,
     this.profileImagePath,
+
+    // NEW OPTIONAL FIELDS
+    this.institutionName,
+    this.bamsStartYear,
+    this.magazinePreference,
   });
 
-  /// Get full name
+  /// Convenience: Full name getter
   String get fullName => '$firstName $lastName';
 
-  /// Get age from date of birth
+  /// Calculate age
   int get age {
     final now = DateTime.now();
     int age = now.year - dateOfBirth.year;
@@ -43,22 +53,38 @@ class PersonalDetails {
     return age;
   }
 
-  /// Check if all required fields are filled
+  /// Validation based on role
   bool get isComplete {
-    return firstName.isNotEmpty &&
+    final baseValid =
+        firstName.isNotEmpty &&
         lastName.isNotEmpty &&
         email.isNotEmpty &&
         password.isNotEmpty &&
         password.length >= 8 &&
-        phone.isNotEmpty &&
         phone.length == 10 &&
-        waPhone.isNotEmpty &&
         waPhone.length == 10 &&
         gender.isNotEmpty &&
         bloodGroup.isNotEmpty &&
         membershipType.isNotEmpty;
+
+    // Role-based validation
+    if (membershipType == "house surgeon") {
+      return baseValid &&
+          institutionName?.isNotEmpty == true &&
+          magazinePreference?.isNotEmpty == true;
+    }
+
+    if (membershipType == "student") {
+      return baseValid &&
+          institutionName?.isNotEmpty == true &&
+          bamsStartYear?.isNotEmpty == true;
+    }
+
+    // Practitioner doesn't need extra fields
+    return baseValid;
   }
 
+  /// Copy with updated fields
   PersonalDetails copyWith({
     String? firstName,
     String? lastName,
@@ -71,6 +97,9 @@ class PersonalDetails {
     String? bloodGroup,
     String? membershipType,
     String? profileImagePath,
+    String? institutionName,
+    String? bamsStartYear,
+    String? magazinePreference,
   }) {
     return PersonalDetails(
       firstName: firstName ?? this.firstName,
@@ -84,7 +113,15 @@ class PersonalDetails {
       bloodGroup: bloodGroup ?? this.bloodGroup,
       membershipType: membershipType ?? this.membershipType,
       profileImagePath: profileImagePath ?? this.profileImagePath,
+      institutionName: institutionName ?? this.institutionName,
+      bamsStartYear: bamsStartYear ?? this.bamsStartYear,
+      magazinePreference: magazinePreference ?? this.magazinePreference,
     );
+  }
+
+  @override
+  String toString() {
+    return 'PersonalDetails(fullName: $fullName, email: $email, phone: $phone, role: $membershipType)';
   }
 
   @override
@@ -92,30 +129,8 @@ class PersonalDetails {
       identical(this, other) ||
       other is PersonalDetails &&
           runtimeType == other.runtimeType &&
-          firstName == other.firstName &&
-          lastName == other.lastName &&
-          email == other.email &&
-          phone == other.phone &&
-          waPhone == other.waPhone &&
-          dateOfBirth == other.dateOfBirth &&
-          gender == other.gender &&
-          bloodGroup == other.bloodGroup &&
-          membershipType == other.membershipType;
+          email == other.email;
 
   @override
-  int get hashCode =>
-      firstName.hashCode ^
-      lastName.hashCode ^
-      email.hashCode ^
-      phone.hashCode ^
-      waPhone.hashCode ^
-      dateOfBirth.hashCode ^
-      gender.hashCode ^
-      bloodGroup.hashCode ^
-      membershipType.hashCode;
-
-  @override
-  String toString() {
-    return 'PersonalDetails(fullName: $fullName, email: $email, phone: $phone, membershipType: $membershipType)';
-  }
+  int get hashCode => email.hashCode;
 }

@@ -56,6 +56,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
         Navigator.of(context).push(
           MaterialPageRoute(
             builder: (context) => PersonalDetailsScreen(
+              role: selectedRole,
               password: _passwordController.text.trim(),
             ),
           ),

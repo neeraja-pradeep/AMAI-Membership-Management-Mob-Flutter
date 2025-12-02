@@ -25,11 +25,39 @@ class _ProfessionalDetailsScreenState
   late final TextEditingController _centralCouncilNoController;
   late final TextEditingController _ugCollegeController;
 
+  /// HOUSE SURGEON fields
+  late final TextEditingController _provisionalController;
+  late final TextEditingController _districtCouncilController;
+  late final TextEditingController _membershipDistrictController;
+  late final TextEditingController _membershipAreaController;
+
   String? _selectedMedicalCouncilState;
+  String? _selectedCountry;
+  String? _selectedState;
+
   bool _isSubmitting = false;
 
   final Set<String> _selectedQualifications = {};
   final Set<String> _selectedCategories = {};
+
+  late String role = "";
+
+  static const List<String> dropdownStates = [
+    "Kerala",
+    "Karnataka",
+    "Tamil Nadu",
+    "Delhi",
+    "Maharashtra",
+    "Other",
+  ];
+
+  static const List<String> dropdownCountry = [
+    "India",
+    "UAE",
+    "USA",
+    "UK",
+    "Other",
+  ];
 
   static const List<String> _qualificationOptions = [
     'UG',
@@ -63,9 +91,22 @@ class _ProfessionalDetailsScreenState
   @override
   void initState() {
     super.initState();
+
+    final state = ref.read(registrationProvider);
+    if (state is RegistrationStateInProgress) {
+      role = state.registration.personalDetails?.membershipType ?? "";
+    }
+
+    /// Practitioner controllers
     _medicalCouncilNoController = TextEditingController();
     _centralCouncilNoController = TextEditingController();
     _ugCollegeController = TextEditingController();
+
+    /// House surgeon controllers
+    _provisionalController = TextEditingController();
+    _districtCouncilController = TextEditingController();
+    _membershipDistrictController = TextEditingController();
+    _membershipAreaController = TextEditingController();
 
     WidgetsBinding.instance.addPostFrameCallback((_) => _loadExistingData());
   }
@@ -75,6 +116,12 @@ class _ProfessionalDetailsScreenState
     _medicalCouncilNoController.dispose();
     _centralCouncilNoController.dispose();
     _ugCollegeController.dispose();
+
+    _provisionalController.dispose();
+    _districtCouncilController.dispose();
+    _membershipDistrictController.dispose();
+    _membershipAreaController.dispose();
+
     super.dispose();
   }
 
@@ -88,21 +135,6 @@ class _ProfessionalDetailsScreenState
       Future.microtask(() => _loadExistingData());
       return;
     }
-
-    if (state is! RegistrationStateInProgress) return;
-
-    final data = state.registration.professionalDetails;
-    if (data == null) return;
-
-    setState(() {
-      _selectedMedicalCouncilState = data.medicalCouncilState;
-      _selectedQualifications.addAll(data.professionalDetails1.split(','));
-      _selectedCategories.addAll(data.professionalDetails2.split(','));
-    });
-
-    _medicalCouncilNoController.text = data.medicalCouncilNo;
-    _centralCouncilNoController.text = data.centralCouncilNo;
-    _ugCollegeController.text = data.ugCollege;
   }
 
   void _saveProfessionalDetails() {
@@ -111,6 +143,16 @@ class _ProfessionalDetailsScreenState
       medicalCouncilNo: _medicalCouncilNoController.text.trim(),
       centralCouncilNo: _centralCouncilNoController.text.trim(),
       ugCollege: _ugCollegeController.text.trim(),
+
+      /// House surgeon only fields
+      provisionalRegistrationNumber: _provisionalController.text.trim(),
+      councilDistrictNumber: _districtCouncilController.text.trim(),
+      country: _selectedCountry,
+      state: _selectedState,
+      membershipDistrict: _membershipDistrictController.text.trim(),
+      membershipArea: _membershipAreaController.text.trim(),
+
+      /// Practitioner only fields
       professionalDetails1: _selectedQualifications.join(','),
       professionalDetails2: _selectedCategories.join(','),
     );
@@ -118,42 +160,34 @@ class _ProfessionalDetailsScreenState
     ref.read(registrationProvider.notifier).updateProfessionalDetails(data);
   }
 
-  /// ------------------------ HANDLE NEXT (API FLOW) ------------------------
   Future<void> _handleNext() async {
+    /// Student skips this page
+
     if (!_formKey.currentState!.validate()) return;
 
-    if (_selectedQualifications.isEmpty) {
-      _showError("Please select at least one qualification");
-      return;
-    }
-
-    if (_selectedCategories.isEmpty) {
-      _showError("Please select at least one professional category");
-      return;
+    /// Practitioner validation
+    if (role == "practitioner") {
+      if (_selectedQualifications.isEmpty) {
+        return _showError("Select at least one qualification");
+      }
+      if (_selectedCategories.isEmpty) {
+        return _showError("Select at least one category");
+      }
     }
 
     setState(() => _isSubmitting = true);
 
     try {
       _saveProfessionalDetails();
-
       final state = ref.read(registrationProvider);
-      if (state is! RegistrationStateInProgress) {
-        throw Exception("Registration not in progress");
-      }
 
-      final personalDetails = state.registration.personalDetails;
-      final professionalDetails = state.registration.professionalDetails;
+      final personalDetails =
+          (state as RegistrationStateInProgress).registration.personalDetails;
+      final professionalDetails = state.registration.professionalDetails!;
 
-      if (personalDetails == null) {
-        throw Exception("Personal details missing");
-      }
-      if (professionalDetails == null) {
-        throw Exception("Professional details not saved");
-      }
-
+      /// Role Based Payload
       final membershipData = {
-        'membership_type': personalDetails.membershipType,
+        'membership_type': personalDetails!.membershipType,
         'first_name': personalDetails.firstName,
         'email': personalDetails.email,
         'password': personalDetails.password,
@@ -163,37 +197,36 @@ class _ProfessionalDetailsScreenState
             "${personalDetails.dateOfBirth.year}-${personalDetails.dateOfBirth.month.toString().padLeft(2, '0')}-${personalDetails.dateOfBirth.day.toString().padLeft(2, '0')}",
         'gender': personalDetails.gender,
         'blood_group': personalDetails.bloodGroup,
-        'medical_council_state': professionalDetails.medicalCouncilState,
-        'medical_council_no': professionalDetails.medicalCouncilNo,
-        'central_council_no': professionalDetails.centralCouncilNo,
-        'ug_college': professionalDetails.ugCollege,
 
-        'professional_details1': professionalDetails.professionalDetails1,
-        'professional_details2': professionalDetails.professionalDetails2,
+        /// COMMON FIELD
+        'medical_council_state': professionalDetails.medicalCouncilState,
+
+        /// Role-specific mapping:
+        if (role == "practitioner") ...{
+          'medical_council_no': professionalDetails.medicalCouncilNo,
+          'central_council_no': professionalDetails.centralCouncilNo,
+          'ug_college': professionalDetails.ugCollege,
+          'professional_details': professionalDetails.professionalDetails1,
+          'academic_details': professionalDetails.professionalDetails2,
+        },
+
+        if (role == "house_surgeon") ...{
+          'provisional_registration_no':
+              professionalDetails.provisionalRegistrationNumber,
+          'council_district_no': professionalDetails.councilDistrictNumber,
+          'country': professionalDetails.country,
+          'state': professionalDetails.state,
+          'membership_district': professionalDetails.membershipDistrict,
+          'membership_area': professionalDetails.membershipArea,
+        },
       };
 
       final responseData = await ref
           .read(registrationProvider.notifier)
           .submitMembershipRegistration(membershipData);
 
-      await ref.read(registrationProvider.notifier).autoSaveProgress();
-      debugPrint(responseData.toString());
       final userId = responseData['application']?['user_detail']?['id'];
-      final applicationId = responseData['application']['id'];
-
-      if (userId == null && applicationId == null) {
-        _showError('Backend Registration Failed');
-        return;
-      }
-
-      if (!mounted) return;
-
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text("Registration saved. Continue with address details."),
-          backgroundColor: Colors.green,
-        ),
-      );
+      final applicationId = responseData['application']?['id'];
 
       Navigator.pushNamed(
         context,
@@ -201,97 +234,54 @@ class _ProfessionalDetailsScreenState
         arguments: {'userId': userId, 'applicationId': applicationId},
       );
     } catch (e) {
-      if (mounted) _showError("Registration failed: ${e.toString()}");
+      _showError("Registration failed: $e");
     } finally {
-      if (mounted) setState(() => _isSubmitting = false);
+      setState(() => _isSubmitting = false);
     }
   }
 
-  /// ------------------------ UI SECTION ------------------------
-
-  void _showError(String msg) {
-    ScaffoldMessenger.of(
-      context,
-    ).showSnackBar(SnackBar(content: Text(msg), backgroundColor: Colors.red));
-  }
+  void _showError(String msg) => ScaffoldMessenger.of(
+    context,
+  ).showSnackBar(SnackBar(content: Text(msg), backgroundColor: Colors.red));
 
   @override
   Widget build(BuildContext context) {
+    /// Skip screen for students
+    if (role == "student") {
+      return const Scaffold(body: Center(child: CircularProgressIndicator()));
+    }
+
     return Scaffold(
       appBar: AppBar(
-        backgroundColor: Colors.white,
-        elevation: 0,
         title: const Text(
           "Register Here",
           style: TextStyle(fontWeight: FontWeight.bold),
         ),
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: Colors.black),
-          onPressed: () => Navigator.pop(context),
-        ),
       ),
-
       body: SingleChildScrollView(
         padding: EdgeInsets.all(24.w),
         child: Form(
           key: _formKey,
           child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               SizedBox(height: 10.h),
-              Center(
-                child: Text(
-                  "Step 2 of 4",
-                  style: TextStyle(
-                    fontSize: 16.sp,
-                    fontWeight: FontWeight.w600,
-                  ),
-                ),
+              Text(
+                "Step 2 of 4",
+                style: TextStyle(fontWeight: FontWeight.w600, fontSize: 16.sp),
               ),
-
               SizedBox(height: 20.h),
               Text(
                 "Professional Details",
-                textAlign: TextAlign.center,
                 style: TextStyle(fontSize: 20.sp, fontWeight: FontWeight.bold),
               ),
 
               SizedBox(height: 25.h),
-              _label("Medical Council State"),
-              _dropdown(),
 
-              SizedBox(height: 18.h),
-              _label("Medical Council Number"),
-              TextInputField(
-                controller: _medicalCouncilNoController,
-                hintText: "Enter Council No.",
-              ),
+              if (role == "practitioner") _buildPractitionerUI(),
 
-              SizedBox(height: 18.h),
-              _label("Central Council Number"),
-              TextInputField(
-                controller: _centralCouncilNoController,
-                hintText: "Enter Central Council No.",
-              ),
+              if (role == "house_surgeon") _buildHouseSurgeonUI(),
 
-              SizedBox(height: 18.h),
-              _label("UG College"),
-              TextInputField(
-                controller: _ugCollegeController,
-                hintText: "Enter UG College",
-              ),
-
-              SizedBox(height: 24.h),
-              _buildQualificationGrid(),
-
-              SizedBox(height: 24.h),
-              _checkboxGroup(
-                "Professional Category",
-                _categoryOptions,
-                _selectedCategories,
-              ),
-
-              SizedBox(height: 40.h),
+              SizedBox(height: 30.h),
               _nextButton(),
             ],
           ),
@@ -300,26 +290,111 @@ class _ProfessionalDetailsScreenState
     );
   }
 
+  Widget _buildHouseSurgeonUI() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        _label("Medical Council State"),
+        _dropdown(dropdownStates, (v) => _selectedMedicalCouncilState = v),
+
+        SizedBox(height: 18.h),
+        _label("Provisional Registration Number"),
+        TextInputField(controller: _provisionalController),
+
+        SizedBox(height: 18.h),
+        _label("Council District Number"),
+        TextInputField(controller: _districtCouncilController),
+
+        SizedBox(height: 18.h),
+        _label("Country"),
+        _dropdown(dropdownCountry, (v) => _selectedCountry = v),
+
+        SizedBox(height: 18.h),
+        _label("State"),
+        _dropdown(dropdownStates, (v) => _selectedState = v),
+
+        SizedBox(height: 18.h),
+        _label("Membership District"),
+        TextInputField(controller: _membershipDistrictController),
+
+        SizedBox(height: 18.h),
+        _label("Membership Area"),
+        TextInputField(controller: _membershipAreaController),
+      ],
+    );
+  }
+
+  Widget _buildPractitionerUI() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        _label("Medical Council State"),
+        _dropdown(dropdownStates, (v) => _selectedMedicalCouncilState = v),
+
+        SizedBox(height: 18.h),
+        _label("Medical Council Number"),
+        TextInputField(controller: _medicalCouncilNoController),
+
+        SizedBox(height: 18.h),
+        _label("Central Council Number"),
+        TextInputField(controller: _centralCouncilNoController),
+
+        SizedBox(height: 18.h),
+        _label("UG College"),
+        TextInputField(controller: _ugCollegeController),
+
+        SizedBox(height: 22.h),
+        Text(
+          "Qualifications",
+          style: TextStyle(fontWeight: FontWeight.w600, fontSize: 16.sp),
+        ),
+        Wrap(
+          spacing: 8,
+          children: _qualificationOptions.map((e) {
+            final selected = _selectedQualifications.contains(e);
+            return FilterChip(
+              selected: selected,
+              label: Text(e),
+              onSelected: (_) => setState(
+                () => selected
+                    ? _selectedQualifications.remove(e)
+                    : _selectedQualifications.add(e),
+              ),
+            );
+          }).toList(),
+        ),
+
+        SizedBox(height: 22.h),
+        Text(
+          "Professional Category",
+          style: TextStyle(fontWeight: FontWeight.w600, fontSize: 16.sp),
+        ),
+        Wrap(
+          spacing: 8,
+          runSpacing: 8,
+          children: _categoryOptions.map((e) {
+            final selected = _selectedCategories.contains(e);
+            return FilterChip(
+              selected: selected,
+              label: Text(e),
+              onSelected: (_) => setState(
+                () => selected
+                    ? _selectedCategories.remove(e)
+                    : _selectedCategories.add(e),
+              ),
+            );
+          }).toList(),
+        ),
+      ],
+    );
+  }
+
   Widget _label(String text) => Text(
     text,
     style: TextStyle(fontSize: 16.sp, fontWeight: FontWeight.w500),
   );
 
-  Widget _dropdown() {
-    final list = [
-      "Kerala",
-      "Karnataka",
-      "Tamil Nadu",
-      "Delhi",
-      "Maharashtra",
-      "Other",
-    ];
-
-    if (_selectedMedicalCouncilState != null &&
-        !list.contains(_selectedMedicalCouncilState)) {
-      _selectedMedicalCouncilState = null;
-    }
-
+  Widget _dropdown(List<String> data, Function(String?) callback) {
     return Container(
       padding: EdgeInsets.symmetric(horizontal: 16.w),
       decoration: BoxDecoration(
@@ -327,118 +402,20 @@ class _ProfessionalDetailsScreenState
         border: Border.all(color: Colors.grey[300]!),
       ),
       child: DropdownButtonFormField(
-        value: _selectedMedicalCouncilState,
         decoration: const InputDecoration(border: InputBorder.none),
-        items: list
+        items: data
             .map((e) => DropdownMenuItem(value: e, child: Text(e)))
             .toList(),
-        onChanged: (val) => setState(() => _selectedMedicalCouncilState = val),
         validator: (v) => v == null ? "Required" : null,
+        onChanged: callback,
       ),
-    );
-  }
-
-  Widget _buildQualificationGrid() {
-    final twoColumnItems = ["UG", "PG", "PhD", "CCRAS"];
-    final fullWidthItems = ["PG Diploma", "Other"];
-
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          "Qualifications",
-          style: TextStyle(fontSize: 16.sp, fontWeight: FontWeight.w600),
-        ),
-        SizedBox(height: 12.h),
-
-        Container(
-          padding: EdgeInsets.all(16.w),
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(12.r),
-            border: Border.all(color: Colors.grey[300]!),
-          ),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              GridView.count(
-                crossAxisCount: 2,
-                shrinkWrap: true,
-                physics: const NeverScrollableScrollPhysics(),
-                childAspectRatio: 4,
-                padding: EdgeInsets.zero,
-                children: twoColumnItems.map((item) {
-                  return _checkboxTile(item, _selectedQualifications);
-                }).toList(),
-              ),
-
-              SizedBox(height: 6.h),
-              ...fullWidthItems.map(
-                (e) => Padding(
-                  padding: EdgeInsets.only(bottom: 6.h),
-                  child: _checkboxTile(e, _selectedQualifications),
-                ),
-              ),
-            ],
-          ),
-        ),
-      ],
-    );
-  }
-
-  Widget _checkboxTile(String text, Set<String> collection) {
-    final selected = collection.contains(text);
-
-    return InkWell(
-      onTap: () => setState(
-        () => selected ? collection.remove(text) : collection.add(text),
-      ),
-      child: Row(
-        children: [
-          Checkbox(
-            visualDensity: VisualDensity.compact,
-            value: selected,
-            activeColor: AppColors.brown,
-            onChanged: (_) => setState(
-              () => selected ? collection.remove(text) : collection.add(text),
-            ),
-          ),
-          Flexible(
-            child: Text(text, style: TextStyle(fontSize: 14.sp)),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _checkboxGroup(String title, List<String> list, Set<String> store) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          title,
-          style: TextStyle(fontSize: 16.sp, fontWeight: FontWeight.w600),
-        ),
-        SizedBox(height: 12.h),
-
-        Container(
-          padding: EdgeInsets.all(16.w),
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(12.r),
-            border: Border.all(color: Colors.grey[300]!),
-          ),
-          child: Wrap(
-            spacing: 8.w,
-            runSpacing: 6.h,
-            children: list.map((e) => _checkboxTile(e, store)).toList(),
-          ),
-        ),
-      ],
     );
   }
 
   Widget _nextButton() {
     return SizedBox(
       height: 50.h,
+      width: double.infinity,
       child: ElevatedButton(
         onPressed: _isSubmitting ? null : _handleNext,
         style: ElevatedButton.styleFrom(
@@ -449,14 +426,7 @@ class _ProfessionalDetailsScreenState
         ),
         child: _isSubmitting
             ? const CircularProgressIndicator(color: Colors.white)
-            : Text(
-                "Next",
-                style: TextStyle(
-                  fontSize: 16.sp,
-                  fontWeight: FontWeight.w600,
-                  color: Colors.white,
-                ),
-              ),
+            : const Text("Next", style: TextStyle(color: Colors.white)),
       ),
     );
   }

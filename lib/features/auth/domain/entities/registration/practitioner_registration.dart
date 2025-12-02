@@ -6,12 +6,7 @@ import 'document_upload.dart';
 import 'registration_step.dart';
 
 /// Payment status
-enum PaymentStatus {
-  pending,
-  processing,
-  completed,
-  failed;
-}
+enum PaymentStatus { pending, processing, completed, failed }
 
 /// Payment details entity for Step 5
 class PaymentDetails {
