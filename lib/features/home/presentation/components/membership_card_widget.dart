@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:myapp/app/theme/colors.dart';
 import 'package:myapp/app/theme/typography.dart';
 import 'package:myapp/features/home/domain/entities/membership_card.dart';
-import 'package:myapp/features/home/presentation/components/status_badge.dart';
 
 /// Widget displaying the AMAI Membership Card on homescreen
-/// Shows membership details with gradient background and status badge
+/// Shows membership details with background image and status badge
 class MembershipCardWidget extends StatelessWidget {
   const MembershipCardWidget({
     required this.membershipCard,
@@ -26,17 +26,14 @@ class MembershipCardWidget extends StatelessWidget {
       onTap: onTap,
       child: Container(
         width: double.infinity,
+        height: 180.h,
         margin: EdgeInsets.symmetric(horizontal: 16.w),
         decoration: BoxDecoration(
-          gradient: const LinearGradient(
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-            colors: [
-              AppColors.membershipCardGradientStart,
-              AppColors.membershipCardGradientEnd,
-            ],
-          ),
           borderRadius: BorderRadius.circular(16.r),
+          image: const DecorationImage(
+            image: AssetImage('assets/home/membership_card.png'),
+            fit: BoxFit.cover,
+          ),
           boxShadow: [
             BoxShadow(
               color: AppColors.cardShadow,
@@ -51,10 +48,8 @@ class MembershipCardWidget extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               _buildHeader(),
-              SizedBox(height: 20.h),
-              _buildHolderName(),
-              SizedBox(height: 16.h),
-              _buildFooter(),
+              const Spacer(),
+              _buildBottomSection(),
             ],
           ),
         ),
@@ -71,81 +66,116 @@ class MembershipCardWidget extends StatelessWidget {
           'AMAI MEMBERSHIP CARD',
           style: TextStyle(
             fontSize: 12.sp,
-            fontWeight: FontWeight.w600,
+            fontWeight: FontWeight.w500,
             color: AppColors.membershipCardText.withOpacity(0.9),
-            letterSpacing: 1.2,
+            letterSpacing: 1.0,
           ),
         ),
-        MembershipStatusBadge(
-          isActive: membershipCard.isActive,
-          isExpired: membershipCard.isExpired,
-          isExpiringSoon: membershipCard.isExpiringSoon,
-        ),
+        _buildStatusBadge(),
       ],
     );
   }
 
-  /// Builds the holder name section
-  Widget _buildHolderName() {
-    return Text(
-      membershipCard.holderName.toUpperCase(),
-      style: TextStyle(
-        fontSize: 24.sp,
-        fontWeight: FontWeight.bold,
-        color: AppColors.membershipCardText,
-        letterSpacing: 0.5,
+  /// Builds the outlined status badge
+  Widget _buildStatusBadge() {
+    String label;
+    if (!membershipCard.isActive) {
+      label = 'Inactive';
+    } else if (membershipCard.isExpired) {
+      label = 'Expired';
+    } else if (membershipCard.isExpiringSoon) {
+      label = 'Expiring Soon';
+    } else {
+      label = 'Active';
+    }
+
+    return Container(
+      padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 6.h),
+      decoration: BoxDecoration(
+        color: Colors.transparent,
+        borderRadius: BorderRadius.circular(20.r),
+        border: Border.all(
+          color: AppColors.membershipCardText.withOpacity(0.6),
+          width: 1,
+        ),
+      ),
+      child: Text(
+        label,
+        style: TextStyle(
+          fontSize: 12.sp,
+          fontWeight: FontWeight.w500,
+          color: AppColors.membershipCardText,
+        ),
       ),
     );
   }
 
-  /// Builds the footer with membership number and validity
-  Widget _buildFooter() {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-      children: [
-        Text(
-          membershipCard.membershipNumber,
-          style: TextStyle(
-            fontSize: 14.sp,
-            fontWeight: FontWeight.w600,
-            color: AppColors.membershipCardText,
-          ),
-        ),
-        _buildInfoColumn(
-          label: 'Valid Till',
-          value: membershipCard.displayValidUntil,
-          crossAxisAlignment: CrossAxisAlignment.end,
-        ),
-      ],
-    );
-  }
-
-  /// Builds an info column with label and value
-  Widget _buildInfoColumn({
-    required String label,
-    required String value,
-    CrossAxisAlignment crossAxisAlignment = CrossAxisAlignment.start,
-  }) {
+  /// Builds the bottom section with name, valid till, ID and date
+  Widget _buildBottomSection() {
     return Column(
-      crossAxisAlignment: crossAxisAlignment,
       children: [
-        Text(
-          label,
-          style: TextStyle(
-            fontSize: 10.sp,
-            fontWeight: FontWeight.w500,
-            color: AppColors.membershipCardText.withOpacity(0.7),
-            letterSpacing: 0.5,
-          ),
+        // Line 1: Name (left) | Valid Till (right)
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Expanded(
+              child: Text(
+                membershipCard.holderName,
+                style: TextStyle(
+                  fontSize: 17.sp,
+                  fontWeight: FontWeight.w700,
+                  color: AppColors.membershipCardText,
+                ),
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+              ),
+            ),
+            Text(
+              'Valid Till',
+              style: TextStyle(
+                fontSize: 14.sp,
+                fontWeight: FontWeight.w300,
+                color: AppColors.membershipCardText,
+              ),
+            ),
+          ],
         ),
         SizedBox(height: 4.h),
-        Text(
-          value,
-          style: TextStyle(
-            fontSize: 14.sp,
-            fontWeight: FontWeight.w600,
-            color: AppColors.membershipCardText,
-          ),
+        // Line 2: Membership ID (left) | Date (right)
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Row(
+              children: [
+                SvgPicture.asset(
+                  'assets/svg/membership.svg',
+                  width: 18.w,
+                  height: 18.h,
+                  colorFilter: ColorFilter.mode(
+                    AppColors.membershipCardText.withOpacity(0.8),
+                    BlendMode.srcIn,
+                  ),
+                ),
+                SizedBox(width: 8.w),
+                Text(
+                  membershipCard.membershipNumber,
+                  style: TextStyle(
+                    fontSize: 14.sp,
+                    fontWeight: FontWeight.w700,
+                    color: AppColors.membershipCardText,
+                  ),
+                ),
+              ],
+            ),
+            Text(
+              membershipCard.displayValidUntil,
+              style: TextStyle(
+                fontSize: 14.sp,
+                fontWeight: FontWeight.w400,
+                color: AppColors.membershipCardText,
+              ),
+            ),
+          ],
         ),
       ],
     );

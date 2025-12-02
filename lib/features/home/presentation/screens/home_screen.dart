@@ -280,21 +280,12 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
         );
       },
       error: (failure, cachedData) {
-        return Column(
-          children: [
-            // Error banner
-            _buildErrorBanner(failure.toUserMessage()),
-            SizedBox(height: 16.h),
-            // Show cached data if available
-            if (cachedData != null)
-              MembershipCardWidget(membershipCard: cachedData)
-            else
-              MembershipCardEmpty(
-                onApply: () {
-                  // TODO: Navigate to membership application
-                },
-              ),
-          ],
+        // Show cached data if available, otherwise show empty card with retry
+        if (cachedData != null) {
+          return MembershipCardWidget(membershipCard: cachedData);
+        }
+        return MembershipCardEmpty(
+          onApply: _onRefresh,
         );
       },
       empty: () => MembershipCardEmpty(
