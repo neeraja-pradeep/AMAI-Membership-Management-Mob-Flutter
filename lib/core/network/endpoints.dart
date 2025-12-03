@@ -41,6 +41,11 @@ class Endpoints {
   static String digitalProductById(int id) =>
       '$apiPrefix/membership/digital-products/$id/';
 
+  /// Insurance renewal endpoint
+  /// POST: Initiate insurance policy renewal
+  static const String insuranceRenewal =
+      '$apiPrefix/membership/insurance/renewal/';
+
   // ============== Events Endpoints ==============
 
   /// Upcoming events list endpoint

@@ -5,6 +5,8 @@ import 'package:myapp/app/theme/colors.dart';
 import 'package:myapp/features/aswas_plus/application/providers/renewal_providers.dart';
 import 'package:myapp/features/aswas_plus/application/states/renewal_state.dart';
 import 'package:myapp/features/aswas_plus/domain/entities/digital_product.dart';
+import 'package:myapp/features/aswas_plus/presentation/screens/select_payment_method_screen.dart';
+import 'package:myapp/features/home/application/providers/home_providers.dart';
 
 /// Renew Membership Screen
 /// Shows renewal options for membership and Aswas Plus
@@ -17,11 +19,15 @@ class RenewMembershipScreen extends ConsumerStatefulWidget {
 }
 
 class _RenewMembershipScreenState extends ConsumerState<RenewMembershipScreen> {
+  bool _isLoading = false;
+
   @override
   void initState() {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
       ref.read(renewalStateProvider.notifier).loadProducts();
+      // Default select Aswas Plus (product id 1) since navigation came from aswas plus screen
+      ref.read(renewalStateProvider.notifier).selectProduct(RenewalProductIds.aswasPlus);
     });
   }
 
@@ -58,7 +64,7 @@ class _RenewMembershipScreenState extends ConsumerState<RenewMembershipScreen> {
       loaded: (membershipProduct, aswasProduct, selectedId) => _buildContent(
         membershipProduct: membershipProduct,
         aswasProduct: aswasProduct,
-        selectedProductId: selectedId,
+        selectedProductId: selectedId ?? RenewalProductIds.aswasPlus,
       ),
       error: (failure) => _buildErrorState(failure.message),
     );
@@ -67,47 +73,265 @@ class _RenewMembershipScreenState extends ConsumerState<RenewMembershipScreen> {
   Widget _buildContent({
     required DigitalProduct membershipProduct,
     required DigitalProduct aswasProduct,
-    int? selectedProductId,
+    required int selectedProductId,
   }) {
-    return SingleChildScrollView(
-      padding: EdgeInsets.all(16.w),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            'Select Renewal Option',
-            style: TextStyle(
-              fontSize: 16.sp,
-              fontWeight: FontWeight.w600,
-              color: AppColors.textPrimary,
+    return Column(
+      children: [
+        Expanded(
+          child: SingleChildScrollView(
+            padding: EdgeInsets.all(16.w),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'Select Renewal Option',
+                  style: TextStyle(
+                    fontSize: 16.sp,
+                    fontWeight: FontWeight.w600,
+                    color: AppColors.textPrimary,
+                  ),
+                ),
+                SizedBox(height: 16.h),
+
+                // Membership Product Card
+                _buildProductCard(
+                  product: membershipProduct,
+                  subtitle: 'Annual renewal required',
+                  isSelected: selectedProductId == membershipProduct.id,
+                  onTap: () => ref
+                      .read(renewalStateProvider.notifier)
+                      .selectProduct(membershipProduct.id),
+                ),
+
+                SizedBox(height: 16.h),
+
+                // Aswas Plus Product Card
+                _buildProductCard(
+                  product: aswasProduct,
+                  subtitle: 'Health insurance add-on',
+                  isSelected: selectedProductId == aswasProduct.id,
+                  onTap: () => ref
+                      .read(renewalStateProvider.notifier)
+                      .selectProduct(aswasProduct.id),
+                ),
+
+                SizedBox(height: 24.h),
+
+                // User Details Section
+                Text(
+                  'Your Details',
+                  style: TextStyle(
+                    fontSize: 16.sp,
+                    fontWeight: FontWeight.w600,
+                    color: AppColors.textPrimary,
+                  ),
+                ),
+                SizedBox(height: 12.h),
+
+                _buildUserDetailsCard(),
+              ],
             ),
           ),
-          SizedBox(height: 16.h),
+        ),
 
-          // Membership Product Card
-          _buildProductCard(
-            product: membershipProduct,
-            subtitle: 'Annual renewal required',
-            isSelected: selectedProductId == membershipProduct.id,
-            onTap: () => ref
-                .read(renewalStateProvider.notifier)
-                .selectProduct(membershipProduct.id),
-          ),
+        // Bottom Buttons
+        _buildBottomButtons(),
+      ],
+    );
+  }
 
-          SizedBox(height: 16.h),
-
-          // Aswas Plus Product Card
-          _buildProductCard(
-            product: aswasProduct,
-            subtitle: 'Health insurance add-on',
-            isSelected: selectedProductId == aswasProduct.id,
-            onTap: () => ref
-                .read(renewalStateProvider.notifier)
-                .selectProduct(aswasProduct.id),
+  Widget _buildUserDetailsCard() {
+    return Container(
+      width: double.infinity,
+      padding: EdgeInsets.all(16.w),
+      decoration: BoxDecoration(
+        color: AppColors.cardBackground,
+        borderRadius: BorderRadius.circular(12.r),
+        boxShadow: [
+          BoxShadow(
+            color: AppColors.cardShadow,
+            blurRadius: 8.r,
+            offset: Offset(0, 2.h),
           ),
         ],
       ),
+      child: Column(
+        children: [
+          _buildDetailRow('Full Name', 'John Doe'),
+          SizedBox(height: 12.h),
+          _buildDetailRow('Membership ID', 'AMAI-2024-001234'),
+          SizedBox(height: 12.h),
+          _buildDetailRow('Email Address', 'john.doe@example.com'),
+        ],
+      ),
     );
+  }
+
+  Widget _buildDetailRow(String label, String value) {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: [
+        Text(
+          label,
+          style: TextStyle(
+            fontSize: 14.sp,
+            fontWeight: FontWeight.w400,
+            color: AppColors.textSecondary,
+          ),
+        ),
+        Text(
+          value,
+          style: TextStyle(
+            fontSize: 14.sp,
+            fontWeight: FontWeight.w500,
+            color: AppColors.textPrimary,
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildBottomButtons() {
+    return Container(
+      padding: EdgeInsets.all(16.w),
+      decoration: BoxDecoration(
+        color: AppColors.white,
+        boxShadow: [
+          BoxShadow(
+            color: AppColors.cardShadow,
+            blurRadius: 8.r,
+            offset: Offset(0, -2.h),
+          ),
+        ],
+      ),
+      child: SafeArea(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            // Proceed to Payment Button
+            SizedBox(
+              width: double.infinity,
+              child: ElevatedButton(
+                onPressed: _isLoading ? null : _onProceedToPayment,
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: AppColors.primary,
+                  padding: EdgeInsets.symmetric(vertical: 14.h),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(8.r),
+                  ),
+                ),
+                child: _isLoading
+                    ? SizedBox(
+                        height: 20.h,
+                        width: 20.h,
+                        child: CircularProgressIndicator(
+                          strokeWidth: 2.w,
+                          valueColor:
+                              AlwaysStoppedAnimation<Color>(AppColors.white),
+                        ),
+                      )
+                    : Text(
+                        'Proceed to Payment',
+                        style: TextStyle(
+                          fontSize: 14.sp,
+                          fontWeight: FontWeight.w600,
+                          color: AppColors.white,
+                        ),
+                      ),
+              ),
+            ),
+            SizedBox(height: 12.h),
+
+            // Cancel Button
+            SizedBox(
+              width: double.infinity,
+              child: OutlinedButton(
+                onPressed: _isLoading ? null : _onCancel,
+                style: OutlinedButton.styleFrom(
+                  padding: EdgeInsets.symmetric(vertical: 14.h),
+                  side: BorderSide(color: AppColors.grey400, width: 1.w),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(8.r),
+                  ),
+                ),
+                child: Text(
+                  'Cancel',
+                  style: TextStyle(
+                    fontSize: 14.sp,
+                    fontWeight: FontWeight.w600,
+                    color: AppColors.textSecondary,
+                  ),
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Future<void> _onProceedToPayment() async {
+    setState(() {
+      _isLoading = true;
+    });
+
+    try {
+      final repository = ref.read(homeRepositoryProvider);
+      final result = await repository.initiateInsuranceRenewal();
+
+      if (!mounted) return;
+
+      result.fold(
+        (failure) {
+          setState(() {
+            _isLoading = false;
+          });
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(failure.message),
+              backgroundColor: AppColors.error,
+            ),
+          );
+        },
+        (renewalResponse) {
+          setState(() {
+            _isLoading = false;
+          });
+          if (renewalResponse != null) {
+            Navigator.of(context).push(
+              MaterialPageRoute<void>(
+                builder: (context) => SelectPaymentMethodScreen(
+                  renewalResponse: renewalResponse,
+                ),
+              ),
+            );
+          } else {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: const Text('Failed to initiate renewal'),
+                backgroundColor: AppColors.error,
+              ),
+            );
+          }
+        },
+      );
+    } catch (e) {
+      if (mounted) {
+        setState(() {
+          _isLoading = false;
+        });
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Error: ${e.toString()}'),
+            backgroundColor: AppColors.error,
+          ),
+        );
+      }
+    }
+  }
+
+  void _onCancel() {
+    Navigator.of(context).pop();
   }
 
   Widget _buildProductCard({

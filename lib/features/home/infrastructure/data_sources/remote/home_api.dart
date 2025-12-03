@@ -2,6 +2,7 @@ import 'package:myapp/core/network/api_client.dart';
 import 'package:myapp/core/network/endpoints.dart';
 import 'package:myapp/features/aswas_plus/infrastructure/models/digital_product_model.dart';
 import 'package:myapp/features/aswas_plus/infrastructure/models/nominee_model.dart';
+import 'package:myapp/features/aswas_plus/infrastructure/models/renewal_response_model.dart';
 import 'package:myapp/features/home/infrastructure/models/announcement_model.dart';
 import 'package:myapp/features/home/infrastructure/models/aswas_card_model.dart';
 import 'package:myapp/features/home/infrastructure/models/event_model.dart';
@@ -94,6 +95,13 @@ abstract class HomeApi {
   Future<HomeApiResponse<DigitalProductModel>> fetchDigitalProduct({
     required int productId,
   });
+
+  /// Initiates insurance renewal
+  ///
+  /// Returns HomeApiResponse containing:
+  /// - RenewalResponseModel on success (200)
+  /// - null data on error
+  Future<HomeApiResponse<RenewalResponseModel>> initiateInsuranceRenewal();
 }
 
 /// Implementation of HomeApi using ApiClient
@@ -310,6 +318,27 @@ class HomeApiImpl implements HomeApi {
 
     return HomeApiResponse<DigitalProductModel>(
       data: product,
+      statusCode: response.statusCode,
+      timestamp: response.timestamp,
+    );
+  }
+
+  @override
+  Future<HomeApiResponse<RenewalResponseModel>> initiateInsuranceRenewal() async {
+    final response = await apiClient.post<Map<String, dynamic>>(
+      Endpoints.insuranceRenewal,
+      fromJson: (json) => json as Map<String, dynamic>,
+    );
+
+    // Parse the response
+    RenewalResponseModel? renewalResponse;
+
+    if (response.data != null) {
+      renewalResponse = RenewalResponseModel.fromJson(response.data!);
+    }
+
+    return HomeApiResponse<RenewalResponseModel>(
+      data: renewalResponse,
       statusCode: response.statusCode,
       timestamp: response.timestamp,
     );

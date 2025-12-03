@@ -2,6 +2,7 @@ import 'package:fpdart/fpdart.dart';
 import 'package:myapp/core/error/failure.dart';
 import 'package:myapp/features/aswas_plus/domain/entities/digital_product.dart';
 import 'package:myapp/features/aswas_plus/domain/entities/nominee.dart';
+import 'package:myapp/features/aswas_plus/domain/entities/renewal_response.dart';
 import 'package:myapp/features/home/domain/entities/announcement.dart';
 import 'package:myapp/features/home/domain/entities/aswas_plus.dart';
 import 'package:myapp/features/home/domain/entities/membership_card.dart';
@@ -138,6 +139,13 @@ abstract class HomeRepository {
   Future<Either<Failure, DigitalProduct?>> getDigitalProduct({
     required int productId,
   });
+
+  /// Initiates insurance renewal
+  ///
+  /// Returns:
+  /// - Right(RenewalResponse) on success
+  /// - Left(Failure) on error
+  Future<Either<Failure, RenewalResponse?>> initiateInsuranceRenewal();
 
   // ============== Clear All ==============
 
