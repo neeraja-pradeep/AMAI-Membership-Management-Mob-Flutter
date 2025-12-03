@@ -63,12 +63,28 @@ Membership
 
 Swagger link : [Initiate Payment] https://amai.nexogms.com/api/schema/swagger-ui/#/Membership/membership_payment_create
 
-POST endpoint: api/membership/membership/payment/
+POST endpoint: https://amai.nexogms.com/api/membership/membership/payment/
 
 Required Fields : user
 
 Endpoint : [ Verify Payment ] https://amai.nexogms.com/api/schema/swagger-ui/#/Membership/membership_verify_payment
 
-POST api/membership/membership/verify/ 
+POST endpoint: https://amai.nexogms.com/api/membership/membership/verify/
+Required fields :  razorpay_order_id, razorpay_payment_id, razorpay_signature
+
+- Aswas Plus 
+Swagger link : [Initiate Payment] https://amai.nexogms.com/api/schema/swagger-ui/#/Insurance/insurance_renewal_create
+No Payload
+POST endpoint: https://amai.nexogms.com/api/membership/insurance/renewal/
+
+Swagger link : [Verify Payement]
+https://amai.nexogms.com/api/schema/swagger-ui/#/Insurance/insurance_renewal_verify_payment
+Required Fields : razorpay_order_id, razorpay_payment_id, razorpay_signature
+POST endpoint: https://amai.nexogms.com/api/membership/insurance/renewal/verify/
+
+
+
+
+
 
 
