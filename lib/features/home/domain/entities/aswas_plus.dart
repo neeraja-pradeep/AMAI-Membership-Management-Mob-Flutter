@@ -40,7 +40,7 @@ class AswasPlus with _$AswasPlus {
 
   /// Check if policy has expired based on status or date
   bool get isExpired =>
-      policyStatus.toLowerCase() == 'expired' ||
+      policyStatus.toLowerCase() == 'inactive' ||
       validUntil.isBefore(DateTime.now());
 
   /// Check if policy is expiring soon (within 30 days)
