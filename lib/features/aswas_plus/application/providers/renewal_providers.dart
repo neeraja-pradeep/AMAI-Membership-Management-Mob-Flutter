@@ -56,8 +56,8 @@ class RenewalNotifier extends StateNotifier<RenewalState> {
       return;
     }
 
-    final membershipProduct = membershipResult.getOrElse(() => null);
-    final aswasProduct = aswasResult.getOrElse(() => null);
+    final membershipProduct = membershipResult.getOrElse((_) => null);
+    final aswasProduct = aswasResult.getOrElse((_) => null);
 
     if (membershipProduct == null || aswasProduct == null) {
       state = const RenewalState.error(
