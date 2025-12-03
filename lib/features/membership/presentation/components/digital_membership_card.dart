@@ -32,16 +32,17 @@ class DigitalMembershipCard extends StatelessWidget {
         Text(
           'Digital Membership Card',
           style: TextStyle(
-            fontSize: 16.sp,
+            fontSize: 18.sp,
             fontWeight: FontWeight.w600,
             color: AppColors.textPrimary,
           ),
         ),
-        SizedBox(height: 12.h),
+        SizedBox(height: 24.h),
 
         // Card container
         Container(
           width: double.infinity,
+          height: 358.h,
           padding: EdgeInsets.all(20.w),
           decoration: BoxDecoration(
             color: AppColors.cardBackground,
@@ -60,8 +61,8 @@ class DigitalMembershipCard extends StatelessWidget {
               Text(
                 'AMAI Digital Membership Card',
                 style: TextStyle(
-                  fontSize: 18.sp,
-                  fontWeight: FontWeight.w700,
+                  fontSize: 16.sp,
+                  fontWeight: FontWeight.w500,
                   color: AppColors.textPrimary,
                 ),
                 textAlign: TextAlign.center,
@@ -83,12 +84,12 @@ class DigitalMembershipCard extends StatelessWidget {
               // QR Code
               QrCodeWidget(
                 data: membershipStatus.membershipNumber,
-                size: 180.w,
+                size: 121.w,
               ),
               SizedBox(height: 20.h),
 
-              // Action buttons
-              _buildActionButtons(),
+              // Action section
+              _buildActionSection(),
             ],
           ),
         ),
@@ -96,58 +97,53 @@ class DigitalMembershipCard extends StatelessWidget {
     );
   }
 
-  /// Builds the action buttons row
-  Widget _buildActionButtons() {
-    return Row(
+  /// Builds the action section with view full screen text and download button
+  Widget _buildActionSection() {
+    return Column(
       children: [
-        // View Full Size button
-        Expanded(
-          child: OutlinedButton.icon(
-            onPressed: onViewFullSize ?? () {},
-            icon: Icon(
-              Icons.fullscreen,
-              size: 18.sp,
-            ),
-            label: Text(
-              'View Full Size',
-              style: TextStyle(
-                fontSize: 14.sp,
-                fontWeight: FontWeight.w500,
+        // View Full Screen QR text link
+        GestureDetector(
+          onTap: onViewFullSize,
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(Icons.fullscreen, size: 20.sp, color: AppColors.textPrimary),
+              SizedBox(width: 8.w),
+              Text(
+                'View Full Screen QR',
+                style: TextStyle(
+                  fontSize: 14.sp,
+                  fontWeight: FontWeight.w400,
+                  color: AppColors.textPrimary,
+                ),
               ),
-            ),
-            style: OutlinedButton.styleFrom(
-              foregroundColor: AppColors.primary,
-              side: const BorderSide(color: AppColors.primary),
-              padding: EdgeInsets.symmetric(vertical: 12.h),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(8.r),
-              ),
-            ),
+            ],
           ),
         ),
-        SizedBox(width: 12.w),
+        SizedBox(height: 20.h),
 
         // Download as PDF button
-        Expanded(
-          child: OutlinedButton.icon(
-            onPressed: onDownloadPdf ?? () {},
-            icon: Icon(
-              Icons.download,
-              size: 18.sp,
-            ),
-            label: Text(
-              'Download PDF',
-              style: TextStyle(
-                fontSize: 14.sp,
-                fontWeight: FontWeight.w500,
+        GestureDetector(
+          onTap: onDownloadPdf,
+          child: Container(
+            width: double.infinity,
+            height: 44.h,
+            decoration: BoxDecoration(
+              color: Colors.transparent,
+              borderRadius: BorderRadius.circular(25.r),
+              border: Border.all(
+                color: AppColors.newPrimaryLight, // Border color
+                width: 2, // Border thickness
               ),
             ),
-            style: OutlinedButton.styleFrom(
-              foregroundColor: AppColors.textSecondary,
-              side: const BorderSide(color: AppColors.grey300),
-              padding: EdgeInsets.symmetric(vertical: 12.h),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(8.r),
+            child: Center(
+              child: Text(
+                'Download as PDF',
+                style: TextStyle(
+                  fontSize: 16.sp,
+                  fontWeight: FontWeight.w500,
+                  color: AppColors.aswasCardText,
+                ),
               ),
             ),
           ),
@@ -202,9 +198,19 @@ class DigitalMembershipCardShimmer extends StatelessWidget {
               // Buttons shimmer
               Row(
                 children: [
-                  Expanded(child: _buildShimmerBox(width: double.infinity, height: 44.h)),
+                  Expanded(
+                    child: _buildShimmerBox(
+                      width: double.infinity,
+                      height: 44.h,
+                    ),
+                  ),
                   SizedBox(width: 12.w),
-                  Expanded(child: _buildShimmerBox(width: double.infinity, height: 44.h)),
+                  Expanded(
+                    child: _buildShimmerBox(
+                      width: double.infinity,
+                      height: 44.h,
+                    ),
+                  ),
                 ],
               ),
             ],

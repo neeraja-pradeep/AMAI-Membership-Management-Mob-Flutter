@@ -52,8 +52,9 @@ class AppColors {
     end: Alignment.bottomCenter,
     stops: [0.0062, 0.9556],
     colors: [
+      Color(0xFFFFFFFF),
       Color(0xFFFFF6F6), // #FFF6F6
-      Color(0xFFFFFFFF), // #FFFFFF
+      // #FFFFFF
     ],
     transform: GradientRotation(178.93 * pi / 180),
   );

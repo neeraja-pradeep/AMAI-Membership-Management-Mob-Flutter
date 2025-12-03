@@ -32,13 +32,22 @@ class _MembershipScreenState extends ConsumerState<MembershipScreen> {
     final state = ref.watch(membershipScreenStateProvider);
 
     return Scaffold(
-      backgroundColor: AppColors.background,
+      extendBodyBehindAppBar: true,
       appBar: _buildAppBar(context),
-      body: RefreshIndicator(
-        onRefresh: () async {
-          await ref.read(membershipScreenStateProvider.notifier).refresh();
-        },
-        child: _buildBody(state),
+      body: Container(
+        width: double.infinity,
+        height: double.infinity,
+        decoration: const BoxDecoration(
+          gradient: AppColors.lightBackgroundGradient,
+        ),
+        child: SafeArea(
+          child: RefreshIndicator(
+            onRefresh: () async {
+              await ref.read(membershipScreenStateProvider.notifier).refresh();
+            },
+            child: _buildBody(state),
+          ),
+        ),
       ),
     );
   }
@@ -46,7 +55,7 @@ class _MembershipScreenState extends ConsumerState<MembershipScreen> {
   /// Builds the custom app bar
   PreferredSizeWidget _buildAppBar(BuildContext context) {
     return AppBar(
-      backgroundColor: AppColors.surface,
+      backgroundColor: Colors.transparent,
       elevation: 0,
       leading: IconButton(
         icon: Icon(
@@ -92,9 +101,7 @@ class _MembershipScreenState extends ConsumerState<MembershipScreen> {
   }
 
   /// Builds the loading state with shimmer
-  Widget _buildLoadingState({
-    dynamic previousData,
-  }) {
+  Widget _buildLoadingState({dynamic previousData}) {
     // If we have previous data, show it with a loading indicator
     if (previousData != null) {
       return Stack(
@@ -106,8 +113,9 @@ class _MembershipScreenState extends ConsumerState<MembershipScreen> {
             right: 0,
             child: LinearProgressIndicator(
               backgroundColor: AppColors.grey200,
-              valueColor:
-                  const AlwaysStoppedAnimation<Color>(AppColors.primary),
+              valueColor: const AlwaysStoppedAnimation<Color>(
+                AppColors.primary,
+              ),
             ),
           ),
         ],
@@ -149,9 +157,7 @@ class _MembershipScreenState extends ConsumerState<MembershipScreen> {
             onRenewalPressed: () {
               // TODO: Navigate to renewal screen
               ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(
-                  content: Text('Renewal flow coming soon'),
-                ),
+                const SnackBar(content: Text('Renewal flow coming soon')),
               );
             },
           ),
@@ -167,9 +173,7 @@ class _MembershipScreenState extends ConsumerState<MembershipScreen> {
             onDownloadPdf: () {
               // Static for now
               ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(
-                  content: Text('Download PDF coming soon'),
-                ),
+                const SnackBar(content: Text('Download PDF coming soon')),
               );
             },
           ),
@@ -235,19 +239,12 @@ class _MembershipScreenState extends ConsumerState<MembershipScreen> {
             color: AppColors.errorLight,
             child: Row(
               children: [
-                Icon(
-                  Icons.error_outline,
-                  color: AppColors.error,
-                  size: 20.sp,
-                ),
+                Icon(Icons.error_outline, color: AppColors.error, size: 20.sp),
                 SizedBox(width: 8.w),
                 Expanded(
                   child: Text(
                     failure.toUserMessage(),
-                    style: TextStyle(
-                      fontSize: 14.sp,
-                      color: AppColors.error,
-                    ),
+                    style: TextStyle(fontSize: 14.sp, color: AppColors.error),
                   ),
                 ),
                 TextButton(
@@ -369,10 +366,7 @@ class _MembershipScreenState extends ConsumerState<MembershipScreen> {
               ),
               SizedBox(height: 8.h),
               // QR Code
-              QrCodeWidget(
-                data: membershipNumber,
-                size: 250.w,
-              ),
+              QrCodeWidget(data: membershipNumber, size: 250.w),
               SizedBox(height: 16.h),
             ],
           ),
