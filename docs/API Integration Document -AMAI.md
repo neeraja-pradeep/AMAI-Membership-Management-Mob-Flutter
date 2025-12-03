@@ -10,6 +10,8 @@ All endpoints are non-authenticated and return JSON responses. Use REST GET call
 
 User IDs
 Superadmin - 2
+Practitioner - 43
+HS - 44
 
 
 Headers -
@@ -21,28 +23,20 @@ Note:- The timestamp mentioned here must be the timestamp fetched from the heade
 
 Customer App
 
-Screen : Home 
-a) AMAI card
-Swagger link: https://amai.nexogms.com/api/schema/swagger-ui/#/membership/membership_memberships_list
+Screen : Home  Screen Quick Actions
+Memberships
+a) Memberships 
+ Swagger link: https://amai.nexogms.com/api/schema/swagger-ui/#/membership/membership_memberships_list
 
-Required fields:- is_active, user_first_name, membership_number, end_date
+ Required fields:- is_active, user_first_name, membership_number, end_date
 
-POST endpoint: https://amai.nexogms.com/api/membership/memberships/
- 
-b) Aswas Plus card
+ POST endpoint: https://amai.nexogms.com/api/membership/memberships/{user_id}/
 
-Swagger link: https://amai.nexogms.com/api/schema/swagger-ui/#/membership/membership_insurance_policies_list
+b) Payment Reciepts
 
-Required fields:- policy_number, end_date, product_description 
-POST endpoint: https://amai.nexogms.com/api/membership/insurance-policies/
+ Swagger link: https://amai.nexogms.com/api/schema/swagger-ui/#/Payments/payment_list
 
-c) Upcoming Events
-Swagger link: https://amai.nexogms.com/api/schema/swagger-ui/#/Events/bookings_events_list
-
-Required fields:- banner_image, title, event_date, event_end_date,venue, venue_address
-
-POST endpoint:https://amai.nexogms.com/api/bookings/events/
-
+ POST Endpoint : https://amai.nexogms.com/api/payments/payment/
 
 
 
