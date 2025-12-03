@@ -3,11 +3,14 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:myapp/app/theme/colors.dart';
 import 'package:myapp/app/theme/typography.dart';
+import 'package:myapp/features/aswas_plus/domain/entities/nominee.dart';
 import 'package:myapp/features/home/application/providers/home_providers.dart';
 import 'package:myapp/features/home/application/states/aswas_state.dart';
+import 'package:myapp/features/home/application/states/nominees_state.dart';
 import 'package:myapp/features/home/domain/entities/aswas_plus.dart';
 import 'package:myapp/features/aswas_plus/presentation/components/policy_details_card.dart';
 import 'package:myapp/features/aswas_plus/presentation/components/scheme_details_section.dart';
+import 'package:myapp/features/aswas_plus/presentation/components/nominee_info_card.dart';
 import 'package:myapp/features/aswas_plus/presentation/components/download_documents_section.dart';
 
 /// ASWAS Plus Screen - displays insurance policy details
@@ -26,6 +29,7 @@ class _AswasePlusScreenState extends ConsumerState<AswasePlusScreen> {
     // Refresh data when screen loads
     WidgetsBinding.instance.addPostFrameCallback((_) {
       ref.read(aswasStateProvider.notifier).refresh();
+      ref.read(nomineesStateProvider.notifier).refresh();
     });
   }
 
@@ -80,7 +84,10 @@ class _AswasePlusScreenState extends ConsumerState<AswasePlusScreen> {
 
   /// Pull-to-refresh handler
   Future<void> _onRefresh() async {
-    await ref.read(aswasStateProvider.notifier).refresh();
+    await Future.wait([
+      ref.read(aswasStateProvider.notifier).refresh(),
+      ref.read(nomineesStateProvider.notifier).refresh(),
+    ]);
   }
 
   /// Builds the main body based on state
@@ -108,6 +115,8 @@ class _AswasePlusScreenState extends ConsumerState<AswasePlusScreen> {
 
   /// Builds the main content with policy details
   Widget _buildContent(AswasPlus aswasPlus, {bool isLoading = false}) {
+    final nomineesState = ref.watch(nomineesStateProvider);
+
     return SingleChildScrollView(
       physics: const AlwaysScrollableScrollPhysics(),
       padding: EdgeInsets.all(16.w),
@@ -135,11 +144,55 @@ class _AswasePlusScreenState extends ConsumerState<AswasePlusScreen> {
 
           SizedBox(height: 24.h),
 
+          // Nominee Information Card
+          _buildNomineeSection(nomineesState),
+
+          SizedBox(height: 24.h),
+
           // Download Documents Section
           const DownloadDocumentsSection(),
 
           SizedBox(height: 24.h),
         ],
+      ),
+    );
+  }
+
+  /// Builds the nominee section based on state
+  Widget _buildNomineeSection(NomineesState nomineesState) {
+    return nomineesState.when(
+      initial: () => const NomineeInfoCardShimmer(),
+      loading: (previousData) {
+        if (previousData != null && previousData.isNotEmpty) {
+          return NomineeInfoCard(
+            nominees: previousData,
+            onRequestChange: _onRequestNomineeChange,
+          );
+        }
+        return const NomineeInfoCardShimmer();
+      },
+      loaded: (nominees) => NomineeInfoCard(
+        nominees: nominees,
+        onRequestChange: _onRequestNomineeChange,
+      ),
+      error: (failure, cachedData) {
+        if (cachedData != null && cachedData.isNotEmpty) {
+          return NomineeInfoCard(
+            nominees: cachedData,
+            onRequestChange: _onRequestNomineeChange,
+          );
+        }
+        return const SizedBox.shrink();
+      },
+      empty: () => const SizedBox.shrink(),
+    );
+  }
+
+  /// Handles request change button press
+  void _onRequestNomineeChange() {
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(
+        content: Text('Request change feature coming soon'),
       ),
     );
   }
@@ -156,6 +209,8 @@ class _AswasePlusScreenState extends ConsumerState<AswasePlusScreen> {
           SizedBox(height: 24.h),
           const SchemeDetailsSectionShimmer(),
           SizedBox(height: 24.h),
+          const NomineeInfoCardShimmer(),
+          SizedBox(height: 24.h),
           const DownloadDocumentsSectionShimmer(),
         ],
       ),
@@ -164,6 +219,8 @@ class _AswasePlusScreenState extends ConsumerState<AswasePlusScreen> {
 
   /// Builds error state with cached data
   Widget _buildErrorWithCachedData(AswasPlus cachedData) {
+    final nomineesState = ref.watch(nomineesStateProvider);
+
     return Column(
       children: [
         // Error banner
@@ -220,6 +277,8 @@ class _AswasePlusScreenState extends ConsumerState<AswasePlusScreen> {
                 SchemeDetailsSection(
                   productDescription: cachedData.productDescription,
                 ),
+                SizedBox(height: 24.h),
+                _buildNomineeSection(nomineesState),
                 SizedBox(height: 24.h),
                 const DownloadDocumentsSection(),
               ],

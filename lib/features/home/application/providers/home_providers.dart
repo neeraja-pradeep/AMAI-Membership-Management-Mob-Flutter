@@ -6,10 +6,12 @@ import 'package:myapp/features/home/application/states/announcements_state.dart'
 import 'package:myapp/features/home/application/states/aswas_state.dart';
 import 'package:myapp/features/home/application/states/events_state.dart';
 import 'package:myapp/features/home/application/states/membership_state.dart';
+import 'package:myapp/features/home/application/states/nominees_state.dart';
 import 'package:myapp/features/home/application/usecases/fetch_announcements_usecase.dart';
 import 'package:myapp/features/home/application/usecases/fetch_aswas_usecase.dart';
 import 'package:myapp/features/home/application/usecases/fetch_events_usecase.dart';
 import 'package:myapp/features/home/application/usecases/fetch_membership_usecase.dart';
+import 'package:myapp/features/home/application/usecases/fetch_nominees_usecase.dart';
 import 'package:myapp/features/home/domain/repositories/home_repository.dart';
 import 'package:myapp/features/home/infrastructure/data_sources/local/home_local_ds.dart';
 import 'package:myapp/features/home/infrastructure/data_sources/remote/home_api.dart';
@@ -95,6 +97,12 @@ final fetchAnnouncementsUsecaseProvider =
     Provider<FetchAnnouncementsUsecase>((ref) {
   final repository = ref.watch(homeRepositoryProvider);
   return FetchAnnouncementsUsecase(repository: repository);
+});
+
+/// Provider for Fetch Nominees Usecase
+final fetchNomineesUsecaseProvider = Provider<FetchNomineesUsecase>((ref) {
+  final repository = ref.watch(homeRepositoryProvider);
+  return FetchNomineesUsecase(repository: repository);
 });
 
 // ============== State Providers ==============
@@ -418,5 +426,88 @@ class AnnouncementsNotifier extends StateNotifier<AnnouncementsState> {
     final repository = _ref.read(homeRepositoryProvider);
     await repository.clearAnnouncementsTimestamp();
     state = const AnnouncementsState.initial();
+  }
+}
+
+// ============== Nominees State Providers ==============
+
+/// Provider for Nominees State
+/// Data is kept in-memory, only timestamp is persisted in Hive
+final nomineesStateProvider =
+    StateNotifierProvider<NomineesNotifier, NomineesState>((ref) {
+  return NomineesNotifier(ref);
+});
+
+/// Notifier for managing nominees state
+/// Handles fresh fetch on app launch and if-modified-since on refresh
+class NomineesNotifier extends StateNotifier<NomineesState> {
+  NomineesNotifier(this._ref) : super(const NomineesState.initial());
+
+  final Ref _ref;
+
+  /// Initialize by fetching fresh data from API
+  /// Called on app launch - does NOT use if-modified-since
+  Future<void> initialize() async {
+    state = const NomineesState.loading();
+
+    final usecase = _ref.read(fetchNomineesUsecaseProvider);
+    final result = await usecase();
+
+    result.fold(
+      (failure) {
+        state = NomineesState.error(failure: failure);
+      },
+      (nominees) {
+        if (nominees != null && nominees.isNotEmpty) {
+          state = NomineesState.loaded(nominees: nominees);
+        } else {
+          state = const NomineesState.empty();
+        }
+      },
+    );
+  }
+
+  /// Refresh nominees using if-modified-since
+  /// Called on pull-to-refresh - uses stored timestamp
+  Future<void> refresh() async {
+    final previousData = state.currentData;
+    state = NomineesState.loading(previousData: previousData);
+
+    final usecase = _ref.read(fetchNomineesUsecaseProvider);
+    final result = await usecase.refresh();
+
+    result.fold(
+      (failure) {
+        // On error, keep previous data visible with error banner
+        state = NomineesState.error(
+          failure: failure,
+          cachedData: previousData,
+        );
+      },
+      (nominees) {
+        if (nominees != null) {
+          // Got fresh data (200 OK)
+          if (nominees.isNotEmpty) {
+            state = NomineesState.loaded(nominees: nominees);
+          } else {
+            state = const NomineesState.empty();
+          }
+        } else {
+          // 304 Not Modified - keep in-memory data
+          if (previousData != null && previousData.isNotEmpty) {
+            state = NomineesState.loaded(nominees: previousData);
+          } else {
+            state = const NomineesState.empty();
+          }
+        }
+      },
+    );
+  }
+
+  /// Clear state and timestamp
+  Future<void> clear() async {
+    final repository = _ref.read(homeRepositoryProvider);
+    await repository.clearNomineesTimestamp();
+    state = const NomineesState.initial();
   }
 }

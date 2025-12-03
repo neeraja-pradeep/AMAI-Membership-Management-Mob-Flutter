@@ -2,6 +2,7 @@ import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:fpdart/fpdart.dart';
 import 'package:myapp/core/error/failure.dart';
 import 'package:myapp/core/network/network_exceptions.dart';
+import 'package:myapp/features/aswas_plus/domain/entities/nominee.dart';
 import 'package:myapp/features/home/domain/entities/announcement.dart';
 import 'package:myapp/features/home/domain/entities/aswas_plus.dart';
 import 'package:myapp/features/home/domain/entities/membership_card.dart';
@@ -274,6 +275,68 @@ class HomeRepositoryImpl implements HomeRepository {
   @override
   Future<void> clearAnnouncementsTimestamp() async {
     await localDataSource.clearAnnouncementsTimestamp();
+  }
+
+  // ============== Nominees ==============
+
+  @override
+  Future<Either<Failure, List<Nominee>?>> getNominees({
+    String? ifModifiedSince,
+  }) async {
+    // Check connectivity
+    final connectivityResult = await connectivity.checkConnectivity();
+    final isOnline = !connectivityResult.contains(ConnectivityResult.none);
+
+    if (!isOnline) {
+      // Offline - return network failure (UI should show in-memory data if available)
+      return left(const NetworkFailure());
+    }
+
+    try {
+      // Online - make API call
+      final response = await homeApi.fetchNominees(
+        ifModifiedSince: ifModifiedSince ?? '',
+      );
+
+      // Handle 304 Not Modified
+      if (response.isNotModified) {
+        return right(null); // Signal to use in-memory data
+      }
+
+      // Handle successful response with data
+      if (response.isSuccess && response.data != null) {
+        final nominees = response.data!.map((e) => e.toDomain()).toList();
+
+        // Store new timestamp for future if-modified-since requests
+        if (response.timestamp != null) {
+          await storeNomineesTimestamp(response.timestamp!);
+        }
+
+        return right(nominees);
+      }
+
+      // No data returned
+      return right([]);
+    } on NetworkException catch (e) {
+      return left(FailureMapper.fromNetworkException(e));
+    } catch (e) {
+      return left(FailureMapper.fromException(e));
+    }
+  }
+
+  @override
+  Future<String?> getNomineesTimestamp() async {
+    return localDataSource.getNomineesTimestamp();
+  }
+
+  @override
+  Future<void> storeNomineesTimestamp(String timestamp) async {
+    await localDataSource.storeNomineesTimestamp(timestamp);
+  }
+
+  @override
+  Future<void> clearNomineesTimestamp() async {
+    await localDataSource.clearNomineesTimestamp();
   }
 
   // ============== Clear All ==============

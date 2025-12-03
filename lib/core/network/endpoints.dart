@@ -25,6 +25,11 @@ class Endpoints {
   static const String insurancePoliciesMe =
       '$apiPrefix/membership/insurance-policies/me/';
 
+  /// Insurance nominees endpoint for current user
+  /// GET: Retrieve insurance nominees for the authenticated user
+  static const String insuranceNomineesMe =
+      '$apiPrefix/membership/insurance-nominees/me/';
+
   /// Single insurance policy endpoint (legacy)
   static String insurancePolicyById(int id) =>
       '$apiPrefix/membership/insurance-policies/$id/';

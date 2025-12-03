@@ -1,5 +1,6 @@
 import 'package:fpdart/fpdart.dart';
 import 'package:myapp/core/error/failure.dart';
+import 'package:myapp/features/aswas_plus/domain/entities/nominee.dart';
 import 'package:myapp/features/home/domain/entities/announcement.dart';
 import 'package:myapp/features/home/domain/entities/aswas_plus.dart';
 import 'package:myapp/features/home/domain/entities/membership_card.dart';
@@ -100,6 +101,29 @@ abstract class HomeRepository {
 
   /// Clears stored announcements timestamp
   Future<void> clearAnnouncementsTimestamp();
+
+  // ============== Nominees ==============
+
+  /// Fetches nominees from API
+  ///
+  /// [ifModifiedSince] - Timestamp for conditional request (304 handling)
+  ///
+  /// Returns:
+  /// - Right(List<Nominee>) on 200 OK with nominees
+  /// - Right(null) on 304 Not Modified (use in-memory data)
+  /// - Left(Failure) on error
+  Future<Either<Failure, List<Nominee>?>> getNominees({
+    String? ifModifiedSince,
+  });
+
+  /// Gets stored nominees timestamp for If-Modified-Since header
+  Future<String?> getNomineesTimestamp();
+
+  /// Stores nominees timestamp from successful API response
+  Future<void> storeNomineesTimestamp(String timestamp);
+
+  /// Clears stored nominees timestamp
+  Future<void> clearNomineesTimestamp();
 
   // ============== Clear All ==============
 

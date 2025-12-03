@@ -1,5 +1,6 @@
 import 'package:myapp/core/network/api_client.dart';
 import 'package:myapp/core/network/endpoints.dart';
+import 'package:myapp/features/aswas_plus/infrastructure/models/nominee_model.dart';
 import 'package:myapp/features/home/infrastructure/models/announcement_model.dart';
 import 'package:myapp/features/home/infrastructure/models/aswas_card_model.dart';
 import 'package:myapp/features/home/infrastructure/models/event_model.dart';
@@ -68,6 +69,17 @@ abstract class HomeApi {
   /// - List<AnnouncementModel> on success (200)
   /// - null data on not modified (304)
   Future<HomeApiResponse<List<AnnouncementModel>>> fetchAnnouncements({
+    required String ifModifiedSince,
+  });
+
+  /// Fetches insurance nominees for the authenticated user
+  ///
+  /// [ifModifiedSince] - Timestamp for conditional request
+  ///
+  /// Returns HomeApiResponse containing:
+  /// - List<NomineeModel> on success (200)
+  /// - null data on not modified (304)
+  Future<HomeApiResponse<List<NomineeModel>>> fetchNominees({
     required String ifModifiedSince,
   });
 }
@@ -225,6 +237,41 @@ class HomeApiImpl implements HomeApi {
 
     return HomeApiResponse<List<AnnouncementModel>>(
       data: announcements ?? [],
+      statusCode: response.statusCode,
+      timestamp: response.timestamp,
+    );
+  }
+
+  @override
+  Future<HomeApiResponse<List<NomineeModel>>> fetchNominees({
+    required String ifModifiedSince,
+  }) async {
+    final response = await apiClient.get<List<dynamic>>(
+      Endpoints.insuranceNomineesMe,
+      ifModifiedSince: ifModifiedSince.isNotEmpty ? ifModifiedSince : null,
+      fromJson: (json) => json as List<dynamic>,
+    );
+
+    // Handle 304 Not Modified
+    if (response.isNotModified) {
+      return HomeApiResponse<List<NomineeModel>>(
+        data: null,
+        statusCode: response.statusCode,
+        timestamp: null,
+      );
+    }
+
+    // Parse the response - API returns direct array of nominees
+    List<NomineeModel>? nominees;
+
+    if (response.data != null) {
+      nominees = response.data!
+          .map((json) => NomineeModel.fromJson(json as Map<String, dynamic>))
+          .toList();
+    }
+
+    return HomeApiResponse<List<NomineeModel>>(
+      data: nominees ?? [],
       statusCode: response.statusCode,
       timestamp: response.timestamp,
     );
