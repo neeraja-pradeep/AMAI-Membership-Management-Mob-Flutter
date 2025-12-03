@@ -221,6 +221,30 @@ class RegistrationStateNotifier extends StateNotifier<RegistrationState> {
     state = current.copyWith(registration: updated, hasUnsavedChanges: true);
   }
 
+  void updateAptaAddress(AddressDetails details) {
+    final current = state;
+    if (current is! RegistrationStateInProgress) return;
+
+    final updated = current.registration.copyWith(
+      aptaAddress: details,
+      lastUpdatedAt: DateTime.now(),
+    );
+
+    state = current.copyWith(registration: updated, hasUnsavedChanges: true);
+  }
+
+  void updatePermanentAddress(AddressDetails details) {
+    final current = state;
+    if (current is! RegistrationStateInProgress) return;
+
+    final updated = current.registration.copyWith(
+      permanentAddress: details,
+      lastUpdatedAt: DateTime.now(),
+    );
+
+    state = current.copyWith(registration: updated, hasUnsavedChanges: true);
+  }
+
   /// Update document uploads (Step 4)
   void updateDocumentUploads(DocumentUploads documents) {
     final current = state;
@@ -656,6 +680,10 @@ class RegistrationStateNotifier extends StateNotifier<RegistrationState> {
       stateId: json['stateId'] as String,
       districtId: json['districtId'] as String,
       isPrimary: json['isPrimary'] as bool? ?? true,
+      type: AddressType.values.firstWhere(
+        (e) => e.name == (json['type'] ?? 'communication'),
+        orElse: () => AddressType.communication,
+      ),
     );
   }
 

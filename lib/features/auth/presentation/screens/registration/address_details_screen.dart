@@ -27,6 +27,7 @@ class AddressDetailsScreen extends ConsumerStatefulWidget {
 class _AddressDetailsScreenState extends ConsumerState<AddressDetailsScreen> {
   final _formKey = GlobalKey<FormState>();
 
+  /// Communication Address controllers
   late final TextEditingController _addressLine1Controller;
   late final TextEditingController _addressLine2Controller;
   late final TextEditingController _cityController;
@@ -35,6 +36,31 @@ class _AddressDetailsScreenState extends ConsumerState<AddressDetailsScreen> {
   String? _selectedCountry;
   String? _selectedState;
   String? _selectedDistrict;
+
+  /// APTA Mailing Address
+  bool _useSameApta = true;
+  late final TextEditingController _aptaAddress1;
+  late final TextEditingController _aptaAddress2;
+  late final TextEditingController _aptaCity;
+  late final TextEditingController _aptaPostal;
+  String? _aptaCountry;
+  String? _aptaState;
+  String? _aptaDistrict;
+
+  /// Permanent Address
+  bool _useSamePermanent = true;
+  late final TextEditingController _permAddress1;
+  late final TextEditingController _permAddress2;
+  late final TextEditingController _permCity;
+  late final TextEditingController _permPostal;
+  String? _permCountry;
+  String? _permState;
+  String? _permDistrict;
+
+  /// Role (practitioner / house_surgeon / student)
+  String _role = 'practitioner';
+
+  bool get _isPractitioner => _role == 'practitioner';
 
   final Map<String, List<String>> _states = {
     'India': ['Karnataka', 'Kerala', 'Tamil Nadu', 'Delhi'],
@@ -53,10 +79,32 @@ class _AddressDetailsScreenState extends ConsumerState<AddressDetailsScreen> {
   @override
   void initState() {
     super.initState();
+
+    /// Communication
     _addressLine1Controller = TextEditingController();
     _addressLine2Controller = TextEditingController();
     _cityController = TextEditingController();
     _postalCodeController = TextEditingController();
+
+    /// APTA
+    _aptaAddress1 = TextEditingController();
+    _aptaAddress2 = TextEditingController();
+    _aptaCity = TextEditingController();
+    _aptaPostal = TextEditingController();
+
+    /// Permanent
+    _permAddress1 = TextEditingController();
+    _permAddress2 = TextEditingController();
+    _permCity = TextEditingController();
+    _permPostal = TextEditingController();
+
+    /// Read role from registration state (personalDetails.membershipType)
+    final regState = ref.read(registrationProvider);
+    if (regState is RegistrationStateInProgress &&
+        regState.registration.personalDetails != null) {
+      _role = regState.registration.personalDetails!.membershipType;
+    }
+
     WidgetsBinding.instance.addPostFrameCallback((_) => _loadExistingData());
   }
 
@@ -66,6 +114,17 @@ class _AddressDetailsScreenState extends ConsumerState<AddressDetailsScreen> {
     _addressLine2Controller.dispose();
     _cityController.dispose();
     _postalCodeController.dispose();
+
+    _aptaAddress1.dispose();
+    _aptaAddress2.dispose();
+    _aptaCity.dispose();
+    _aptaPostal.dispose();
+
+    _permAddress1.dispose();
+    _permAddress2.dispose();
+    _permCity.dispose();
+    _permPostal.dispose();
+
     super.dispose();
   }
 
@@ -82,6 +141,11 @@ class _AddressDetailsScreenState extends ConsumerState<AddressDetailsScreen> {
 
     if (state is! RegistrationStateInProgress) return;
 
+    // refresh role from persisted registration, just in case
+    if (state.registration.personalDetails != null) {
+      _role = state.registration.personalDetails!.membershipType;
+    }
+
     final data = state.registration.addressDetails;
     if (data == null) return;
 
@@ -96,8 +160,31 @@ class _AddressDetailsScreenState extends ConsumerState<AddressDetailsScreen> {
     });
   }
 
+  /// Auto copy logic
+  void _copyCommunicationTo(
+    TextEditingController a1,
+    a2,
+    city,
+    postal,
+    Function setCountry,
+    setStateField,
+    setDistrict,
+  ) {
+    a1.text = _addressLine1Controller.text;
+    a2.text = _addressLine2Controller.text;
+    city.text = _cityController.text;
+    postal.text = _postalCodeController.text;
+
+    setCountry(_selectedCountry);
+    setStateField(_selectedState);
+    setDistrict(_selectedDistrict);
+  }
+
   void _save() {
-    final data = AddressDetails(
+    final notifier = ref.read(registrationProvider.notifier);
+
+    final communication = AddressDetails(
+      type: AddressType.communication,
       addressLine1: _addressLine1Controller.text.trim(),
       addressLine2: _addressLine2Controller.text.trim(),
       countryId: _selectedCountry ?? "",
@@ -107,64 +194,116 @@ class _AddressDetailsScreenState extends ConsumerState<AddressDetailsScreen> {
       postalCode: _postalCodeController.text.trim(),
       isPrimary: true,
     );
-    ref.read(registrationProvider.notifier).updateAddressDetails(data);
+
+    notifier.updateAddressDetails(communication);
+
+    /// APTA details → ONLY for practitioner
+    if (_isPractitioner) {
+      notifier.updateAptaAddress(
+        AddressDetails(
+          type: AddressType.apta,
+          addressLine1: _aptaAddress1.text,
+          addressLine2: _aptaAddress2.text,
+          city: _aptaCity.text,
+          postalCode: _aptaPostal.text,
+          countryId: _aptaCountry ?? "",
+          stateId: _aptaState ?? "",
+          districtId: _aptaDistrict ?? "",
+        ),
+      );
+    }
+
+    /// Permanent (for all roles)
+    notifier.updatePermanentAddress(
+      AddressDetails(
+        type: AddressType.permanent,
+        addressLine1: _permAddress1.text,
+        addressLine2: _permAddress2.text,
+        city: _permCity.text,
+        postalCode: _permPostal.text,
+        countryId: _permCountry ?? "",
+        stateId: _permState ?? "",
+        districtId: _permDistrict ?? "",
+      ),
+    );
   }
 
   Future<void> _handleNext() async {
-    if (!_formKey.currentState!.validate()) {
-      return;
-    }
+    if (!_formKey.currentState!.validate()) return;
 
-    await ref.read(registrationProvider.notifier).autoSaveProgress();
+    _save(); // keep your local state sync
 
     try {
-      _save();
-
-      final addressData = {
-        'user': widget.userId, // <-- from previous screen
-        'address_line1': _addressLine1Controller.text.trim(),
-        'address_line2': _addressLine2Controller.text.trim(),
-        'country': _selectedCountry,
-        'state': _selectedState,
-        'district': _selectedDistrict,
-        'city': _cityController.text.trim(),
-        'postal_code': _postalCodeController.text.trim(),
-        'is_primary': true,
-      };
-
-      final responseData = await ref
-          .read(registrationProvider.notifier)
-          .submitAddress(data: addressData);
-      debugPrint(responseData.toString());
       await ref.read(registrationProvider.notifier).autoSaveProgress();
 
-      final addressId = responseData['id'];
+      final notifier = ref.read(registrationProvider.notifier);
 
-      if (addressId == null) {
-        _showError('Backend Registration Failed');
-        return;
+      // 1️⃣ Communication address (always from main fields)
+      final communicationData = {
+        'address_line1': _addressLine1Controller.text.trim(),
+        'address_line2': _addressLine2Controller.text.trim(),
+        'city': _cityController.text.trim(),
+        'postal_code': _postalCodeController.text.trim(),
+        'country': _selectedCountry ?? '',
+        'state': _selectedState ?? '',
+        'district': _selectedDistrict ?? '',
+        'type': 'communications',
+      };
+
+      // 🔁 Always submit communication
+      await notifier.submitAddress(data: communicationData);
+
+      // 2️⃣ APTA address → ONLY for practitioner
+      if (_isPractitioner) {
+        final aptaData = _useSameApta
+            ? {
+                // copy from communication but change type
+                ...communicationData,
+                'type': 'apta',
+              }
+            : {
+                'address_line1': _aptaAddress1.text.trim(),
+                'address_line2': _aptaAddress2.text.trim(),
+                'city': _aptaCity.text.trim(),
+                'postal_code': _aptaPostal.text.trim(),
+                'country': _aptaCountry ?? '',
+                'state': _aptaState ?? '',
+                'district': _aptaDistrict ?? '',
+                'type': 'apta',
+              };
+
+        await notifier.submitAddress(data: aptaData);
       }
 
+      // 3️⃣ Permanent address (for all roles)
+      final permanentData = _useSamePermanent
+          ? {
+              // copy from communication but change type
+              ...communicationData,
+              'type': 'permanent',
+            }
+          : {
+              'address_line1': _permAddress1.text.trim(),
+              'address_line2': _permAddress2.text.trim(),
+              'city': _permCity.text.trim(),
+              'postal_code': _permPostal.text.trim(),
+              'country': _permCountry ?? '',
+              'state': _permState ?? '',
+              'district': _permDistrict ?? '',
+              'type': 'permanent',
+            };
+
+      await notifier.submitAddress(data: permanentData);
+
+      // Navigate after all succeed
       if (!mounted) return;
-
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text("Registration saved. Continue with Document details."),
-          backgroundColor: Colors.green,
-        ),
-      );
-
-      if (!mounted) return;
-
       Navigator.pushNamed(
         context,
         AppRouter.registrationDocuments,
-        arguments: widget.applicationId,
+        arguments: {"applicationId": widget.applicationId, "role": _role},
       );
     } catch (e) {
-      if (mounted) _showError("Registration failed: ${e.toString()}");
-    } finally {
-      // if (mounted) setState(() => _isSubmitting = false);
+      _showError(e.toString());
     }
   }
 
@@ -174,133 +313,54 @@ class _AddressDetailsScreenState extends ConsumerState<AddressDetailsScreen> {
     ).showSnackBar(SnackBar(content: Text(msg), backgroundColor: Colors.red));
   }
 
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        backgroundColor: Colors.white,
-        elevation: 0,
-        title: const Text(
-          "Register Here",
-          style: TextStyle(fontWeight: FontWeight.bold),
+  /// -------- UI --------
+
+  Widget _buildAddressFields({
+    required TextEditingController address1,
+    required TextEditingController address2,
+    required TextEditingController city,
+    required TextEditingController postal,
+    required String? country,
+    required String? state,
+    required String? district,
+    required Function(String?) onCountryChange,
+    required Function(String?) onStateChange,
+    required Function(String?) onDistrictChange,
+  }) {
+    return Column(
+      children: [
+        SizedBox(height: 18.h),
+        _buildLabel("Address Line 1"),
+        TextInputField(controller: address1, hintText: "Building / House No"),
+
+        SizedBox(height: 18.h),
+        _buildLabel("Address Line 2"),
+        TextInputField(controller: address2, hintText: "Street, Landmark"),
+
+        SizedBox(height: 18.h),
+        _buildLabel("Country"),
+        _buildDropdown(["India", "USA"], country, onCountryChange),
+
+        SizedBox(height: 18.h),
+        _buildLabel("State"),
+        _buildDropdown(_states[country] ?? [], state, onStateChange),
+
+        SizedBox(height: 18.h),
+        _buildLabel("District"),
+        _buildDropdown(_districts[state] ?? [], district, onDistrictChange),
+
+        SizedBox(height: 18.h),
+        _buildLabel("City / Post Office"),
+        TextInputField(controller: city, hintText: "City Name"),
+
+        SizedBox(height: 18.h),
+        _buildLabel("Postal Code"),
+        TextInputField(
+          controller: postal,
+          keyboardType: TextInputType.number,
+          inputFormatters: [FilteringTextInputFormatter.digitsOnly],
         ),
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: Colors.black),
-          onPressed: () => Navigator.pop(context),
-        ),
-      ),
-
-      body: SingleChildScrollView(
-        padding: EdgeInsets.all(24.w),
-        child: Form(
-          key: _formKey,
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              SizedBox(height: 10.h),
-              Center(
-                child: Text(
-                  "Step 3 of 4",
-                  style: TextStyle(
-                    fontSize: 16.sp,
-                    fontWeight: FontWeight.w600,
-                  ),
-                ),
-              ),
-
-              SizedBox(height: 20.h),
-              Text(
-                "Address Details",
-                style: TextStyle(fontSize: 20.sp, fontWeight: FontWeight.bold),
-              ),
-              SizedBox(height: 25.h),
-
-              // Address Line 1
-              _buildLabel("Address Line 1"),
-              SizedBox(height: 6.h),
-              TextInputField(
-                controller: _addressLine1Controller,
-                hintText: "Building, House No",
-                validator: (v) => v!.trim().isEmpty ? "Required" : null,
-              ),
-
-              SizedBox(height: 18.h),
-              _buildLabel("Address Line 2"),
-              SizedBox(height: 6.h),
-              TextInputField(
-                controller: _addressLine2Controller,
-                hintText: "Street, Locality",
-                validator: (v) => v!.trim().isEmpty ? "Required" : null,
-              ),
-
-              SizedBox(height: 18.h),
-              _buildLabel("Country"),
-              SizedBox(height: 6.h),
-              _buildDropdown(["India", "USA"], _selectedCountry, (val) {
-                setState(() {
-                  _selectedCountry = val;
-                  _selectedState = null;
-                  _selectedDistrict = null;
-                });
-                _save();
-              }),
-
-              SizedBox(height: 18.h),
-              _buildLabel("State"),
-              SizedBox(height: 6.h),
-              _buildDropdown(_states[_selectedCountry] ?? [], _selectedState, (
-                val,
-              ) {
-                setState(() {
-                  _selectedState = val;
-                  _selectedDistrict = null;
-                });
-                _save();
-              }),
-
-              SizedBox(height: 18.h),
-              _buildLabel("District"),
-              SizedBox(height: 6.h),
-              _buildDropdown(
-                _districts[_selectedState] ?? [],
-                _selectedDistrict,
-                (val) {
-                  setState(() => _selectedDistrict = val);
-                  _save();
-                },
-              ),
-
-              SizedBox(height: 18.h),
-              _buildLabel("City / Post Office"),
-              SizedBox(height: 6.h),
-              TextInputField(
-                controller: _cityController,
-                hintText: "City, PO Name",
-                validator: (v) => v!.trim().isEmpty ? "Required" : null,
-              ),
-
-              SizedBox(height: 18.h),
-              _buildLabel("Postal Code"),
-              SizedBox(height: 6.h),
-              TextInputField(
-                controller: _postalCodeController,
-                hintText: "6-digit postal code",
-                keyboardType: TextInputType.number,
-                inputFormatters: [FilteringTextInputFormatter.digitsOnly],
-                validator: (v) {
-                  if (v == null || v.isEmpty) return "Required";
-                  if (v.trim().length != 6)
-                    return "Postal code must be 6 digits";
-                  return null;
-                },
-              ),
-
-              SizedBox(height: 40.h),
-              _buildNextButton(),
-            ],
-          ),
-        ),
-      ),
+      ],
     );
   }
 
@@ -316,45 +376,192 @@ class _AddressDetailsScreenState extends ConsumerState<AddressDetailsScreen> {
     String? value,
     Function(String?) onChanged,
   ) {
-    if (value != null && !items.contains(value)) value = null;
-
-    return Container(
-      padding: EdgeInsets.symmetric(horizontal: 16.w),
-      decoration: BoxDecoration(
-        border: Border.all(color: Colors.grey[300]!),
-        borderRadius: BorderRadius.circular(12.r),
+    return DropdownButtonFormField(
+      value: items.contains(value) ? value : null,
+      decoration: InputDecoration(
+        border: OutlineInputBorder(borderRadius: BorderRadius.circular(12.r)),
       ),
-      child: DropdownButtonFormField(
-        value: value,
-        decoration: const InputDecoration(border: InputBorder.none),
-        hint: const Text("Select"),
-        items: items
-            .map((e) => DropdownMenuItem(value: e, child: Text(e)))
-            .toList(),
-        validator: (v) => v == null ? "Required" : null,
-        onChanged: onChanged,
-      ),
+      hint: const Text("Select"),
+      items: items
+          .map((e) => DropdownMenuItem(value: e, child: Text(e)))
+          .toList(),
+      onChanged: onChanged,
+      validator: (v) => v == null ? "Required" : null,
     );
   }
 
-  Widget _buildNextButton() {
-    return SizedBox(
-      height: 50.h,
-      width: double.infinity,
-      child: ElevatedButton(
-        onPressed: _handleNext,
-        style: ElevatedButton.styleFrom(
-          backgroundColor: AppColors.brown,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(12.r),
-          ),
+  /// ---------------- CHECKBOX UI SECTION ----------------
+
+  Widget _toggleSection(String title, bool isSame, Function(bool) toggle) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        SizedBox(height: 30.h),
+
+        // Title
+        Text(
+          title,
+          style: TextStyle(fontSize: 18.sp, fontWeight: FontWeight.bold),
         ),
-        child: Text(
-          "Next",
-          style: TextStyle(
-            color: Colors.white,
-            fontSize: 16.sp,
-            fontWeight: FontWeight.w600,
+
+        SizedBox(height: 6.h),
+
+        // Checkbox
+        Row(
+          children: [
+            Checkbox(value: isSame, onChanged: (v) => toggle(v ?? false)),
+            Expanded(
+              child: Text(
+                "Same as Communication Address",
+                style: TextStyle(fontSize: 15.sp),
+              ),
+            ),
+          ],
+        ),
+      ],
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text("Register Here"),
+        backgroundColor: Colors.white,
+        elevation: 0,
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back),
+          onPressed: () => Navigator.pop(context),
+        ),
+      ),
+
+      body: SingleChildScrollView(
+        padding: EdgeInsets.all(24.w),
+        child: Form(
+          key: _formKey,
+          child: Column(
+            children: [
+              Text(
+                "Step 3 of 4",
+                style: TextStyle(fontSize: 16.sp, fontWeight: FontWeight.w600),
+              ),
+              SizedBox(height: 20.h),
+
+              Text(
+                "Communication Address",
+                style: TextStyle(fontSize: 20.sp, fontWeight: FontWeight.bold),
+              ),
+
+              _buildAddressFields(
+                address1: _addressLine1Controller,
+                address2: _addressLine2Controller,
+                city: _cityController,
+                postal: _postalCodeController,
+                country: _selectedCountry,
+                state: _selectedState,
+                district: _selectedDistrict,
+                onCountryChange: (v) => setState(() => _selectedCountry = v),
+                onStateChange: (v) => setState(() => _selectedState = v),
+                onDistrictChange: (v) => setState(() => _selectedDistrict = v),
+              ),
+
+              /// APTA MAILING → ONLY for practitioner
+              if (_isPractitioner) ...[
+                _toggleSection("APTA Mailing Address", _useSameApta, (v) {
+                  setState(() {
+                    _useSameApta = v;
+                    if (v) {
+                      _copyCommunicationTo(
+                        _aptaAddress1,
+                        _aptaAddress2,
+                        _aptaCity,
+                        _aptaPostal,
+                        (c) => _aptaCountry = c,
+                        (s) => _aptaState = s,
+                        (d) => _aptaDistrict = d,
+                      );
+                    }
+                  });
+                }),
+
+                AnimatedSwitcher(
+                  duration: const Duration(milliseconds: 300),
+                  child: !_useSameApta
+                      ? _buildAddressFields(
+                          address1: _aptaAddress1,
+                          address2: _aptaAddress2,
+                          city: _aptaCity,
+                          postal: _aptaPostal,
+                          country: _aptaCountry,
+                          state: _aptaState,
+                          district: _aptaDistrict,
+                          onCountryChange: (v) =>
+                              setState(() => _aptaCountry = v),
+                          onStateChange: (v) => setState(() => _aptaState = v),
+                          onDistrictChange: (v) =>
+                              setState(() => _aptaDistrict = v),
+                        )
+                      : const SizedBox.shrink(),
+                ),
+              ],
+
+              /// PERMANENT (for all roles)
+              _toggleSection("Permanent Address", _useSamePermanent, (v) {
+                setState(() {
+                  _useSamePermanent = v;
+                  if (v) {
+                    _copyCommunicationTo(
+                      _permAddress1,
+                      _permAddress2,
+                      _permCity,
+                      _permPostal,
+                      (c) => _permCountry = c,
+                      (s) => _permState = s,
+                      (d) => _permDistrict = d,
+                    );
+                  }
+                });
+              }),
+
+              AnimatedSwitcher(
+                duration: const Duration(milliseconds: 300),
+                child: !_useSamePermanent
+                    ? _buildAddressFields(
+                        address1: _permAddress1,
+                        address2: _permAddress2,
+                        city: _permCity,
+                        postal: _permPostal,
+                        country: _permCountry,
+                        state: _permState,
+                        district: _permDistrict,
+                        onCountryChange: (v) =>
+                            setState(() => _permCountry = v),
+                        onStateChange: (v) => setState(() => _permState = v),
+                        onDistrictChange: (v) =>
+                            setState(() => _permDistrict = v),
+                      )
+                    : const SizedBox.shrink(),
+              ),
+
+              SizedBox(height: 40.h),
+              SizedBox(
+                height: 50.h,
+                width: double.infinity,
+                child: ElevatedButton(
+                  onPressed: _handleNext,
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: AppColors.brown,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12.r),
+                    ),
+                  ),
+                  child: Text(
+                    "Next",
+                    style: TextStyle(color: Colors.white, fontSize: 16.sp),
+                  ),
+                ),
+              ),
+            ],
           ),
         ),
       ),

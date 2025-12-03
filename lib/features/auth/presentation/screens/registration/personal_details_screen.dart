@@ -63,9 +63,10 @@ class _PersonalDetailsScreenState extends ConsumerState<PersonalDetailsScreen> {
     _institutionController = TextEditingController();
     _bamsStartYearController = TextEditingController();
 
-    /// 🔥 Convert enum → string
+    /// Convert enum → string
     role = _mapRole(widget.role); // "practitioner", "house_surgeon", "student"
-    debugPrint(role);
+    debugPrint('Role mapped to: $role');
+
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _loadExistingData();
     });
@@ -138,8 +139,8 @@ class _PersonalDetailsScreenState extends ConsumerState<PersonalDetailsScreen> {
 
   void _autoSave() => _savePersonalDetails();
 
-  void _savePersonalDetails() {
-    final personalDetails = PersonalDetails(
+  PersonalDetails _buildPersonalDetailsFromForm() {
+    return PersonalDetails(
       firstName: _firstNameController.text.trim(),
       lastName: _lastNameController.text.trim(),
       email: _emailController.text.trim(),
@@ -149,15 +150,22 @@ class _PersonalDetailsScreenState extends ConsumerState<PersonalDetailsScreen> {
       dateOfBirth: _dateOfBirth ?? DateTime.now(),
       gender: _selectedGender ?? '',
       bloodGroup: _selectedBloodGroup ?? '',
-      membershipType: role, // string now
-      institutionName: (role == "houseSurgeon" || role == "student")
+      membershipType: role, // "practitioner" / "house_surgeon" / "student"
+      // 🔧 FIXED: correct role string for house_surgeon
+      institutionName: (role == "house_surgeon" || role == "student")
           ? _institutionController.text.trim()
           : null,
       bamsStartYear: role == "student"
           ? _bamsStartYearController.text.trim()
           : null,
-      magazinePreference: role == "houseSurgeon" ? _selectedMagazineType : null,
+      magazinePreference: role == "house_surgeon"
+          ? _selectedMagazineType
+          : null,
     );
+  }
+
+  void _savePersonalDetails() {
+    final personalDetails = _buildPersonalDetailsFromForm();
 
     ref
         .read(registrationProvider.notifier)
@@ -165,59 +173,64 @@ class _PersonalDetailsScreenState extends ConsumerState<PersonalDetailsScreen> {
   }
 
   Future<void> _handleNext() async {
-    if (_formKey.currentState?.validate() ?? false) {
-      _savePersonalDetails();
-      await ref.read(registrationProvider.notifier).autoSaveProgress();
+    // 1️⃣ Form validation gate
+    if (!(_formKey.currentState?.validate() ?? false)) {
+      debugPrint('❌ PersonalDetails form not valid');
+      return;
+    }
 
-      final state = ref.read(registrationProvider);
-      if (state is! RegistrationStateInProgress) return;
+    // 2️⃣ Build from controllers + save into provider
+    final personalDetails = _buildPersonalDetailsFromForm();
 
-      final personalDetails = state.registration.personalDetails;
+    ref
+        .read(registrationProvider.notifier)
+        .updatePersonalDetails(personalDetails);
 
-      if (personalDetails == null) {
-        _showError("Personal details missing");
-        return;
-      }
+    await ref.read(registrationProvider.notifier).autoSaveProgress();
 
-      // 🧑‍🎓 Student → Skip professional screen
-      if (role == "student") {
-        final membershipData = {
-          'membership_type': personalDetails.membershipType,
-          'first_name': personalDetails.firstName,
-          'email': personalDetails.email,
-          'password': personalDetails.password,
-          'phone': personalDetails.phone,
-          'wa_phone': personalDetails.waPhone,
-          'date_of_birth':
-              "${personalDetails.dateOfBirth.year}-${personalDetails.dateOfBirth.month.toString().padLeft(2, '0')}-${personalDetails.dateOfBirth.day.toString().padLeft(2, '0')}",
-          'gender': personalDetails.gender,
-          'blood_group': personalDetails.bloodGroup,
-        };
+    // 3️⃣ Role-based navigation
 
-        try {
-          final responseData = await ref
-              .read(registrationProvider.notifier)
-              .submitMembershipRegistration(membershipData);
+    // 🧑‍🎓 Student → Skip professional screen and hit membership endpoint
+    if (role == "student") {
+      final membershipData = {
+        'membership_type': personalDetails.membershipType,
+        'first_name': personalDetails.firstName,
+        'email': personalDetails.email,
+        'password': personalDetails.password,
+        'phone': personalDetails.phone,
+        'wa_phone': personalDetails.waPhone,
+        'date_of_birth':
+            "${personalDetails.dateOfBirth.year}-${personalDetails.dateOfBirth.month.toString().padLeft(2, '0')}-${personalDetails.dateOfBirth.day.toString().padLeft(2, '0')}",
+        'gender': personalDetails.gender,
+        'blood_group': personalDetails.bloodGroup,
+      };
 
-          final userId = responseData['application']?['user_detail']?['id'];
-          final applicationId = responseData['application']?['id'];
+      try {
+        final responseData = await ref
+            .read(registrationProvider.notifier)
+            .submitMembershipRegistration(membershipData);
 
-          Navigator.pushNamed(
-            context,
-            AppRouter.registrationAddress,
-            arguments: {'userId': userId, 'applicationId': applicationId},
-          );
-        } catch (e) {
-          _showError("Failed: $e");
+        final userId = responseData['application']?['user_detail']?['id'];
+        final applicationId = responseData['application']?['id'];
+        if (userId == null) {
+          _showError(responseData['detail']);
         }
-
-        return;
+        if (!mounted) return;
+        Navigator.pushNamed(
+          context,
+          AppRouter.registrationAddress,
+          arguments: {'userId': userId, 'applicationId': applicationId},
+        );
+      } catch (e) {
+        _showError("Failed: $e");
       }
 
-      // Practitioner or House Surgeon → next page
-      if (mounted) {
-        Navigator.pushNamed(context, AppRouter.registrationProfessional);
-      }
+      return;
+    }
+
+    // 👨‍⚕️ Practitioner or 🩺 House Surgeon → go to Professional screen
+    if (mounted) {
+      Navigator.pushNamed(context, AppRouter.registrationProfessional);
     }
   }
 
@@ -250,8 +263,8 @@ class _PersonalDetailsScreenState extends ConsumerState<PersonalDetailsScreen> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  /// 🚫 NOTHING BELOW WAS MODIFIED — UI remains untouched
-                  const Text("First Name"), SizedBox(height: 10.h),
+                  const Text("First Name"),
+                  SizedBox(height: 10.h),
                   TextInputField(
                     controller: _firstNameController,
                     hintText: "First Name",
@@ -260,7 +273,8 @@ class _PersonalDetailsScreenState extends ConsumerState<PersonalDetailsScreen> {
                   ),
                   SizedBox(height: 16.h),
 
-                  const Text("Last Name"), SizedBox(height: 10.h),
+                  const Text("Last Name"),
+                  SizedBox(height: 10.h),
                   TextInputField(
                     controller: _lastNameController,
                     hintText: "Last Name",
@@ -269,7 +283,8 @@ class _PersonalDetailsScreenState extends ConsumerState<PersonalDetailsScreen> {
                   ),
                   SizedBox(height: 16.h),
 
-                  const Text("Email"), SizedBox(height: 10.h),
+                  const Text("Email"),
+                  SizedBox(height: 10.h),
                   TextInputField(
                     controller: _emailController,
                     keyboardType: TextInputType.emailAddress,
@@ -279,7 +294,8 @@ class _PersonalDetailsScreenState extends ConsumerState<PersonalDetailsScreen> {
                   ),
 
                   SizedBox(height: 16.h),
-                  const Text("Mobile Number"), SizedBox(height: 10.h),
+                  const Text("Mobile Number"),
+                  SizedBox(height: 10.h),
                   TextFormField(
                     controller: _phoneController,
                     maxLength: 10,
@@ -295,7 +311,8 @@ class _PersonalDetailsScreenState extends ConsumerState<PersonalDetailsScreen> {
                   ),
 
                   SizedBox(height: 16.h),
-                  const Text("Whatsapp Number"), SizedBox(height: 10.h),
+                  const Text("Whatsapp Number"),
+                  SizedBox(height: 10.h),
                   TextFormField(
                     controller: _waPhoneController,
                     maxLength: 10,

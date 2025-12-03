@@ -12,8 +12,13 @@ import '../../../domain/entities/registration/document_upload.dart';
 
 class DocumentUploadScreen extends ConsumerStatefulWidget {
   final int applicationId;
+  final String role; // << 🔥 Role passed directly here
 
-  const DocumentUploadScreen({super.key, required this.applicationId});
+  const DocumentUploadScreen({
+    super.key,
+    required this.applicationId,
+    required this.role,
+  });
 
   @override
   ConsumerState<DocumentUploadScreen> createState() =>
@@ -50,10 +55,13 @@ class _DocumentUploadScreenState extends ConsumerState<DocumentUploadScreen> {
     setState(() {});
   }
 
+  /// 🔥 Pick file TYPE based on role
   Future<void> _pickFile({required bool isProfile}) async {
     final result = await FilePicker.platform.pickFiles(
       type: FileType.custom,
       allowedExtensions: isProfile
+          ? ['jpg', 'jpeg', 'png']
+          : widget.role == "student"
           ? ['jpg', 'jpeg', 'png']
           : ['jpg', 'jpeg', 'png', 'pdf'],
     );
@@ -99,7 +107,6 @@ class _DocumentUploadScreenState extends ConsumerState<DocumentUploadScreen> {
         return;
       }
 
-      // Save state only after success
       setState(() {
         if (isProfile) {
           profilePhoto = file;
@@ -113,7 +120,7 @@ class _DocumentUploadScreenState extends ConsumerState<DocumentUploadScreen> {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(
-            "${isProfile ? "Profile Photo" : "Certificate"} uploaded successfully!",
+            "${isProfile ? "Profile Photo" : _certificateLabel()} uploaded successfully!",
           ),
           backgroundColor: Colors.green,
         ),
@@ -174,6 +181,16 @@ class _DocumentUploadScreenState extends ConsumerState<DocumentUploadScreen> {
     ref
         .read(registrationProvider.notifier)
         .updateDocumentUploads(DocumentUploads(documents: docs));
+  }
+
+  /// 🔥 Label based on role
+  String _certificateLabel() {
+    if (widget.role == "house_surgeon") {
+      return "Provisional Registration Certificate";
+    } else if (widget.role == "student") {
+      return "College ID Card";
+    }
+    return "Medical Council Certificate"; // default for practitioners
   }
 
   Future<void> _next() async {
@@ -251,7 +268,7 @@ class _DocumentUploadScreenState extends ConsumerState<DocumentUploadScreen> {
 
             SizedBox(height: 25.h),
 
-            _label("Medical Council Certificate"),
+            _label(_certificateLabel()), // 🔥 role-based dynamic
             _uploadTile(
               file: certificate,
               onPick: isUploading ? null : () => _pickFile(isProfile: false),

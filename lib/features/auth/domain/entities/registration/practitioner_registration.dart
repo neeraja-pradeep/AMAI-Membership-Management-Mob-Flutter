@@ -10,13 +10,13 @@ enum PaymentStatus { pending, processing, completed, failed }
 
 /// Payment details entity for Step 5
 class PaymentDetails {
-  final String sessionId; // Payment gateway session ID
+  final String sessionId;
   final double amount;
   final String currency;
   final PaymentStatus status;
   final String? transactionId;
-  final String? paymentMethod; // 'card', 'upi', 'netbanking', etc.
-  final DateTime? completedAt; // When payment was completed
+  final String? paymentMethod;
+  final DateTime? completedAt;
 
   const PaymentDetails({
     required this.sessionId,
@@ -49,35 +49,27 @@ class PaymentDetails {
       completedAt: completedAt ?? this.completedAt,
     );
   }
-
-  @override
-  String toString() {
-    return 'PaymentDetails(sessionId: $sessionId, amount: $amount $currency, status: $status, txnId: $transactionId)';
-  }
 }
 
 /// Main practitioner registration entity
-///
-/// Combines all registration steps into a single entity
-/// State persists across app restarts for 24 hours
 class PractitionerRegistration {
-  final String registrationId; // UUID for tracking
+  final String registrationId;
   final RegistrationStep currentStep;
   final DateTime createdAt;
   final DateTime lastUpdatedAt;
 
-  // Application ID from backend (returned after Step 2)
   final String? applicationId;
 
-  // CURRENT: 5-step registration data (Personal → Professional → Address → Documents → Payment)
   final PersonalDetails? personalDetails;
   final ProfessionalDetails? professionalDetails;
 
-  // DEPRECATED: Old 3-step flow (Membership → Address → Documents)
   final MembershipDetails? membershipDetails;
 
-  // Step data (nullable until completed)
-  final AddressDetails? addressDetails;
+  /// 👇 UPDATED: Multiple addresses supported
+  final AddressDetails? addressDetails; // Communication Address
+  final AddressDetails? aptaAddress; // APTA Mailing Address
+  final AddressDetails? permanentAddress; // Permanent Address
+
   final DocumentUploads? documentUploads;
   final PaymentDetails? paymentDetails;
 
@@ -91,18 +83,17 @@ class PractitionerRegistration {
     this.professionalDetails,
     this.membershipDetails,
     this.addressDetails,
+    this.aptaAddress,
+    this.permanentAddress,
     this.documentUploads,
     this.paymentDetails,
   });
 
-  /// Check if registration is expired (>24 hours old)
   bool get isExpired {
     final now = DateTime.now();
-    final expiryTime = createdAt.add(const Duration(hours: 24));
-    return now.isAfter(expiryTime);
+    return now.isAfter(createdAt.add(const Duration(hours: 24)));
   }
 
-  /// Check if current step is complete
   bool isStepComplete(RegistrationStep step) {
     switch (step) {
       case RegistrationStep.personalDetails:
@@ -116,109 +107,55 @@ class PractitionerRegistration {
       case RegistrationStep.payment:
         return paymentDetails?.isComplete ?? false;
       case RegistrationStep.membershipDetails:
-        // DEPRECATED: Old flow
         return membershipDetails?.isComplete ?? false;
     }
   }
 
-  /// Check if can proceed to next step
-  ///
-  /// REQUIREMENT: Multi-step validation
-  /// - Validates current step is complete
-  /// - Validates all previous steps remain valid
   bool get canProceedToNext {
-    // Current step must be complete
     if (!isStepComplete(currentStep)) return false;
-
-    // REQUIREMENT: Validate all previous steps
     return arePreviousStepsValid();
   }
 
-  /// Validate all steps before current step
-  ///
-  /// REQUIREMENT: Multi-step validation - all previous screens must remain valid
   bool arePreviousStepsValid() {
     switch (currentStep) {
       case RegistrationStep.personalDetails:
       case RegistrationStep.membershipDetails:
-        // No previous steps
         return true;
-
       case RegistrationStep.professionalDetails:
-        // Must have valid personal details
         return personalDetails?.isComplete ?? false;
-
       case RegistrationStep.addressDetails:
-        // Must have valid personal + professional details OR membership details (old flow)
-        if (personalDetails != null && professionalDetails != null) {
-          return (personalDetails?.isComplete ?? false) &&
-              (professionalDetails?.isComplete ?? false);
-        }
-        // Old flow compatibility
-        return membershipDetails?.isComplete ?? false;
-
+        return (personalDetails?.isComplete ?? false) &&
+            (professionalDetails?.isComplete ?? false);
       case RegistrationStep.documentUploads:
-        // Must have valid personal + professional + address details
-        if (personalDetails != null && professionalDetails != null) {
-          return (personalDetails?.isComplete ?? false) &&
-              (professionalDetails?.isComplete ?? false) &&
-              (addressDetails?.isComplete ?? false);
-        }
-        // Old flow compatibility
-        return (membershipDetails?.isComplete ?? false) &&
+        return (personalDetails?.isComplete ?? false) &&
+            (professionalDetails?.isComplete ?? false) &&
             (addressDetails?.isComplete ?? false);
-
       case RegistrationStep.payment:
-        // Must have valid personal + professional + address + documents
-        if (personalDetails != null && professionalDetails != null) {
-          return (personalDetails?.isComplete ?? false) &&
-              (professionalDetails?.isComplete ?? false) &&
-              (addressDetails?.isComplete ?? false) &&
-              (documentUploads?.isComplete ?? false);
-        }
-        // Old flow compatibility
-        return (membershipDetails?.isComplete ?? false) &&
+        return (personalDetails?.isComplete ?? false) &&
+            (professionalDetails?.isComplete ?? false) &&
             (addressDetails?.isComplete ?? false) &&
             (documentUploads?.isComplete ?? false);
     }
   }
 
-  /// Check if entire registration is complete (5 steps for new flow, 3 for old)
   bool get isComplete {
-    // New flow: Personal → Professional → Address → Documents → Payment
-    if (personalDetails != null && professionalDetails != null) {
-      return personalDetails != null &&
-          professionalDetails != null &&
-          addressDetails != null &&
-          documentUploads != null &&
-          paymentDetails != null;
-    }
-    // Old flow: Membership → Address → Documents
-    return membershipDetails != null &&
+    return personalDetails != null &&
+        professionalDetails != null &&
         addressDetails != null &&
-        documentUploads != null;
+        documentUploads != null &&
+        paymentDetails != null;
   }
 
-  /// Get completion percentage (0.0 to 1.0)
   double get completionPercentage {
-    int completedSteps = 0;
+    int completed = 0;
 
-    // Count completed steps based on flow
-    if (personalDetails != null || professionalDetails != null) {
-      // New flow (5 steps)
-      if (personalDetails?.isComplete == true) completedSteps++;
-      if (professionalDetails?.isComplete == true) completedSteps++;
-      if (addressDetails?.isComplete == true) completedSteps++;
-      if (documentUploads?.isComplete == true) completedSteps++;
-      if (paymentDetails?.isComplete == true) completedSteps++;
-    } else {
-      // Old flow (3 steps)
-      if (membershipDetails?.isComplete == true) completedSteps++;
-      if (addressDetails?.isComplete == true) completedSteps++;
-      if (documentUploads?.isComplete == true) completedSteps++;
-    }
+    if (personalDetails?.isComplete == true) completed++;
+    if (professionalDetails?.isComplete == true) completed++;
+    if (addressDetails?.isComplete == true) completed++;
+    if (documentUploads?.isComplete == true) completed++;
+    if (paymentDetails?.isComplete == true) completed++;
 
-    return completedSteps / RegistrationStep.totalSteps;
+    return completed / RegistrationStep.totalSteps;
   }
 
   PractitionerRegistration copyWith({
@@ -230,7 +167,12 @@ class PractitionerRegistration {
     PersonalDetails? personalDetails,
     ProfessionalDetails? professionalDetails,
     MembershipDetails? membershipDetails,
+
+    /// 👇 Required so Riverpod notifier can update them
     AddressDetails? addressDetails,
+    AddressDetails? aptaAddress,
+    AddressDetails? permanentAddress,
+
     DocumentUploads? documentUploads,
     PaymentDetails? paymentDetails,
   }) {
@@ -244,6 +186,8 @@ class PractitionerRegistration {
       professionalDetails: professionalDetails ?? this.professionalDetails,
       membershipDetails: membershipDetails ?? this.membershipDetails,
       addressDetails: addressDetails ?? this.addressDetails,
+      aptaAddress: aptaAddress ?? this.aptaAddress,
+      permanentAddress: permanentAddress ?? this.permanentAddress,
       documentUploads: documentUploads ?? this.documentUploads,
       paymentDetails: paymentDetails ?? this.paymentDetails,
     );
@@ -251,6 +195,6 @@ class PractitionerRegistration {
 
   @override
   String toString() {
-    return 'PractitionerRegistration(id: $registrationId, step: ${currentStep.displayName}, completion: ${(completionPercentage * 100).toStringAsFixed(0)}%, expired: $isExpired)';
+    return 'Registration(id: $registrationId, step: $currentStep, address: ${addressDetails != null}, apta: ${aptaAddress != null}, perm: ${permanentAddress != null})';
   }
 }
