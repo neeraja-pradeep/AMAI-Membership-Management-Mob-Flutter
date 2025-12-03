@@ -38,4 +38,37 @@ Swagger link : https://amai.nexogms.com/api/schema/swagger-ui/#/Insurance%20Nomi
 Required Fields : nominee_name, relationship, contact_number 
 GET endpoint : https://amai.nexogms.com/api/membership/insurance-nominees/me/
 
+Screen : Membership renewal 
+Choose your membership type
+a. Membership
+
+Swagger link : https://amai.nexogms.com/api/schema/swagger-ui/#/membership/membership_digital_products_retrieve
+
+GET endpoint: https://amai.nexogms.com/api/membership/digital-products/2/
+ID - 2 
+
+Required Fields:- product_name, base_price
+
+Aswas Plus
+
+Swagger link: https://amai.nexogms.com/api/schema/swagger-ui/#/membership/membership_digital_products_retrieve
+
+GET endpoint: https://amai.nexogms.com/api/membership/digital-products/2/
+ID - 2 
+
+Required Fields:- product_name, base_price
+
+b) Proceed to Payment 
+Membership
+
+Swagger link : [Initiate Payment] https://amai.nexogms.com/api/schema/swagger-ui/#/Membership/membership_payment_create
+
+POST endpoint: api/membership/membership/payment/
+
+Required Fields : user
+
+Endpoint : [ Verify Payment ] https://amai.nexogms.com/api/schema/swagger-ui/#/Membership/membership_verify_payment
+
+POST api/membership/membership/verify/ 
+
 
