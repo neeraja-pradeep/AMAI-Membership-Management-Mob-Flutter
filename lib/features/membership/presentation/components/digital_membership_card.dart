@@ -87,30 +87,6 @@ class DigitalMembershipCard extends StatelessWidget {
               ),
               SizedBox(height: 20.h),
 
-              // Card holder name
-              Text(
-                membershipStatus.memberName,
-                style: TextStyle(
-                  fontSize: 16.sp,
-                  fontWeight: FontWeight.w600,
-                  color: AppColors.textPrimary,
-                ),
-                textAlign: TextAlign.center,
-              ),
-              SizedBox(height: 4.h),
-
-              // Membership ID
-              Text(
-                'ID: ${membershipStatus.membershipNumber}',
-                style: TextStyle(
-                  fontSize: 14.sp,
-                  fontWeight: FontWeight.w500,
-                  color: AppColors.textSecondary,
-                ),
-                textAlign: TextAlign.center,
-              ),
-              SizedBox(height: 20.h),
-
               // Action buttons
               _buildActionButtons(),
             ],
@@ -221,14 +197,6 @@ class DigitalMembershipCardShimmer extends StatelessWidget {
 
               // QR code shimmer
               _buildShimmerBox(width: 180.w, height: 180.w),
-              SizedBox(height: 20.h),
-
-              // Name shimmer
-              _buildShimmerBox(width: 140.w, height: 18.h),
-              SizedBox(height: 8.h),
-
-              // ID shimmer
-              _buildShimmerBox(width: 120.w, height: 16.h),
               SizedBox(height: 20.h),
 
               // Buttons shimmer
