@@ -38,16 +38,14 @@ abstract class HomeApi {
     required String ifModifiedSince,
   });
 
-  /// Fetches insurance policies (Aswas Plus) for a specific user
+  /// Fetches insurance policies (Aswas Plus) for the authenticated user
   ///
-  /// [userId] - The user ID to fetch insurance policies for
   /// [ifModifiedSince] - Timestamp for conditional request
   ///
   /// Returns HomeApiResponse containing:
   /// - AswasCardModel on success (200) - only if active policy exists
   /// - null data on not modified (304) or no active policy
   Future<HomeApiResponse<AswasCardModel>> fetchAswasPlus({
-    required int userId,
     required String ifModifiedSince,
   });
 
@@ -117,11 +115,10 @@ class HomeApiImpl implements HomeApi {
 
   @override
   Future<HomeApiResponse<AswasCardModel>> fetchAswasPlus({
-    required int userId,
     required String ifModifiedSince,
   }) async {
     final response = await apiClient.get<List<dynamic>>(
-      Endpoints.insurancePoliciesByUserId(userId),
+      Endpoints.insurancePoliciesMe,
       ifModifiedSince: ifModifiedSince.isNotEmpty ? ifModifiedSince : null,
       fromJson: (json) => json as List<dynamic>,
     );

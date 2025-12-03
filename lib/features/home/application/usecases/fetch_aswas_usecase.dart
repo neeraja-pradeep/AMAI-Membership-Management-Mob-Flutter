@@ -13,31 +13,27 @@ class FetchAswasUsecase {
   /// Fetches Aswas Plus (fresh fetch, no if-modified-since)
   /// Used on app launch
   ///
-  /// [userId] - The user ID to fetch insurance policies for
-  ///
   /// Returns:
   /// - Right(AswasPlus) on success with active policy
   /// - Right(null) if no active policy
   /// - Left(Failure) on error
-  Future<Either<Failure, AswasPlus?>> call({required int userId}) async {
+  Future<Either<Failure, AswasPlus?>> call() async {
     // Fresh fetch without if-modified-since
-    return repository.getAswasPlus(userId: userId);
+    return repository.getAswasPlus();
   }
 
   /// Refreshes Aswas Plus using if-modified-since
   /// Used for pull-to-refresh within a session
   ///
-  /// [userId] - The user ID to fetch insurance policies for
-  ///
   /// Returns:
   /// - Right(AswasPlus) with fresh data if modified
   /// - Right(null) if 304 Not Modified (use in-memory data)
   /// - Left(Failure) on error
-  Future<Either<Failure, AswasPlus?>> refresh({required int userId}) async {
+  Future<Either<Failure, AswasPlus?>> refresh() async {
     // Get stored timestamp for conditional request
     final timestamp = await repository.getAswasTimestamp();
 
     // Fetch with if-modified-since
-    return repository.getAswasPlus(userId: userId, ifModifiedSince: timestamp);
+    return repository.getAswasPlus(ifModifiedSince: timestamp);
   }
 }
