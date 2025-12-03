@@ -4,19 +4,15 @@ import 'package:myapp/app/theme/colors.dart';
 import 'package:myapp/features/home/domain/entities/aswas_plus.dart';
 
 /// Policy Details Card for ASWAS Plus screen
-/// Shows policy holder info, policy number, validity, and renewal button
+/// Shows policy holder info, policy number, and validity
 class PolicyDetailsCard extends StatelessWidget {
   const PolicyDetailsCard({
     required this.aswasPlus,
-    this.onRenewPressed,
     super.key,
   });
 
   /// ASWAS Plus policy data
   final AswasPlus aswasPlus;
-
-  /// Callback when renew button is pressed
-  final VoidCallback? onRenewPressed;
 
   @override
   Widget build(BuildContext context) {
@@ -54,11 +50,6 @@ class PolicyDetailsCard extends StatelessWidget {
 
           // Valid Until
           _buildDetailRow('Valid Until', aswasPlus.displayValidUntil),
-          SizedBox(height: 20.h),
-
-          // Renew Button (hidden when policy is active)
-          if (!aswasPlus.isActive)
-            _buildRenewButton(),
         ],
       ),
     );
@@ -145,31 +136,6 @@ class PolicyDetailsCard extends StatelessWidget {
           ),
         ),
       ],
-    );
-  }
-
-  /// Builds the renew button
-  Widget _buildRenewButton() {
-    return SizedBox(
-      width: double.infinity,
-      child: ElevatedButton(
-        onPressed: onRenewPressed,
-        style: ElevatedButton.styleFrom(
-          backgroundColor: AppColors.primary,
-          padding: EdgeInsets.symmetric(vertical: 14.h),
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(8.r),
-          ),
-        ),
-        child: Text(
-          'Renew Policy',
-          style: TextStyle(
-            fontSize: 14.sp,
-            fontWeight: FontWeight.w600,
-            color: AppColors.white,
-          ),
-        ),
-      ),
     );
   }
 }

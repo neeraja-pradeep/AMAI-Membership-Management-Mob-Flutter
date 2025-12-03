@@ -127,7 +127,6 @@ class _AswasePlusScreenState extends ConsumerState<AswasePlusScreen> {
           // Policy Details Card
           PolicyDetailsCard(
             aswasPlus: aswasPlus,
-            onRenewPressed: _onRenewPressed,
           ),
 
           SizedBox(height: 24.h),
@@ -320,7 +319,6 @@ class _AswasePlusScreenState extends ConsumerState<AswasePlusScreen> {
               children: [
                 PolicyDetailsCard(
                   aswasPlus: cachedData,
-                  onRenewPressed: _onRenewPressed,
                 ),
                 SizedBox(height: 24.h),
                 if (cachedData.isExpired) ...[
