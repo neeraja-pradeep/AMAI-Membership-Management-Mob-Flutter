@@ -33,7 +33,11 @@ class MembershipApiImpl implements MembershipApi {
       ifModifiedSince: ifModifiedSince,
       fromJson: (json) {
         if (json == null) return null;
-        return MembershipStatusModel.fromJson(json as Map<String, dynamic>);
+        final data = json as Map<String, dynamic>;
+        // Extract nested 'membership' object from response
+        final membershipData = data['membership'] as Map<String, dynamic>?;
+        if (membershipData == null) return null;
+        return MembershipStatusModel.fromJson(membershipData);
       },
     );
 
