@@ -1,21 +1,22 @@
+import 'package:flutter_dotenv/flutter_dotenv.dart';
+
 /// Razorpay configuration
 ///
-/// IMPORTANT: Replace the placeholder values with your actual Razorpay credentials
-/// For production, consider using environment variables or a secure vault
+/// Reads credentials from .env file
+/// Create a .env file in the project root with:
+/// RAZORPAY_KEY_ID=your_key_id_here
+/// RAZORPAY_KEY_SECRET=your_key_secret_here
 class RazorpayConfig {
   RazorpayConfig._();
 
   /// Razorpay API Key (Test/Live)
-  /// Replace with your Razorpay Key ID from the Razorpay Dashboard
-  /// Format: rzp_test_XXXXXXXXXXXX (for test mode)
-  /// Format: rzp_live_XXXXXXXXXXXX (for live mode)
-  static const String apiKey = 'YOUR_RAZORPAY_KEY_ID_HERE';
+  /// Reads from RAZORPAY_KEY_ID in .env file
+  static String get apiKey => dotenv.env['RAZORPAY_KEY_ID'] ?? '';
 
   /// Razorpay API Secret (Test/Live)
-  /// Replace with your Razorpay Key Secret from the Razorpay Dashboard
+  /// Reads from RAZORPAY_KEY_SECRET in .env file
   /// Note: Secret key should NOT be used in client-side code in production
-  /// It's only used here for testing purposes
-  static const String apiSecret = 'YOUR_RAZORPAY_KEY_SECRET_HERE';
+  static String get apiSecret => dotenv.env['RAZORPAY_KEY_SECRET'] ?? '';
 
   /// Company/App name shown in Razorpay checkout
   static const String companyName = 'AMAI';
