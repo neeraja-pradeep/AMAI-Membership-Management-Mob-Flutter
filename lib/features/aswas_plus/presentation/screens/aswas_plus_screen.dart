@@ -13,6 +13,7 @@ import 'package:myapp/features/aswas_plus/presentation/components/scheme_details
 import 'package:myapp/features/aswas_plus/presentation/components/nominee_info_card.dart';
 import 'package:myapp/features/aswas_plus/presentation/components/download_documents_section.dart';
 import 'package:myapp/features/aswas_plus/presentation/components/note_card.dart';
+import 'package:myapp/features/aswas_plus/presentation/screens/renew_membership_screen.dart';
 
 /// ASWAS Plus Screen - displays insurance policy details
 /// Shows policy information for enrolled users
@@ -206,9 +207,9 @@ class _AswasePlusScreenState extends ConsumerState<AswasePlusScreen> {
 
   /// Handles renew button press
   void _onRenewPressed() {
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text('Renewal flow coming soon'),
+    Navigator.of(context).push(
+      MaterialPageRoute<void>(
+        builder: (context) => const RenewMembershipScreen(),
       ),
     );
   }

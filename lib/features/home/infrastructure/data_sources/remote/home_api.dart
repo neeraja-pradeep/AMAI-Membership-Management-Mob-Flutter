@@ -1,5 +1,6 @@
 import 'package:myapp/core/network/api_client.dart';
 import 'package:myapp/core/network/endpoints.dart';
+import 'package:myapp/features/aswas_plus/infrastructure/models/digital_product_model.dart';
 import 'package:myapp/features/aswas_plus/infrastructure/models/nominee_model.dart';
 import 'package:myapp/features/home/infrastructure/models/announcement_model.dart';
 import 'package:myapp/features/home/infrastructure/models/aswas_card_model.dart';
@@ -81,6 +82,17 @@ abstract class HomeApi {
   /// - null data on not modified (304)
   Future<HomeApiResponse<List<NomineeModel>>> fetchNominees({
     required String ifModifiedSince,
+  });
+
+  /// Fetches a digital product by ID
+  ///
+  /// [productId] - The ID of the digital product
+  ///
+  /// Returns HomeApiResponse containing:
+  /// - DigitalProductModel on success (200)
+  /// - null data on error
+  Future<HomeApiResponse<DigitalProductModel>> fetchDigitalProduct({
+    required int productId,
   });
 }
 
@@ -275,6 +287,29 @@ class HomeApiImpl implements HomeApi {
 
     return HomeApiResponse<List<NomineeModel>>(
       data: nominees ?? [],
+      statusCode: response.statusCode,
+      timestamp: response.timestamp,
+    );
+  }
+
+  @override
+  Future<HomeApiResponse<DigitalProductModel>> fetchDigitalProduct({
+    required int productId,
+  }) async {
+    final response = await apiClient.get<Map<String, dynamic>>(
+      Endpoints.digitalProductById(productId),
+      fromJson: (json) => json as Map<String, dynamic>,
+    );
+
+    // Parse the response
+    DigitalProductModel? product;
+
+    if (response.data != null) {
+      product = DigitalProductModel.fromJson(response.data!);
+    }
+
+    return HomeApiResponse<DigitalProductModel>(
+      data: product,
       statusCode: response.statusCode,
       timestamp: response.timestamp,
     );

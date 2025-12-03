@@ -2,6 +2,7 @@ import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:fpdart/fpdart.dart';
 import 'package:myapp/core/error/failure.dart';
 import 'package:myapp/core/network/network_exceptions.dart';
+import 'package:myapp/features/aswas_plus/domain/entities/digital_product.dart';
 import 'package:myapp/features/aswas_plus/domain/entities/nominee.dart';
 import 'package:myapp/features/home/domain/entities/announcement.dart';
 import 'package:myapp/features/home/domain/entities/aswas_plus.dart';
@@ -337,6 +338,35 @@ class HomeRepositoryImpl implements HomeRepository {
   @override
   Future<void> clearNomineesTimestamp() async {
     await localDataSource.clearNomineesTimestamp();
+  }
+
+  // ============== Digital Products ==============
+
+  @override
+  Future<Either<Failure, DigitalProduct?>> getDigitalProduct({
+    required int productId,
+  }) async {
+    // Check connectivity
+    final connectivityResult = await connectivity.checkConnectivity();
+    final isOnline = !connectivityResult.contains(ConnectivityResult.none);
+
+    if (!isOnline) {
+      return left(const NetworkFailure());
+    }
+
+    try {
+      final response = await homeApi.fetchDigitalProduct(productId: productId);
+
+      if (response.isSuccess && response.data != null) {
+        return right(response.data!.toDomain());
+      }
+
+      return right(null);
+    } on NetworkException catch (e) {
+      return left(FailureMapper.fromNetworkException(e));
+    } catch (e) {
+      return left(FailureMapper.fromException(e));
+    }
   }
 
   // ============== Clear All ==============

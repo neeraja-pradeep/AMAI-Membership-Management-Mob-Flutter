@@ -34,6 +34,13 @@ class Endpoints {
   static String insurancePolicyById(int id) =>
       '$apiPrefix/membership/insurance-policies/$id/';
 
+  // ============== Digital Products Endpoints ==============
+
+  /// Digital product by ID endpoint
+  /// GET: Retrieve digital product details
+  static String digitalProductById(int id) =>
+      '$apiPrefix/membership/digital-products/$id/';
+
   // ============== Events Endpoints ==============
 
   /// Upcoming events list endpoint

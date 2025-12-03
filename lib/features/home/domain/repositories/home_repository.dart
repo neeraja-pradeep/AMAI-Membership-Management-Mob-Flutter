@@ -1,5 +1,6 @@
 import 'package:fpdart/fpdart.dart';
 import 'package:myapp/core/error/failure.dart';
+import 'package:myapp/features/aswas_plus/domain/entities/digital_product.dart';
 import 'package:myapp/features/aswas_plus/domain/entities/nominee.dart';
 import 'package:myapp/features/home/domain/entities/announcement.dart';
 import 'package:myapp/features/home/domain/entities/aswas_plus.dart';
@@ -124,6 +125,19 @@ abstract class HomeRepository {
 
   /// Clears stored nominees timestamp
   Future<void> clearNomineesTimestamp();
+
+  // ============== Digital Products ==============
+
+  /// Fetches a digital product by ID
+  ///
+  /// [productId] - The ID of the digital product
+  ///
+  /// Returns:
+  /// - Right(DigitalProduct) on success
+  /// - Left(Failure) on error
+  Future<Either<Failure, DigitalProduct?>> getDigitalProduct({
+    required int productId,
+  });
 
   // ============== Clear All ==============
 
