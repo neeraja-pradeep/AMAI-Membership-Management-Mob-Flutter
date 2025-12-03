@@ -6,6 +6,7 @@ import 'package:myapp/features/membership/application/providers/membership_provi
 import 'package:myapp/features/membership/application/states/membership_screen_state.dart';
 import 'package:myapp/features/membership/presentation/components/current_status_card.dart';
 import 'package:myapp/features/membership/presentation/components/digital_membership_card.dart';
+import 'package:myapp/features/membership/presentation/components/qr_code_widget.dart';
 
 /// Main Membership Screen
 /// Displays current membership status, digital card, and payment receipts
@@ -161,12 +162,7 @@ class _MembershipScreenState extends ConsumerState<MembershipScreen> {
           DigitalMembershipCard(
             membershipStatus: membershipStatus,
             onViewFullSize: () {
-              // TODO: Navigate to full QR screen
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(
-                  content: Text('Full QR view coming soon'),
-                ),
-              );
+              _showFullSizeQrDialog(membershipStatus.membershipNumber);
             },
             onDownloadPdf: () {
               // Static for now
@@ -294,11 +290,7 @@ class _MembershipScreenState extends ConsumerState<MembershipScreen> {
                   DigitalMembershipCard(
                     membershipStatus: cachedData,
                     onViewFullSize: () {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(
-                          content: Text('Full QR view coming soon'),
-                        ),
-                      );
+                      _showFullSizeQrDialog(cachedData.membershipNumber);
                     },
                     onDownloadPdf: () {
                       ScaffoldMessenger.of(context).showSnackBar(
@@ -344,6 +336,47 @@ class _MembershipScreenState extends ConsumerState<MembershipScreen> {
               ),
             ),
         ],
+      ),
+    );
+  }
+
+  /// Shows a full-size QR code dialog
+  void _showFullSizeQrDialog(String membershipNumber) {
+    showDialog(
+      context: context,
+      builder: (context) => Dialog(
+        backgroundColor: Colors.transparent,
+        child: Container(
+          padding: EdgeInsets.all(24.w),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(16.r),
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              // Close button
+              Align(
+                alignment: Alignment.topRight,
+                child: GestureDetector(
+                  onTap: () => Navigator.of(context).pop(),
+                  child: Icon(
+                    Icons.close,
+                    size: 24.sp,
+                    color: AppColors.textSecondary,
+                  ),
+                ),
+              ),
+              SizedBox(height: 8.h),
+              // QR Code
+              QrCodeWidget(
+                data: membershipNumber,
+                size: 250.w,
+              ),
+              SizedBox(height: 16.h),
+            ],
+          ),
+        ),
       ),
     );
   }
