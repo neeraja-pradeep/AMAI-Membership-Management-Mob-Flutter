@@ -5,8 +5,8 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:myapp/app/theme/colors.dart';
 import 'package:myapp/features/home/infrastructure/data_sources/local/home_local_ds.dart';
-import 'package:myapp/features/home/presentation/screens/home_screen.dart';
 import 'package:myapp/features/membership/infrastructure/data_sources/local/membership_local_ds.dart';
+import 'package:myapp/features/navigation/presentation/screens/main_navigation_screen.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -56,7 +56,7 @@ class MyApp extends StatelessWidget {
           home: child,
         );
       },
-      child: const HomeScreen(),
+      child: const MainNavigationScreen(),
     );
   }
 }
