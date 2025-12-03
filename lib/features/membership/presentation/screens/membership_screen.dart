@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:go_router/go_router.dart';
 import 'package:myapp/app/theme/colors.dart';
 import 'package:myapp/features/membership/application/providers/membership_providers.dart';
 import 'package:myapp/features/membership/application/states/membership_screen_state.dart';
@@ -53,7 +52,7 @@ class _MembershipScreenState extends ConsumerState<MembershipScreen> {
           color: AppColors.textPrimary,
           size: 20.sp,
         ),
-        onPressed: () => context.pop(),
+        onPressed: () => Navigator.of(context).pop(),
       ),
       title: Text(
         'Membership',
