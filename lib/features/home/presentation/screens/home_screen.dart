@@ -14,6 +14,7 @@ import 'package:myapp/features/home/presentation/components/membership_card_widg
 import 'package:myapp/features/home/presentation/components/quick_actions_section.dart';
 import 'package:myapp/features/home/presentation/components/upcoming_events_section.dart';
 import 'package:myapp/features/membership/presentation/screens/membership_screen.dart';
+import 'package:myapp/features/aswas_plus/presentation/screens/aswas_plus_screen.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 
 /// Home screen - primary landing screen after authentication
@@ -71,7 +72,12 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                     );
                   },
                   onAswasePlusTap: () {
-                    // TODO: Navigate to Aswas Plus
+                    // Navigate to Aswas Plus screen
+                    Navigator.of(context).push(
+                      MaterialPageRoute<void>(
+                        builder: (context) => const AswasePlusScreen(),
+                      ),
+                    );
                   },
                   onAcademyTap: () {
                     // TODO: Navigate to Academy
@@ -321,7 +327,17 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
             children: [
               Stack(
                 children: [
-                  AswasCardWidget(aswasPlus: previousData),
+                  AswasCardWidget(
+                    aswasPlus: previousData,
+                    onTap: () {
+                      // Navigate to Aswas Plus details
+                      Navigator.of(context).push(
+                        MaterialPageRoute<void>(
+                          builder: (context) => const AswasePlusScreen(),
+                        ),
+                      );
+                    },
+                  ),
                   Positioned.fill(
                     child: Container(
                       margin: EdgeInsets.symmetric(horizontal: 16.w),
@@ -357,7 +373,12 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
             AswasCardWidget(
               aswasPlus: aswasPlus,
               onTap: () {
-                // TODO: Navigate to Aswas Plus details
+                // Navigate to Aswas Plus details
+                Navigator.of(context).push(
+                  MaterialPageRoute<void>(
+                    builder: (context) => const AswasePlusScreen(),
+                  ),
+                );
               },
             ),
             SizedBox(height: 24.h),
@@ -370,7 +391,17 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
         if (cachedData != null) {
           return Column(
             children: [
-              AswasCardWidget(aswasPlus: cachedData),
+              AswasCardWidget(
+                aswasPlus: cachedData,
+                onTap: () {
+                  // Navigate to Aswas Plus details
+                  Navigator.of(context).push(
+                    MaterialPageRoute<void>(
+                      builder: (context) => const AswasePlusScreen(),
+                    ),
+                  );
+                },
+              ),
               SizedBox(height: 24.h),
             ],
           );
