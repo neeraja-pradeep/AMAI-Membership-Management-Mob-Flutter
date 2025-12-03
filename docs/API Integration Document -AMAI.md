@@ -24,19 +24,18 @@ Note:- The timestamp mentioned here must be the timestamp fetched from the heade
 Customer App
 
 Screen : Home  Screen Quick Actions
-Memberships
-a) Memberships 
- Swagger link: https://amai.nexogms.com/api/schema/swagger-ui/#/membership/membership_memberships_list
+Aswas Plus
+a. Aswas plus card
 
- Required fields:- is_active, user_first_name, membership_number, end_date
+Swagger link : https://amai.nexogms.com/api/schema/swagger-ui/#/Insurance/insurance_policy_me
 
- POST endpoint: https://amai.nexogms.com/api/membership/memberships/{user_id}/
+Required Fields: policy_status, user_name, policy_number, end_date
 
-b) Payment Reciepts
+POST Endpoint : :https://amai.nexogms.com/api/membership/insurance-policies/me/
 
- Swagger link: https://amai.nexogms.com/api/schema/swagger-ui/#/Payments/payment_list
-
- POST Endpoint : https://amai.nexogms.com/api/payments/payment/
-
+b. Nominee Information
+Swagger link : https://amai.nexogms.com/api/schema/swagger-ui/#/Insurance%20Nominees/insurance_nominee_me
+Required Fields : nominee_name, relationship, contact_number 
+GET endpoint : https://amai.nexogms.com/api/membership/insurance-nominees/me/
 
 
