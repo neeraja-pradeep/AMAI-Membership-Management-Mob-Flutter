@@ -10,10 +10,9 @@ class Endpoints {
 
   // ============== Membership Endpoints ==============
 
-  /// Membership detail endpoint by user ID
-  /// GET: Retrieve membership details for a specific user
-  static String membershipByUserId(int userId) =>
-      '$apiPrefix/membership/memberships/$userId/';
+  /// Membership detail endpoint for current user
+  /// GET: Retrieve membership details for the authenticated user
+  static const String membershipMe = '$apiPrefix/membership/memberships/me/';
 
   /// Single membership endpoint (legacy)
   static String membershipById(int id) =>

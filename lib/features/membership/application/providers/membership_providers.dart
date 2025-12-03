@@ -82,9 +82,8 @@ class MembershipScreenNotifier extends StateNotifier<MembershipScreenState> {
   Future<void> initialize() async {
     state = const MembershipScreenState.loading();
 
-    final userId = _ref.read(userIdProvider);
     final usecase = _ref.read(fetchMembershipStatusUsecaseProvider);
-    final result = await usecase(userId: userId);
+    final result = await usecase();
 
     result.fold(
       (failure) {
@@ -107,9 +106,8 @@ class MembershipScreenNotifier extends StateNotifier<MembershipScreenState> {
     final previousData = state.currentData;
     state = MembershipScreenState.loading(previousData: previousData);
 
-    final userId = _ref.read(userIdProvider);
     final usecase = _ref.read(fetchMembershipStatusUsecaseProvider);
-    final result = await usecase.refresh(userId: userId);
+    final result = await usecase.refresh();
 
     result.fold(
       (failure) {

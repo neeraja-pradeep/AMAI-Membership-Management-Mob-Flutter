@@ -22,7 +22,6 @@ class MembershipRepositoryImpl implements MembershipRepository {
 
   @override
   Future<Either<Failure, MembershipStatus?>> getMembershipStatus({
-    required int userId,
     String? ifModifiedSince,
   }) async {
     try {
@@ -34,7 +33,6 @@ class MembershipRepositoryImpl implements MembershipRepository {
 
       // Make API call
       final response = await membershipApi.fetchMembershipStatus(
-        userId: userId,
         ifModifiedSince: ifModifiedSince,
       );
 

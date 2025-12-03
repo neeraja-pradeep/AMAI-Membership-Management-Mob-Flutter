@@ -35,7 +35,6 @@ abstract class HomeApi {
   /// - MembershipCardModel on success (200)
   /// - null data on not modified (304)
   Future<HomeApiResponse<MembershipCardModel>> fetchMembershipCard({
-    required int userId,
     required String ifModifiedSince,
   });
 
@@ -83,11 +82,10 @@ class HomeApiImpl implements HomeApi {
 
   @override
   Future<HomeApiResponse<MembershipCardModel>> fetchMembershipCard({
-    required int userId,
     required String ifModifiedSince,
   }) async {
     final response = await apiClient.get<Map<String, dynamic>>(
-      Endpoints.membershipByUserId(userId),
+      Endpoints.membershipMe,
       ifModifiedSince: ifModifiedSince.isNotEmpty ? ifModifiedSince : null,
       fromJson: (json) => json as Map<String, dynamic>,
     );

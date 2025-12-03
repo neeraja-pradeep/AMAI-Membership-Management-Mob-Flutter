@@ -12,7 +12,6 @@ abstract class MembershipApi {
   /// Returns ApiResponse with MembershipStatusModel on success,
   /// null on 304 Not Modified
   Future<ApiResponse<MembershipStatusModel?>> fetchMembershipStatus({
-    required int userId,
     String? ifModifiedSince,
   });
 }
@@ -25,11 +24,10 @@ class MembershipApiImpl implements MembershipApi {
 
   @override
   Future<ApiResponse<MembershipStatusModel?>> fetchMembershipStatus({
-    required int userId,
     String? ifModifiedSince,
   }) async {
     final response = await apiClient.get<MembershipStatusModel?>(
-      Endpoints.membershipByUserId(userId),
+      Endpoints.membershipMe,
       ifModifiedSince: ifModifiedSince,
       fromJson: (json) {
         if (json == null) return null;

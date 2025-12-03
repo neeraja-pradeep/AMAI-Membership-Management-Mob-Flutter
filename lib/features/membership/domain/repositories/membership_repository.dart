@@ -5,9 +5,8 @@ import 'package:myapp/features/membership/domain/entities/membership_status.dart
 /// Abstract repository interface for membership operations
 /// Defines the contract for fetching and caching membership data
 abstract class MembershipRepository {
-  /// Fetches membership status for a user
+  /// Fetches membership status for the authenticated user
   ///
-  /// [userId] - The user ID to fetch membership for
   /// [ifModifiedSince] - Optional timestamp for conditional request
   ///
   /// Returns:
@@ -15,7 +14,6 @@ abstract class MembershipRepository {
   /// - Right(null) on 304 Not Modified (use cached data)
   /// - Left(Failure) on error
   Future<Either<Failure, MembershipStatus?>> getMembershipStatus({
-    required int userId,
     String? ifModifiedSince,
   });
 

@@ -118,9 +118,8 @@ class MembershipNotifier extends StateNotifier<MembershipState> {
   Future<void> initialize() async {
     state = const MembershipState.loading();
 
-    final userId = _ref.read(userIdProvider);
     final usecase = _ref.read(fetchMembershipUsecaseProvider);
-    final result = await usecase(userId: userId);
+    final result = await usecase();
 
     result.fold(
       (failure) {
@@ -142,9 +141,8 @@ class MembershipNotifier extends StateNotifier<MembershipState> {
     final previousData = state.currentData;
     state = MembershipState.loading(previousData: previousData);
 
-    final userId = _ref.read(userIdProvider);
     final usecase = _ref.read(fetchMembershipUsecaseProvider);
-    final result = await usecase.refresh(userId: userId);
+    final result = await usecase.refresh();
 
     result.fold(
       (failure) {

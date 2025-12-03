@@ -20,7 +20,6 @@ abstract class HomeRepository {
   /// - Right(null) on 304 Not Modified (use in-memory data)
   /// - Left(Failure) on error
   Future<Either<Failure, MembershipCard?>> getMembershipCard({
-    required int userId,
     String? ifModifiedSince,
   });
 

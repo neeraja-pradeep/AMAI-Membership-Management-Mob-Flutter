@@ -17,11 +17,8 @@ class FetchMembershipStatusUsecase {
   /// - Right(MembershipStatus) on success
   /// - Right(null) if no membership found
   /// - Left(Failure) on error
-  Future<Either<Failure, MembershipStatus?>> call({
-    required int userId,
-  }) async {
+  Future<Either<Failure, MembershipStatus?>> call() async {
     return repository.getMembershipStatus(
-      userId: userId,
       ifModifiedSince: null,
     );
   }
@@ -33,14 +30,11 @@ class FetchMembershipStatusUsecase {
   /// - Right(MembershipStatus) on 200 OK with new data
   /// - Right(null) on 304 Not Modified (use in-memory data)
   /// - Left(Failure) on error
-  Future<Either<Failure, MembershipStatus?>> refresh({
-    required int userId,
-  }) async {
+  Future<Either<Failure, MembershipStatus?>> refresh() async {
     // Get stored timestamp
     final timestamp = await repository.getStoredTimestamp();
 
     return repository.getMembershipStatus(
-      userId: userId,
       ifModifiedSince: timestamp,
     );
   }
