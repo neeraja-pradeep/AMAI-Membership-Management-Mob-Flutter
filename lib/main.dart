@@ -5,6 +5,7 @@ import 'package:hive_flutter/hive_flutter.dart';
 import 'package:myapp/app/theme/colors.dart';
 import 'package:myapp/features/home/infrastructure/data_sources/local/home_local_ds.dart';
 import 'package:myapp/features/home/presentation/screens/home_screen.dart';
+import 'package:myapp/features/membership/infrastructure/data_sources/local/membership_local_ds.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -14,6 +15,7 @@ Future<void> main() async {
 
   // Open Hive boxes before app runs (prevents race conditions)
   await Hive.openBox(HomeBoxKeys.boxName);
+  await Hive.openBox(MembershipBoxKeys.boxName);
 
   runApp(
     const ProviderScope(

@@ -13,6 +13,7 @@ import 'package:myapp/features/home/presentation/components/aswas_card_widget.da
 import 'package:myapp/features/home/presentation/components/membership_card_widget.dart';
 import 'package:myapp/features/home/presentation/components/quick_actions_section.dart';
 import 'package:myapp/features/home/presentation/components/upcoming_events_section.dart';
+import 'package:myapp/features/membership/presentation/screens/membership_screen.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 
 /// Home screen - primary landing screen after authentication
@@ -62,7 +63,12 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                     // TODO: Navigate to all quick actions
                   },
                   onMembershipTap: () {
-                    // TODO: Navigate to membership
+                    // Navigate to membership screen
+                    Navigator.of(context).push(
+                      MaterialPageRoute<void>(
+                        builder: (context) => const MembershipScreen(),
+                      ),
+                    );
                   },
                   onAswasePlusTap: () {
                     // TODO: Navigate to Aswas Plus
@@ -275,7 +281,12 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
         return MembershipCardWidget(
           membershipCard: membershipCard,
           onTap: () {
-            // TODO: Navigate to membership details
+            // Navigate to membership screen
+            Navigator.of(context).push(
+              MaterialPageRoute<void>(
+                builder: (context) => const MembershipScreen(),
+              ),
+            );
           },
         );
       },
