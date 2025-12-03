@@ -61,20 +61,17 @@ class ProfileRepositoryImpl implements ProfileRepository {
     }
 
     try {
-      // Fetch user profile and membership data in parallel
-      final results = await Future.wait([
-        profileApi.fetchUserProfile(userId: userId),
-        homeApi.fetchMembershipCard(ifModifiedSince: ''),
-      ]);
-
-      final userProfileResponse = results[0];
-      final membershipResponse = results[1];
+      // Fetch user profile
+      final userProfileResponse = await profileApi.fetchUserProfile(userId: userId);
 
       if (!userProfileResponse.isSuccess || userProfileResponse.data == null) {
         return left(const ServerFailure(message: 'Failed to load user profile'));
       }
 
       final userProfile = userProfileResponse.data!.toDomain();
+
+      // Fetch membership data
+      final membershipResponse = await homeApi.fetchMembershipCard(ifModifiedSince: '');
 
       // Extract membership type from membership response
       MembershipType membershipType = MembershipType.practitioner;
