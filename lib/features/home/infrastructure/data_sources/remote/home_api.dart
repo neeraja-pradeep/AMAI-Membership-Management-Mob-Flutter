@@ -148,10 +148,13 @@ class HomeApiImpl implements HomeApi {
     AswasCardModel? aswasCard;
 
     if (response.data != null && response.data!.isNotEmpty) {
-      // Get the first ACTIVE policy from the array
+      // Get the first ACTIVE or EXPIRED policy from the array
       final policies = response.data!
           .map((json) => AswasCardModel.fromJson(json as Map<String, dynamic>))
-          .where((policy) => policy.policyStatus.toLowerCase() == 'active')
+          .where((policy) {
+            final status = policy.policyStatus.toLowerCase();
+            return status == 'active' || status == 'expired';
+          })
           .toList();
 
       if (policies.isNotEmpty) {
