@@ -12,13 +12,16 @@ class MembershipStatusModel {
     required this.membershipNumber,
     required this.userFirstName,
     required this.endDate,
-    required this.isActive,
+    required this.status,
     this.membershipType,
     this.startDate,
     this.createdAt,
     this.updatedAt,
     this.user,
   });
+
+  /// Computed property to check if membership is active
+  bool get isActive => status.toLowerCase() == 'active';
 
   /// Creates model from JSON map
   factory MembershipStatusModel.fromJson(Map<String, dynamic> json) =>
@@ -36,8 +39,8 @@ class MembershipStatusModel {
   @JsonKey(name: 'end_date')
   final String endDate;
 
-  @JsonKey(name: 'is_active')
-  final bool isActive;
+  @JsonKey(name: 'status')
+  final String status;
 
   @JsonKey(name: 'membership_type')
   final String? membershipType;
