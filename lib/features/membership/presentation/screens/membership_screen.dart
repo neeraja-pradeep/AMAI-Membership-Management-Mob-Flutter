@@ -99,7 +99,7 @@ class _MembershipScreenState extends ConsumerState<MembershipScreen> {
       return Stack(
         children: [
           _buildContent(previousData),
-          Positioned(
+          const Positioned(
             top: 0,
             left: 0,
             right: 0,
