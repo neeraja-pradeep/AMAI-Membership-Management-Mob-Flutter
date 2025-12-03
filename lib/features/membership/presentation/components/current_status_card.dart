@@ -44,10 +44,6 @@ class CurrentStatusCard extends ConsumerWidget {
           _buildHeaderRow(),
           SizedBox(height: 16.h),
 
-          // Membership type
-          _buildMembershipType(),
-          SizedBox(height: 8.h),
-
           // Valid until
           _buildValidUntil(),
 
@@ -80,18 +76,6 @@ class CurrentStatusCard extends ConsumerWidget {
           isExpiringSoon: membershipStatus.isExpiringSoon,
         ),
       ],
-    );
-  }
-
-  /// Builds the membership type display
-  Widget _buildMembershipType() {
-    return Text(
-      membershipStatus.displayMembershipType,
-      style: TextStyle(
-        fontSize: 20.sp,
-        fontWeight: FontWeight.w700,
-        color: AppColors.textPrimary,
-      ),
     );
   }
 
@@ -168,10 +152,6 @@ class CurrentStatusCardShimmer extends StatelessWidget {
             ],
           ),
           SizedBox(height: 16.h),
-
-          // Membership type shimmer
-          _buildShimmerBox(width: 150.w, height: 24.h),
-          SizedBox(height: 8.h),
 
           // Valid until shimmer
           _buildShimmerBox(width: 180.w, height: 16.h),
