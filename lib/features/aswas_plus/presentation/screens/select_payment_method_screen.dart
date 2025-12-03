@@ -1,17 +1,119 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:myapp/app/theme/colors.dart';
+import 'package:myapp/core/config/razorpay_config.dart';
 import 'package:myapp/features/aswas_plus/domain/entities/renewal_response.dart';
+import 'package:razorpay_flutter/razorpay_flutter.dart';
 
 /// Select Payment Method Screen
 /// Shows payment options and total amount for renewal
-class SelectPaymentMethodScreen extends StatelessWidget {
+class SelectPaymentMethodScreen extends StatefulWidget {
   const SelectPaymentMethodScreen({
     super.key,
     required this.renewalResponse,
   });
 
   final RenewalResponse renewalResponse;
+
+  @override
+  State<SelectPaymentMethodScreen> createState() =>
+      _SelectPaymentMethodScreenState();
+}
+
+class _SelectPaymentMethodScreenState extends State<SelectPaymentMethodScreen> {
+  late Razorpay _razorpay;
+  bool _isProcessing = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _razorpay = Razorpay();
+    _razorpay.on(Razorpay.EVENT_PAYMENT_SUCCESS, _handlePaymentSuccess);
+    _razorpay.on(Razorpay.EVENT_PAYMENT_ERROR, _handlePaymentError);
+    _razorpay.on(Razorpay.EVENT_EXTERNAL_WALLET, _handleExternalWallet);
+  }
+
+  @override
+  void dispose() {
+    _razorpay.clear();
+    super.dispose();
+  }
+
+  void _handlePaymentSuccess(PaymentSuccessResponse response) {
+    setState(() {
+      _isProcessing = false;
+    });
+    // Show success message
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text('Payment Successful! ID: ${response.paymentId}'),
+        backgroundColor: AppColors.success,
+      ),
+    );
+    // Navigate back to home or show success screen
+    Navigator.of(context).popUntil((route) => route.isFirst);
+  }
+
+  void _handlePaymentError(PaymentFailureResponse response) {
+    setState(() {
+      _isProcessing = false;
+    });
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text('Payment Failed: ${response.message ?? 'Unknown error'}'),
+        backgroundColor: AppColors.error,
+      ),
+    );
+  }
+
+  void _handleExternalWallet(ExternalWalletResponse response) {
+    setState(() {
+      _isProcessing = false;
+    });
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text('External Wallet: ${response.walletName}'),
+        backgroundColor: AppColors.primary,
+      ),
+    );
+  }
+
+  void _openRazorpayCheckout() {
+    setState(() {
+      _isProcessing = true;
+    });
+
+    var options = {
+      'key': RazorpayConfig.apiKey,
+      'amount': widget.renewalResponse.amount * 100, // Amount in paise
+      'currency': widget.renewalResponse.currency,
+      'name': RazorpayConfig.companyName,
+      'description': RazorpayConfig.description,
+      'order_id': widget.renewalResponse.orderId,
+      'timeout': RazorpayConfig.timeout,
+      'prefill': {
+        'contact': '',
+        'email': '',
+      },
+      'theme': {
+        'color': '#${RazorpayConfig.themeColor.toRadixString(16).substring(2)}',
+      },
+    };
+
+    try {
+      _razorpay.open(options);
+    } catch (e) {
+      setState(() {
+        _isProcessing = false;
+      });
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Error: ${e.toString()}'),
+          backgroundColor: AppColors.error,
+        ),
+      );
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -79,6 +181,9 @@ class SelectPaymentMethodScreen extends StatelessWidget {
               ),
             ),
           ),
+
+          // Pay Now Button
+          _buildPayNowButton(),
         ],
       ),
     );
@@ -116,7 +221,7 @@ class SelectPaymentMethodScreen extends StatelessWidget {
           ),
           SizedBox(height: 8.h),
           Text(
-            renewalResponse.displayAmount,
+            widget.renewalResponse.displayAmount,
             style: TextStyle(
               fontSize: 32.sp,
               fontWeight: FontWeight.w700,
@@ -131,7 +236,7 @@ class SelectPaymentMethodScreen extends StatelessWidget {
               borderRadius: BorderRadius.circular(20.r),
             ),
             child: Text(
-              'Order ID: ${renewalResponse.orderId}',
+              'Order ID: ${widget.renewalResponse.orderId}',
               style: TextStyle(
                 fontSize: 12.sp,
                 fontWeight: FontWeight.w500,
@@ -210,6 +315,55 @@ class SelectPaymentMethodScreen extends StatelessWidget {
             color: AppColors.grey400,
           ),
         ],
+      ),
+    );
+  }
+
+  Widget _buildPayNowButton() {
+    return Container(
+      padding: EdgeInsets.all(16.w),
+      decoration: BoxDecoration(
+        color: AppColors.white,
+        boxShadow: [
+          BoxShadow(
+            color: AppColors.cardShadow,
+            blurRadius: 8.r,
+            offset: Offset(0, -2.h),
+          ),
+        ],
+      ),
+      child: SafeArea(
+        child: SizedBox(
+          width: double.infinity,
+          child: ElevatedButton(
+            onPressed: _isProcessing ? null : _openRazorpayCheckout,
+            style: ElevatedButton.styleFrom(
+              backgroundColor: AppColors.primary,
+              padding: EdgeInsets.symmetric(vertical: 16.h),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12.r),
+              ),
+              elevation: 0,
+            ),
+            child: _isProcessing
+                ? SizedBox(
+                    height: 20.h,
+                    width: 20.h,
+                    child: CircularProgressIndicator(
+                      strokeWidth: 2.w,
+                      valueColor: AlwaysStoppedAnimation<Color>(AppColors.white),
+                    ),
+                  )
+                : Text(
+                    'Pay Now',
+                    style: TextStyle(
+                      fontSize: 16.sp,
+                      fontWeight: FontWeight.w600,
+                      color: AppColors.white,
+                    ),
+                  ),
+          ),
+        ),
       ),
     );
   }
