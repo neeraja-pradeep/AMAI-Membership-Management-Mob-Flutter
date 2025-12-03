@@ -12,6 +12,7 @@ import 'package:myapp/features/aswas_plus/presentation/components/policy_details
 import 'package:myapp/features/aswas_plus/presentation/components/scheme_details_section.dart';
 import 'package:myapp/features/aswas_plus/presentation/components/nominee_info_card.dart';
 import 'package:myapp/features/aswas_plus/presentation/components/download_documents_section.dart';
+import 'package:myapp/features/aswas_plus/presentation/components/note_card.dart';
 
 /// ASWAS Plus Screen - displays insurance policy details
 /// Shows policy information for enrolled users
@@ -153,6 +154,11 @@ class _AswasePlusScreenState extends ConsumerState<AswasePlusScreen> {
           const DownloadDocumentsSection(),
 
           SizedBox(height: 24.h),
+
+          // Note Card
+          const NoteCard(),
+
+          SizedBox(height: 24.h),
         ],
       ),
     );
@@ -281,6 +287,8 @@ class _AswasePlusScreenState extends ConsumerState<AswasePlusScreen> {
                 _buildNomineeSection(nomineesState),
                 SizedBox(height: 24.h),
                 const DownloadDocumentsSection(),
+                SizedBox(height: 24.h),
+                const NoteCard(),
               ],
             ),
           ),
