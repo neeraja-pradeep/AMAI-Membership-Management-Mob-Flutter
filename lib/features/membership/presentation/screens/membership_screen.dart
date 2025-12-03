@@ -5,6 +5,7 @@ import 'package:myapp/app/theme/colors.dart';
 import 'package:myapp/features/membership/application/providers/membership_providers.dart';
 import 'package:myapp/features/membership/application/states/membership_screen_state.dart';
 import 'package:myapp/features/membership/presentation/components/current_status_card.dart';
+import 'package:myapp/features/membership/presentation/components/digital_membership_card.dart';
 
 /// Main Membership Screen
 /// Displays current membership status, digital card, and payment receipts
@@ -116,10 +117,12 @@ class _MembershipScreenState extends ConsumerState<MembershipScreen> {
     return SingleChildScrollView(
       physics: const AlwaysScrollableScrollPhysics(),
       padding: EdgeInsets.all(16.w),
-      child: const Column(
+      child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          CurrentStatusCardShimmer(),
+          const CurrentStatusCardShimmer(),
+          SizedBox(height: 24.h),
+          const DigitalMembershipCardShimmer(),
           // TODO: Add more shimmers for other sections
         ],
       ),
@@ -152,9 +155,31 @@ class _MembershipScreenState extends ConsumerState<MembershipScreen> {
             },
           ),
 
+          SizedBox(height: 24.h),
+
+          // Digital Membership Card section
+          DigitalMembershipCard(
+            membershipStatus: membershipStatus,
+            onViewFullSize: () {
+              // TODO: Navigate to full QR screen
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(
+                  content: Text('Full QR view coming soon'),
+                ),
+              );
+            },
+            onDownloadPdf: () {
+              // Static for now
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(
+                  content: Text('Download PDF coming soon'),
+                ),
+              );
+            },
+          ),
+
           SizedBox(height: 16.h),
 
-          // TODO: Add Digital Membership Card section
           // TODO: Add Payment Receipts section
         ],
       ),
@@ -252,15 +277,38 @@ class _MembershipScreenState extends ConsumerState<MembershipScreen> {
           if (cachedData != null)
             Padding(
               padding: EdgeInsets.all(16.w),
-              child: CurrentStatusCard(
-                membershipStatus: cachedData,
-                onRenewalPressed: () {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(
-                      content: Text('Renewal flow coming soon'),
-                    ),
-                  );
-                },
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  CurrentStatusCard(
+                    membershipStatus: cachedData,
+                    onRenewalPressed: () {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(
+                          content: Text('Renewal flow coming soon'),
+                        ),
+                      );
+                    },
+                  ),
+                  SizedBox(height: 24.h),
+                  DigitalMembershipCard(
+                    membershipStatus: cachedData,
+                    onViewFullSize: () {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(
+                          content: Text('Full QR view coming soon'),
+                        ),
+                      );
+                    },
+                    onDownloadPdf: () {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(
+                          content: Text('Download PDF coming soon'),
+                        ),
+                      );
+                    },
+                  ),
+                ],
               ),
             )
           else
