@@ -7,11 +7,19 @@ import 'package:myapp/app/theme/colors.dart';
 class SchemeDetailsSection extends StatelessWidget {
   const SchemeDetailsSection({
     this.productDescription,
+    this.showRenewButton = false,
+    this.onRenewPressed,
     super.key,
   });
 
   /// Product description from API
   final String? productDescription;
+
+  /// Whether to show the renew button
+  final bool showRenewButton;
+
+  /// Callback when renew button is pressed
+  final VoidCallback? onRenewPressed;
 
   @override
   Widget build(BuildContext context) {
@@ -44,17 +52,51 @@ class SchemeDetailsSection extends StatelessWidget {
               ),
             ],
           ),
-          child: Text(
-            productDescription ?? _defaultSchemeDetails,
-            style: TextStyle(
-              fontSize: 14.sp,
-              fontWeight: FontWeight.w400,
-              color: AppColors.textSecondary,
-              height: 1.6,
-            ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                productDescription ?? _defaultSchemeDetails,
+                style: TextStyle(
+                  fontSize: 14.sp,
+                  fontWeight: FontWeight.w400,
+                  color: AppColors.textSecondary,
+                  height: 1.6,
+                ),
+              ),
+              if (showRenewButton) ...[
+                SizedBox(height: 16.h),
+                _buildRenewButton(),
+              ],
+            ],
           ),
         ),
       ],
+    );
+  }
+
+  /// Builds the renew button
+  Widget _buildRenewButton() {
+    return SizedBox(
+      width: double.infinity,
+      child: ElevatedButton(
+        onPressed: onRenewPressed,
+        style: ElevatedButton.styleFrom(
+          backgroundColor: AppColors.primary,
+          padding: EdgeInsets.symmetric(vertical: 14.h),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(8.r),
+          ),
+        ),
+        child: Text(
+          'Renew Policy',
+          style: TextStyle(
+            fontSize: 14.sp,
+            fontWeight: FontWeight.w600,
+            color: AppColors.white,
+          ),
+        ),
+      ),
     );
   }
 

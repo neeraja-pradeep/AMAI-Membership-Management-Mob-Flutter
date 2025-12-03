@@ -127,20 +127,22 @@ class _AswasePlusScreenState extends ConsumerState<AswasePlusScreen> {
           // Policy Details Card
           PolicyDetailsCard(
             aswasPlus: aswasPlus,
-            onRenewPressed: () {
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(
-                  content: Text('Renewal flow coming soon'),
-                ),
-              );
-            },
+            onRenewPressed: _onRenewPressed,
           ),
 
           SizedBox(height: 24.h),
 
+          // Expired message (shown only when policy is expired)
+          if (aswasPlus.isExpired) ...[
+            _buildExpiredMessage(),
+            SizedBox(height: 24.h),
+          ],
+
           // Scheme Details Section
           SchemeDetailsSection(
             productDescription: aswasPlus.productDescription,
+            showRenewButton: aswasPlus.isExpired,
+            onRenewPressed: _onRenewPressed,
           ),
 
           SizedBox(height: 24.h),
@@ -199,6 +201,53 @@ class _AswasePlusScreenState extends ConsumerState<AswasePlusScreen> {
     ScaffoldMessenger.of(context).showSnackBar(
       const SnackBar(
         content: Text('Request change feature coming soon'),
+      ),
+    );
+  }
+
+  /// Handles renew button press
+  void _onRenewPressed() {
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(
+        content: Text('Renewal flow coming soon'),
+      ),
+    );
+  }
+
+  /// Builds the expired message widget
+  Widget _buildExpiredMessage() {
+    return Container(
+      width: double.infinity,
+      padding: EdgeInsets.all(12.w),
+      decoration: BoxDecoration(
+        color: AppColors.errorLight,
+        borderRadius: BorderRadius.circular(8.r),
+        border: Border.all(
+          color: AppColors.error.withOpacity(0.3),
+          width: 1.w,
+        ),
+      ),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Icon(
+            Icons.warning_amber_rounded,
+            color: AppColors.error,
+            size: 20.sp,
+          ),
+          SizedBox(width: 8.w),
+          Expanded(
+            child: Text(
+              'Your Aswas plus membership has expired. Renew to continue the benefits.',
+              style: TextStyle(
+                fontSize: 13.sp,
+                fontWeight: FontWeight.w500,
+                color: AppColors.error,
+                height: 1.4,
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }
@@ -271,17 +320,17 @@ class _AswasePlusScreenState extends ConsumerState<AswasePlusScreen> {
               children: [
                 PolicyDetailsCard(
                   aswasPlus: cachedData,
-                  onRenewPressed: () {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(
-                        content: Text('Renewal flow coming soon'),
-                      ),
-                    );
-                  },
+                  onRenewPressed: _onRenewPressed,
                 ),
                 SizedBox(height: 24.h),
+                if (cachedData.isExpired) ...[
+                  _buildExpiredMessage(),
+                  SizedBox(height: 24.h),
+                ],
                 SchemeDetailsSection(
                   productDescription: cachedData.productDescription,
+                  showRenewButton: cachedData.isExpired,
+                  onRenewPressed: _onRenewPressed,
                 ),
                 SizedBox(height: 24.h),
                 _buildNomineeSection(nomineesState),
