@@ -41,22 +41,23 @@ class PolicyDetailsCard extends StatelessWidget {
           _buildHeader(),
           SizedBox(height: 20.h),
 
-          // Policy Number
-          _buildDetailRow('Policy Number', aswasPlus.policyNumber),
+          // Policy Number (displayed without label)
+          Text(
+            aswasPlus.policyNumber,
+            style: TextStyle(
+              fontSize: 14.sp,
+              fontWeight: FontWeight.w500,
+              color: AppColors.textPrimary,
+            ),
+          ),
           SizedBox(height: 12.h),
-
-          // Coverage Amount
-          if (aswasPlus.coverageAmount != null) ...[
-            _buildDetailRow('Coverage Amount', aswasPlus.displayCoverageAmount),
-            SizedBox(height: 12.h),
-          ],
 
           // Valid Until
           _buildDetailRow('Valid Until', aswasPlus.displayValidUntil),
           SizedBox(height: 20.h),
 
-          // Renew Button (conditional)
-          if (aswasPlus.isActive && !aswasPlus.isExpired)
+          // Renew Button (hidden when policy is active)
+          if (!aswasPlus.isActive)
             _buildRenewButton(),
         ],
       ),
@@ -69,7 +70,7 @@ class PolicyDetailsCard extends StatelessWidget {
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
         Text(
-          'Policy Details',
+          'Aswas plus',
           style: TextStyle(
             fontSize: 18.sp,
             fontWeight: FontWeight.w600,
