@@ -66,4 +66,10 @@ class Endpoints {
 
   /// Single announcement endpoint
   static String announcementById(int id) => '$apiPrefix/library/announcements/$id/';
+
+  // ============== User/Account Endpoints ==============
+
+  /// User profile endpoint
+  /// GET: Retrieve user profile by ID
+  static String userProfile(int userId) => '$apiPrefix/accounts/users/$userId/';
 }

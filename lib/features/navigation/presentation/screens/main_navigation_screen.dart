@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:myapp/app/theme/colors.dart';
 import 'package:myapp/features/home/presentation/screens/home_screen.dart';
+import 'package:myapp/features/profile/presentation/screens/profile_screen.dart';
 
 /// Main navigation screen with bottom navigation bar
 /// Contains 4 tabs: Home, Events, Library, Profile
@@ -19,7 +20,7 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
     const HomeScreen(),
     const _EventsPlaceholderScreen(),
     const _LibraryPlaceholderScreen(),
-    const _ProfilePlaceholderScreen(),
+    const ProfileScreen(),
   ];
 
   @override
@@ -228,55 +229,3 @@ class _LibraryPlaceholderScreen extends StatelessWidget {
   }
 }
 
-/// Placeholder screen for Profile tab
-class _ProfilePlaceholderScreen extends StatelessWidget {
-  const _ProfilePlaceholderScreen();
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: AppColors.background,
-      appBar: AppBar(
-        title: Text(
-          'Profile',
-          style: TextStyle(
-            fontSize: 18.sp,
-            fontWeight: FontWeight.w600,
-            color: AppColors.textPrimary,
-          ),
-        ),
-        backgroundColor: AppColors.white,
-        elevation: 0,
-      ),
-      body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(
-              Icons.person,
-              size: 64.sp,
-              color: AppColors.grey300,
-            ),
-            SizedBox(height: 16.h),
-            Text(
-              'Profile',
-              style: TextStyle(
-                fontSize: 20.sp,
-                fontWeight: FontWeight.w600,
-                color: AppColors.textPrimary,
-              ),
-            ),
-            SizedBox(height: 8.h),
-            Text(
-              'Coming Soon',
-              style: TextStyle(
-                fontSize: 14.sp,
-                color: AppColors.textSecondary,
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}
