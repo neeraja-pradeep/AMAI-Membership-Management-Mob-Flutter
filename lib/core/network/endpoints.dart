@@ -46,6 +46,11 @@ class Endpoints {
   static const String insuranceRenewal =
       '$apiPrefix/membership/insurance/renewal/';
 
+  /// Insurance renewal verification endpoint
+  /// POST: Verify payment after Razorpay payment success
+  static const String insuranceRenewalVerify =
+      '$apiPrefix/membership/insurance/renewal/verify/';
+
   // ============== Events Endpoints ==============
 
   /// Upcoming events list endpoint

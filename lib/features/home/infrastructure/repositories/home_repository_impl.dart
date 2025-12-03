@@ -397,6 +397,41 @@ class HomeRepositoryImpl implements HomeRepository {
     }
   }
 
+  // ============== Payment Verification ==============
+
+  @override
+  Future<Either<Failure, bool>> verifyPayment({
+    required String razorpayOrderId,
+    required String razorpayPaymentId,
+    required String razorpaySignature,
+  }) async {
+    // Check connectivity
+    final connectivityResult = await connectivity.checkConnectivity();
+    final isOnline = !connectivityResult.contains(ConnectivityResult.none);
+
+    if (!isOnline) {
+      return left(const NetworkFailure());
+    }
+
+    try {
+      final response = await homeApi.verifyPayment(
+        razorpayOrderId: razorpayOrderId,
+        razorpayPaymentId: razorpayPaymentId,
+        razorpaySignature: razorpaySignature,
+      );
+
+      if (response.isSuccess) {
+        return right(true);
+      }
+
+      return right(false);
+    } on NetworkException catch (e) {
+      return left(FailureMapper.fromNetworkException(e));
+    } catch (e) {
+      return left(FailureMapper.fromException(e));
+    }
+  }
+
   // ============== Clear All ==============
 
   @override

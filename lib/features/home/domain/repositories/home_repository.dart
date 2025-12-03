@@ -147,6 +147,21 @@ abstract class HomeRepository {
   /// - Left(Failure) on error
   Future<Either<Failure, RenewalResponse?>> initiateInsuranceRenewal();
 
+  /// Verifies Razorpay payment after successful payment
+  ///
+  /// [razorpayOrderId] - The Razorpay order ID
+  /// [razorpayPaymentId] - The Razorpay payment ID
+  /// [razorpaySignature] - The Razorpay signature
+  ///
+  /// Returns:
+  /// - Right(true) on success
+  /// - Left(Failure) on error
+  Future<Either<Failure, bool>> verifyPayment({
+    required String razorpayOrderId,
+    required String razorpayPaymentId,
+    required String razorpaySignature,
+  });
+
   // ============== Clear All ==============
 
   /// Clears all stored timestamps

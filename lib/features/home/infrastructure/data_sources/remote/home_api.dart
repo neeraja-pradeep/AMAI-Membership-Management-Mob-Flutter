@@ -102,6 +102,21 @@ abstract class HomeApi {
   /// - RenewalResponseModel on success (200)
   /// - null data on error
   Future<HomeApiResponse<RenewalResponseModel>> initiateInsuranceRenewal();
+
+  /// Verifies Razorpay payment after successful payment
+  ///
+  /// [razorpayOrderId] - The Razorpay order ID
+  /// [razorpayPaymentId] - The Razorpay payment ID
+  /// [razorpaySignature] - The Razorpay signature
+  ///
+  /// Returns HomeApiResponse containing:
+  /// - bool (true) on success (200)
+  /// - null data on error
+  Future<HomeApiResponse<bool>> verifyPayment({
+    required String razorpayOrderId,
+    required String razorpayPaymentId,
+    required String razorpaySignature,
+  });
 }
 
 /// Implementation of HomeApi using ApiClient
@@ -339,6 +354,29 @@ class HomeApiImpl implements HomeApi {
 
     return HomeApiResponse<RenewalResponseModel>(
       data: renewalResponse,
+      statusCode: response.statusCode,
+      timestamp: response.timestamp,
+    );
+  }
+
+  @override
+  Future<HomeApiResponse<bool>> verifyPayment({
+    required String razorpayOrderId,
+    required String razorpayPaymentId,
+    required String razorpaySignature,
+  }) async {
+    final response = await apiClient.post<Map<String, dynamic>>(
+      Endpoints.insuranceRenewalVerify,
+      data: {
+        'razorpay_order_id': razorpayOrderId,
+        'razorpay_payment_id': razorpayPaymentId,
+        'razorpay_signature': razorpaySignature,
+      },
+      fromJson: (json) => json as Map<String, dynamic>,
+    );
+
+    return HomeApiResponse<bool>(
+      data: response.isSuccess,
       statusCode: response.statusCode,
       timestamp: response.timestamp,
     );

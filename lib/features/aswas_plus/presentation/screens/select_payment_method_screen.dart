@@ -1,13 +1,15 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:myapp/app/theme/colors.dart';
 import 'package:myapp/core/config/razorpay_config.dart';
 import 'package:myapp/features/aswas_plus/domain/entities/renewal_response.dart';
+import 'package:myapp/features/home/application/providers/home_providers.dart';
 import 'package:razorpay_flutter/razorpay_flutter.dart';
 
 /// Select Payment Method Screen
 /// Shows payment options and total amount for renewal
-class SelectPaymentMethodScreen extends StatefulWidget {
+class SelectPaymentMethodScreen extends ConsumerStatefulWidget {
   const SelectPaymentMethodScreen({
     super.key,
     required this.renewalResponse,
@@ -16,11 +18,11 @@ class SelectPaymentMethodScreen extends StatefulWidget {
   final RenewalResponse renewalResponse;
 
   @override
-  State<SelectPaymentMethodScreen> createState() =>
+  ConsumerState<SelectPaymentMethodScreen> createState() =>
       _SelectPaymentMethodScreenState();
 }
 
-class _SelectPaymentMethodScreenState extends State<SelectPaymentMethodScreen> {
+class _SelectPaymentMethodScreenState extends ConsumerState<SelectPaymentMethodScreen> {
   late Razorpay _razorpay;
   bool _isProcessing = false;
 
@@ -40,18 +42,62 @@ class _SelectPaymentMethodScreenState extends State<SelectPaymentMethodScreen> {
   }
 
   void _handlePaymentSuccess(PaymentSuccessResponse response) {
+    // Verify payment with backend
+    _verifyPayment(
+      orderId: response.orderId ?? '',
+      paymentId: response.paymentId ?? '',
+      signature: response.signature ?? '',
+    );
+  }
+
+  Future<void> _verifyPayment({
+    required String orderId,
+    required String paymentId,
+    required String signature,
+  }) async {
+    final repository = ref.read(homeRepositoryProvider);
+    final result = await repository.verifyPayment(
+      razorpayOrderId: orderId,
+      razorpayPaymentId: paymentId,
+      razorpaySignature: signature,
+    );
+
     setState(() {
       _isProcessing = false;
     });
-    // Show success message
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text('Payment Successful! ID: ${response.paymentId}'),
-        backgroundColor: AppColors.success,
-      ),
+
+    result.fold(
+      (failure) {
+        // Show error message
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Payment verification failed: ${failure.message}'),
+            backgroundColor: AppColors.error,
+          ),
+        );
+      },
+      (success) {
+        if (success) {
+          // Show success message
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text('Payment Successful! ID: $paymentId'),
+              backgroundColor: AppColors.success,
+            ),
+          );
+          // Navigate back to home
+          Navigator.of(context).popUntil((route) => route.isFirst);
+        } else {
+          // Show verification failed message
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('Payment verification failed'),
+              backgroundColor: AppColors.error,
+            ),
+          );
+        }
+      },
     );
-    // Navigate back to home or show success screen
-    Navigator.of(context).popUntil((route) => route.isFirst);
   }
 
   void _handlePaymentError(PaymentFailureResponse response) {
