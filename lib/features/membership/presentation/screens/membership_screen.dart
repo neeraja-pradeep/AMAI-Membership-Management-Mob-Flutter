@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:myapp/app/theme/colors.dart';
+import 'package:myapp/features/aswas_plus/application/providers/renewal_providers.dart';
+import 'package:myapp/features/aswas_plus/presentation/screens/renew_membership_screen.dart';
 import 'package:myapp/features/membership/application/providers/membership_providers.dart';
 import 'package:myapp/features/membership/application/states/membership_screen_state.dart';
 import 'package:myapp/features/membership/presentation/components/current_status_card.dart';
@@ -147,10 +149,11 @@ class _MembershipScreenState extends ConsumerState<MembershipScreen> {
           CurrentStatusCard(
             membershipStatus: membershipStatus,
             onRenewalPressed: () {
-              // TODO: Navigate to renewal screen
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(
-                  content: Text('Renewal flow coming soon'),
+              Navigator.of(context).push(
+                MaterialPageRoute<void>(
+                  builder: (context) => const RenewMembershipScreen(
+                    defaultSelectedProductId: RenewalProductIds.membership,
+                  ),
                 ),
               );
             },
@@ -279,9 +282,11 @@ class _MembershipScreenState extends ConsumerState<MembershipScreen> {
                   CurrentStatusCard(
                     membershipStatus: cachedData,
                     onRenewalPressed: () {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(
-                          content: Text('Renewal flow coming soon'),
+                      Navigator.of(context).push(
+                        MaterialPageRoute<void>(
+                          builder: (context) => const RenewMembershipScreen(
+                            defaultSelectedProductId: RenewalProductIds.membership,
+                          ),
                         ),
                       );
                     },

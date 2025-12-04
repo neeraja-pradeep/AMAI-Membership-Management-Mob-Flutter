@@ -11,7 +11,14 @@ import 'package:myapp/features/home/application/providers/home_providers.dart';
 /// Renew Membership Screen
 /// Shows renewal options for membership and Aswas Plus
 class RenewMembershipScreen extends ConsumerStatefulWidget {
-  const RenewMembershipScreen({super.key});
+  const RenewMembershipScreen({
+    super.key,
+    this.defaultSelectedProductId,
+  });
+
+  /// Default product ID to select on screen load
+  /// If null, defaults to Aswas Plus (for backward compatibility)
+  final int? defaultSelectedProductId;
 
   @override
   ConsumerState<RenewMembershipScreen> createState() =>
@@ -26,8 +33,10 @@ class _RenewMembershipScreenState extends ConsumerState<RenewMembershipScreen> {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
       ref.read(renewalStateProvider.notifier).loadProducts();
-      // Default select Aswas Plus (product id 1) since navigation came from aswas plus screen
-      ref.read(renewalStateProvider.notifier).selectProduct(RenewalProductIds.aswasPlus);
+      // Select the default product based on where navigation came from
+      // If coming from membership screen, select membership; otherwise select Aswas Plus
+      final defaultProductId = widget.defaultSelectedProductId ?? RenewalProductIds.aswasPlus;
+      ref.read(renewalStateProvider.notifier).selectProduct(defaultProductId);
     });
   }
 
