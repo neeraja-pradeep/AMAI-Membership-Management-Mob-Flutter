@@ -24,10 +24,9 @@ final insuranceRegistrationProvider = FutureProvider.autoDispose
             RegistrationResponseModel.fromJson(response.data!);
         return Right(registrationResponse);
       } else {
-        return Left(
+        return const Left(
           ServerFailure(
-            message:
-                response.errorMessage ?? 'Registration failed. Please try again.',
+            message: 'Registration failed. Please try again.',
           ),
         );
       }
@@ -58,10 +57,9 @@ final insuranceVerificationProvider =
       if (response.isSuccess) {
         return const Right(true);
       } else {
-        return Left(
+        return const Left(
           ServerFailure(
-            message:
-                response.errorMessage ?? 'Payment verification failed. Please try again.',
+            message: 'Payment verification failed. Please try again.',
           ),
         );
       }
