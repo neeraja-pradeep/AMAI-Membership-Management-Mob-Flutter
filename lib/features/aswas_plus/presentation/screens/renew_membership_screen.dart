@@ -305,7 +305,8 @@ class _RenewMembershipScreenState extends ConsumerState<RenewMembershipScreen> {
   Future<void> _handleMembershipRenewal() async {
     try {
       final repository = ref.read(membershipRepositoryProvider);
-      final result = await repository.initiateMembershipPayment();
+      final userId = ref.read(userIdProvider);
+      final result = await repository.initiateMembershipPayment(userId: userId);
 
       if (!mounted) return;
 
