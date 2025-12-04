@@ -37,6 +37,29 @@ class RegistrationApi {
         .toList();
   }
 
+  /// ---------------------- PAYMENT API CALLS ----------------------
+
+  /// Initiate Payment
+  /// Required field: user
+  Future<Map<String, dynamic>> initiatePayment({required int userId}) async {
+    final response = await _apiClient.post(
+      Endpoints.initiatePayment,
+      data: {"user": userId},
+    );
+
+    return response.data as Map<String, dynamic>;
+  }
+
+  /// Verify Payment
+  /// Required: razorpay_order_id, razorpay_payment_id, razorpay_signature
+  Future<Map<String, dynamic>> verifyPayment({
+    required Map<String, dynamic> data,
+  }) async {
+    final response = await _apiClient.post(Endpoints.verifyPayment, data: data);
+
+    return response.data as Map<String, dynamic>;
+  }
+
   /// Fetch countries
   Future<List<Country>> fetchCountries() async {
     final response = await _apiClient.get(Endpoints.countries);
@@ -195,17 +218,5 @@ class RegistrationApi {
     );
 
     return response.data['exists'] as bool? ?? false;
-  }
-
-  /// Verify payment status
-  Future<Map<String, dynamic>> verifyPayment({
-    required String sessionId,
-  }) async {
-    final response = await _apiClient.post(
-      Endpoints.registrationVerifyPayment,
-      data: {'session_id': sessionId},
-    );
-
-    return response.data as Map<String, dynamic>;
   }
 }

@@ -212,15 +212,17 @@ class _PersonalDetailsScreenState extends ConsumerState<PersonalDetailsScreen> {
 
         final userId = responseData['application']?['user_detail']?['id'];
         final applicationId = responseData['application']?['id'];
-        if (userId == null) {
-          _showError(responseData['detail']);
+
+        if (userId == null || applicationId == null) {
+          _showError(responseData['detail'] ?? 'Something went wrong');
+          return;
         }
+
+        final notifier = ref.read(registrationProvider.notifier);
+        notifier.updateBackendIds(applicationId: applicationId, userId: userId);
+
         if (!mounted) return;
-        Navigator.pushNamed(
-          context,
-          AppRouter.registrationAddress,
-          arguments: {'userId': userId, 'applicationId': applicationId},
-        );
+        Navigator.pushNamed(context, AppRouter.registrationAddress);
       } catch (e) {
         _showError("Failed: $e");
       }

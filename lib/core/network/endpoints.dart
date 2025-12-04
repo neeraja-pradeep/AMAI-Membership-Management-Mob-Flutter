@@ -72,15 +72,20 @@ class Endpoints {
 
   /// GET /api/registration/check-duplicate/
   /// Check for duplicate email or phone
-  static const String registrationCheckDuplicate = '/api/registration/check-duplicate/';
+  static const String registrationCheckDuplicate =
+      '/api/registration/check-duplicate/';
 
   /// POST /api/registration/verify-payment/
   /// Verify payment status after gateway redirect
-  static const String registrationVerifyPayment = '/api/registration/verify-payment/';
+  static const String registrationVerifyPayment =
+      '/api/registration/verify-payment/';
 
   /// GET /api/session/validate/
   /// Validate current session
   static const String sessionValidate = '/api/session/validate/';
+
+  static const String initiatePayment = "/api/membership/membership/payment/";
+  static const String verifyPayment = "/api/membership/membership/verify/";
 
   // ==================== Helpers ====================
 

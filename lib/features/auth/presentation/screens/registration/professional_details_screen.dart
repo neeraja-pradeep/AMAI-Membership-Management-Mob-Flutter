@@ -135,6 +135,48 @@ class _ProfessionalDetailsScreenState
       Future.microtask(() => _loadExistingData());
       return;
     }
+
+    if (state is! RegistrationStateInProgress) return;
+
+    final professional = state.registration.professionalDetails;
+    if (professional == null) return;
+
+    setState(() {
+      _selectedMedicalCouncilState = professional.medicalCouncilState;
+      _medicalCouncilNoController.text = professional.medicalCouncilNo;
+      _centralCouncilNoController.text = professional.centralCouncilNo;
+      _ugCollegeController.text = professional.ugCollege;
+
+      _provisionalController.text =
+          professional.provisionalRegistrationNumber ?? '';
+      _districtCouncilController.text =
+          professional.councilDistrictNumber ?? '';
+      _selectedCountry = professional.country;
+      _selectedState = professional.state;
+      _membershipDistrictController.text =
+          professional.membershipDistrict ?? '';
+      _membershipAreaController.text = professional.membershipArea ?? '';
+
+      if ((professional.professionalDetails1 ?? '').isNotEmpty) {
+        _selectedQualifications
+          ..clear()
+          ..addAll(
+            professional.professionalDetails1!
+                .split(',')
+                .where((e) => e.trim().isNotEmpty),
+          );
+      }
+
+      if ((professional.professionalDetails2 ?? '').isNotEmpty) {
+        _selectedCategories
+          ..clear()
+          ..addAll(
+            professional.professionalDetails2!
+                .split(',')
+                .where((e) => e.trim().isNotEmpty),
+          );
+      }
+    });
   }
 
   void _saveProfessionalDetails() {
@@ -161,11 +203,12 @@ class _ProfessionalDetailsScreenState
   }
 
   Future<void> _handleNext() async {
-    /// Student skips this page
+    /// Student should never see this screen, but just in case:
+    if (role == "student") return;
 
     if (!_formKey.currentState!.validate()) return;
 
-    /// Practitioner validation
+    /// Practitioner extra validation
     if (role == "practitioner") {
       if (_selectedQualifications.isEmpty) {
         return _showError("Select at least one qualification");
@@ -179,15 +222,21 @@ class _ProfessionalDetailsScreenState
 
     try {
       _saveProfessionalDetails();
-      final state = ref.read(registrationProvider);
 
-      final personalDetails =
-          (state as RegistrationStateInProgress).registration.personalDetails;
+      final state = ref.read(registrationProvider);
+      if (state is! RegistrationStateInProgress ||
+          state.registration.personalDetails == null ||
+          state.registration.professionalDetails == null) {
+        _showError("Incomplete registration data. Please go back and retry.");
+        return;
+      }
+
+      final personalDetails = state.registration.personalDetails!;
       final professionalDetails = state.registration.professionalDetails!;
 
       /// Role Based Payload
       final membershipData = {
-        'membership_type': personalDetails!.membershipType,
+        'membership_type': personalDetails.membershipType,
         'first_name': personalDetails.firstName,
         'email': personalDetails.email,
         'password': personalDetails.password,
@@ -221,22 +270,35 @@ class _ProfessionalDetailsScreenState
         },
       };
 
-      final responseData = await ref
-          .read(registrationProvider.notifier)
-          .submitMembershipRegistration(membershipData);
+      final notifier = ref.read(registrationProvider.notifier);
+
+      // Hit membership API
+      final responseData = await notifier.submitMembershipRegistration(
+        membershipData,
+      );
 
       final userId = responseData['application']?['user_detail']?['id'];
       final applicationId = responseData['application']?['id'];
 
-      Navigator.pushNamed(
-        context,
-        AppRouter.registrationAddress,
-        arguments: {'userId': userId, 'applicationId': applicationId},
-      );
+      if (userId == null || applicationId == null) {
+        _showError(
+          (responseData['detail'] as String?) ??
+              "Failed to create application. Please try again.",
+        );
+        return;
+      }
+
+      // 🔥 Save backend ids in Riverpod (single source of truth)
+      notifier.updateBackendIds(applicationId: applicationId, userId: userId);
+
+      if (!mounted) return;
+
+      // Address screen will read userId/applicationId from provider
+      Navigator.pushNamed(context, AppRouter.registrationAddress);
     } catch (e) {
       _showError("Registration failed: $e");
     } finally {
-      setState(() => _isSubmitting = false);
+      if (mounted) setState(() => _isSubmitting = false);
     }
   }
 
@@ -274,11 +336,9 @@ class _ProfessionalDetailsScreenState
                 "Professional Details",
                 style: TextStyle(fontSize: 20.sp, fontWeight: FontWeight.bold),
               ),
-
               SizedBox(height: 25.h),
 
               if (role == "practitioner") _buildPractitionerUI(),
-
               if (role == "house_surgeon") _buildHouseSurgeonUI(),
 
               SizedBox(height: 30.h),

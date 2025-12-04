@@ -114,23 +114,10 @@ class AppRouter {
         return _buildRoute(const LoginScreen());
 
       case registrationAddress:
-        final args = settings.arguments as Map;
-        final userId = args['userId'];
-        final applicationId = args['applicationId'];
-
-        return _buildRoute(
-          AddressDetailsScreen(userId: userId, applicationId: applicationId),
-        );
+        return _buildRoute(const AddressDetailsScreen());
 
       case AppRouter.registrationDocuments:
-        final args = settings.arguments as Map<String, dynamic>;
-
-        return _buildRoute(
-          DocumentUploadScreen(
-            applicationId: args['applicationId'],
-            role: args['role'],
-          ),
-        );
+        return _buildRoute(const DocumentUploadScreen());
 
       case registrationProfessional:
         return _buildRoute(const ProfessionalDetailsScreen());

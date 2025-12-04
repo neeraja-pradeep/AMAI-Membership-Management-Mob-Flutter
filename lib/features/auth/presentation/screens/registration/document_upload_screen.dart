@@ -11,14 +11,7 @@ import '../../../application/states/registration_state.dart';
 import '../../../domain/entities/registration/document_upload.dart';
 
 class DocumentUploadScreen extends ConsumerStatefulWidget {
-  final int applicationId;
-  final String role; // << 🔥 Role passed directly here
-
-  const DocumentUploadScreen({
-    super.key,
-    required this.applicationId,
-    required this.role,
-  });
+  const DocumentUploadScreen({super.key});
 
   @override
   ConsumerState<DocumentUploadScreen> createState() =>
@@ -32,18 +25,42 @@ class _DocumentUploadScreenState extends ConsumerState<DocumentUploadScreen> {
   bool isUploading = false;
   double uploadProgress = 0;
 
+  /// 👇 Pulled from Riverpod instead of Navigator arguments
+  int? _applicationId;
+  String _role = 'practitioner'; // "practitioner" | "house_surgeon" | "student"
+
   @override
   void initState() {
     super.initState();
-    _restoreSavedFiles();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _initFromProvider();
+    });
   }
 
-  void _restoreSavedFiles() {
+  void _initFromProvider() {
     final state = ref.read(registrationProvider);
-    if (state is! RegistrationStateInProgress) return;
 
-    final docs = state.registration.documentUploads?.documents ?? [];
+    if (state is RegistrationStateResumePrompt) {
+      // Resume existing registration, then re-run init
+      ref
+          .read(registrationProvider.notifier)
+          .resumeRegistration(state.existingRegistration);
+      Future.microtask(_initFromProvider);
+      return;
+    }
 
+    if (state is! RegistrationStateInProgress) {
+      _showError("Registration not in progress.");
+      return;
+    }
+
+    final reg = state.registration;
+
+    _role = reg.personalDetails?.membershipType ?? 'practitioner';
+    _applicationId = reg.applicationId;
+
+    // Restore previously saved files (if any)
+    final docs = reg.documentUploads?.documents ?? [];
     for (var doc in docs) {
       if (doc.type == DocumentType.profilePhoto) {
         profilePhoto = File(doc.localFilePath);
@@ -55,13 +72,13 @@ class _DocumentUploadScreenState extends ConsumerState<DocumentUploadScreen> {
     setState(() {});
   }
 
-  /// 🔥 Pick file TYPE based on role
+  /// 🔥 Pick file TYPE based on role (from provider)
   Future<void> _pickFile({required bool isProfile}) async {
     final result = await FilePicker.platform.pickFiles(
       type: FileType.custom,
       allowedExtensions: isProfile
           ? ['jpg', 'jpeg', 'png']
-          : widget.role == "student"
+          : _role == "student"
           ? ['jpg', 'jpeg', 'png']
           : ['jpg', 'jpeg', 'png', 'pdf'],
     );
@@ -73,9 +90,13 @@ class _DocumentUploadScreenState extends ConsumerState<DocumentUploadScreen> {
     final file = File(result.files.single.path!);
 
     final sizeMB = (await file.length()) / (1024 * 1024);
-
     if (sizeMB > 5) {
       _showError("File must be under 5MB.");
+      return;
+    }
+
+    if (_applicationId == null) {
+      _showError("Missing application ID. Please restart registration.");
       return;
     }
 
@@ -97,7 +118,7 @@ class _DocumentUploadScreenState extends ConsumerState<DocumentUploadScreen> {
       final response = await ref
           .read(registrationProvider.notifier)
           .submitDocuments(
-            application: widget.applicationId,
+            application: _applicationId!, // ✅ from provider
             documentFile: file,
             documentType: extension,
           );
@@ -183,11 +204,11 @@ class _DocumentUploadScreenState extends ConsumerState<DocumentUploadScreen> {
         .updateDocumentUploads(DocumentUploads(documents: docs));
   }
 
-  /// 🔥 Label based on role
+  /// 🔥 Label based on role from provider
   String _certificateLabel() {
-    if (widget.role == "house_surgeon") {
+    if (_role == "house_surgeon") {
       return "Provisional Registration Certificate";
-    } else if (widget.role == "student") {
+    } else if (_role == "student") {
       return "College ID Card";
     }
     return "Medical Council Certificate"; // default for practitioners
@@ -231,7 +252,6 @@ class _DocumentUploadScreenState extends ConsumerState<DocumentUploadScreen> {
           onPressed: () => Navigator.pop(context),
         ),
       ),
-
       body: Padding(
         padding: EdgeInsets.all(24.w),
         child: Column(
@@ -268,7 +288,7 @@ class _DocumentUploadScreenState extends ConsumerState<DocumentUploadScreen> {
 
             SizedBox(height: 25.h),
 
-            _label(_certificateLabel()), // 🔥 role-based dynamic
+            _label(_certificateLabel()),
             _uploadTile(
               file: certificate,
               onPick: isUploading ? null : () => _pickFile(isProfile: false),

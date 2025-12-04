@@ -41,6 +41,23 @@ class RegistrationRepositoryImpl implements RegistrationRepository {
   }
 
   @override
+  Future<Map<String, dynamic>> initiatePayment({required int userId}) async {
+    try {
+      final response = await _api.initiatePayment(userId: userId);
+
+      if (!response.containsKey("razorpay_order_id")) {
+        throw RegistrationError.paymentFailed("Order ID missing in response");
+      }
+
+      return response;
+    } on DioException catch (e) {
+      throw _mapDioExceptionToPaymentError(e);
+    } catch (_) {
+      throw RegistrationError.paymentFailed("Unable to initiate payment");
+    }
+  }
+
+  @override
   Future<List<Country>> fetchCountries() async {
     try {
       return await _api.fetchCountries();
@@ -48,6 +65,29 @@ class RegistrationRepositoryImpl implements RegistrationRepository {
       throw _mapDioExceptionToDropdownError(e, 'Countries');
     } catch (e) {
       throw RegistrationError.dropdownNetwork('Countries');
+    }
+  }
+
+  @override
+  Future<bool> verifyPayment({
+    required String orderId,
+    required String paymentId,
+    required String signature,
+  }) async {
+    try {
+      final body = {
+        "razorpay_order_id": orderId,
+        "razorpay_payment_id": paymentId,
+        "razorpay_signature": signature,
+      };
+
+      final response = await _api.verifyPayment(data: body);
+
+      return response["verified"] == true;
+    } on DioException catch (e) {
+      throw _mapDioExceptionToPaymentError(e);
+    } catch (_) {
+      throw RegistrationError.paymentFailed("Payment verification failed");
     }
   }
 
@@ -187,35 +227,6 @@ class RegistrationRepositoryImpl implements RegistrationRepository {
       throw _mapDioExceptionToSubmissionError(e);
     } catch (e) {
       throw RegistrationError.serverError();
-    }
-  }
-
-  @override
-  Future<PaymentDetails> verifyPayment({required String sessionId}) async {
-    try {
-      final response = await _api.verifyPayment(sessionId: sessionId);
-
-      return PaymentDetails(
-        sessionId: sessionId,
-        amount: (response['amount'] as num).toDouble(),
-        currency: response['currency'] as String,
-        status: PaymentStatus.values.firstWhere(
-          (s) => s.name == response['status'],
-          orElse: () => PaymentStatus.pending,
-        ),
-        transactionId: response['transaction_id'] as String?,
-        paymentMethod: response['payment_method'] as String?,
-        completedAt: response['completed_at'] != null
-            ? DateTime.parse(response['completed_at'] as String)
-            : null,
-      );
-    } on DioException catch (e) {
-      if (e.response?.statusCode == 404) {
-        throw RegistrationError.paymentFailed('Payment session not found');
-      }
-      throw _mapDioExceptionToPaymentError(e);
-    } catch (e) {
-      throw RegistrationError.paymentFailed('Unable to verify payment');
     }
   }
 

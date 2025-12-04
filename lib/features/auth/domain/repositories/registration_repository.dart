@@ -44,6 +44,12 @@ abstract class RegistrationRepository {
   Future<String> submitRegistration({
     required PractitionerRegistration registration,
   });
+  Future<Map<String, dynamic>> initiatePayment({required int userId});
+  Future<bool> verifyPayment({
+    required String orderId,
+    required String paymentId,
+    required String signature,
+  });
 
   Future<Map<String, dynamic>> submitDocument({
     required File documentFile,
@@ -80,12 +86,6 @@ abstract class RegistrationRepository {
   Future<Map<String, dynamic>> submitMembershipRegistration(
     Map<String, dynamic> membershipData,
   );
-
-  /// Verify payment status
-  ///
-  /// Returns payment details or throws [RegistrationError]
-  /// Used after payment gateway redirect
-  Future<PaymentDetails> verifyPayment({required String sessionId});
 }
 
 /// Medical council entity for dropdown

@@ -58,14 +58,16 @@ class PractitionerRegistration {
   final DateTime createdAt;
   final DateTime lastUpdatedAt;
 
-  final String? applicationId;
+  /// 🔹 Backend IDs
+  final int? userId;
+  final int? applicationId;
 
   final PersonalDetails? personalDetails;
   final ProfessionalDetails? professionalDetails;
 
   final MembershipDetails? membershipDetails;
 
-  /// 👇 UPDATED: Multiple addresses supported
+  /// 👇 Multiple addresses supported
   final AddressDetails? addressDetails; // Communication Address
   final AddressDetails? aptaAddress; // APTA Mailing Address
   final AddressDetails? permanentAddress; // Permanent Address
@@ -78,6 +80,7 @@ class PractitionerRegistration {
     this.currentStep = RegistrationStep.personalDetails,
     required this.createdAt,
     required this.lastUpdatedAt,
+    this.userId,
     this.applicationId,
     this.personalDetails,
     this.professionalDetails,
@@ -163,12 +166,14 @@ class PractitionerRegistration {
     RegistrationStep? currentStep,
     DateTime? createdAt,
     DateTime? lastUpdatedAt,
-    String? applicationId,
+
+    int? userId,
+    int? applicationId,
+
     PersonalDetails? personalDetails,
     ProfessionalDetails? professionalDetails,
     MembershipDetails? membershipDetails,
 
-    /// 👇 Required so Riverpod notifier can update them
     AddressDetails? addressDetails,
     AddressDetails? aptaAddress,
     AddressDetails? permanentAddress,
@@ -181,6 +186,7 @@ class PractitionerRegistration {
       currentStep: currentStep ?? this.currentStep,
       createdAt: createdAt ?? this.createdAt,
       lastUpdatedAt: lastUpdatedAt ?? this.lastUpdatedAt,
+      userId: userId ?? this.userId,
       applicationId: applicationId ?? this.applicationId,
       personalDetails: personalDetails ?? this.personalDetails,
       professionalDetails: professionalDetails ?? this.professionalDetails,
@@ -195,6 +201,11 @@ class PractitionerRegistration {
 
   @override
   String toString() {
-    return 'Registration(id: $registrationId, step: $currentStep, address: ${addressDetails != null}, apta: ${aptaAddress != null}, perm: ${permanentAddress != null})';
+    return 'Registration(id: $registrationId, '
+        'step: $currentStep, '
+        'userId: $userId, appId: $applicationId, '
+        'address: ${addressDetails != null}, '
+        'apta: ${aptaAddress != null}, '
+        'perm: ${permanentAddress != null})';
   }
 }

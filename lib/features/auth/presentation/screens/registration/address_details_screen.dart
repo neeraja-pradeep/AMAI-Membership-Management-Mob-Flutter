@@ -10,14 +10,7 @@ import '../../../domain/entities/registration/address_details.dart';
 import '../../components/text_input_field.dart';
 
 class AddressDetailsScreen extends ConsumerStatefulWidget {
-  final int userId;
-  final int applicationId;
-
-  const AddressDetailsScreen({
-    super.key,
-    required this.userId,
-    required this.applicationId,
-  });
+  const AddressDetailsScreen({super.key});
 
   @override
   ConsumerState<AddressDetailsScreen> createState() =>
@@ -295,12 +288,23 @@ class _AddressDetailsScreenState extends ConsumerState<AddressDetailsScreen> {
 
       await notifier.submitAddress(data: permanentData);
 
-      // Navigate after all succeed
+      // 4️⃣ Read applicationId + role from registrationProvider instead of args
+      final regState = ref.read(registrationProvider);
+      if (regState is! RegistrationStateInProgress ||
+          regState.registration.applicationId == null ||
+          regState.registration.personalDetails == null) {
+        _showError("Application information missing. Please try again.");
+        return;
+      }
+
+      final applicationId = regState.registration.applicationId!;
+      final role = regState.registration.personalDetails!.membershipType;
+
       if (!mounted) return;
       Navigator.pushNamed(
         context,
         AppRouter.registrationDocuments,
-        arguments: {"applicationId": widget.applicationId, "role": _role},
+        arguments: {"applicationId": applicationId, "role": role},
       );
     } catch (e) {
       _showError(e.toString());
@@ -434,7 +438,6 @@ class _AddressDetailsScreenState extends ConsumerState<AddressDetailsScreen> {
           onPressed: () => Navigator.pop(context),
         ),
       ),
-
       body: SingleChildScrollView(
         padding: EdgeInsets.all(24.w),
         child: Form(

@@ -169,12 +169,12 @@ class RegistrationStateNotifier extends StateNotifier<RegistrationState> {
     state = current.copyWith(registration: updated, hasUnsavedChanges: true);
   }
 
-  /// Update application ID (returned from Step 1 backend)
-  void updateApplicationId(String applicationId) {
+  void updateBackendIds({required int userId, required int applicationId}) {
     final current = state;
     if (current is! RegistrationStateInProgress) return;
 
     final updated = current.registration.copyWith(
+      userId: userId,
       applicationId: applicationId,
       lastUpdatedAt: DateTime.now(),
     );
@@ -269,6 +269,92 @@ class RegistrationStateNotifier extends StateNotifier<RegistrationState> {
     );
 
     state = current.copyWith(registration: updated, hasUnsavedChanges: true);
+  }
+
+  Future<Map<String, dynamic>> initiatePayment({required int userId}) async {
+    if (state is! RegistrationStateInProgress) {
+      throw Exception("Registration not started");
+    }
+
+    try {
+      state = const RegistrationStateLoading(
+        message: "Creating payment session...",
+      );
+
+      final response = await _repository.initiatePayment(userId: userId);
+
+      // Extract Razorpay order ID
+      final orderId = response["order_id"] ?? response["razorpay_order_id"];
+
+      if (orderId == null) {
+        throw Exception("Payment session could not be created");
+      }
+
+      return {
+        "orderId": orderId,
+        "amount": response["amount"],
+        "currency": response["currency"] ?? "INR",
+      };
+    } catch (e) {
+      state = const RegistrationStateError(
+        message: "Payment initialization failed",
+        code: "INITIATE_PAYMENT_FAILED",
+        canRetry: true,
+      );
+      rethrow;
+    }
+  }
+
+  Future<bool> verifyPayment({
+    required String paymentId,
+    required String orderId,
+    required String signature,
+  }) async {
+    if (state is! RegistrationStateInProgress) return false;
+
+    try {
+      state = const RegistrationStateLoading(
+        message: "Verifying transaction...",
+      );
+
+      final verified = await _repository.verifyPayment(
+        orderId: orderId,
+        paymentId: paymentId,
+        signature: signature,
+      );
+
+      if (!verified) {
+        state = RegistrationStatePaymentFailed(
+          message: "Payment verification failed",
+          currentRegistration:
+              (state as RegistrationStateInProgress).registration,
+          paymentDetails: (state as RegistrationStateInProgress)
+              .registration
+              .paymentDetails!,
+        );
+        return false;
+      }
+
+      // Mark success inside registration
+      final successPaymentDetails = (state as RegistrationStateInProgress)
+          .registration
+          .paymentDetails!
+          .copyWith(
+            status: PaymentStatus.completed,
+            completedAt: DateTime.now(),
+          );
+
+      updatePaymentDetails(successPaymentDetails);
+
+      return true;
+    } catch (e) {
+      state = const RegistrationStateError(
+        message: "Payment verification failed",
+        code: "VERIFY_PAYMENT_ERROR",
+        canRetry: false,
+      );
+      return false;
+    }
   }
 
   /// Submit membership registration to backend (NEW: Combined Personal + Professional)
