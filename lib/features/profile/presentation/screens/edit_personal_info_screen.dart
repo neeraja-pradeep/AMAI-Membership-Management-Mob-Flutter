@@ -62,8 +62,14 @@ class _EditPersonalInfoScreenState
     _phoneController = TextEditingController(text: profile.phone);
     _whatsappController = TextEditingController(text: profile.phone);
     _selectedDateOfBirth = profile.dateOfBirth;
-    _selectedGender = profile.formattedGender;
-    _selectedBloodGroup = profile.bloodGroup;
+
+    // Validate gender against dropdown options (set to null if not a valid option)
+    final formattedGender = profile.formattedGender;
+    _selectedGender = _genderOptions.contains(formattedGender) ? formattedGender : null;
+
+    // Validate blood group against dropdown options (set to null if not a valid option)
+    final bloodGroup = profile.bloodGroup;
+    _selectedBloodGroup = _bloodGroupOptions.contains(bloodGroup) ? bloodGroup : null;
   }
 
   @override
