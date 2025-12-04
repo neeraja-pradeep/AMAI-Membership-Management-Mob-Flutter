@@ -8,7 +8,7 @@ part of 'membership_card_model.dart';
 
 MembershipCardModel _$MembershipCardModelFromJson(Map<String, dynamic> json) =>
     MembershipCardModel(
-      id: (json['id'] as num).toInt(),
+      id: (json['id'] as num?)?.toInt() ?? 0,
       membershipNumber: json['membership_number'] as String,
       userFirstName: json['user_first_name'] as String,
       endDate: json['end_date'] as String,

@@ -26,7 +26,7 @@ class MembershipCardModel {
   factory MembershipCardModel.fromJson(Map<String, dynamic> json) =>
       _$MembershipCardModelFromJson(json);
 
-  @JsonKey(name: 'id')
+  @JsonKey(name: 'id', defaultValue: 0)
   final int id;
 
   @JsonKey(name: 'membership_number')
