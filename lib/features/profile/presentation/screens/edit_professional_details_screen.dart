@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:myapp/app/theme/colors.dart';
+import 'package:myapp/features/home/application/providers/home_providers.dart';
+import 'package:myapp/features/profile/application/providers/profile_providers.dart';
 
 /// Edit Professional Details Screen (Practitioner, House Surgeon)
 /// Allows users to edit their professional details and medical council registration
@@ -42,6 +44,7 @@ class _EditProfessionalDetailsScreenState
   late TextEditingController _ugCollegeController;
   String? _selectedMedicalCouncilState;
   bool _isSubmitting = false;
+  bool _hasPendingRequest = false;
 
   // State options for Medical Council
   final List<String> _stateOptions = [
@@ -149,13 +152,42 @@ class _EditProfessionalDetailsScreenState
 
               SizedBox(height: 32.h),
 
+              // Pending Request Banner
+              if (_hasPendingRequest) ...[
+                Container(
+                  padding: EdgeInsets.all(12.w),
+                  decoration: BoxDecoration(
+                    color: AppColors.warningLight,
+                    borderRadius: BorderRadius.circular(8.r),
+                    border: Border.all(color: AppColors.warning.withOpacity(0.3)),
+                  ),
+                  child: Row(
+                    children: [
+                      Icon(Icons.hourglass_empty, color: AppColors.warning, size: 20.sp),
+                      SizedBox(width: 12.w),
+                      Expanded(
+                        child: Text(
+                          'You have a pending request awaiting admin approval. You can submit another request after the current one is approved.',
+                          style: TextStyle(
+                            fontSize: 12.sp,
+                            color: AppColors.warning,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                SizedBox(height: 16.h),
+              ],
+
               // Submit Button
               SizedBox(
                 width: double.infinity,
                 child: ElevatedButton(
-                  onPressed: _isSubmitting ? null : _onSubmit,
+                  onPressed: (_isSubmitting || _hasPendingRequest) ? null : _onSubmit,
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: AppColors.primary,
+                    backgroundColor: _hasPendingRequest ? AppColors.grey400 : AppColors.primary,
+                    disabledBackgroundColor: AppColors.grey300,
                     padding: EdgeInsets.symmetric(vertical: 14.h),
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(8.r),
@@ -172,11 +204,11 @@ class _EditProfessionalDetailsScreenState
                           ),
                         )
                       : Text(
-                          'Submit Request',
+                          _hasPendingRequest ? 'Request Pending Approval' : 'Submit Request',
                           style: TextStyle(
                             fontSize: 16.sp,
                             fontWeight: FontWeight.w600,
-                            color: AppColors.white,
+                            color: _hasPendingRequest ? AppColors.grey600 : AppColors.white,
                           ),
                         ),
                 ),
@@ -516,8 +548,52 @@ class _EditProfessionalDetailsScreenState
       _isSubmitting = true;
     });
 
-    // Simulate API call (static for now)
-    await Future.delayed(const Duration(seconds: 2));
+    // Build the list of selected professional categories
+    final selectedProfessionalDetails = <String>[];
+    if (_researcherSelected) selectedProfessionalDetails.add('Researcher');
+    if (_pgScholarSelected) selectedProfessionalDetails.add('PG Scholar');
+    if (_pgDiplomaScholarSelected) selectedProfessionalDetails.add('PG Diploma Scholar');
+    if (_deptOfIsmSelected) selectedProfessionalDetails.add('Dept of ISM');
+    if (_deptOfNamSelected) selectedProfessionalDetails.add('Dept of NAM');
+    if (_deptOfNhmSelected) selectedProfessionalDetails.add('Dept of NHM');
+    if (_aidedCollegeSelected) selectedProfessionalDetails.add('Aided College');
+    if (_govtCollegeSelected) selectedProfessionalDetails.add('Govt College');
+    if (_pvtCollegeSelected) selectedProfessionalDetails.add('PVT College');
+    if (_pvtSectorCollegeSelected) selectedProfessionalDetails.add('PVT Sector College');
+    if (_retdSelected) selectedProfessionalDetails.add('Retired (RETD)');
+    if (_pvtPracticeSelected) selectedProfessionalDetails.add('Private Practice');
+    if (_manufacturerSelected) selectedProfessionalDetails.add('Manufacturer');
+    if (_militaryServiceSelected) selectedProfessionalDetails.add('Military Service');
+    if (_centralGovtSelected) selectedProfessionalDetails.add('Central Govt');
+    if (_esiSelected) selectedProfessionalDetails.add('ESI');
+    if (_otherSelected) selectedProfessionalDetails.add('Other');
+
+    // Build the data map for API
+    final data = <String, dynamic>{
+      'professional_details': selectedProfessionalDetails,
+    };
+
+    // Add medical council fields if provided
+    if (_selectedMedicalCouncilState != null) {
+      data['medical_council_state'] = _selectedMedicalCouncilState;
+    }
+    if (_medicalCouncilNoController.text.trim().isNotEmpty) {
+      data['medical_council_no'] = _medicalCouncilNoController.text.trim();
+    }
+    if (_centralCouncilNoController.text.trim().isNotEmpty) {
+      data['central_council_no'] = _centralCouncilNoController.text.trim();
+    }
+    if (_ugCollegeController.text.trim().isNotEmpty) {
+      data['ug_college'] = _ugCollegeController.text.trim();
+    }
+
+    // Call the API
+    final repository = ref.read(profileRepositoryProvider);
+    final userId = ref.read(userIdProvider);
+    final result = await repository.updatePersonalInfo(
+      userId: userId,
+      data: data,
+    );
 
     if (!mounted) return;
 
@@ -525,8 +601,29 @@ class _EditProfessionalDetailsScreenState
       _isSubmitting = false;
     });
 
-    // Show success dialog
-    _showSuccessDialog();
+    result.fold(
+      (failure) {
+        // Show error message
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(failure.message),
+            backgroundColor: AppColors.error,
+          ),
+        );
+      },
+      (updatedProfile) {
+        // Set pending request state to true
+        setState(() {
+          _hasPendingRequest = true;
+        });
+
+        // Refresh the profile data
+        ref.read(profileStateProvider.notifier).refresh();
+
+        // Show success dialog
+        _showSuccessDialog();
+      },
+    );
   }
 
   void _showSuccessDialog() {
