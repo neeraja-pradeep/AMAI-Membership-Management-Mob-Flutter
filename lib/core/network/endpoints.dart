@@ -90,4 +90,10 @@ class Endpoints {
   /// Payment history endpoint
   /// GET: Retrieve payment receipts for the authenticated user
   static const String paymentHistory = '$apiPrefix/payments/payment/';
+
+  // ============== Insurance Registration Endpoints ==============
+
+  /// Insurance registration endpoint
+  /// POST: Register for ASWAS Plus insurance
+  static const String insuranceRegister = '$apiPrefix/membership/insurance/register/';
 }

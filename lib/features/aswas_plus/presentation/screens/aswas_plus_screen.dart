@@ -14,6 +14,7 @@ import 'package:myapp/features/aswas_plus/presentation/components/nominee_info_c
 import 'package:myapp/features/aswas_plus/presentation/components/download_documents_section.dart';
 import 'package:myapp/features/aswas_plus/presentation/components/note_card.dart';
 import 'package:myapp/features/aswas_plus/presentation/components/not_enrolled_card.dart';
+import 'package:myapp/features/aswas_plus/presentation/screens/register_here_screen.dart';
 import 'package:myapp/features/aswas_plus/presentation/screens/renew_membership_screen.dart';
 
 /// ASWAS Plus Screen - displays insurance policy details
@@ -436,11 +437,11 @@ class _AswasePlusScreenState extends ConsumerState<AswasePlusScreen> {
     );
   }
 
-  /// Handles register button press (static for now)
+  /// Handles register button press - navigates to registration screen
   void _onRegisterPressed() {
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text('Registration flow coming soon'),
+    Navigator.of(context).push(
+      MaterialPageRoute<void>(
+        builder: (context) => const RegisterHereScreen(),
       ),
     );
   }
