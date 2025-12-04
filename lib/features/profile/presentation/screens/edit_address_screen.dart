@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:myapp/app/theme/colors.dart';
+import 'package:myapp/features/home/application/providers/home_providers.dart';
+import 'package:myapp/features/profile/application/providers/profile_providers.dart';
 
 /// Edit Saved Addresses Screen
 /// Allows users to edit their address information
@@ -25,6 +27,7 @@ class _EditAddressScreenState extends ConsumerState<EditAddressScreen> {
   bool _isAptaMailingAddress = false;
   bool _isPermanentAddress = true;
   bool _isSubmitting = false;
+  bool _hasPendingRequest = false;
 
   // Dropdown options (static for now - will be from API later)
   final List<String> _countryOptions = ['India'];
@@ -242,13 +245,42 @@ class _EditAddressScreenState extends ConsumerState<EditAddressScreen> {
 
               SizedBox(height: 32.h),
 
+              // Pending Request Banner
+              if (_hasPendingRequest) ...[
+                Container(
+                  padding: EdgeInsets.all(12.w),
+                  decoration: BoxDecoration(
+                    color: AppColors.warningLight,
+                    borderRadius: BorderRadius.circular(8.r),
+                    border: Border.all(color: AppColors.warning.withOpacity(0.3)),
+                  ),
+                  child: Row(
+                    children: [
+                      Icon(Icons.hourglass_empty, color: AppColors.warning, size: 20.sp),
+                      SizedBox(width: 12.w),
+                      Expanded(
+                        child: Text(
+                          'You have a pending request awaiting admin approval. You can submit another request after the current one is approved.',
+                          style: TextStyle(
+                            fontSize: 12.sp,
+                            color: AppColors.warning,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                SizedBox(height: 16.h),
+              ],
+
               // Submit Button
               SizedBox(
                 width: double.infinity,
                 child: ElevatedButton(
-                  onPressed: _isSubmitting ? null : _onSubmit,
+                  onPressed: (_isSubmitting || _hasPendingRequest) ? null : _onSubmit,
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: AppColors.primary,
+                    backgroundColor: _hasPendingRequest ? AppColors.grey400 : AppColors.primary,
+                    disabledBackgroundColor: AppColors.grey300,
                     padding: EdgeInsets.symmetric(vertical: 14.h),
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(8.r),
@@ -265,11 +297,11 @@ class _EditAddressScreenState extends ConsumerState<EditAddressScreen> {
                           ),
                         )
                       : Text(
-                          'Save Address',
+                          _hasPendingRequest ? 'Request Pending Approval' : 'Submit Request',
                           style: TextStyle(
                             fontSize: 16.sp,
                             fontWeight: FontWeight.w600,
-                            color: AppColors.white,
+                            color: _hasPendingRequest ? AppColors.grey600 : AppColors.white,
                           ),
                         ),
                 ),
@@ -484,8 +516,35 @@ class _EditAddressScreenState extends ConsumerState<EditAddressScreen> {
       _isSubmitting = true;
     });
 
-    // Simulate API call (static for now)
-    await Future.delayed(const Duration(seconds: 2));
+    // Determine address type based on checkboxes
+    String addressType;
+    if (_isAptaMailingAddress) {
+      addressType = 'apta';
+    } else if (_isPermanentAddress) {
+      addressType = 'permanent';
+    } else {
+      addressType = 'communications';
+    }
+
+    // Build the data map for API
+    final data = <String, dynamic>{
+      'address_line1': _houseNoController.text.trim(),
+      'address_line2': _streetController.text.trim(),
+      'city': _postOfficeController.text.trim(),
+      'postal_code': _postalCodeController.text.trim(),
+      'country': _selectedCountry,
+      'state': _selectedState,
+      'district': _districtController.text.trim(),
+      'type': addressType,
+    };
+
+    // Call the API
+    final repository = ref.read(profileRepositoryProvider);
+    final userId = ref.read(userIdProvider);
+    final result = await repository.updatePersonalInfo(
+      userId: userId,
+      data: data,
+    );
 
     if (!mounted) return;
 
@@ -493,8 +552,29 @@ class _EditAddressScreenState extends ConsumerState<EditAddressScreen> {
       _isSubmitting = false;
     });
 
-    // Show success dialog
-    _showSuccessDialog();
+    result.fold(
+      (failure) {
+        // Show error message
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(failure.message),
+            backgroundColor: AppColors.error,
+          ),
+        );
+      },
+      (updatedProfile) {
+        // Set pending request state to true
+        setState(() {
+          _hasPendingRequest = true;
+        });
+
+        // Refresh the profile data
+        ref.read(profileStateProvider.notifier).refresh();
+
+        // Show success dialog
+        _showSuccessDialog();
+      },
+    );
   }
 
   void _showSuccessDialog() {
@@ -506,11 +586,11 @@ class _EditAddressScreenState extends ConsumerState<EditAddressScreen> {
           children: [
             Icon(Icons.check_circle, color: AppColors.success, size: 24.sp),
             SizedBox(width: 8.w),
-            const Text('Address Saved'),
+            const Text('Request Submitted'),
           ],
         ),
         content: const Text(
-          'Your address has been saved successfully. Changes will be reflected after admin approval.',
+          'Your address update request has been submitted successfully. Changes will be reflected after admin approval.',
         ),
         actions: [
           TextButton(
