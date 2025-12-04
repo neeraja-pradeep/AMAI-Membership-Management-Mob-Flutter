@@ -395,6 +395,31 @@ class _RegisterHereScreenState extends ConsumerState<RegisterHereScreen> {
               return null;
             },
           ),
+          SizedBox(height: 16.h),
+
+          // Nominee Email
+          _buildTextField(
+            label: 'Nominee Email',
+            controller: nominee.emailController,
+            keyboardType: TextInputType.emailAddress,
+            validator: (value) {
+              if (value == null || value.isEmpty) {
+                return 'Email is required';
+              }
+              if (!RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$').hasMatch(value)) {
+                return 'Please enter a valid email';
+              }
+              return null;
+            },
+          ),
+          SizedBox(height: 16.h),
+
+          // Nominee Date of Birth
+          _buildNomineeDatePickerField(
+            label: 'Nominee Date of Birth',
+            value: nominee.dateOfBirth,
+            onTap: () => _selectNomineeDateOfBirth(index),
+          ),
         ],
       ),
     );
@@ -749,6 +774,87 @@ class _RegisterHereScreenState extends ConsumerState<RegisterHereScreen> {
     }
   }
 
+  /// Selects nominee date of birth
+  Future<void> _selectNomineeDateOfBirth(int index) async {
+    final nominee = _nominees[index];
+    final DateTime? picked = await showDatePicker(
+      context: context,
+      initialDate: nominee.dateOfBirth ?? DateTime(1990),
+      firstDate: DateTime(1900),
+      lastDate: DateTime.now(),
+      builder: (context, child) {
+        return Theme(
+          data: Theme.of(context).copyWith(
+            colorScheme: const ColorScheme.light(
+              primary: AppColors.primary,
+              onPrimary: AppColors.white,
+              surface: AppColors.white,
+              onSurface: AppColors.textPrimary,
+            ),
+          ),
+          child: child!,
+        );
+      },
+    );
+    if (picked != null && picked != nominee.dateOfBirth) {
+      setState(() {
+        nominee.dateOfBirth = picked;
+      });
+    }
+  }
+
+  /// Builds a date picker field for nominee
+  Widget _buildNomineeDatePickerField({
+    required String label,
+    required DateTime? value,
+    required VoidCallback onTap,
+  }) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          label,
+          style: TextStyle(
+            fontSize: 14.sp,
+            fontWeight: FontWeight.w500,
+            color: AppColors.textPrimary,
+          ),
+        ),
+        SizedBox(height: 8.h),
+        InkWell(
+          onTap: onTap,
+          child: Container(
+            padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 12.h),
+            decoration: BoxDecoration(
+              color: AppColors.white,
+              borderRadius: BorderRadius.circular(8.r),
+              border: Border.all(color: AppColors.grey300),
+            ),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(
+                  value != null
+                      ? DateFormat('dd MMM yyyy').format(value)
+                      : 'Select date',
+                  style: TextStyle(
+                    fontSize: 14.sp,
+                    color: value != null ? AppColors.textPrimary : AppColors.textHint,
+                  ),
+                ),
+                Icon(
+                  Icons.calendar_today_outlined,
+                  color: AppColors.grey400,
+                  size: 20.sp,
+                ),
+              ],
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
   /// Picks document for upload
   void _pickDocument() {
     // Static for now - will integrate with file_picker package later
@@ -800,6 +906,19 @@ class _RegisterHereScreenState extends ConsumerState<RegisterHereScreen> {
       }
     }
 
+    // Validate nominees have date of birth selected
+    for (int i = 0; i < _nominees.length; i++) {
+      if (_nominees[i].dateOfBirth == null) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Please select date of birth for Nominee ${i + 1}'),
+            backgroundColor: AppColors.error,
+          ),
+        );
+        return;
+      }
+    }
+
     setState(() {
       _isSubmitting = true;
     });
@@ -810,7 +929,11 @@ class _RegisterHereScreenState extends ConsumerState<RegisterHereScreen> {
       return {
         'nominee_name': nominee.nameController.text.trim(),
         'relationship': nominee.selectedRelation!.toLowerCase(),
+        'date_of_birth': nominee.dateOfBirth != null
+            ? DateFormat('yyyy-MM-dd').format(nominee.dateOfBirth!)
+            : null,
         'contact_number': nominee.mobileController.text.trim(),
+        'email': nominee.emailController.text.trim(),
         'address': nominee.addressController.text.trim(),
         'allocation_percentage': 100 ~/ _nominees.length,
         'is_primary': _nominees.indexOf(nominee) == 0,
@@ -865,16 +988,20 @@ class NomineeFormData {
   NomineeFormData()
       : nameController = TextEditingController(),
         addressController = TextEditingController(),
-        mobileController = TextEditingController();
+        mobileController = TextEditingController(),
+        emailController = TextEditingController();
 
   final TextEditingController nameController;
   final TextEditingController addressController;
   final TextEditingController mobileController;
+  final TextEditingController emailController;
   String? selectedRelation;
+  DateTime? dateOfBirth;
 
   void dispose() {
     nameController.dispose();
     addressController.dispose();
     mobileController.dispose();
+    emailController.dispose();
   }
 }
