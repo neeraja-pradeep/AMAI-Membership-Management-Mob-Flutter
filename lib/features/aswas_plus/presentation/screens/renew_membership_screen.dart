@@ -7,6 +7,8 @@ import 'package:myapp/features/aswas_plus/application/states/renewal_state.dart'
 import 'package:myapp/features/aswas_plus/domain/entities/digital_product.dart';
 import 'package:myapp/features/aswas_plus/presentation/screens/select_payment_method_screen.dart';
 import 'package:myapp/features/home/application/providers/home_providers.dart';
+import 'package:myapp/features/membership/application/providers/membership_providers.dart';
+import 'package:myapp/features/membership/presentation/screens/membership_payment_screen.dart';
 
 /// Renew Membership Screen
 /// Shows renewal options for membership and Aswas Plus
@@ -284,6 +286,80 @@ class _RenewMembershipScreenState extends ConsumerState<RenewMembershipScreen> {
       _isLoading = true;
     });
 
+    // Get the currently selected product ID
+    final state = ref.read(renewalStateProvider);
+    final selectedProductId = state.maybeWhen(
+      loaded: (_, __, selectedId) => selectedId,
+      orElse: () => null,
+    );
+
+    // Determine which flow to use based on selected product
+    if (selectedProductId == RenewalProductIds.membership) {
+      await _handleMembershipRenewal();
+    } else {
+      await _handleAswasRenewal();
+    }
+  }
+
+  /// Handle membership renewal flow
+  Future<void> _handleMembershipRenewal() async {
+    try {
+      final repository = ref.read(membershipRepositoryProvider);
+      final result = await repository.initiateMembershipPayment();
+
+      if (!mounted) return;
+
+      result.fold(
+        (failure) {
+          setState(() {
+            _isLoading = false;
+          });
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(failure.message),
+              backgroundColor: AppColors.error,
+            ),
+          );
+        },
+        (paymentResponse) {
+          setState(() {
+            _isLoading = false;
+          });
+          if (paymentResponse != null) {
+            Navigator.of(context).push(
+              MaterialPageRoute<void>(
+                builder: (context) => MembershipPaymentScreen(
+                  paymentResponse: paymentResponse,
+                ),
+              ),
+            );
+          } else {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: const Text('Failed to initiate membership renewal'),
+                backgroundColor: AppColors.error,
+              ),
+            );
+          }
+        },
+      );
+    } catch (e) {
+      if (mounted) {
+        setState(() {
+          _isLoading = false;
+        });
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Error: ${e.toString()}'),
+            backgroundColor: AppColors.error,
+          ),
+        );
+      }
+    }
+  }
+
+  /// Handle Aswas Plus renewal flow
+  Future<void> _handleAswasRenewal() async {
     try {
       final repository = ref.read(homeRepositoryProvider);
       final result = await repository.initiateInsuranceRenewal();

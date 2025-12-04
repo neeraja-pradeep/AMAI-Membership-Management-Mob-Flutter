@@ -7,7 +7,8 @@ import 'package:myapp/features/membership/application/states/membership_screen_s
 import 'package:myapp/features/membership/presentation/components/current_status_card.dart';
 import 'package:myapp/features/membership/presentation/components/digital_membership_card.dart';
 import 'package:myapp/features/membership/presentation/components/qr_code_widget.dart';
-import 'package:myapp/features/membership/presentation/screens/membership_renew_screen.dart';
+import 'package:myapp/features/aswas_plus/application/providers/renewal_providers.dart';
+import 'package:myapp/features/aswas_plus/presentation/screens/renew_membership_screen.dart';
 
 /// Main Membership Screen
 /// Displays current membership status, digital card, and payment receipts
@@ -150,7 +151,9 @@ class _MembershipScreenState extends ConsumerState<MembershipScreen> {
             onRenewalPressed: () {
               Navigator.of(context).push(
                 MaterialPageRoute<void>(
-                  builder: (context) => const MembershipRenewScreen(),
+                  builder: (context) => const RenewMembershipScreen(
+                    defaultSelectedProductId: RenewalProductIds.membership,
+                  ),
                 ),
               );
             },
@@ -281,7 +284,9 @@ class _MembershipScreenState extends ConsumerState<MembershipScreen> {
                     onRenewalPressed: () {
                       Navigator.of(context).push(
                         MaterialPageRoute<void>(
-                          builder: (context) => const MembershipRenewScreen(),
+                          builder: (context) => const RenewMembershipScreen(
+                            defaultSelectedProductId: RenewalProductIds.membership,
+                          ),
                         ),
                       );
                     },
