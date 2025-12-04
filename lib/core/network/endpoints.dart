@@ -84,4 +84,10 @@ class Endpoints {
   /// POST: Verify Razorpay payment for membership renewal
   static const String membershipPaymentVerify =
       '$apiPrefix/membership/membership/verify/';
+
+  // ============== Payment History Endpoints ==============
+
+  /// Payment history endpoint
+  /// GET: Retrieve payment receipts for the authenticated user
+  static const String paymentHistory = '$apiPrefix/payments/payment/';
 }

@@ -2,6 +2,7 @@ import 'package:myapp/core/network/api_client.dart';
 import 'package:myapp/core/network/endpoints.dart';
 import 'package:myapp/features/membership/infrastructure/models/membership_payment_response_model.dart';
 import 'package:myapp/features/membership/infrastructure/models/membership_status_model.dart';
+import 'package:myapp/features/membership/infrastructure/models/payment_receipt_model.dart';
 
 /// Abstract class defining the membership API contract
 abstract class MembershipApi {
@@ -37,6 +38,11 @@ abstract class MembershipApi {
     required String razorpayPaymentId,
     required String razorpaySignature,
   });
+
+  /// Fetches payment receipts/history for the authenticated user
+  ///
+  /// Returns ApiResponse with List<PaymentReceiptModel> on success
+  Future<ApiResponse<List<PaymentReceiptModel>>> fetchPaymentReceipts();
 }
 
 /// Implementation of MembershipApi using ApiClient
@@ -96,6 +102,23 @@ class MembershipApiImpl implements MembershipApi {
         'razorpay_signature': razorpaySignature,
       },
       fromJson: (json) => true,
+    );
+
+    return response;
+  }
+
+  @override
+  Future<ApiResponse<List<PaymentReceiptModel>>> fetchPaymentReceipts() async {
+    final response = await apiClient.get<List<PaymentReceiptModel>>(
+      Endpoints.paymentHistory,
+      fromJson: (json) {
+        if (json == null) return <PaymentReceiptModel>[];
+        final list = json as List<dynamic>;
+        return list
+            .map((item) =>
+                PaymentReceiptModel.fromJson(item as Map<String, dynamic>))
+            .toList();
+      },
     );
 
     return response;

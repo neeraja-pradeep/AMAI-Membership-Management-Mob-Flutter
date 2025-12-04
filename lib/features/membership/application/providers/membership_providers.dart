@@ -8,6 +8,7 @@ import 'package:myapp/features/membership/application/usecases/fetch_membership_
 import 'package:myapp/features/membership/domain/repositories/membership_repository.dart';
 import 'package:myapp/features/membership/infrastructure/data_sources/local/membership_local_ds.dart';
 import 'package:myapp/features/membership/infrastructure/data_sources/remote/membership_api.dart';
+import 'package:myapp/features/membership/infrastructure/models/payment_receipt_model.dart';
 import 'package:myapp/features/membership/infrastructure/repositories/membership_repository_impl.dart';
 
 // ============== Core Providers (reusing from home) ==============
@@ -142,3 +143,17 @@ class MembershipScreenNotifier extends StateNotifier<MembershipScreenState> {
     state = const MembershipScreenState.initial();
   }
 }
+
+// ============== Payment Receipts Provider ==============
+
+/// Provider for fetching payment receipts
+final paymentReceiptsProvider =
+    FutureProvider.autoDispose<List<PaymentReceiptModel>>((ref) async {
+  final repository = ref.watch(membershipRepositoryProvider);
+  final result = await repository.getPaymentReceipts();
+
+  return result.fold(
+    (failure) => throw Exception(failure.message),
+    (receipts) => receipts,
+  );
+});

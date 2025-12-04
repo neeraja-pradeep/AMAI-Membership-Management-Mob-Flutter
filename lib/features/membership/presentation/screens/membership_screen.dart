@@ -6,6 +6,7 @@ import 'package:myapp/features/membership/application/providers/membership_provi
 import 'package:myapp/features/membership/application/states/membership_screen_state.dart';
 import 'package:myapp/features/membership/presentation/components/current_status_card.dart';
 import 'package:myapp/features/membership/presentation/components/digital_membership_card.dart';
+import 'package:myapp/features/membership/presentation/components/payment_receipts_section.dart';
 import 'package:myapp/features/membership/presentation/components/qr_code_widget.dart';
 import 'package:myapp/features/aswas_plus/application/providers/renewal_providers.dart';
 import 'package:myapp/features/aswas_plus/presentation/screens/renew_membership_screen.dart';
@@ -38,6 +39,8 @@ class _MembershipScreenState extends ConsumerState<MembershipScreen> {
       appBar: _buildAppBar(context),
       body: RefreshIndicator(
         onRefresh: () async {
+          // Refresh both membership status and payment receipts
+          ref.invalidate(paymentReceiptsProvider);
           await ref.read(membershipScreenStateProvider.notifier).refresh();
         },
         child: _buildBody(state),
@@ -177,9 +180,12 @@ class _MembershipScreenState extends ConsumerState<MembershipScreen> {
             },
           ),
 
-          SizedBox(height: 16.h),
+          SizedBox(height: 24.h),
 
-          // TODO: Add Payment Receipts section
+          // Payment Receipts section
+          const PaymentReceiptsSection(),
+
+          SizedBox(height: 16.h),
         ],
       ),
     );
@@ -305,6 +311,8 @@ class _MembershipScreenState extends ConsumerState<MembershipScreen> {
                       );
                     },
                   ),
+                  SizedBox(height: 24.h),
+                  const PaymentReceiptsSection(),
                 ],
               ),
             )

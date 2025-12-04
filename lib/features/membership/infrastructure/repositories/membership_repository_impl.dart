@@ -7,6 +7,7 @@ import 'package:myapp/features/membership/domain/entities/membership_status.dart
 import 'package:myapp/features/membership/domain/repositories/membership_repository.dart';
 import 'package:myapp/features/membership/infrastructure/data_sources/local/membership_local_ds.dart';
 import 'package:myapp/features/membership/infrastructure/data_sources/remote/membership_api.dart';
+import 'package:myapp/features/membership/infrastructure/models/payment_receipt_model.dart';
 
 /// Implementation of MembershipRepository
 /// Handles API calls, caching logic, and connectivity checks
@@ -139,6 +140,34 @@ class MembershipRepositoryImpl implements MembershipRepository {
       // Handle failure
       return const Left(
         ServerFailure(message: 'Payment verification failed'),
+      );
+    } on NetworkException catch (e) {
+      return Left(FailureMapper.fromNetworkException(e));
+    } catch (e) {
+      return Left(UnknownFailure(message: e.toString()));
+    }
+  }
+
+  @override
+  Future<Either<Failure, List<PaymentReceiptModel>>> getPaymentReceipts() async {
+    try {
+      // Check connectivity
+      final connectivityResult = await connectivity.checkConnectivity();
+      if (connectivityResult.contains(ConnectivityResult.none)) {
+        return const Left(NetworkFailure());
+      }
+
+      // Make API call
+      final response = await membershipApi.fetchPaymentReceipts();
+
+      // Handle successful response
+      if (response.isSuccess) {
+        return Right(response.data ?? []);
+      }
+
+      // Handle failure
+      return const Left(
+        ServerFailure(message: 'Failed to fetch payment receipts'),
       );
     } on NetworkException catch (e) {
       return Left(FailureMapper.fromNetworkException(e));

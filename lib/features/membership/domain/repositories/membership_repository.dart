@@ -2,6 +2,7 @@ import 'package:fpdart/fpdart.dart';
 import 'package:myapp/core/error/failure.dart';
 import 'package:myapp/features/membership/domain/entities/membership_payment_response.dart';
 import 'package:myapp/features/membership/domain/entities/membership_status.dart';
+import 'package:myapp/features/membership/infrastructure/models/payment_receipt_model.dart';
 
 /// Abstract repository interface for membership operations
 /// Defines the contract for fetching and caching membership data
@@ -52,4 +53,11 @@ abstract class MembershipRepository {
     required String razorpayPaymentId,
     required String razorpaySignature,
   });
+
+  /// Fetches payment receipts/history for the authenticated user
+  ///
+  /// Returns:
+  /// - Right(List<PaymentReceiptModel>) on success
+  /// - Left(Failure) on error
+  Future<Either<Failure, List<PaymentReceiptModel>>> getPaymentReceipts();
 }
