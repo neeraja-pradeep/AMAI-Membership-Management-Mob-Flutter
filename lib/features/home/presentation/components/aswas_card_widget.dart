@@ -77,6 +77,7 @@ class AswasCardWidget extends StatelessWidget {
           isActive: aswasPlus.isActive,
           isExpired: aswasPlus.isExpired,
           isExpiringSoon: aswasPlus.isExpiringSoon,
+          isPending: aswasPlus.isPending,
         ),
       ],
     );
@@ -238,12 +239,14 @@ class AswasStatusBadge extends StatelessWidget {
     required this.isActive,
     required this.isExpired,
     required this.isExpiringSoon,
+    this.isPending = false,
     super.key,
   });
 
   final bool isActive;
   final bool isExpired;
   final bool isExpiringSoon;
+  final bool isPending;
 
   @override
   Widget build(BuildContext context) {
@@ -263,6 +266,10 @@ class AswasStatusBadge extends StatelessWidget {
       backgroundColor = AppColors.activeBadge;
       textColor = AppColors.activeBadgeText;
       text = 'Active';
+    } else if (isPending) {
+      backgroundColor = AppColors.pendingBadge;
+      textColor = AppColors.pendingBadgeText;
+      text = 'Pending';
     } else {
       backgroundColor = AppColors.inactiveBadge;
       textColor = AppColors.inactiveBadgeText;

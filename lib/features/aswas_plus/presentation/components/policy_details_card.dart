@@ -91,6 +91,10 @@ class PolicyDetailsCard extends StatelessWidget {
       backgroundColor = AppColors.activeBadge;
       textColor = AppColors.activeBadgeText;
       text = 'Active';
+    } else if (aswasPlus.isPending) {
+      backgroundColor = AppColors.pendingBadge;
+      textColor = AppColors.pendingBadgeText;
+      text = 'Pending';
     } else {
       backgroundColor = AppColors.inactiveBadge;
       textColor = AppColors.inactiveBadgeText;

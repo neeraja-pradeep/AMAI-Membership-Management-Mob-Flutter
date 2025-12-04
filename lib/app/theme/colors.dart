@@ -100,6 +100,8 @@ class AppColors {
   static const Color expiredBadgeText = Color(0xFFFFFFFF);
   static const Color expiringSoonBadge = Color(0xFFFF9800);
   static const Color expiringSoonBadgeText = Color(0xFFFFFFFF);
+  static const Color pendingBadge = Color(0xFFFFF3E0);
+  static const Color pendingBadgeText = Color(0xFFE65100);
 
   // ============== Divider Colors ==============
   static const Color divider = Color(0xFFE0E0E0);
