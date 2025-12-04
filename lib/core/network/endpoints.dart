@@ -72,4 +72,16 @@ class Endpoints {
   /// User profile endpoint
   /// GET: Retrieve user profile by ID
   static String userProfile(int userId) => '$apiPrefix/accounts/users/$userId/';
+
+  // ============== Membership Payment Endpoints ==============
+
+  /// Membership payment initiation endpoint
+  /// POST: Initiate membership renewal payment
+  static const String membershipPayment =
+      '$apiPrefix/membership/membership/payment/';
+
+  /// Membership payment verification endpoint
+  /// POST: Verify Razorpay payment for membership renewal
+  static const String membershipPaymentVerify =
+      '$apiPrefix/membership/membership/verify/';
 }

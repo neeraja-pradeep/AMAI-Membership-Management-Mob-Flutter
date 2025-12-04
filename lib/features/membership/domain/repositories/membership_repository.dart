@@ -1,5 +1,6 @@
 import 'package:fpdart/fpdart.dart';
 import 'package:myapp/core/error/failure.dart';
+import 'package:myapp/features/membership/domain/entities/membership_payment_response.dart';
 import 'package:myapp/features/membership/domain/entities/membership_status.dart';
 
 /// Abstract repository interface for membership operations
@@ -25,4 +26,30 @@ abstract class MembershipRepository {
 
   /// Clears the stored timestamp
   Future<void> clearTimestamp();
+
+  /// Initiates membership payment
+  ///
+  /// [userId] - The user ID to initiate payment for
+  ///
+  /// Returns:
+  /// - Right(MembershipPaymentResponse) on success
+  /// - Left(Failure) on error
+  Future<Either<Failure, MembershipPaymentResponse>> initiateMembershipPayment({
+    required int userId,
+  });
+
+  /// Verifies membership payment after Razorpay success
+  ///
+  /// [razorpayOrderId] - The Razorpay order ID
+  /// [razorpayPaymentId] - The Razorpay payment ID
+  /// [razorpaySignature] - The Razorpay signature
+  ///
+  /// Returns:
+  /// - Right(true) on success
+  /// - Left(Failure) on error
+  Future<Either<Failure, bool>> verifyMembershipPayment({
+    required String razorpayOrderId,
+    required String razorpayPaymentId,
+    required String razorpaySignature,
+  });
 }
