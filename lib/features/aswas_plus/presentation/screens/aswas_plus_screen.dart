@@ -13,6 +13,7 @@ import 'package:myapp/features/aswas_plus/presentation/components/scheme_details
 import 'package:myapp/features/aswas_plus/presentation/components/nominee_info_card.dart';
 import 'package:myapp/features/aswas_plus/presentation/components/download_documents_section.dart';
 import 'package:myapp/features/aswas_plus/presentation/components/note_card.dart';
+import 'package:myapp/features/aswas_plus/presentation/components/not_enrolled_card.dart';
 import 'package:myapp/features/aswas_plus/presentation/screens/renew_membership_screen.dart';
 
 /// ASWAS Plus Screen - displays insurance policy details
@@ -399,62 +400,47 @@ class _AswasePlusScreenState extends ConsumerState<AswasePlusScreen> {
     );
   }
 
-  /// Builds empty state (no policy)
+  /// Builds empty state (no policy) - shows non-enrolled view
   Widget _buildEmptyState() {
-    return Center(
-      child: Padding(
-        padding: EdgeInsets.all(32.w),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(
-              Icons.shield_outlined,
-              size: 64.sp,
-              color: AppColors.textHint,
-            ),
-            SizedBox(height: 16.h),
-            Text(
-              'No Active Policy',
-              style: AppTypography.titleMedium.copyWith(
-                color: AppColors.textPrimary,
-              ),
-              textAlign: TextAlign.center,
-            ),
-            SizedBox(height: 8.h),
-            Text(
-              'You don\'t have an active ASWAS Plus policy.\nRegister now to get coverage.',
-              style: AppTypography.bodyMedium.copyWith(
-                color: AppColors.textSecondary,
-              ),
-              textAlign: TextAlign.center,
-            ),
-            SizedBox(height: 24.h),
-            ElevatedButton(
-              onPressed: () {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(
-                    content: Text('Registration flow coming soon'),
-                  ),
-                );
-              },
-              style: ElevatedButton.styleFrom(
-                backgroundColor: AppColors.primary,
-                padding: EdgeInsets.symmetric(horizontal: 32.w, vertical: 12.h),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(8.r),
-                ),
-              ),
-              child: Text(
-                'Register for Policy',
-                style: TextStyle(
-                  fontSize: 14.sp,
-                  fontWeight: FontWeight.w600,
-                  color: AppColors.white,
-                ),
-              ),
-            ),
-          ],
-        ),
+    return SingleChildScrollView(
+      physics: const AlwaysScrollableScrollPhysics(),
+      padding: EdgeInsets.all(16.w),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // Not Enrolled Card
+          NotEnrolledCard(
+            onRegisterPressed: _onRegisterPressed,
+          ),
+
+          SizedBox(height: 24.h),
+
+          // Scheme Details Section (without renew button)
+          const SchemeDetailsSection(
+            showRenewButton: false,
+          ),
+
+          SizedBox(height: 24.h),
+
+          // Download Documents Section
+          const DownloadDocumentsSection(),
+
+          SizedBox(height: 24.h),
+
+          // Note Card
+          const NoteCard(),
+
+          SizedBox(height: 24.h),
+        ],
+      ),
+    );
+  }
+
+  /// Handles register button press (static for now)
+  void _onRegisterPressed() {
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(
+        content: Text('Registration flow coming soon'),
       ),
     );
   }
