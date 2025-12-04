@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:myapp/app/theme/colors.dart';
+import 'package:myapp/features/home/application/providers/home_providers.dart';
+import 'package:myapp/features/profile/application/providers/profile_providers.dart';
 
 /// Edit Academic Details Screen (Practitioner only)
 /// Allows practitioners to edit their academic qualifications
@@ -23,6 +25,7 @@ class _EditAcademicDetailsScreenState
   bool _pgDiplomaSelected = false;
   bool _otherSelected = false;
   bool _isSubmitting = false;
+  bool _hasPendingRequest = false;
 
   @override
   Widget build(BuildContext context) {
@@ -162,13 +165,42 @@ class _EditAcademicDetailsScreenState
 
             SizedBox(height: 32.h),
 
+            // Pending Request Banner
+            if (_hasPendingRequest) ...[
+              Container(
+                padding: EdgeInsets.all(12.w),
+                decoration: BoxDecoration(
+                  color: AppColors.warningLight,
+                  borderRadius: BorderRadius.circular(8.r),
+                  border: Border.all(color: AppColors.warning.withOpacity(0.3)),
+                ),
+                child: Row(
+                  children: [
+                    Icon(Icons.hourglass_empty, color: AppColors.warning, size: 20.sp),
+                    SizedBox(width: 12.w),
+                    Expanded(
+                      child: Text(
+                        'You have a pending request awaiting admin approval. You can submit another request after the current one is approved.',
+                        style: TextStyle(
+                          fontSize: 12.sp,
+                          color: AppColors.warning,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              SizedBox(height: 16.h),
+            ],
+
             // Submit Button
             SizedBox(
               width: double.infinity,
               child: ElevatedButton(
-                onPressed: _isSubmitting ? null : _onSubmit,
+                onPressed: (_isSubmitting || _hasPendingRequest) ? null : _onSubmit,
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: AppColors.primary,
+                  backgroundColor: _hasPendingRequest ? AppColors.grey400 : AppColors.primary,
+                  disabledBackgroundColor: AppColors.grey300,
                   padding: EdgeInsets.symmetric(vertical: 14.h),
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(8.r),
@@ -185,11 +217,11 @@ class _EditAcademicDetailsScreenState
                         ),
                       )
                     : Text(
-                        'Submit Request',
+                        _hasPendingRequest ? 'Request Pending Approval' : 'Submit Request',
                         style: TextStyle(
                           fontSize: 16.sp,
                           fontWeight: FontWeight.w600,
-                          color: AppColors.white,
+                          color: _hasPendingRequest ? AppColors.grey600 : AppColors.white,
                         ),
                       ),
               ),
@@ -311,8 +343,27 @@ class _EditAcademicDetailsScreenState
       _isSubmitting = true;
     });
 
-    // Simulate API call (static for now)
-    await Future.delayed(const Duration(seconds: 2));
+    // Build the list of selected academic qualifications
+    final selectedQualifications = <String>[];
+    if (_ugSelected) selectedQualifications.add('UG');
+    if (_pgSelected) selectedQualifications.add('PG');
+    if (_phdSelected) selectedQualifications.add('PhD');
+    if (_ccrasSelected) selectedQualifications.add('CCRAS');
+    if (_pgDiplomaSelected) selectedQualifications.add('PG Diploma');
+    if (_otherSelected) selectedQualifications.add('Other');
+
+    // Build the data map for API
+    final data = <String, dynamic>{
+      'academic_details': selectedQualifications,
+    };
+
+    // Call the API
+    final repository = ref.read(profileRepositoryProvider);
+    final userId = ref.read(userIdProvider);
+    final result = await repository.updatePersonalInfo(
+      userId: userId,
+      data: data,
+    );
 
     if (!mounted) return;
 
@@ -320,8 +371,29 @@ class _EditAcademicDetailsScreenState
       _isSubmitting = false;
     });
 
-    // Show success dialog
-    _showSuccessDialog();
+    result.fold(
+      (failure) {
+        // Show error message
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(failure.message),
+            backgroundColor: AppColors.error,
+          ),
+        );
+      },
+      (updatedProfile) {
+        // Set pending request state to true
+        setState(() {
+          _hasPendingRequest = true;
+        });
+
+        // Refresh the profile data
+        ref.read(profileStateProvider.notifier).refresh();
+
+        // Show success dialog
+        _showSuccessDialog();
+      },
+    );
   }
 
   void _showSuccessDialog() {
