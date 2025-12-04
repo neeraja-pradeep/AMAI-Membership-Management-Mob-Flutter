@@ -118,8 +118,8 @@ class HomeRepositoryImpl implements HomeRepository {
       if (response.isSuccess && response.data != null) {
         final aswasPlus = response.data!.toDomain();
 
-        // Return policy if active or inactive (show details for both)
-        if (!aswasPlus.isActive && !aswasPlus.isExpired) {
+        // Return policy if active, inactive, or pending (show details for all)
+        if (!aswasPlus.isActive && !aswasPlus.isExpired && !aswasPlus.isPending) {
           return right(null);
         }
 

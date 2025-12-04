@@ -183,12 +183,12 @@ class HomeApiImpl implements HomeApi {
     AswasCardModel? aswasCard;
 
     if (response.data != null && response.data!.isNotEmpty) {
-      // Get the first ACTIVE or INACTIVE policy from the array
+      // Get the first ACTIVE, INACTIVE, or PENDING policy from the array
       final policies = response.data!
           .map((json) => AswasCardModel.fromJson(json as Map<String, dynamic>))
           .where((policy) {
             final status = policy.policyStatus.toLowerCase();
-            return status == 'active' || status == 'inactive';
+            return status == 'active' || status == 'inactive' || status == 'pending';
           })
           .toList();
 

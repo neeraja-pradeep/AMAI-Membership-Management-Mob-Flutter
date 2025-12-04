@@ -38,6 +38,9 @@ class AswasPlus with _$AswasPlus {
   /// Check if policy is active
   bool get isActive => policyStatus.toLowerCase() == 'active';
 
+  /// Check if policy is pending
+  bool get isPending => policyStatus.toLowerCase() == 'pending';
+
   /// Check if policy has expired based on status or date
   bool get isExpired =>
       policyStatus.toLowerCase() == 'inactive' ||
