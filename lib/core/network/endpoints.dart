@@ -96,4 +96,8 @@ class Endpoints {
   /// Insurance registration endpoint
   /// POST: Register for ASWAS Plus insurance
   static const String insuranceRegister = '$apiPrefix/membership/insurance/register/';
+
+  /// Insurance verification endpoint
+  /// POST: Verify Razorpay payment for insurance registration
+  static const String insuranceVerify = '$apiPrefix/membership/insurance/verify/';
 }

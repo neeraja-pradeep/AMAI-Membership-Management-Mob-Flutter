@@ -4,6 +4,8 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:intl/intl.dart';
 import 'package:myapp/app/theme/colors.dart';
 import 'package:myapp/features/aswas_plus/application/providers/registration_providers.dart';
+import 'package:myapp/features/aswas_plus/infrastructure/models/registration_response_model.dart';
+import 'package:myapp/features/aswas_plus/presentation/screens/registration_payment_screen.dart';
 import 'package:myapp/features/home/application/providers/home_providers.dart';
 
 /// Register Here Screen for ASWAS Plus registration
@@ -839,40 +841,20 @@ class _RegisterHereScreenState extends ConsumerState<RegisterHereScreen> {
           ),
         );
       },
-      (success) {
-        _showSuccessDialog();
+      (registrationResponse) {
+        // Navigate to payment screen
+        _navigateToPayment(registrationResponse);
       },
     );
   }
 
-  /// Shows success dialog
-  void _showSuccessDialog() {
-    showDialog(
-      context: context,
-      barrierDismissible: false,
-      builder: (context) => AlertDialog(
-        title: Row(
-          children: [
-            Icon(Icons.check_circle, color: AppColors.success, size: 24.sp),
-            SizedBox(width: 8.w),
-            const Text('Registration Submitted'),
-          ],
+  /// Navigates to payment screen with registration response
+  void _navigateToPayment(RegistrationResponseModel registrationResponse) {
+    Navigator.of(context).push(
+      MaterialPageRoute<void>(
+        builder: (context) => RegistrationPaymentScreen(
+          registrationResponse: registrationResponse,
         ),
-        content: const Text(
-          'Your ASWAS Plus registration has been submitted successfully. You will be notified once it is approved.',
-        ),
-        actions: [
-          TextButton(
-            onPressed: () {
-              Navigator.of(context).pop();
-              Navigator.of(context).pop();
-            },
-            child: Text(
-              'OK',
-              style: TextStyle(color: AppColors.primary),
-            ),
-          ),
-        ],
       ),
     );
   }
