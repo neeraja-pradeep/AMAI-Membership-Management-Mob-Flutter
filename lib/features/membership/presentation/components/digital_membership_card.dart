@@ -39,60 +39,106 @@ class DigitalMembershipCard extends StatelessWidget {
         ),
         SizedBox(height: 12.h),
 
-        // Card container
-        Container(
-          width: double.infinity,
-          padding: EdgeInsets.all(20.w),
-          decoration: BoxDecoration(
-            color: AppColors.cardBackground,
-            borderRadius: BorderRadius.circular(12.r),
-            boxShadow: [
-              BoxShadow(
-                color: AppColors.cardShadow,
-                blurRadius: 8.r,
-                offset: Offset(0, 2.h),
-              ),
-            ],
-          ),
-          child: Column(
-            children: [
-              // Card title
-              Text(
-                'AMAI Digital Membership Card',
-                style: TextStyle(
-                  fontSize: 18.sp,
-                  fontWeight: FontWeight.w700,
-                  color: AppColors.textPrimary,
-                ),
-                textAlign: TextAlign.center,
-              ),
-              SizedBox(height: 4.h),
-
-              // Subtitle
-              Text(
-                'Show at events and check-ins',
-                style: TextStyle(
-                  fontSize: 14.sp,
-                  fontWeight: FontWeight.w400,
-                  color: AppColors.textSecondary,
-                ),
-                textAlign: TextAlign.center,
-              ),
-              SizedBox(height: 20.h),
-
-              // QR Code
-              QrCodeWidget(
-                data: membershipStatus.membershipNumber,
-                size: 180.w,
-              ),
-              SizedBox(height: 20.h),
-
-              // Action buttons
-              _buildActionButtons(),
-            ],
-          ),
-        ),
+        // Card container - show unavailable message if membership is inactive
+        if (!membershipStatus.isActive)
+          _buildUnavailableCard()
+        else
+          _buildActiveCard(),
       ],
+    );
+  }
+
+  /// Builds the unavailable card message for inactive membership
+  Widget _buildUnavailableCard() {
+    return Container(
+      width: double.infinity,
+      padding: EdgeInsets.all(24.w),
+      decoration: BoxDecoration(
+        color: AppColors.cardBackground,
+        borderRadius: BorderRadius.circular(12.r),
+        boxShadow: [
+          BoxShadow(
+            color: AppColors.cardShadow,
+            blurRadius: 8.r,
+            offset: Offset(0, 2.h),
+          ),
+        ],
+      ),
+      child: Column(
+        children: [
+          Icon(
+            Icons.credit_card_off_outlined,
+            size: 48.sp,
+            color: AppColors.grey400,
+          ),
+          SizedBox(height: 16.h),
+          Text(
+            'Digital card is unavailable because your membership has expired. Renew to regain access.',
+            style: TextStyle(
+              fontSize: 14.sp,
+              fontWeight: FontWeight.w400,
+              color: AppColors.textSecondary,
+            ),
+            textAlign: TextAlign.center,
+          ),
+        ],
+      ),
+    );
+  }
+
+  /// Builds the active card with QR code
+  Widget _buildActiveCard() {
+    return Container(
+      width: double.infinity,
+      padding: EdgeInsets.all(20.w),
+      decoration: BoxDecoration(
+        color: AppColors.cardBackground,
+        borderRadius: BorderRadius.circular(12.r),
+        boxShadow: [
+          BoxShadow(
+            color: AppColors.cardShadow,
+            blurRadius: 8.r,
+            offset: Offset(0, 2.h),
+          ),
+        ],
+      ),
+      child: Column(
+        children: [
+          // Card title
+          Text(
+            'AMAI Digital Membership Card',
+            style: TextStyle(
+              fontSize: 18.sp,
+              fontWeight: FontWeight.w700,
+              color: AppColors.textPrimary,
+            ),
+            textAlign: TextAlign.center,
+          ),
+          SizedBox(height: 4.h),
+
+          // Subtitle
+          Text(
+            'Show at events and check-ins',
+            style: TextStyle(
+              fontSize: 14.sp,
+              fontWeight: FontWeight.w400,
+              color: AppColors.textSecondary,
+            ),
+            textAlign: TextAlign.center,
+          ),
+          SizedBox(height: 20.h),
+
+          // QR Code
+          QrCodeWidget(
+            data: membershipStatus.membershipNumber,
+            size: 180.w,
+          ),
+          SizedBox(height: 20.h),
+
+          // Action buttons
+          _buildActionButtons(),
+        ],
+      ),
     );
   }
 

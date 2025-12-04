@@ -45,7 +45,8 @@ class MembershipStatus with _$MembershipStatus {
   bool get isExpiringSoon => daysUntilExpiry > 0 && daysUntilExpiry <= 30;
 
   /// Whether to show the renewal button
-  bool get shouldShowRenewalButton => isRenewalDue;
+  /// Shows when renewal is due OR when membership is inactive
+  bool get shouldShowRenewalButton => isRenewalDue || !isActive;
 
   /// Formatted validity date string (e.g., "31 Dec 2025")
   String get formattedValidUntil => DateFormat('dd MMM yyyy').format(validUntil);

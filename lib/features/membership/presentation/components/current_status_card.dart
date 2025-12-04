@@ -112,7 +112,7 @@ class CurrentStatusCard extends ConsumerWidget {
     return SizedBox(
       width: double.infinity,
       child: AppButton(
-        text: 'Renew Membership',
+        text: membershipStatus.isActive ? 'Renew Membership' : 'Renew Now',
         onPressed: onRenewalPressed ?? () {},
         variant: AppButtonVariant.primary,
       ),

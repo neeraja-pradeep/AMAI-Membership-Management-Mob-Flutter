@@ -81,7 +81,7 @@ class MembershipStatusBadge extends StatelessWidget {
     String label;
 
     if (!isActive) {
-      label = 'Inactive';
+      label = 'Expired';
     } else if (isExpired) {
       label = 'Expired';
     } else if (isExpiringSoon) {
@@ -93,8 +93,8 @@ class MembershipStatusBadge extends StatelessWidget {
     return StatusBadge(
       label: label,
       isActive: isActive && !isExpired,
-      isExpired: isExpired,
-      isExpiringSoon: isExpiringSoon && !isExpired,
+      isExpired: isExpired || !isActive,
+      isExpiringSoon: isExpiringSoon && !isExpired && isActive,
     );
   }
 }
