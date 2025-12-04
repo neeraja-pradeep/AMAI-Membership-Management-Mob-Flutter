@@ -102,4 +102,35 @@ class ProfileRepositoryImpl implements ProfileRepository {
       return left(FailureMapper.fromException(e));
     }
   }
+
+  @override
+  Future<Either<Failure, UserProfile>> updatePersonalInfo({
+    required int userId,
+    required Map<String, dynamic> data,
+  }) async {
+    // Check connectivity
+    final connectivityResult = await connectivity.checkConnectivity();
+    final isOnline = !connectivityResult.contains(ConnectivityResult.none);
+
+    if (!isOnline) {
+      return left(const NetworkFailure());
+    }
+
+    try {
+      final response = await profileApi.updatePersonalInfo(
+        userId: userId,
+        data: data,
+      );
+
+      if (response.isSuccess && response.data != null) {
+        return right(response.data!.toDomain());
+      }
+
+      return left(const ServerFailure(message: 'Failed to update personal information'));
+    } on NetworkException catch (e) {
+      return left(FailureMapper.fromNetworkException(e));
+    } catch (e) {
+      return left(FailureMapper.fromException(e));
+    }
+  }
 }

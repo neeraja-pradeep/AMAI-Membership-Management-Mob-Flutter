@@ -3,6 +3,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:intl/intl.dart';
 import 'package:myapp/app/theme/colors.dart';
+import 'package:myapp/features/home/application/providers/home_providers.dart';
+import 'package:myapp/features/profile/application/providers/profile_providers.dart';
 import 'package:myapp/features/profile/domain/entities/user_profile.dart';
 
 /// Edit Personal Information Screen
@@ -32,6 +34,7 @@ class _EditPersonalInfoScreenState
   String? _selectedBloodGroup;
   bool _whatsappSameAsPhone = false;
   bool _isSubmitting = false;
+  bool _hasPendingRequest = false;
 
   // Dropdown options (static for now - will be from API later)
   final List<String> _genderOptions = ['Male', 'Female', 'Other'];
@@ -231,13 +234,42 @@ class _EditPersonalInfoScreenState
               ),
               SizedBox(height: 32.h),
 
+              // Pending Request Banner
+              if (_hasPendingRequest) ...[
+                Container(
+                  padding: EdgeInsets.all(12.w),
+                  decoration: BoxDecoration(
+                    color: AppColors.warningLight,
+                    borderRadius: BorderRadius.circular(8.r),
+                    border: Border.all(color: AppColors.warning.withOpacity(0.3)),
+                  ),
+                  child: Row(
+                    children: [
+                      Icon(Icons.hourglass_empty, color: AppColors.warning, size: 20.sp),
+                      SizedBox(width: 12.w),
+                      Expanded(
+                        child: Text(
+                          'You have a pending request awaiting admin approval. You can submit another request after the current one is approved.',
+                          style: TextStyle(
+                            fontSize: 12.sp,
+                            color: AppColors.warning,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                SizedBox(height: 16.h),
+              ],
+
               // Submit Button
               SizedBox(
                 width: double.infinity,
                 child: ElevatedButton(
-                  onPressed: _isSubmitting ? null : _onSubmit,
+                  onPressed: (_isSubmitting || _hasPendingRequest) ? null : _onSubmit,
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: AppColors.primary,
+                    backgroundColor: _hasPendingRequest ? AppColors.grey400 : AppColors.primary,
+                    disabledBackgroundColor: AppColors.grey300,
                     padding: EdgeInsets.symmetric(vertical: 14.h),
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(8.r),
@@ -254,11 +286,11 @@ class _EditPersonalInfoScreenState
                           ),
                         )
                       : Text(
-                          'Submit Request',
+                          _hasPendingRequest ? 'Request Pending Approval' : 'Submit Request',
                           style: TextStyle(
                             fontSize: 16.sp,
                             fontWeight: FontWeight.w600,
-                            color: AppColors.white,
+                            color: _hasPendingRequest ? AppColors.grey600 : AppColors.white,
                           ),
                         ),
                 ),
@@ -503,8 +535,36 @@ class _EditPersonalInfoScreenState
       _isSubmitting = true;
     });
 
-    // Simulate API call (static for now)
-    await Future.delayed(const Duration(seconds: 2));
+    // Build the data map for API
+    final data = <String, dynamic>{
+      'first_name': _nameController.text.trim(),
+      'email': _emailController.text.trim(),
+      'phone': _phoneController.text.trim(),
+      'wa_phone': _whatsappController.text.trim(),
+    };
+
+    // Add date of birth if selected (format: YYYY-MM-DD)
+    if (_selectedDateOfBirth != null) {
+      data['date_of_birth'] = DateFormat('yyyy-MM-dd').format(_selectedDateOfBirth!);
+    }
+
+    // Add gender if selected (lowercase for API)
+    if (_selectedGender != null) {
+      data['gender'] = _selectedGender!.toLowerCase();
+    }
+
+    // Add blood group if selected
+    if (_selectedBloodGroup != null) {
+      data['blood_group'] = _selectedBloodGroup;
+    }
+
+    // Call the API
+    final repository = ref.read(profileRepositoryProvider);
+    final userId = ref.read(userIdProvider);
+    final result = await repository.updatePersonalInfo(
+      userId: userId,
+      data: data,
+    );
 
     if (!mounted) return;
 
@@ -512,8 +572,29 @@ class _EditPersonalInfoScreenState
       _isSubmitting = false;
     });
 
-    // Show success dialog
-    _showSuccessDialog();
+    result.fold(
+      (failure) {
+        // Show error message
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(failure.message),
+            backgroundColor: AppColors.error,
+          ),
+        );
+      },
+      (updatedProfile) {
+        // Set pending request state to true
+        setState(() {
+          _hasPendingRequest = true;
+        });
+
+        // Refresh the profile data
+        ref.read(profileStateProvider.notifier).refresh();
+
+        // Show success dialog
+        _showSuccessDialog();
+      },
+    );
   }
 
   void _showSuccessDialog() {

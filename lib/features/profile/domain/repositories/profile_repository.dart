@@ -26,4 +26,24 @@ abstract class ProfileRepository {
   Future<Either<Failure, ProfileData>> getProfileData({
     required int userId,
   });
+
+  /// Updates user personal information
+  ///
+  /// [userId] - The user ID to update
+  /// [data] - Map containing the fields to update:
+  ///   - first_name: User's first name
+  ///   - email: User's email address
+  ///   - phone: User's phone number
+  ///   - wa_phone: User's WhatsApp number
+  ///   - date_of_birth: User's date of birth (YYYY-MM-DD format)
+  ///   - gender: User's gender
+  ///   - blood_group: User's blood group
+  ///
+  /// Returns:
+  /// - Right(UserProfile) on success
+  /// - Left(Failure) on error
+  Future<Either<Failure, UserProfile>> updatePersonalInfo({
+    required int userId,
+    required Map<String, dynamic> data,
+  });
 }
