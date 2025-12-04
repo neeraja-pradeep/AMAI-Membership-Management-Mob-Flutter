@@ -10,6 +10,11 @@ import 'package:myapp/features/profile/presentation/components/personal_informat
 import 'package:myapp/features/profile/presentation/components/edit_profile_options_card.dart';
 import 'package:myapp/features/profile/presentation/components/support_preferences_section.dart';
 import 'package:myapp/features/profile/presentation/components/profile_loading_shimmer.dart';
+import 'package:myapp/features/profile/presentation/screens/edit_personal_info_screen.dart';
+import 'package:myapp/features/profile/presentation/screens/edit_address_screen.dart';
+import 'package:myapp/features/profile/presentation/screens/edit_academic_details_screen.dart';
+import 'package:myapp/features/profile/presentation/screens/edit_professional_details_screen.dart';
+import 'package:myapp/features/profile/presentation/screens/edit_nominee_screen.dart';
 
 /// Profile Screen - displays user profile with conditional UI based on membership type
 class ProfileScreen extends ConsumerStatefulWidget {
@@ -115,19 +120,41 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
             EditProfileOptionsCard(
               membershipType: data.membershipType,
               onPersonalInfoTap: () {
-                // TODO: Navigate to Edit Personal Information
+                Navigator.of(context).push(
+                  MaterialPageRoute<void>(
+                    builder: (context) => EditPersonalInfoScreen(
+                      userProfile: data.userProfile,
+                    ),
+                  ),
+                );
               },
               onAddressesTap: () {
-                // TODO: Navigate to Edit Addresses
+                Navigator.of(context).push(
+                  MaterialPageRoute<void>(
+                    builder: (context) => const EditAddressScreen(),
+                  ),
+                );
               },
               onAcademicDetailsTap: () {
-                // TODO: Navigate to Edit Academic Details (Practitioner only)
+                Navigator.of(context).push(
+                  MaterialPageRoute<void>(
+                    builder: (context) => const EditAcademicDetailsScreen(),
+                  ),
+                );
               },
               onProfessionalDetailsTap: () {
-                // TODO: Navigate to Edit Professional Details
+                Navigator.of(context).push(
+                  MaterialPageRoute<void>(
+                    builder: (context) => const EditProfessionalDetailsScreen(),
+                  ),
+                );
               },
               onNomineeDetailsTap: () {
-                // TODO: Navigate to Edit Nominee Details (Practitioner only)
+                Navigator.of(context).push(
+                  MaterialPageRoute<void>(
+                    builder: (context) => const EditNomineeScreen(),
+                  ),
+                );
               },
             ),
             SizedBox(height: 16.h),
