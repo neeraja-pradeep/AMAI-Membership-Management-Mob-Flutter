@@ -19,6 +19,7 @@ import 'package:myapp/features/home/presentation/components/upcoming_event_mini_
 import 'package:myapp/features/home/presentation/components/announcement_mini_card.dart';
 import 'package:myapp/features/membership/presentation/screens/membership_screen.dart';
 import 'package:myapp/features/aswas_plus/presentation/screens/aswas_plus_screen.dart';
+import 'package:myapp/features/profile/presentation/screens/profile_screen.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 
 /// Home screen - primary landing screen after authentication
@@ -260,7 +261,11 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
   Widget _buildProfileAvatar() {
     return GestureDetector(
       onTap: () {
-        // TODO: Navigate to profile
+        Navigator.of(context).push(
+          MaterialPageRoute<void>(
+            builder: (context) => const ProfileScreen(),
+          ),
+        );
       },
       child: Container(
         width: 44.w,
