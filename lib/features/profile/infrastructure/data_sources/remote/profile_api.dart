@@ -4,6 +4,15 @@ import 'package:myapp/features/profile/infrastructure/models/user_profile_model.
 
 /// Abstract interface for Profile API operations
 abstract class ProfileApi {
+  /// Fetches current user profile (session-based)
+  ///
+  /// Uses the authenticated session to get the current user's profile
+  ///
+  /// Returns ApiResponse containing:
+  /// - UserProfileModel on success (200)
+  /// - null data on error
+  Future<ApiResponse<UserProfileModel>> fetchCurrentUserProfile();
+
   /// Fetches user profile by ID
   ///
   /// [userId] - The user ID to fetch profile for
@@ -34,6 +43,27 @@ class ProfileApiImpl implements ProfileApi {
   const ProfileApiImpl({required this.apiClient});
 
   final ApiClient apiClient;
+
+  @override
+  Future<ApiResponse<UserProfileModel>> fetchCurrentUserProfile() async {
+    final response = await apiClient.get<Map<String, dynamic>>(
+      Endpoints.userProfileMe,
+      fromJson: (json) => json as Map<String, dynamic>,
+    );
+
+    // Parse the response
+    UserProfileModel? userProfile;
+
+    if (response.data != null) {
+      userProfile = UserProfileModel.fromJson(response.data!);
+    }
+
+    return ApiResponse<UserProfileModel>(
+      data: userProfile,
+      statusCode: response.statusCode,
+      timestamp: response.timestamp,
+    );
+  }
 
   @override
   Future<ApiResponse<UserProfileModel>> fetchUserProfile({

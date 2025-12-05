@@ -22,6 +22,59 @@ class ProfileRepositoryImpl implements ProfileRepository {
   final Connectivity connectivity;
 
   @override
+  Future<Either<Failure, ProfileData>> getCurrentProfileData() async {
+    // Check connectivity
+    final connectivityResult = await connectivity.checkConnectivity();
+    final isOnline = !connectivityResult.contains(ConnectivityResult.none);
+
+    if (!isOnline) {
+      return left(const NetworkFailure());
+    }
+
+    try {
+      // Fetch user profile using session-based endpoint
+      final userProfileResponse = await profileApi.fetchCurrentUserProfile();
+
+      if (!userProfileResponse.isSuccess || userProfileResponse.data == null) {
+        return left(const ServerFailure(message: 'Failed to load user profile'));
+      }
+
+      final userProfile = userProfileResponse.data!.toDomain();
+
+      // Fetch membership data
+      final membershipResponse = await homeApi.fetchMembershipCard(ifModifiedSince: '');
+
+      // Extract membership type from membership response
+      MembershipType membershipType = MembershipType.practitioner;
+      String? membershipNumber;
+      String? membershipStatus;
+      DateTime? validUntil;
+
+      if (membershipResponse.isSuccess && membershipResponse.data != null) {
+        final membership = membershipResponse.data!;
+        membershipType = MembershipType.fromString(membership.membershipType);
+        membershipNumber = membership.membershipNumber;
+        membershipStatus = membership.status;
+        try {
+          validUntil = DateTime.parse(membership.endDate);
+        } catch (_) {}
+      }
+
+      return right(ProfileData(
+        userProfile: userProfile,
+        membershipType: membershipType,
+        membershipNumber: membershipNumber,
+        membershipStatus: membershipStatus,
+        validUntil: validUntil,
+      ));
+    } on NetworkException catch (e) {
+      return left(FailureMapper.fromNetworkException(e));
+    } catch (e) {
+      return left(FailureMapper.fromException(e));
+    }
+  }
+
+  @override
   Future<Either<Failure, UserProfile>> getUserProfile({
     required int userId,
   }) async {

@@ -62,7 +62,11 @@ class Endpoints {
   /// Get user addresses
   static const String getAddresses = '/api/accounts/addresses/';
 
-  /// User profile endpoint
+  /// User profile endpoint (session-based)
+  /// GET: Retrieve user profile for authenticated user
+  static const String userProfileMe = '$apiPrefix/accounts/users/';
+
+  /// User profile endpoint by ID (legacy)
   /// GET: Retrieve user profile by ID
   static String userProfile(int userId) => '$apiPrefix/accounts/users/$userId/';
 

@@ -5,6 +5,15 @@ import 'package:myapp/features/profile/domain/entities/user_profile.dart';
 
 /// Abstract repository contract for profile feature
 abstract class ProfileRepository {
+  /// Fetches current user profile data (session-based)
+  ///
+  /// Uses the authenticated session to get the current user's profile
+  ///
+  /// Returns:
+  /// - Right(ProfileData) on success
+  /// - Left(Failure) on error
+  Future<Either<Failure, ProfileData>> getCurrentProfileData();
+
   /// Fetches user profile data
   ///
   /// [userId] - The user ID to fetch profile for

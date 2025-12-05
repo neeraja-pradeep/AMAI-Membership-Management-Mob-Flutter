@@ -53,9 +53,9 @@ class ProfileNotifier extends StateNotifier<ProfileState> {
     state = const ProfileState.loading();
 
     final repository = _ref.read(profileRepositoryProvider);
-    final userId = _ref.read(userIdProvider);
 
-    final result = await repository.getProfileData(userId: userId);
+    // Use session-based endpoint (no userId needed)
+    final result = await repository.getCurrentProfileData();
 
     result.fold(
       (failure) {
@@ -73,9 +73,9 @@ class ProfileNotifier extends StateNotifier<ProfileState> {
     state = ProfileState.loading(previousData: previousData);
 
     final repository = _ref.read(profileRepositoryProvider);
-    final userId = _ref.read(userIdProvider);
 
-    final result = await repository.getProfileData(userId: userId);
+    // Use session-based endpoint (no userId needed)
+    final result = await repository.getCurrentProfileData();
 
     result.fold(
       (failure) {
