@@ -15,6 +15,7 @@ import 'package:myapp/features/profile/presentation/screens/edit_address_screen.
 import 'package:myapp/features/profile/presentation/screens/edit_academic_details_screen.dart';
 import 'package:myapp/features/profile/presentation/screens/edit_professional_details_screen.dart';
 import 'package:myapp/features/profile/presentation/screens/edit_nominee_screen.dart';
+import 'package:myapp/features/home/application/providers/home_providers.dart';
 
 /// Profile Screen - displays user profile with conditional UI based on membership type
 class ProfileScreen extends ConsumerStatefulWidget {
@@ -150,9 +151,19 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                 );
               },
               onNomineeDetailsTap: () {
+                final nomineesState = ref.read(nomineesStateProvider);
+                final nominees = nomineesState.currentData;
+
+                if (nominees == null || nominees.isEmpty) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(content: Text('No nominee data available')),
+                  );
+                  return;
+                }
+
                 Navigator.of(context).push(
                   MaterialPageRoute<void>(
-                    builder: (context) => const EditNomineeScreen(),
+                    builder: (context) => EditNomineeScreen(nominee: nominees.first),
                   ),
                 );
               },
