@@ -69,7 +69,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                       MaterialPageRoute<void>(
                         builder: (context) => const MembershipScreen(),
                       ),
-                    );
+                    ).then((_) => _onRefresh());
                   },
                   onAswasePlusTap: () {
                     // Navigate to Aswas Plus screen
@@ -77,7 +77,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                       MaterialPageRoute<void>(
                         builder: (context) => const AswasePlusScreen(),
                       ),
-                    );
+                    ).then((_) => _onRefresh());
                   },
                   onAcademyTap: () {
                     // TODO: Navigate to Academy
@@ -292,7 +292,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
               MaterialPageRoute<void>(
                 builder: (context) => const MembershipScreen(),
               ),
-            );
+            ).then((_) => _onRefresh());
           },
         );
       },
@@ -335,7 +335,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                         MaterialPageRoute<void>(
                           builder: (context) => const AswasePlusScreen(),
                         ),
-                      );
+                      ).then((_) => _onRefresh());
                     },
                   ),
                   Positioned.fill(
@@ -378,7 +378,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                   MaterialPageRoute<void>(
                     builder: (context) => const AswasePlusScreen(),
                   ),
-                );
+                ).then((_) => _onRefresh());
               },
             ),
             SizedBox(height: 24.h),
@@ -399,7 +399,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                     MaterialPageRoute<void>(
                       builder: (context) => const AswasePlusScreen(),
                     ),
-                  );
+                  ).then((_) => _onRefresh());
                 },
               ),
               SizedBox(height: 24.h),
