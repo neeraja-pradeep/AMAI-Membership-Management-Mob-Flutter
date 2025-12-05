@@ -105,7 +105,7 @@ class MembershipDetailResponse {
 
   /// Check if this is a pending application response
   bool get isPendingApplication =>
-      error != null && applicationStatus?.toLowerCase() == 'pending';
+      applicationStatus?.toLowerCase() == 'pending';
 
   Map<String, dynamic> toJson() => _$MembershipDetailResponseToJson(this);
 }
