@@ -25,11 +25,45 @@ Screen : Login
 a) Login
 Endpoint:
 https://amai.nexogms.com/api/schema/swagger-ui/#/Authentication/auth_login
+
 POST endpoint: https://amai.nexogms.com/api/accounts/login/
+
 payload:{
-  "email": "user@example.com",
-  "password": "securepassword123"
+  "email": "cijo7@test.com",
+    "password": "admin"
 }
+
+
+Screen : Forget Password
+a) Send otp
+Endpoint:
+https://amai.nexogms.com/api/schema/swagger-ui/#/Authentication/auth_send_otp
+
+POST endpoint: https://amai.nexogms.com/api/auth/otp-signin/
+
+Payload:
+
+{
+    "phone_number":"+919497883832"
+}
+
+a) Verify otp and change password
+Endpoint:
+https://amai.nexogms.com/api/schema/swagger-ui/#/Authentication/auth_verify_otp
+
+POST endpoint: https://amai.nexogms.com/api/auth/otp-signin/
+
+Payload:
+
+{
+    "phone_number":"+919497883832",
+    "otp_code":"521981",
+    "new_password":"adminroot"
+}
+
+
+
+
 
 
 Screen : Registration 
@@ -37,14 +71,27 @@ a) Registration Form 1
 Endpoint:
 https://amai.nexogms.com/api/schema/swagger-ui/#/Membership/membership_register
 
-Required fields:- email, password,  phone, wa_phone, first_name, last_name, membership_type[student, practitioner, house_surgeon, honorary], blood_group, bams_start_year, institution_name, 
+Required fields:- 
+
+For Practitioner:- membership_type[student, practitioner, house_surgeon, honorary], first_name, email, password,  phone, wa_phone, date_of_birth, gender, blood_group, medical_council_state,   medical_council_no, central_council_no, ug_college, zone_id, professional_details[], academic_details[]
+
+For example:- "professional_details":["test","tets2"],
+
+
+
+For House Surgeon:- membership_type[student, practitioner, house_surgeon, honorary], first_name, email, password,  phone, wa_phone, date_of_birth, gender, blood_group, provisional_reg_no, medical_council_state, council_district_no, zone_id,
+
+
+For Students:- membership_type[student, practitioner, house_surgeon, honorary], first_name, email, password,  phone, wa_phone, date_of_birth, gender, institution_name, bams_start_year blood_group, 
+
+
 POST endpoint:https://amai.nexogms.com/api/membership/register/
 
 b) Registration Form 2 -  Address
 Endpoint:
 https://amai.nexogms.com/api/schema/swagger-ui/#/accounts/accounts_addresses_create
 
-Required fields:- address_line1(House No. / Building Name), address_line2(Street / Locality / Area), city(Post Office), postal_code(Post Code), country(Country), state(State), district(District), is_primary 
+Required fields:- address_line1(House No. / Building Name), address_line2(Street / Locality / Area), city(Post Office), postal_code(Post Code), country(Country), state(State), district(District), type(apta, communications, permanent)
 Post endpoint:https://amai.nexogms.com/api/accounts/addresses/
 
 b) Registration Form 3 -  Documents
@@ -55,8 +102,16 @@ Required Fields: application, document_file, document_type
 
 Post endpoint:https://amai.nexogms.com/api/membership/application-documents/
 
+c) Registration payment 
 
+Endpoint : [Initiate Payment] https://amai.nexogms.com/api/schema/swagger-ui/#/Membership/membership_payment_create_2
+POST api/membership/membership/register/payment/
 
+Required Fields : user
 
+Endpoint : [ Verify Payment ] https://amai.nexogms.com/api/schema/swagger-ui/#/Membership/membership_verify_registration_payment
 
+POST api/membership/membership/register/verify/ 
+
+Required fields :  razorpay_order_id, razorpay_payment_id, razorpay_signature
 
