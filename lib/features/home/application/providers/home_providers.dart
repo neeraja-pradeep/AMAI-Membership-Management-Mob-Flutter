@@ -17,7 +17,8 @@ import 'package:myapp/features/home/infrastructure/data_sources/local/home_local
 import 'package:myapp/features/home/infrastructure/data_sources/remote/home_api.dart';
 import 'package:myapp/features/home/infrastructure/repositories/home_repository_impl.dart';
 
-// Re-export apiClientProvider so existing imports continue to work
+// Import and re-export apiClientProvider so existing imports continue to work
+import 'package:myapp/core/network/api_client_provider.dart';
 export 'package:myapp/core/network/api_client_provider.dart';
 
 // ============== Core Providers ==============
