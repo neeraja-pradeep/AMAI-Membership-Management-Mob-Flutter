@@ -13,6 +13,7 @@ import 'package:myapp/features/home/presentation/components/aswas_card_widget.da
 import 'package:myapp/features/home/presentation/components/membership_card_widget.dart';
 import 'package:myapp/features/home/presentation/components/quick_actions_section.dart';
 import 'package:myapp/features/home/presentation/components/upcoming_events_section.dart';
+import 'package:myapp/features/home/presentation/components/upcoming_event_mini_card.dart';
 import 'package:myapp/features/membership/presentation/screens/membership_screen.dart';
 import 'package:myapp/features/aswas_plus/presentation/screens/aswas_plus_screen.dart';
 import 'package:flutter_svg/flutter_svg.dart';
@@ -245,70 +246,99 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     );
   }
 
-  /// Builds the membership card section
+  /// Builds the membership card section with horizontal scroll
   Widget _buildMembershipCard() {
-    final state = ref.watch(membershipStateProvider);
+    final membershipState = ref.watch(membershipStateProvider);
+    final eventsState = ref.watch(eventsStateProvider);
 
-    return state.when(
-      initial: () => const MembershipCardShimmer(),
-      loading: (previousData) {
-        // Show previous data while loading, or shimmer if no data
-        if (previousData != null) {
-          return Stack(
-            children: [
-              MembershipCardWidget(membershipCard: previousData),
-              Positioned.fill(
-                child: Container(
-                  margin: EdgeInsets.symmetric(horizontal: 16.w),
-                  decoration: BoxDecoration(
-                    color: AppColors.white.withOpacity(0.5),
-                    borderRadius: BorderRadius.circular(16.r),
-                  ),
-                  child: Center(
-                    child: SizedBox(
-                      width: 24.w,
-                      height: 24.h,
-                      child: const CircularProgressIndicator(
-                        strokeWidth: 2,
-                        valueColor: AlwaysStoppedAnimation<Color>(
-                          AppColors.primary,
+    // Get event within a week if available
+    final upcomingEventWithinWeek = eventsState.maybeWhen(
+      loaded: (events) {
+        final eventsWithinWeek = events
+            .where((event) => UpcomingEventMiniCard.isWithinWeek(event))
+            .toList();
+        return eventsWithinWeek.isNotEmpty ? eventsWithinWeek.first : null;
+      },
+      orElse: () => null,
+    );
+
+    return SizedBox(
+      height: 180.h,
+      child: ListView(
+        scrollDirection: Axis.horizontal,
+        padding: EdgeInsets.zero,
+        children: [
+          // Membership card
+          SizedBox(
+            width: MediaQuery.of(context).size.width,
+            child: membershipState.when(
+              initial: () => const MembershipCardShimmer(),
+              loading: (previousData) {
+                if (previousData != null) {
+                  return Stack(
+                    children: [
+                      MembershipCardWidget(membershipCard: previousData),
+                      Positioned.fill(
+                        child: Container(
+                          decoration: BoxDecoration(
+                            color: AppColors.white.withOpacity(0.5),
+                            borderRadius: BorderRadius.circular(16.r),
+                          ),
+                          child: Center(
+                            child: SizedBox(
+                              width: 24.w,
+                              height: 24.h,
+                              child: const CircularProgressIndicator(
+                                strokeWidth: 2,
+                                valueColor: AlwaysStoppedAnimation<Color>(
+                                  AppColors.primary,
+                                ),
+                              ),
+                            ),
+                          ),
                         ),
                       ),
-                    ),
-                  ),
-                ),
+                    ],
+                  );
+                }
+                return const MembershipCardShimmer();
+              },
+              loaded: (membershipCard) {
+                return MembershipCardWidget(
+                  membershipCard: membershipCard,
+                  onTap: () {
+                    Navigator.of(context).push(
+                      MaterialPageRoute<void>(
+                        builder: (context) => const MembershipScreen(),
+                      ),
+                    ).then((_) => _onRefresh());
+                  },
+                );
+              },
+              error: (failure, cachedData) {
+                if (cachedData != null) {
+                  return MembershipCardWidget(membershipCard: cachedData);
+                }
+                return MembershipCardEmpty(
+                  onApply: _onRefresh,
+                );
+              },
+              empty: () => MembershipCardEmpty(
+                onApply: () {
+                  // TODO: Navigate to membership application
+                },
               ),
-            ],
-          );
-        }
-        return const MembershipCardShimmer();
-      },
-      loaded: (membershipCard) {
-        return MembershipCardWidget(
-          membershipCard: membershipCard,
-          onTap: () {
-            // Navigate to membership screen
-            Navigator.of(context).push(
-              MaterialPageRoute<void>(
-                builder: (context) => const MembershipScreen(),
-              ),
-            ).then((_) => _onRefresh());
-          },
-        );
-      },
-      error: (failure, cachedData) {
-        // Show cached data if available, otherwise show empty card with retry
-        if (cachedData != null) {
-          return MembershipCardWidget(membershipCard: cachedData);
-        }
-        return MembershipCardEmpty(
-          onApply: _onRefresh,
-        );
-      },
-      empty: () => MembershipCardEmpty(
-        onApply: () {
-          // TODO: Navigate to membership application
-        },
+            ),
+          ),
+          // Upcoming event card (only if event within a week exists)
+          if (upcomingEventWithinWeek != null)
+            UpcomingEventMiniCard(
+              event: upcomingEventWithinWeek,
+              onRegisterTap: () {
+                // TODO: Navigate to event registration
+              },
+            ),
+        ],
       ),
     );
   }
