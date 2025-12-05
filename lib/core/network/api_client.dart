@@ -13,9 +13,11 @@ import 'package:flutter/foundation.dart';
 /// - Request/response logging (debug mode only)
 /// - Error handling
 /// - Timeout configuration (30s for production)
+/// - Session validation for auto-login
 class ApiClient {
   late final Dio _dio;
-  late final CookieJar _cookieJar;
+  late final PersistCookieJar _cookieJar;
+  bool _isInitialized = false;
 
   static const String kBaseUrl = 'https://amai.nexogms.com';
   static const Duration kConnectionTimeout = Duration(seconds: 30);
@@ -39,9 +41,22 @@ class ApiClient {
     );
 
     _configureSecurity();
-    _initializeCookieJar();
-    _setupInterceptors();
   }
+
+  /// Initialize the API client (must be called before first use)
+  ///
+  /// This sets up cookie persistence and interceptors.
+  /// Call this in main() before runApp().
+  Future<void> initialize() async {
+    if (_isInitialized) return;
+
+    await _initializeCookieJar();
+    _setupInterceptors();
+    _isInitialized = true;
+  }
+
+  /// Check if API client is initialized
+  bool get isInitialized => _isInitialized;
 
   /// Configure SSL/TLS security
   ///
@@ -135,6 +150,65 @@ class ApiClient {
     );
 
     return csrfCookie.value.isEmpty ? null : csrfCookie.value;
+  }
+
+  /// Check if a valid session exists
+  ///
+  /// Returns true if sessionid cookie exists and is not expired.
+  /// Used for auto-login on app startup.
+  Future<bool> hasValidSession() async {
+    if (!_isInitialized) {
+      await initialize();
+    }
+
+    try {
+      final cookies = await _cookieJar.loadForRequest(
+        Uri.parse(_dio.options.baseUrl),
+      );
+
+      // Check for sessionid cookie
+      final sessionCookie = cookies.firstWhere(
+        (c) => c.name.toLowerCase() == 'sessionid',
+        orElse: () => Cookie('', ''),
+      );
+
+      if (sessionCookie.value.isEmpty) {
+        return false;
+      }
+
+      // Check if session cookie is expired
+      if (sessionCookie.expires != null) {
+        if (sessionCookie.expires!.isBefore(DateTime.now())) {
+          return false;
+        }
+      }
+
+      return true;
+    } catch (e) {
+      debugPrint('Error checking session: $e');
+      return false;
+    }
+  }
+
+  /// Validate session with server
+  ///
+  /// Makes a request to verify the session is still valid on the server.
+  /// Returns true if session is valid, false otherwise.
+  Future<bool> validateSessionWithServer() async {
+    if (!_isInitialized) {
+      await initialize();
+    }
+
+    try {
+      // Try to access a protected endpoint to verify session
+      final response = await _dio.get('/api/users/profile/');
+
+      // If we get a 200, session is valid
+      return response.statusCode == 200;
+    } catch (e) {
+      debugPrint('Session validation failed: $e');
+      return false;
+    }
   }
 
   /// GET request

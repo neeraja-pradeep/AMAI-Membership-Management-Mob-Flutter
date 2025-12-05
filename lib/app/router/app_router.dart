@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:myapp/features/auth/presentation/screen/login_screen.dart';
+import 'package:myapp/features/auth/presentation/screens/splash_screen.dart';
+import 'package:myapp/features/auth/presentation/screens/home_screen.dart';
 
 import '../../features/auth/presentation/screens/registration/personal_details_screen.dart';
 import '../../features/auth/presentation/screens/registration/professional_details_screen.dart';
@@ -17,6 +19,9 @@ class AppRouter {
   // ============================================================================
   // ROUTE NAMES
   // ============================================================================
+
+  /// Splash screen route
+  static const String splash = '/';
 
   /// Authentication routes
   static const String login = '/login';
@@ -108,9 +113,12 @@ class AppRouter {
   /// ```
   static Route<dynamic> generateRoute(RouteSettings settings) {
     switch (settings.name) {
+      // Splash route
+      case splash:
+        return _buildRoute(const SplashScreen());
+
       // Auth routes
       case login:
-        // TODO: Import and return LoginScreen
         return _buildRoute(const LoginScreen());
 
       case registrationAddress:
@@ -125,13 +133,10 @@ class AppRouter {
       case registrationPayment:
         return _buildRoute(const PaymentScreen());
 
-      // Dashboard route
+      // Dashboard/Home route
       case dashboard:
       case home:
-        // TODO: Import and return DashboardScreen
-        return _buildRoute(
-          const Scaffold(body: Center(child: Text('Dashboard'))),
-        );
+        return _buildRoute(const HomeScreen());
 
       // Unknown route
       default:
