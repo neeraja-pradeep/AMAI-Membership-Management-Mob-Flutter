@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:myapp/app/theme/colors.dart';
+import 'package:myapp/features/auth/presentation/screens/home_screen.dart';
 
 import '../../../../../app/router/app_router.dart';
 import '../../../application/notifiers/registration_state_notifier.dart';
@@ -25,6 +26,7 @@ class _DocumentUploadScreenState extends ConsumerState<DocumentUploadScreen> {
   bool acceptedTerms = false;
   bool isUploading = false;
   double uploadProgress = 0;
+  bool _registrationComplete = false;
 
   /// 👇 Pulled from Riverpod instead of Navigator arguments
   int? _applicationId;
@@ -224,6 +226,12 @@ class _DocumentUploadScreenState extends ConsumerState<DocumentUploadScreen> {
       return;
     }
 
+    // Students don't need to pay - show success directly
+    if (_role == "student") {
+      setState(() => _registrationComplete = true);
+      return;
+    }
+
     Navigator.pushNamed(context, AppRouter.registrationPayment);
   }
 
@@ -251,92 +259,176 @@ class _DocumentUploadScreenState extends ConsumerState<DocumentUploadScreen> {
           onPressed: () => Navigator.pop(context),
         ),
       ),
-      body: Padding(
-        padding: EdgeInsets.all(24.w),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            const RegistrationStepIndicator(
-              currentStep: 4,
-              stepTitle: "Document Upload",
-            ),
-
-            if (isUploading)
-              Padding(
-                padding: EdgeInsets.only(top: 12.h),
-                child: LinearProgressIndicator(
-                  value: uploadProgress == 0 ? null : uploadProgress,
-                  backgroundColor: Colors.grey[300],
-                  color: AppColors.brown,
-                  minHeight: 4,
-                ),
-              ),
-
-            SizedBox(height: 30.h),
-
-            _label("Profile Photo"),
-            _uploadTile(
-              file: profilePhoto,
-              onPick: isUploading ? null : () => _pickFile(isProfile: true),
-              onRemove: isUploading ? null : () => _removeFile(true),
-            ),
-
-            SizedBox(height: 25.h),
-
-            _label(_certificateLabel()),
-            _uploadTile(
-              file: certificate,
-              onPick: isUploading ? null : () => _pickFile(isProfile: false),
-              onRemove: isUploading ? null : () => _removeFile(false),
-            ),
-
-            SizedBox(height: 30.h),
-
-            Row(
+      body: Stack(
+        children: [
+          Padding(
+            padding: EdgeInsets.all(24.w),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Checkbox(
-                  value: acceptedTerms,
-                  onChanged: isUploading
-                      ? null
-                      : (v) => setState(() => acceptedTerms = v!),
-                  activeColor: AppColors.brown,
+                const RegistrationStepIndicator(
+                  currentStep: 4,
+                  stepTitle: "Document Upload",
                 ),
-                Expanded(
-                  child: Text(
-                    "I agree to the Terms & Conditions",
-                    style: TextStyle(fontSize: 14.sp),
+
+                if (isUploading)
+                  Padding(
+                    padding: EdgeInsets.only(top: 12.h),
+                    child: LinearProgressIndicator(
+                      value: uploadProgress == 0 ? null : uploadProgress,
+                      backgroundColor: Colors.grey[300],
+                      color: AppColors.brown,
+                      minHeight: 4,
+                    ),
+                  ),
+
+                SizedBox(height: 30.h),
+
+                _label("Profile Photo"),
+                _uploadTile(
+                  file: profilePhoto,
+                  onPick: isUploading ? null : () => _pickFile(isProfile: true),
+                  onRemove: isUploading ? null : () => _removeFile(true),
+                ),
+
+                SizedBox(height: 25.h),
+
+                _label(_certificateLabel()),
+                _uploadTile(
+                  file: certificate,
+                  onPick: isUploading ? null : () => _pickFile(isProfile: false),
+                  onRemove: isUploading ? null : () => _removeFile(false),
+                ),
+
+                SizedBox(height: 30.h),
+
+                Row(
+                  children: [
+                    Checkbox(
+                      value: acceptedTerms,
+                      onChanged: isUploading
+                          ? null
+                          : (v) => setState(() => acceptedTerms = v!),
+                      activeColor: AppColors.brown,
+                    ),
+                    Expanded(
+                      child: Text(
+                        "I agree to the Terms & Conditions",
+                        style: TextStyle(fontSize: 14.sp),
+                      ),
+                    ),
+                  ],
+                ),
+
+                const Spacer(),
+
+                SizedBox(
+                  width: double.infinity,
+                  height: 50.h,
+                  child: ElevatedButton(
+                    onPressed: canProceed ? _next : null,
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: canProceed
+                          ? AppColors.brown
+                          : Colors.grey[300],
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12.r),
+                      ),
+                    ),
+                    child: Text(
+                      "Next",
+                      style: TextStyle(
+                        fontSize: 16.sp,
+                        color: Colors.white,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
                   ),
                 ),
               ],
             ),
+          ),
 
-            const Spacer(),
-
-            SizedBox(
+          // Student Registration Success Overlay
+          if (_registrationComplete)
+            Container(
               width: double.infinity,
-              height: 50.h,
-              child: ElevatedButton(
-                onPressed: canProceed ? _next : null,
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: canProceed
-                      ? AppColors.brown
-                      : Colors.grey[300],
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12.r),
-                  ),
-                ),
-                child: Text(
-                  "Next",
-                  style: TextStyle(
-                    fontSize: 16.sp,
+              height: double.infinity,
+              color: Colors.black.withOpacity(0.4),
+              child: Center(
+                child: Container(
+                  padding: EdgeInsets.all(24.w),
+                  decoration: BoxDecoration(
                     color: Colors.white,
-                    fontWeight: FontWeight.w600,
+                    borderRadius: BorderRadius.circular(16.r),
+                    boxShadow: [
+                      const BoxShadow(
+                        color: Colors.black26,
+                        blurRadius: 10,
+                        spreadRadius: 2,
+                      ),
+                    ],
+                  ),
+                  width: 300.w,
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Icon(
+                        Icons.check_circle,
+                        color: Colors.green,
+                        size: 60.sp,
+                      ),
+                      SizedBox(height: 16.h),
+                      Text(
+                        "Registration Successful!",
+                        textAlign: TextAlign.center,
+                        style: TextStyle(
+                          fontSize: 20.sp,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      SizedBox(height: 12.h),
+                      Text(
+                        "Thank you for registering!\nYour application has been successfully submitted and is now pending administrative review.",
+                        textAlign: TextAlign.center,
+                        style: TextStyle(fontSize: 14.sp, height: 1.4),
+                      ),
+                      SizedBox(height: 24.h),
+                      SizedBox(
+                        width: double.infinity,
+                        height: 48.h,
+                        child: ElevatedButton(
+                          onPressed: () {
+                            Navigator.pushAndRemoveUntil(
+                              context,
+                              MaterialPageRoute(
+                                builder: (_) => const HomeScreen(),
+                              ),
+                              (route) => false,
+                            );
+                          },
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: AppColors.brown,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(12.r),
+                            ),
+                          ),
+                          child: Text(
+                            "Back to Home",
+                            style: TextStyle(
+                              fontSize: 16.sp,
+                              color: Colors.white,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                        ),
+                      ),
+                    ],
                   ),
                 ),
               ),
             ),
-          ],
-        ),
+        ],
       ),
     );
   }
