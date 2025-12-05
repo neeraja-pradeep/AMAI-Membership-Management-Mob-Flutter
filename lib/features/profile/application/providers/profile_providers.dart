@@ -1,6 +1,10 @@
 import 'package:connectivity_plus/connectivity_plus.dart';
+import 'package:dio/dio.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:fpdart/fpdart.dart';
+import 'package:myapp/core/error/failure.dart';
 import 'package:myapp/core/network/api_client.dart';
+import 'package:myapp/core/network/endpoints.dart';
 import 'package:myapp/features/home/application/providers/home_providers.dart';
 import 'package:myapp/features/profile/application/states/profile_state.dart';
 import 'package:myapp/features/profile/domain/repositories/profile_repository.dart';
@@ -91,3 +95,49 @@ class ProfileNotifier extends StateNotifier<ProfileState> {
     state = const ProfileState.initial();
   }
 }
+
+// ============== Profile Picture Upload ==============
+
+/// Parameters for profile picture upload
+class ProfilePictureUploadParams {
+  const ProfilePictureUploadParams({
+    required this.userId,
+    required this.imagePath,
+  });
+
+  final int userId;
+  final String imagePath;
+}
+
+/// Provider for uploading profile picture
+final profilePictureUploadProvider = FutureProvider.autoDispose
+    .family<Either<Failure, bool>, ProfilePictureUploadParams>(
+  (ref, params) async {
+    final apiClient = ref.watch(apiClientProvider);
+
+    try {
+      final formData = FormData.fromMap({
+        'profile_picture_file': await MultipartFile.fromFile(
+          params.imagePath,
+          filename: params.imagePath.split('/').last,
+        ),
+      });
+
+      final response = await apiClient.patch<Map<String, dynamic>>(
+        Endpoints.userProfile(params.userId),
+        data: formData,
+        fromJson: (json) => json as Map<String, dynamic>,
+      );
+
+      if (response.isSuccess) {
+        return const Right(true);
+      } else {
+        return const Left(
+          ServerFailure(message: 'Failed to upload profile picture'),
+        );
+      }
+    } catch (e) {
+      return Left(ServerFailure(message: e.toString()));
+    }
+  },
+);

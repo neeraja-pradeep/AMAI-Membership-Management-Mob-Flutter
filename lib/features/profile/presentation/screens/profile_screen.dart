@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:myapp/app/theme/colors.dart';
 import 'package:myapp/features/profile/application/providers/profile_providers.dart';
 import 'package:myapp/features/profile/domain/entities/membership_type.dart';
@@ -26,6 +27,9 @@ class ProfileScreen extends ConsumerStatefulWidget {
 }
 
 class _ProfileScreenState extends ConsumerState<ProfileScreen> {
+  final ImagePicker _imagePicker = ImagePicker();
+  bool _isUploadingPicture = false;
+
   @override
   void initState() {
     super.initState();
@@ -37,6 +41,111 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
 
   Future<void> _onRefresh() async {
     await ref.read(profileStateProvider.notifier).refresh();
+  }
+
+  Future<void> _onEditPicture() async {
+    // Show bottom sheet to choose camera or gallery
+    final source = await showModalBottomSheet<ImageSource>(
+      context: context,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(16.r)),
+      ),
+      builder: (context) => SafeArea(
+        child: Padding(
+          padding: EdgeInsets.all(16.w),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text(
+                'Select Image Source',
+                style: TextStyle(
+                  fontSize: 16.sp,
+                  fontWeight: FontWeight.w600,
+                  color: AppColors.textPrimary,
+                ),
+              ),
+              SizedBox(height: 16.h),
+              ListTile(
+                leading: Icon(Icons.camera_alt, color: AppColors.primary),
+                title: const Text('Camera'),
+                onTap: () => Navigator.pop(context, ImageSource.camera),
+              ),
+              ListTile(
+                leading: Icon(Icons.photo_library, color: AppColors.primary),
+                title: const Text('Gallery'),
+                onTap: () => Navigator.pop(context, ImageSource.gallery),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+
+    if (source == null) return;
+
+    try {
+      final pickedFile = await _imagePicker.pickImage(
+        source: source,
+        maxWidth: 800,
+        maxHeight: 800,
+        imageQuality: 85,
+      );
+
+      if (pickedFile == null) return;
+
+      setState(() {
+        _isUploadingPicture = true;
+      });
+
+      final userId = ref.read(userIdProvider);
+      final result = await ref.read(
+        profilePictureUploadProvider(
+          ProfilePictureUploadParams(
+            userId: userId,
+            imagePath: pickedFile.path,
+          ),
+        ).future,
+      );
+
+      if (!mounted) return;
+
+      setState(() {
+        _isUploadingPicture = false;
+      });
+
+      result.fold(
+        (failure) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(failure.message),
+              backgroundColor: AppColors.error,
+            ),
+          );
+        },
+        (success) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('Profile picture updated successfully'),
+              backgroundColor: AppColors.success,
+            ),
+          );
+          // Refresh profile to show updated picture
+          ref.read(profileStateProvider.notifier).refresh();
+        },
+      );
+    } catch (e) {
+      if (mounted) {
+        setState(() {
+          _isUploadingPicture = false;
+        });
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Error selecting image: $e'),
+            backgroundColor: AppColors.error,
+          ),
+        );
+      }
+    }
   }
 
   @override
@@ -107,10 +216,33 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
             // Profile Header Section
             ProfileHeaderSection(
               userProfile: data.userProfile,
-              onEditPicture: () {
-                // TODO: Handle edit picture (static for now)
-              },
+              onEditPicture: _isUploadingPicture ? null : _onEditPicture,
             ),
+            if (_isUploadingPicture)
+              Padding(
+                padding: EdgeInsets.only(top: 8.h),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    SizedBox(
+                      width: 16.w,
+                      height: 16.w,
+                      child: CircularProgressIndicator(
+                        strokeWidth: 2.w,
+                        color: AppColors.primary,
+                      ),
+                    ),
+                    SizedBox(width: 8.w),
+                    Text(
+                      'Uploading...',
+                      style: TextStyle(
+                        fontSize: 12.sp,
+                        color: AppColors.textSecondary,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
             SizedBox(height: 24.h),
             // Personal Information Card
             PersonalInformationCard(
