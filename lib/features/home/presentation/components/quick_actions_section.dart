@@ -43,32 +43,16 @@ class QuickActionsSection extends StatelessWidget {
     );
   }
 
-  /// Builds the section header with title and "View All" button
+  /// Builds the section header with title
   Widget _buildHeader() {
     return Padding(
       padding: EdgeInsets.symmetric(horizontal: 16.w),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          Text(
-            'Quick Actions',
-            style: AppTypography.titleMedium.copyWith(
-              fontWeight: FontWeight.w600,
-              fontSize: 18.sp,
-            ),
-          ),
-          GestureDetector(
-            onTap: onViewAll,
-            child: Text(
-              'View All',
-              style: AppTypography.bodySmall.copyWith(
-                color: AppColors.newPrimaryLight,
-                fontWeight: FontWeight.w400,
-                fontSize: 16.sp,
-              ),
-            ),
-          ),
-        ],
+      child: Text(
+        'Quick Actions',
+        style: AppTypography.titleMedium.copyWith(
+          fontWeight: FontWeight.w600,
+          fontSize: 18.sp,
+        ),
       ),
     );
   }
