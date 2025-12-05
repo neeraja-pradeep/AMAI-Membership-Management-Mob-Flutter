@@ -247,8 +247,9 @@ class _ProfessionalDetailsScreenState
           'medical_council_no': professionalDetails.medicalCouncilNo,
           'central_council_no': professionalDetails.centralCouncilNo,
           'ug_college': professionalDetails.ugCollege,
-          'professional_details': professionalDetails.professionalDetails1,
-          'academic_details': professionalDetails.professionalDetails2,
+          // API expects JSON arrays, not comma-separated strings
+          'professional_details': _selectedQualifications.toList(),
+          'academic_details': _selectedCategories.toList(),
         });
       }
 
