@@ -82,55 +82,7 @@ class _SplashScreenState extends ConsumerState<SplashScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.white,
-      body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            // App Logo or Icon
-            Container(
-              width: 120.w,
-              height: 120.h,
-              decoration: BoxDecoration(
-                color: AppColors.brown,
-                borderRadius: BorderRadius.circular(24.r),
-              ),
-              child: Center(
-                child: Text(
-                  "AMAI",
-                  style: TextStyle(
-                    color: Colors.white,
-                    fontSize: 28.sp,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-              ),
-            ),
-            SizedBox(height: 24.h),
-            Text(
-              "AMAI Membership",
-              style: TextStyle(
-                fontSize: 24.sp,
-                fontWeight: FontWeight.bold,
-                color: AppColors.brown,
-              ),
-            ),
-            SizedBox(height: 8.h),
-            Text(
-              "Ayurveda Medical Association of India",
-              style: TextStyle(fontSize: 14.sp, color: Colors.grey[600]),
-            ),
-            SizedBox(height: 48.h),
-            SizedBox(
-              width: 32.w,
-              height: 32.h,
-              child: const CircularProgressIndicator(
-                strokeWidth: 3,
-                valueColor: AlwaysStoppedAnimation<Color>(AppColors.brown),
-              ),
-            ),
-          ],
-        ),
-      ),
+      body: Center(child: Image.asset('assets/logo.png')),
     );
   }
 }

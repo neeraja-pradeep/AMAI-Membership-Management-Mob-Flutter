@@ -272,6 +272,8 @@ class _ProfessionalDetailsScreenState
         membershipData,
       );
 
+      debugPrint(responseData.toString());
+
       final userId = responseData['application']?['user_detail']?['id'];
       final applicationId = responseData['application']?['id'];
 
