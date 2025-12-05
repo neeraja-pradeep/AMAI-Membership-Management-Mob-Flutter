@@ -18,7 +18,12 @@ class _EditNomineeScreenState extends ConsumerState<EditNomineeScreen> {
   final _formKey = GlobalKey<FormState>();
   late TextEditingController _nameController;
   late TextEditingController _contactController;
+  late TextEditingController _emailController;
+  late TextEditingController _addressController;
+  late TextEditingController _allocationController;
   String? _selectedRelation;
+  DateTime? _selectedDateOfBirth;
+  bool _isPrimary = false;
   bool _isSubmitting = false;
 
   // Relation options (static for now - will be from API later)
@@ -38,12 +43,18 @@ class _EditNomineeScreenState extends ConsumerState<EditNomineeScreen> {
     super.initState();
     _nameController = TextEditingController();
     _contactController = TextEditingController();
+    _emailController = TextEditingController();
+    _addressController = TextEditingController();
+    _allocationController = TextEditingController();
   }
 
   @override
   void dispose() {
     _nameController.dispose();
     _contactController.dispose();
+    _emailController.dispose();
+    _addressController.dispose();
+    _allocationController.dispose();
     super.dispose();
   }
 
@@ -130,12 +141,24 @@ class _EditNomineeScreenState extends ConsumerState<EditNomineeScreen> {
 
                     // Relation Dropdown
                     _buildDropdownField(
-                      label: 'Relation',
+                      label: 'Relationship',
                       value: _selectedRelation,
                       items: _relationOptions,
                       onChanged: (value) {
                         setState(() {
                           _selectedRelation = value;
+                        });
+                      },
+                    ),
+                    SizedBox(height: 16.h),
+
+                    // Date of Birth Field
+                    _buildDatePickerField(
+                      label: 'Date of Birth',
+                      selectedDate: _selectedDateOfBirth,
+                      onDateSelected: (date) {
+                        setState(() {
+                          _selectedDateOfBirth = date;
                         });
                       },
                     ),
@@ -154,6 +177,64 @@ class _EditNomineeScreenState extends ConsumerState<EditNomineeScreen> {
                           return 'Please enter a valid phone number';
                         }
                         return null;
+                      },
+                    ),
+                    SizedBox(height: 16.h),
+
+                    // Email Field
+                    _buildTextField(
+                      label: 'Email',
+                      controller: _emailController,
+                      keyboardType: TextInputType.emailAddress,
+                      validator: (value) {
+                        if (value != null && value.isNotEmpty) {
+                          final emailRegex = RegExp(
+                            r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$',
+                          );
+                          if (!emailRegex.hasMatch(value)) {
+                            return 'Please enter a valid email address';
+                          }
+                        }
+                        return null;
+                      },
+                    ),
+                    SizedBox(height: 16.h),
+
+                    // Address Field
+                    _buildTextField(
+                      label: 'Address',
+                      controller: _addressController,
+                      maxLines: 3,
+                    ),
+                    SizedBox(height: 16.h),
+
+                    // Allocation Percentage Field
+                    _buildTextField(
+                      label: 'Allocation Percentage',
+                      controller: _allocationController,
+                      keyboardType: TextInputType.number,
+                      validator: (value) {
+                        if (value != null && value.isNotEmpty) {
+                          final percentage = double.tryParse(value);
+                          if (percentage == null ||
+                              percentage < 0 ||
+                              percentage > 100) {
+                            return 'Please enter a valid percentage (0-100)';
+                          }
+                        }
+                        return null;
+                      },
+                    ),
+                    SizedBox(height: 16.h),
+
+                    // Is Primary Switch
+                    _buildSwitchField(
+                      label: 'Primary Nominee',
+                      value: _isPrimary,
+                      onChanged: (value) {
+                        setState(() {
+                          _isPrimary = value;
+                        });
                       },
                     ),
                   ],
@@ -248,6 +329,7 @@ class _EditNomineeScreenState extends ConsumerState<EditNomineeScreen> {
     required TextEditingController controller,
     TextInputType keyboardType = TextInputType.text,
     String? Function(String?)? validator,
+    int maxLines = 1,
   }) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -265,6 +347,7 @@ class _EditNomineeScreenState extends ConsumerState<EditNomineeScreen> {
           controller: controller,
           keyboardType: keyboardType,
           validator: validator,
+          maxLines: maxLines,
           decoration: InputDecoration(
             filled: true,
             fillColor: AppColors.grey50,
@@ -356,6 +439,108 @@ class _EditNomineeScreenState extends ConsumerState<EditNomineeScreen> {
     );
   }
 
+  Widget _buildDatePickerField({
+    required String label,
+    required DateTime? selectedDate,
+    required void Function(DateTime) onDateSelected,
+  }) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          label,
+          style: TextStyle(
+            fontSize: 14.sp,
+            fontWeight: FontWeight.w500,
+            color: AppColors.textPrimary,
+          ),
+        ),
+        SizedBox(height: 8.h),
+        GestureDetector(
+          onTap: () async {
+            final picked = await showDatePicker(
+              context: context,
+              initialDate: selectedDate ?? DateTime.now(),
+              firstDate: DateTime(1900),
+              lastDate: DateTime.now(),
+              builder: (context, child) {
+                return Theme(
+                  data: Theme.of(context).copyWith(
+                    colorScheme: ColorScheme.light(
+                      primary: AppColors.primary,
+                    ),
+                  ),
+                  child: child!,
+                );
+              },
+            );
+            if (picked != null) {
+              onDateSelected(picked);
+            }
+          },
+          child: Container(
+            width: double.infinity,
+            padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 14.h),
+            decoration: BoxDecoration(
+              color: AppColors.grey50,
+              borderRadius: BorderRadius.circular(8.r),
+              border: Border.all(color: AppColors.grey300),
+            ),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(
+                  selectedDate != null
+                      ? '${selectedDate.year}-${selectedDate.month.toString().padLeft(2, '0')}-${selectedDate.day.toString().padLeft(2, '0')}'
+                      : 'Select $label',
+                  style: TextStyle(
+                    fontSize: 14.sp,
+                    color: selectedDate != null
+                        ? AppColors.textPrimary
+                        : AppColors.textHint,
+                  ),
+                ),
+                Icon(
+                  Icons.calendar_today_outlined,
+                  color: AppColors.grey400,
+                  size: 20.sp,
+                ),
+              ],
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildSwitchField({
+    required String label,
+    required bool value,
+    required void Function(bool) onChanged,
+  }) {
+    return Container(
+      padding: EdgeInsets.symmetric(horizontal: 4.w, vertical: 8.h),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Text(
+            label,
+            style: TextStyle(
+              fontSize: 14.sp,
+              fontWeight: FontWeight.w500,
+              color: AppColors.textPrimary,
+            ),
+          ),
+          Switch(
+            value: value,
+            onChanged: onChanged,
+            activeColor: AppColors.primary,
+          ),
+        ],
+      ),
+    );
+  }
+
   Future<void> _onSubmit() async {
     if (!_formKey.currentState!.validate()) {
       return;
@@ -379,11 +564,27 @@ class _EditNomineeScreenState extends ConsumerState<EditNomineeScreen> {
     final userId = ref.read(userIdProvider);
 
     // Build the payload
-    final payload = {
+    final payload = <String, dynamic>{
       'nominee_name': _nameController.text.trim(),
       'relationship': _selectedRelation!.toLowerCase(),
       'contact_number': _contactController.text.trim(),
+      'is_primary': _isPrimary,
     };
+
+    // Add optional fields only if they have values
+    if (_selectedDateOfBirth != null) {
+      payload['date_of_birth'] =
+          '${_selectedDateOfBirth!.year}-${_selectedDateOfBirth!.month.toString().padLeft(2, '0')}-${_selectedDateOfBirth!.day.toString().padLeft(2, '0')}';
+    }
+    if (_emailController.text.trim().isNotEmpty) {
+      payload['email'] = _emailController.text.trim();
+    }
+    if (_addressController.text.trim().isNotEmpty) {
+      payload['address'] = _addressController.text.trim();
+    }
+    if (_allocationController.text.trim().isNotEmpty) {
+      payload['allocation_percentage'] = _allocationController.text.trim();
+    }
 
     // Call the PATCH API
     final result = await ref.read(
