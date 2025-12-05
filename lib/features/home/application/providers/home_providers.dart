@@ -2,7 +2,6 @@ import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:myapp/core/error/failure.dart';
-import 'package:myapp/core/network/api_client.dart';
 import 'package:myapp/features/home/application/states/announcements_state.dart';
 import 'package:myapp/features/home/application/states/aswas_state.dart';
 import 'package:myapp/features/home/application/states/events_state.dart';
@@ -18,19 +17,17 @@ import 'package:myapp/features/home/infrastructure/data_sources/local/home_local
 import 'package:myapp/features/home/infrastructure/data_sources/remote/home_api.dart';
 import 'package:myapp/features/home/infrastructure/repositories/home_repository_impl.dart';
 
+// Re-export apiClientProvider so existing imports continue to work
+export 'package:myapp/core/network/api_client_provider.dart';
+
 // ============== Core Providers ==============
 
 /// Provider for current user ID
-/// TODO: Replace with actual user ID from auth state
+/// TODO: Replace with actual user ID from authenticated session
+/// This is a temporary placeholder until proper auth state management is implemented
 final userIdProvider = Provider<int>((ref) {
-  return 7; // Practitioner user ID
-});
-
-/// Provider for API client
-/// TODO: Replace with actual user ID from auth state
-final apiClientProvider = Provider<ApiClient>((ref) {
-  final userId = ref.watch(userIdProvider);
-  return ApiClient(userId: userId);
+  // TODO: Get actual user ID from session/auth state
+  return 7; // Temporary placeholder
 });
 
 /// Provider for Connectivity

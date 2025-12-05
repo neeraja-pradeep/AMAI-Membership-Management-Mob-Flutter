@@ -259,23 +259,10 @@ class ApiClient {
     }
   }
 
-  /// GET request (returns raw Dio Response)
-  Future<Response<T>> get<T>(
-    String path, {
-    Map<String, dynamic>? queryParameters,
-    Options? options,
-    CancelToken? cancelToken,
-  }) async {
-    return _dio.get<T>(
-      path,
-      queryParameters: queryParameters,
-      options: options,
-      cancelToken: cancelToken,
-    );
-  }
-
   /// GET request with ApiResponse wrapper
-  Future<ApiResponse<T>> getWithResponse<T>(
+  ///
+  /// Returns ApiResponse<T> with optional fromJson parsing and conditional requests
+  Future<ApiResponse<T>> get<T>(
     String path, {
     Map<String, dynamic>? queryParameters,
     String? ifModifiedSince,
@@ -298,33 +285,13 @@ class ApiClient {
     }
   }
 
-  /// POST request (returns raw Dio Response)
-  ///
-  /// Supports progress tracking for file uploads via onSendProgress
-  Future<Response<T>> post<T>(
-    String path, {
-    dynamic data,
-    Map<String, dynamic>? queryParameters,
-    Options? options,
-    CancelToken? cancelToken,
-    ProgressCallback? onSendProgress,
-  }) async {
-    return _dio.post<T>(
-      path,
-      data: data,
-      queryParameters: queryParameters,
-      options: options,
-      cancelToken: cancelToken,
-      onSendProgress: onSendProgress,
-    );
-  }
-
   /// POST request with ApiResponse wrapper
-  Future<ApiResponse<T>> postWithResponse<T>(
+  ///
+  /// Returns ApiResponse<T> with optional fromJson parsing
+  Future<ApiResponse<T>> post<T>(
     String path, {
     dynamic data,
     Map<String, dynamic>? queryParameters,
-    String? ifModifiedSince,
     T Function(dynamic json)? fromJson,
   }) async {
     try {
@@ -332,11 +299,6 @@ class ApiClient {
         path,
         data: data,
         queryParameters: queryParameters,
-        options: Options(
-          headers: ifModifiedSince != null
-              ? {'If-Modified-Since': ifModifiedSince}
-              : null,
-        ),
       );
 
       return _handleResponse<T>(response, fromJson);
@@ -345,25 +307,10 @@ class ApiClient {
     }
   }
 
-  /// PUT request (returns raw Dio Response)
-  Future<Response<T>> put<T>(
-    String path, {
-    dynamic data,
-    Map<String, dynamic>? queryParameters,
-    Options? options,
-    CancelToken? cancelToken,
-  }) async {
-    return _dio.put<T>(
-      path,
-      data: data,
-      queryParameters: queryParameters,
-      options: options,
-      cancelToken: cancelToken,
-    );
-  }
-
   /// PUT request with ApiResponse wrapper
-  Future<ApiResponse<T>> putWithResponse<T>(
+  ///
+  /// Returns ApiResponse<T> with optional fromJson parsing
+  Future<ApiResponse<T>> put<T>(
     String path, {
     dynamic data,
     Map<String, dynamic>? queryParameters,
@@ -402,25 +349,10 @@ class ApiClient {
     }
   }
 
-  /// DELETE request (returns raw Dio Response)
-  Future<Response<T>> delete<T>(
-    String path, {
-    dynamic data,
-    Map<String, dynamic>? queryParameters,
-    Options? options,
-    CancelToken? cancelToken,
-  }) async {
-    return _dio.delete<T>(
-      path,
-      data: data,
-      queryParameters: queryParameters,
-      options: options,
-      cancelToken: cancelToken,
-    );
-  }
-
   /// DELETE request with ApiResponse wrapper
-  Future<ApiResponse<T>> deleteWithResponse<T>(
+  ///
+  /// Returns ApiResponse<T> with optional fromJson parsing
+  Future<ApiResponse<T>> delete<T>(
     String path, {
     dynamic data,
     Map<String, dynamic>? queryParameters,

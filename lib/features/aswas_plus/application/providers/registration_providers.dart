@@ -1,9 +1,9 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:fpdart/fpdart.dart';
 import 'package:myapp/core/error/failure.dart';
+import 'package:myapp/core/network/api_client_provider.dart';
 import 'package:myapp/core/network/endpoints.dart';
 import 'package:myapp/features/aswas_plus/infrastructure/models/registration_response_model.dart';
-import 'package:myapp/features/home/application/providers/home_providers.dart';
 
 /// Provider for insurance registration API call
 /// Takes payload and returns Either<Failure, RegistrationResponseModel>
