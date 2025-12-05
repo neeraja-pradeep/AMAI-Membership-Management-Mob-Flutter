@@ -124,11 +124,10 @@ class _AddressDetailsScreenState extends ConsumerState<AddressDetailsScreen> {
   void _loadExistingData() {
     final state = ref.read(registrationProvider);
 
+    // If RegistrationStateResumePrompt somehow still exists here,
+    // it means the user bypassed the resume dialog. Start fresh instead.
     if (state is RegistrationStateResumePrompt) {
-      ref
-          .read(registrationProvider.notifier)
-          .resumeRegistration(state.existingRegistration);
-      Future.microtask(() => _loadExistingData());
+      ref.read(registrationProvider.notifier).startFreshRegistration();
       return;
     }
 

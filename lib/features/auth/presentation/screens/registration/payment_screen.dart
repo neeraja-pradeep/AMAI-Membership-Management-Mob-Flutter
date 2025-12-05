@@ -53,11 +53,10 @@ class _PaymentScreenState extends ConsumerState<PaymentScreen> {
   void _initFromProvider() async {
     final state = ref.read(registrationProvider);
 
+    // If RegistrationStateResumePrompt somehow still exists here,
+    // it means the user bypassed the resume dialog. Start fresh instead.
     if (state is RegistrationStateResumePrompt) {
-      ref
-          .read(registrationProvider.notifier)
-          .resumeRegistration(state.existingRegistration);
-      Future.microtask(_initFromProvider);
+      ref.read(registrationProvider.notifier).startFreshRegistration();
       return;
     }
 

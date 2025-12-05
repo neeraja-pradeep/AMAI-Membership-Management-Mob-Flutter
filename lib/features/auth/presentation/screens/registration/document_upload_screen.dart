@@ -40,12 +40,10 @@ class _DocumentUploadScreenState extends ConsumerState<DocumentUploadScreen> {
   void _initFromProvider() {
     final state = ref.read(registrationProvider);
 
+    // If RegistrationStateResumePrompt somehow still exists here,
+    // it means the user bypassed the resume dialog. Start fresh instead.
     if (state is RegistrationStateResumePrompt) {
-      // Resume existing registration, then re-run init
-      ref
-          .read(registrationProvider.notifier)
-          .resumeRegistration(state.existingRegistration);
-      Future.microtask(_initFromProvider);
+      ref.read(registrationProvider.notifier).startFreshRegistration();
       return;
     }
 

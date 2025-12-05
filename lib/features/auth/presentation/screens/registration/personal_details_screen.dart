@@ -17,11 +17,13 @@ import '../../widgets/exit_confirmation_dialog.dart';
 class PersonalDetailsScreen extends ConsumerStatefulWidget {
   final UserRole role;
   final String password;
+  final String email;
 
   const PersonalDetailsScreen({
     super.key,
     required this.password,
     required this.role,
+    this.email = '', // Optional: empty for resume flow, filled for fresh flow
   });
 
   @override
@@ -55,7 +57,7 @@ class _PersonalDetailsScreenState extends ConsumerState<PersonalDetailsScreen> {
 
     _firstNameController = TextEditingController();
     _lastNameController = TextEditingController();
-    _emailController = TextEditingController();
+    _emailController = TextEditingController(text: widget.email); // Pre-fill with passed email
     _phoneController = TextEditingController();
     _waPhoneController = TextEditingController();
     _dobController = TextEditingController();
@@ -88,12 +90,10 @@ class _PersonalDetailsScreenState extends ConsumerState<PersonalDetailsScreen> {
   void _loadExistingData() {
     final state = ref.read(registrationProvider);
 
+    // If RegistrationStateResumePrompt somehow still exists here,
+    // it means the user bypassed the resume dialog. Start fresh instead.
     if (state is RegistrationStateResumePrompt) {
-      ref
-          .read(registrationProvider.notifier)
-          .resumeRegistration(state.existingRegistration);
-
-      Future.microtask(() => _loadExistingData());
+      ref.read(registrationProvider.notifier).startFreshRegistration();
       return;
     }
 
@@ -106,7 +106,13 @@ class _PersonalDetailsScreenState extends ConsumerState<PersonalDetailsScreen> {
     if (personalDetails != null) {
       _firstNameController.text = personalDetails.firstName;
       _lastNameController.text = personalDetails.lastName;
-      _emailController.text = personalDetails.email;
+
+      // Only load email from state if widget.email is empty (resume case)
+      // Otherwise keep the email passed from RegisterScreen (fresh case)
+      if (widget.email.isEmpty && personalDetails.email.isNotEmpty) {
+        _emailController.text = personalDetails.email;
+      }
+
       _phoneController.text = personalDetails.phone;
       _waPhoneController.text = personalDetails.waPhone;
 

@@ -3,12 +3,15 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:myapp/app/theme/colors.dart';
 import 'package:myapp/features/auth/application/providers/auth_provider.dart';
+import 'package:myapp/features/auth/application/notifiers/registration_state_notifier.dart';
+import 'package:myapp/features/auth/application/states/registration_state.dart';
 import 'package:myapp/features/auth/presentation/components/email_field.dart';
 import 'package:myapp/features/auth/presentation/components/offline_banner.dart';
 import 'package:myapp/features/auth/presentation/components/password_field.dart';
 import 'package:myapp/features/auth/presentation/components/role_selection_popup.dart';
 import 'package:myapp/features/auth/presentation/components/stale_data_banner.dart';
 import 'package:myapp/features/auth/presentation/screens/registration/personal_details_screen.dart';
+import 'package:myapp/features/auth/presentation/widgets/resume_registration_dialog.dart';
 
 class RegisterScreen extends ConsumerStatefulWidget {
   const RegisterScreen({super.key});
@@ -26,6 +29,15 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
 
   bool _showPassword = false;
   bool _showConfirmPassword = false;
+  bool _hasCheckedForExistingRegistration = false;
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _checkForExistingRegistration();
+    });
+  }
 
   @override
   void dispose() {
@@ -33,6 +45,18 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
     _passwordController.dispose();
     _confirmPasswordController.dispose();
     super.dispose();
+  }
+
+  /// Check for existing incomplete registration and show resume dialog
+  void _checkForExistingRegistration() {
+    if (_hasCheckedForExistingRegistration) return;
+    _hasCheckedForExistingRegistration = true;
+
+    final state = ref.read(registrationProvider);
+
+    if (state is RegistrationStateResumePrompt) {
+      showResumeRegistrationDialog(context, state.existingRegistration);
+    }
   }
 
   void _continueRegistration() async {
@@ -53,11 +77,18 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
       );
 
       if (selectedRole != null) {
+        // Clear any existing registration data before starting fresh
+        // This ensures new email/password are used, not old cached data
+        await ref.read(registrationProvider.notifier).startFreshRegistration();
+
+        if (!mounted) return;
+
         Navigator.of(context).push(
           MaterialPageRoute(
             builder: (context) => PersonalDetailsScreen(
               role: selectedRole,
               password: _passwordController.text.trim(),
+              email: _emailController.text.trim(),
             ),
           ),
         );
