@@ -376,6 +376,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
           },
         ),
         pending: () => const MembershipCardShimmer(),
+        rejected: () => const MembershipCardShimmer(),
       ),
     ];
 

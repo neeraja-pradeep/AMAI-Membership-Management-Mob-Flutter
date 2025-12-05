@@ -112,6 +112,18 @@ class PendingApplicationFailure extends Failure {
       'Your registration is under review. Please wait for approval.';
 }
 
+/// Rejected application failure - membership application was rejected
+class RejectedApplicationFailure extends Failure {
+  const RejectedApplicationFailure({
+    super.message = 'Your membership application was rejected.',
+    super.code = 'REJECTED_APPLICATION',
+  });
+
+  @override
+  String toUserMessage() =>
+      'Unfortunately, your registration could not be approved.';
+}
+
 /// Utility to map NetworkException to Failure
 class FailureMapper {
   FailureMapper._();

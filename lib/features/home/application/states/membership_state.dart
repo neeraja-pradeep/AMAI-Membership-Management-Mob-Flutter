@@ -32,6 +32,9 @@ class MembershipState with _$MembershipState {
   /// Pending approval state - membership application is under review
   const factory MembershipState.pending() = _Pending;
 
+  /// Rejected state - membership application was rejected
+  const factory MembershipState.rejected() = _Rejected;
+
   const MembershipState._();
 
   /// Gets current membership card data from any state that has it
@@ -74,6 +77,12 @@ class MembershipState with _$MembershipState {
   /// Whether membership application is pending approval
   bool get isPending => maybeWhen(
         pending: () => true,
+        orElse: () => false,
+      );
+
+  /// Whether membership application was rejected
+  bool get isRejected => maybeWhen(
+        rejected: () => true,
         orElse: () => false,
       );
 }

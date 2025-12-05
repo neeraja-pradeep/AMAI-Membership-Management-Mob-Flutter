@@ -57,6 +57,11 @@ class HomeRepositoryImpl implements HomeRepository {
         return left(const PendingApplicationFailure());
       }
 
+      // Handle rejected application status
+      if (response.isRejectedApplication) {
+        return left(const RejectedApplicationFailure());
+      }
+
       // Handle successful response with data
       if (response.isSuccess && response.data != null) {
         final membershipCard = response.data!.toDomain();

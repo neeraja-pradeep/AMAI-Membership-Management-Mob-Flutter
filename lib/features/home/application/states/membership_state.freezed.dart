@@ -25,6 +25,7 @@ mixin _$MembershipState {
         error,
     required TResult Function() empty,
     required TResult Function() pending,
+    required TResult Function() rejected,
   }) =>
       throw _privateConstructorUsedError;
   @optionalTypeArgs
@@ -35,6 +36,7 @@ mixin _$MembershipState {
     TResult? Function(Failure failure, MembershipCard? cachedData)? error,
     TResult? Function()? empty,
     TResult? Function()? pending,
+    TResult? Function()? rejected,
   }) =>
       throw _privateConstructorUsedError;
   @optionalTypeArgs
@@ -45,6 +47,7 @@ mixin _$MembershipState {
     TResult Function(Failure failure, MembershipCard? cachedData)? error,
     TResult Function()? empty,
     TResult Function()? pending,
+    TResult Function()? rejected,
     required TResult orElse(),
   }) =>
       throw _privateConstructorUsedError;
@@ -56,6 +59,7 @@ mixin _$MembershipState {
     required TResult Function(_Error value) error,
     required TResult Function(_Empty value) empty,
     required TResult Function(_Pending value) pending,
+    required TResult Function(_Rejected value) rejected,
   }) =>
       throw _privateConstructorUsedError;
   @optionalTypeArgs
@@ -66,6 +70,7 @@ mixin _$MembershipState {
     TResult? Function(_Error value)? error,
     TResult? Function(_Empty value)? empty,
     TResult? Function(_Pending value)? pending,
+    TResult? Function(_Rejected value)? rejected,
   }) =>
       throw _privateConstructorUsedError;
   @optionalTypeArgs
@@ -76,6 +81,7 @@ mixin _$MembershipState {
     TResult Function(_Error value)? error,
     TResult Function(_Empty value)? empty,
     TResult Function(_Pending value)? pending,
+    TResult Function(_Rejected value)? rejected,
     required TResult orElse(),
   }) =>
       throw _privateConstructorUsedError;
@@ -144,6 +150,7 @@ class _$InitialImpl extends _Initial {
         error,
     required TResult Function() empty,
     required TResult Function() pending,
+    required TResult Function() rejected,
   }) {
     return initial();
   }
@@ -157,6 +164,7 @@ class _$InitialImpl extends _Initial {
     TResult? Function(Failure failure, MembershipCard? cachedData)? error,
     TResult? Function()? empty,
     TResult? Function()? pending,
+    TResult? Function()? rejected,
   }) {
     return initial?.call();
   }
@@ -170,6 +178,7 @@ class _$InitialImpl extends _Initial {
     TResult Function(Failure failure, MembershipCard? cachedData)? error,
     TResult Function()? empty,
     TResult Function()? pending,
+    TResult Function()? rejected,
     required TResult orElse(),
   }) {
     if (initial != null) {
@@ -187,6 +196,7 @@ class _$InitialImpl extends _Initial {
     required TResult Function(_Error value) error,
     required TResult Function(_Empty value) empty,
     required TResult Function(_Pending value) pending,
+    required TResult Function(_Rejected value) rejected,
   }) {
     return initial(this);
   }
@@ -200,6 +210,7 @@ class _$InitialImpl extends _Initial {
     TResult? Function(_Error value)? error,
     TResult? Function(_Empty value)? empty,
     TResult? Function(_Pending value)? pending,
+    TResult? Function(_Rejected value)? rejected,
   }) {
     return initial?.call(this);
   }
@@ -213,6 +224,7 @@ class _$InitialImpl extends _Initial {
     TResult Function(_Error value)? error,
     TResult Function(_Empty value)? empty,
     TResult Function(_Pending value)? pending,
+    TResult Function(_Rejected value)? rejected,
     required TResult orElse(),
   }) {
     if (initial != null) {
@@ -313,6 +325,7 @@ class _$LoadingImpl extends _Loading {
         error,
     required TResult Function() empty,
     required TResult Function() pending,
+    required TResult Function() rejected,
   }) {
     return loading(previousData);
   }
@@ -326,6 +339,7 @@ class _$LoadingImpl extends _Loading {
     TResult? Function(Failure failure, MembershipCard? cachedData)? error,
     TResult? Function()? empty,
     TResult? Function()? pending,
+    TResult? Function()? rejected,
   }) {
     return loading?.call(previousData);
   }
@@ -339,6 +353,7 @@ class _$LoadingImpl extends _Loading {
     TResult Function(Failure failure, MembershipCard? cachedData)? error,
     TResult Function()? empty,
     TResult Function()? pending,
+    TResult Function()? rejected,
     required TResult orElse(),
   }) {
     if (loading != null) {
@@ -356,6 +371,7 @@ class _$LoadingImpl extends _Loading {
     required TResult Function(_Error value) error,
     required TResult Function(_Empty value) empty,
     required TResult Function(_Pending value) pending,
+    required TResult Function(_Rejected value) rejected,
   }) {
     return loading(this);
   }
@@ -369,6 +385,7 @@ class _$LoadingImpl extends _Loading {
     TResult? Function(_Error value)? error,
     TResult? Function(_Empty value)? empty,
     TResult? Function(_Pending value)? pending,
+    TResult? Function(_Rejected value)? rejected,
   }) {
     return loading?.call(this);
   }
@@ -382,6 +399,7 @@ class _$LoadingImpl extends _Loading {
     TResult Function(_Error value)? error,
     TResult Function(_Empty value)? empty,
     TResult Function(_Pending value)? pending,
+    TResult Function(_Rejected value)? rejected,
     required TResult orElse(),
   }) {
     if (loading != null) {
@@ -483,6 +501,7 @@ class _$LoadedImpl extends _Loaded {
         error,
     required TResult Function() empty,
     required TResult Function() pending,
+    required TResult Function() rejected,
   }) {
     return loaded(membershipCard);
   }
@@ -496,6 +515,7 @@ class _$LoadedImpl extends _Loaded {
     TResult? Function(Failure failure, MembershipCard? cachedData)? error,
     TResult? Function()? empty,
     TResult? Function()? pending,
+    TResult? Function()? rejected,
   }) {
     return loaded?.call(membershipCard);
   }
@@ -509,6 +529,7 @@ class _$LoadedImpl extends _Loaded {
     TResult Function(Failure failure, MembershipCard? cachedData)? error,
     TResult Function()? empty,
     TResult Function()? pending,
+    TResult Function()? rejected,
     required TResult orElse(),
   }) {
     if (loaded != null) {
@@ -526,6 +547,7 @@ class _$LoadedImpl extends _Loaded {
     required TResult Function(_Error value) error,
     required TResult Function(_Empty value) empty,
     required TResult Function(_Pending value) pending,
+    required TResult Function(_Rejected value) rejected,
   }) {
     return loaded(this);
   }
@@ -539,6 +561,7 @@ class _$LoadedImpl extends _Loaded {
     TResult? Function(_Error value)? error,
     TResult? Function(_Empty value)? empty,
     TResult? Function(_Pending value)? pending,
+    TResult? Function(_Rejected value)? rejected,
   }) {
     return loaded?.call(this);
   }
@@ -552,6 +575,7 @@ class _$LoadedImpl extends _Loaded {
     TResult Function(_Error value)? error,
     TResult Function(_Empty value)? empty,
     TResult Function(_Pending value)? pending,
+    TResult Function(_Rejected value)? rejected,
     required TResult orElse(),
   }) {
     if (loaded != null) {
@@ -666,6 +690,7 @@ class _$ErrorImpl extends _Error {
         error,
     required TResult Function() empty,
     required TResult Function() pending,
+    required TResult Function() rejected,
   }) {
     return error(failure, cachedData);
   }
@@ -679,6 +704,7 @@ class _$ErrorImpl extends _Error {
     TResult? Function(Failure failure, MembershipCard? cachedData)? error,
     TResult? Function()? empty,
     TResult? Function()? pending,
+    TResult? Function()? rejected,
   }) {
     return error?.call(failure, cachedData);
   }
@@ -692,6 +718,7 @@ class _$ErrorImpl extends _Error {
     TResult Function(Failure failure, MembershipCard? cachedData)? error,
     TResult Function()? empty,
     TResult Function()? pending,
+    TResult Function()? rejected,
     required TResult orElse(),
   }) {
     if (error != null) {
@@ -709,6 +736,7 @@ class _$ErrorImpl extends _Error {
     required TResult Function(_Error value) error,
     required TResult Function(_Empty value) empty,
     required TResult Function(_Pending value) pending,
+    required TResult Function(_Rejected value) rejected,
   }) {
     return error(this);
   }
@@ -722,6 +750,7 @@ class _$ErrorImpl extends _Error {
     TResult? Function(_Error value)? error,
     TResult? Function(_Empty value)? empty,
     TResult? Function(_Pending value)? pending,
+    TResult? Function(_Rejected value)? rejected,
   }) {
     return error?.call(this);
   }
@@ -735,6 +764,7 @@ class _$ErrorImpl extends _Error {
     TResult Function(_Error value)? error,
     TResult Function(_Empty value)? empty,
     TResult Function(_Pending value)? pending,
+    TResult Function(_Rejected value)? rejected,
     required TResult orElse(),
   }) {
     if (error != null) {
@@ -802,6 +832,7 @@ class _$EmptyImpl extends _Empty {
         error,
     required TResult Function() empty,
     required TResult Function() pending,
+    required TResult Function() rejected,
   }) {
     return empty();
   }
@@ -815,6 +846,7 @@ class _$EmptyImpl extends _Empty {
     TResult? Function(Failure failure, MembershipCard? cachedData)? error,
     TResult? Function()? empty,
     TResult? Function()? pending,
+    TResult? Function()? rejected,
   }) {
     return empty?.call();
   }
@@ -828,6 +860,7 @@ class _$EmptyImpl extends _Empty {
     TResult Function(Failure failure, MembershipCard? cachedData)? error,
     TResult Function()? empty,
     TResult Function()? pending,
+    TResult Function()? rejected,
     required TResult orElse(),
   }) {
     if (empty != null) {
@@ -845,6 +878,7 @@ class _$EmptyImpl extends _Empty {
     required TResult Function(_Error value) error,
     required TResult Function(_Empty value) empty,
     required TResult Function(_Pending value) pending,
+    required TResult Function(_Rejected value) rejected,
   }) {
     return empty(this);
   }
@@ -858,6 +892,7 @@ class _$EmptyImpl extends _Empty {
     TResult? Function(_Error value)? error,
     TResult? Function(_Empty value)? empty,
     TResult? Function(_Pending value)? pending,
+    TResult? Function(_Rejected value)? rejected,
   }) {
     return empty?.call(this);
   }
@@ -871,6 +906,7 @@ class _$EmptyImpl extends _Empty {
     TResult Function(_Error value)? error,
     TResult Function(_Empty value)? empty,
     TResult Function(_Pending value)? pending,
+    TResult Function(_Rejected value)? rejected,
     required TResult orElse(),
   }) {
     if (empty != null) {
@@ -930,6 +966,7 @@ class _$PendingImpl extends _Pending {
         error,
     required TResult Function() empty,
     required TResult Function() pending,
+    required TResult Function() rejected,
   }) {
     return pending();
   }
@@ -943,6 +980,7 @@ class _$PendingImpl extends _Pending {
     TResult? Function(Failure failure, MembershipCard? cachedData)? error,
     TResult? Function()? empty,
     TResult? Function()? pending,
+    TResult? Function()? rejected,
   }) {
     return pending?.call();
   }
@@ -956,6 +994,7 @@ class _$PendingImpl extends _Pending {
     TResult Function(Failure failure, MembershipCard? cachedData)? error,
     TResult Function()? empty,
     TResult Function()? pending,
+    TResult Function()? rejected,
     required TResult orElse(),
   }) {
     if (pending != null) {
@@ -973,6 +1012,7 @@ class _$PendingImpl extends _Pending {
     required TResult Function(_Error value) error,
     required TResult Function(_Empty value) empty,
     required TResult Function(_Pending value) pending,
+    required TResult Function(_Rejected value) rejected,
   }) {
     return pending(this);
   }
@@ -986,6 +1026,7 @@ class _$PendingImpl extends _Pending {
     TResult? Function(_Error value)? error,
     TResult? Function(_Empty value)? empty,
     TResult? Function(_Pending value)? pending,
+    TResult? Function(_Rejected value)? rejected,
   }) {
     return pending?.call(this);
   }
@@ -999,6 +1040,7 @@ class _$PendingImpl extends _Pending {
     TResult Function(_Error value)? error,
     TResult Function(_Empty value)? empty,
     TResult Function(_Pending value)? pending,
+    TResult Function(_Rejected value)? rejected,
     required TResult orElse(),
   }) {
     if (pending != null) {
@@ -1011,4 +1053,138 @@ class _$PendingImpl extends _Pending {
 abstract class _Pending extends MembershipState {
   const factory _Pending() = _$PendingImpl;
   const _Pending._() : super._();
+}
+
+/// @nodoc
+abstract class _$$RejectedImplCopyWith<$Res> {
+  factory _$$RejectedImplCopyWith(
+          _$RejectedImpl value, $Res Function(_$RejectedImpl) then) =
+      __$$RejectedImplCopyWithImpl<$Res>;
+}
+
+/// @nodoc
+class __$$RejectedImplCopyWithImpl<$Res>
+    extends _$MembershipStateCopyWithImpl<$Res, _$RejectedImpl>
+    implements _$$RejectedImplCopyWith<$Res> {
+  __$$RejectedImplCopyWithImpl(
+      _$RejectedImpl _value, $Res Function(_$RejectedImpl) _then)
+      : super(_value, _then);
+}
+
+/// @nodoc
+
+class _$RejectedImpl extends _Rejected {
+  const _$RejectedImpl() : super._();
+
+  @override
+  String toString() {
+    return 'MembershipState.rejected()';
+  }
+
+  @override
+  bool operator ==(Object other) {
+    return identical(this, other) ||
+        (other.runtimeType == runtimeType && other is _$RejectedImpl);
+  }
+
+  @override
+  int get hashCode => runtimeType.hashCode;
+
+  @override
+  @optionalTypeArgs
+  TResult when<TResult extends Object?>({
+    required TResult Function() initial,
+    required TResult Function(MembershipCard? previousData) loading,
+    required TResult Function(MembershipCard membershipCard) loaded,
+    required TResult Function(Failure failure, MembershipCard? cachedData)
+        error,
+    required TResult Function() empty,
+    required TResult Function() pending,
+    required TResult Function() rejected,
+  }) {
+    return rejected();
+  }
+
+  @override
+  @optionalTypeArgs
+  TResult? whenOrNull<TResult extends Object?>({
+    TResult? Function()? initial,
+    TResult? Function(MembershipCard? previousData)? loading,
+    TResult? Function(MembershipCard membershipCard)? loaded,
+    TResult? Function(Failure failure, MembershipCard? cachedData)? error,
+    TResult? Function()? empty,
+    TResult? Function()? pending,
+    TResult? Function()? rejected,
+  }) {
+    return rejected?.call();
+  }
+
+  @override
+  @optionalTypeArgs
+  TResult maybeWhen<TResult extends Object?>({
+    TResult Function()? initial,
+    TResult Function(MembershipCard? previousData)? loading,
+    TResult Function(MembershipCard membershipCard)? loaded,
+    TResult Function(Failure failure, MembershipCard? cachedData)? error,
+    TResult Function()? empty,
+    TResult Function()? pending,
+    TResult Function()? rejected,
+    required TResult orElse(),
+  }) {
+    if (rejected != null) {
+      return rejected();
+    }
+    return orElse();
+  }
+
+  @override
+  @optionalTypeArgs
+  TResult map<TResult extends Object?>({
+    required TResult Function(_Initial value) initial,
+    required TResult Function(_Loading value) loading,
+    required TResult Function(_Loaded value) loaded,
+    required TResult Function(_Error value) error,
+    required TResult Function(_Empty value) empty,
+    required TResult Function(_Pending value) pending,
+    required TResult Function(_Rejected value) rejected,
+  }) {
+    return rejected(this);
+  }
+
+  @override
+  @optionalTypeArgs
+  TResult? mapOrNull<TResult extends Object?>({
+    TResult? Function(_Initial value)? initial,
+    TResult? Function(_Loading value)? loading,
+    TResult? Function(_Loaded value)? loaded,
+    TResult? Function(_Error value)? error,
+    TResult? Function(_Empty value)? empty,
+    TResult? Function(_Pending value)? pending,
+    TResult? Function(_Rejected value)? rejected,
+  }) {
+    return rejected?.call(this);
+  }
+
+  @override
+  @optionalTypeArgs
+  TResult maybeMap<TResult extends Object?>({
+    TResult Function(_Initial value)? initial,
+    TResult Function(_Loading value)? loading,
+    TResult Function(_Loaded value)? loaded,
+    TResult Function(_Error value)? error,
+    TResult Function(_Empty value)? empty,
+    TResult Function(_Pending value)? pending,
+    TResult Function(_Rejected value)? rejected,
+    required TResult orElse(),
+  }) {
+    if (rejected != null) {
+      return rejected(this);
+    }
+    return orElse();
+  }
+}
+
+abstract class _Rejected extends MembershipState {
+  const factory _Rejected() = _$RejectedImpl;
+  const _Rejected._() : super._();
 }

@@ -107,5 +107,9 @@ class MembershipDetailResponse {
   bool get isPendingApplication =>
       applicationStatus?.toLowerCase() == 'pending';
 
+  /// Check if this is a rejected application response
+  bool get isRejectedApplication =>
+      applicationStatus?.toLowerCase() == 'rejected';
+
   Map<String, dynamic> toJson() => _$MembershipDetailResponseToJson(this);
 }

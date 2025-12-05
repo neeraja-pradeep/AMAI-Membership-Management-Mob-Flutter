@@ -37,6 +37,11 @@ class _MainNavigationScreenState extends ConsumerState<MainNavigationScreen> {
       return const RegistrationStatusScreen();
     }
 
+    // Show Registration Status screen with rejected UI when membership application is rejected
+    if (membershipState.isRejected) {
+      return const RegistrationStatusScreen(isRejected: true);
+    }
+
     return Scaffold(
       body: IndexedStack(
         index: _currentIndex,
