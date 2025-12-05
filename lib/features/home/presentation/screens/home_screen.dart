@@ -375,6 +375,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
             // TODO: Navigate to membership application
           },
         ),
+        pending: () => const MembershipCardShimmer(),
       ),
     ];
 
