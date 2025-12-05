@@ -52,6 +52,11 @@ class HomeRepositoryImpl implements HomeRepository {
         return right(null); // Signal to use in-memory data
       }
 
+      // Handle pending application status
+      if (response.isPendingApplication) {
+        return left(const PendingApplicationFailure());
+      }
+
       // Handle successful response with data
       if (response.isSuccess && response.data != null) {
         final membershipCard = response.data!.toDomain();

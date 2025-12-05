@@ -1,19 +1,24 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:myapp/app/theme/colors.dart';
+import 'package:myapp/features/home/application/providers/home_providers.dart';
 import 'package:myapp/features/home/presentation/screens/home_screen.dart';
+import 'package:myapp/features/home/presentation/screens/registration_status_screen.dart';
 import 'package:myapp/features/profile/presentation/screens/profile_screen.dart';
 
 /// Main navigation screen with bottom navigation bar
 /// Contains 4 tabs: Home, Events, Library, Profile
-class MainNavigationScreen extends StatefulWidget {
+/// Shows RegistrationStatusScreen when membership application is pending
+class MainNavigationScreen extends ConsumerStatefulWidget {
   const MainNavigationScreen({super.key});
 
   @override
-  State<MainNavigationScreen> createState() => _MainNavigationScreenState();
+  ConsumerState<MainNavigationScreen> createState() =>
+      _MainNavigationScreenState();
 }
 
-class _MainNavigationScreenState extends State<MainNavigationScreen> {
+class _MainNavigationScreenState extends ConsumerState<MainNavigationScreen> {
   int _currentIndex = 0;
 
   final List<Widget> _screens = [
@@ -25,6 +30,13 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final membershipState = ref.watch(membershipStateProvider);
+
+    // Show Registration Status screen when membership application is pending
+    if (membershipState.isPending) {
+      return const RegistrationStatusScreen();
+    }
+
     return Scaffold(
       body: IndexedStack(
         index: _currentIndex,

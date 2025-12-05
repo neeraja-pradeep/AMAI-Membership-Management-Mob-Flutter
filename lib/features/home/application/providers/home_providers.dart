@@ -1,6 +1,7 @@
 import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:hive_flutter/hive_flutter.dart';
+import 'package:myapp/core/error/failure.dart';
 import 'package:myapp/core/network/api_client.dart';
 import 'package:myapp/features/home/application/states/announcements_state.dart';
 import 'package:myapp/features/home/application/states/aswas_state.dart';
@@ -131,7 +132,12 @@ class MembershipNotifier extends StateNotifier<MembershipState> {
 
     result.fold(
       (failure) {
-        state = MembershipState.error(failure: failure);
+        // Check if this is a pending application failure
+        if (failure is PendingApplicationFailure) {
+          state = const MembershipState.pending();
+        } else {
+          state = MembershipState.error(failure: failure);
+        }
       },
       (membershipCard) {
         if (membershipCard != null) {
@@ -154,11 +160,16 @@ class MembershipNotifier extends StateNotifier<MembershipState> {
 
     result.fold(
       (failure) {
-        // On error, keep previous data visible with error banner
-        state = MembershipState.error(
-          failure: failure,
-          cachedData: previousData,
-        );
+        // Check if this is a pending application failure
+        if (failure is PendingApplicationFailure) {
+          state = const MembershipState.pending();
+        } else {
+          // On error, keep previous data visible with error banner
+          state = MembershipState.error(
+            failure: failure,
+            cachedData: previousData,
+          );
+        }
       },
       (membershipCard) {
         if (membershipCard != null) {

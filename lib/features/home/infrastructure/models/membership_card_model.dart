@@ -82,10 +82,13 @@ class MembershipCardModel {
 
 /// Response wrapper for membership detail endpoint
 /// Extracts membership data from the nested response structure
+/// Also handles error responses with application_status field
 @JsonSerializable()
 class MembershipDetailResponse {
   const MembershipDetailResponse({
     this.membership,
+    this.error,
+    this.applicationStatus,
   });
 
   factory MembershipDetailResponse.fromJson(Map<String, dynamic> json) =>
@@ -93,6 +96,16 @@ class MembershipDetailResponse {
 
   @JsonKey(name: 'membership')
   final MembershipCardModel? membership;
+
+  @JsonKey(name: 'error')
+  final String? error;
+
+  @JsonKey(name: 'application_status')
+  final String? applicationStatus;
+
+  /// Check if this is a pending application response
+  bool get isPendingApplication =>
+      error != null && applicationStatus?.toLowerCase() == 'pending';
 
   Map<String, dynamic> toJson() => _$MembershipDetailResponseToJson(this);
 }

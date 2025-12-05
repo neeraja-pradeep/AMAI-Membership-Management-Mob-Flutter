@@ -100,6 +100,18 @@ class UnknownFailure extends Failure {
   String toUserMessage() => 'Something went wrong. Please try again.';
 }
 
+/// Pending application failure - membership application is under review
+class PendingApplicationFailure extends Failure {
+  const PendingApplicationFailure({
+    super.message = 'Your membership application is pending review.',
+    super.code = 'PENDING_APPLICATION',
+  });
+
+  @override
+  String toUserMessage() =>
+      'Your registration is under review. Please wait for approval.';
+}
+
 /// Utility to map NetworkException to Failure
 class FailureMapper {
   FailureMapper._();

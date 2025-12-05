@@ -29,6 +29,9 @@ class MembershipState with _$MembershipState {
   /// No membership found state
   const factory MembershipState.empty() = _Empty;
 
+  /// Pending approval state - membership application is under review
+  const factory MembershipState.pending() = _Pending;
+
   const MembershipState._();
 
   /// Gets current membership card data from any state that has it
@@ -67,4 +70,10 @@ class MembershipState with _$MembershipState {
 
   /// Whether membership is expired (if data available)
   bool get isExpired => currentData?.isExpired ?? false;
+
+  /// Whether membership application is pending approval
+  bool get isPending => maybeWhen(
+        pending: () => true,
+        orElse: () => false,
+      );
 }

@@ -14,11 +14,13 @@ class HomeApiResponse<T> {
     required this.data,
     required this.statusCode,
     this.timestamp,
+    this.isPendingApplication = false,
   });
 
   final T? data;
   final int statusCode;
   final String? timestamp;
+  final bool isPendingApplication;
 
   /// Check if response is 304 Not Modified
   bool get isNotModified => statusCode == 304;
@@ -146,17 +148,25 @@ class HomeApiImpl implements HomeApi {
 
     // Parse the response
     MembershipCardModel? membershipCard;
+    bool isPendingApplication = false;
 
     if (response.data != null) {
       // API returns membership detail with nested membership object
       final detailResponse = MembershipDetailResponse.fromJson(response.data!);
-      membershipCard = detailResponse.membership;
+
+      // Check if this is a pending application response
+      if (detailResponse.isPendingApplication) {
+        isPendingApplication = true;
+      } else {
+        membershipCard = detailResponse.membership;
+      }
     }
 
     return HomeApiResponse<MembershipCardModel>(
       data: membershipCard,
       statusCode: response.statusCode,
       timestamp: response.timestamp,
+      isPendingApplication: isPendingApplication,
     );
   }
 

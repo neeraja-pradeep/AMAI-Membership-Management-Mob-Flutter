@@ -40,10 +40,14 @@ MembershipDetailResponse _$MembershipDetailResponseFromJson(
           ? null
           : MembershipCardModel.fromJson(
               json['membership'] as Map<String, dynamic>),
+      error: json['error'] as String?,
+      applicationStatus: json['application_status'] as String?,
     );
 
 Map<String, dynamic> _$MembershipDetailResponseToJson(
         MembershipDetailResponse instance) =>
     <String, dynamic>{
       'membership': instance.membership,
+      'error': instance.error,
+      'application_status': instance.applicationStatus,
     };
