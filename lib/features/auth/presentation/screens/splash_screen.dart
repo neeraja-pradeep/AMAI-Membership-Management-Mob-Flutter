@@ -6,7 +6,7 @@ import 'package:myapp/app/theme/colors.dart';
 import 'package:myapp/core/network/api_client_provider.dart';
 
 import '../screen/login_screen.dart';
-import 'package:myapp/features/home/presentation/screens/home_screen.dart';
+import 'package:myapp/features/navigation/presentation/screens/main_navigation_screen.dart';
 
 /// Splash screen that checks session and redirects accordingly
 ///
@@ -49,11 +49,11 @@ class _SplashScreenState extends ConsumerState<SplashScreen> {
       if (!mounted) return;
 
       if (isValid) {
-        // Session is valid, go to home
-        debugPrint('[SplashScreen] Navigating to HomeScreen');
+        // Session is valid, go to main navigation (with bottom nav bar)
+        debugPrint('[SplashScreen] Navigating to MainNavigationScreen');
         Navigator.pushAndRemoveUntil(
           context,
-          MaterialPageRoute(builder: (_) => const HomeScreen()),
+          MaterialPageRoute(builder: (_) => const MainNavigationScreen()),
           (route) => false,
         );
       } else {
