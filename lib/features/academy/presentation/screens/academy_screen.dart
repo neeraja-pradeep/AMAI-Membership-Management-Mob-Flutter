@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:myapp/app/theme/colors.dart';
 import 'package:myapp/app/theme/typography.dart';
-import 'package:url_launcher/url_launcher.dart';
 
 /// Academy Screen - displays information about AMAI Academy
 class AcademyScreen extends StatelessWidget {
@@ -58,7 +57,7 @@ One year into this journey and the academy is happily overwhelmed with queries r
             ),
             SizedBox(height: 24.h),
             // Contact Us Card
-            _buildContactCard(context),
+            _buildContactCard(),
             SizedBox(height: 24.h),
           ],
         ),
@@ -66,7 +65,7 @@ One year into this journey and the academy is happily overwhelmed with queries r
     );
   }
 
-  Widget _buildContactCard(BuildContext context) {
+  Widget _buildContactCard() {
     return Container(
       width: double.infinity,
       padding: EdgeInsets.all(16.w),
@@ -93,36 +92,26 @@ One year into this journey and the academy is happily overwhelmed with queries r
             ),
           ),
           SizedBox(height: 12.h),
-          GestureDetector(
-            onTap: () => _launchPhone(context),
-            child: Row(
-              children: [
-                Icon(
-                  Icons.phone,
+          Row(
+            children: [
+              Icon(
+                Icons.phone,
+                color: AppColors.primary,
+                size: 20.sp,
+              ),
+              SizedBox(width: 12.w),
+              Text(
+                _contactNumber,
+                style: AppTypography.bodyMedium.copyWith(
                   color: AppColors.primary,
-                  size: 20.sp,
+                  fontWeight: FontWeight.w500,
+                  fontSize: 14.sp,
                 ),
-                SizedBox(width: 12.w),
-                Text(
-                  _contactNumber,
-                  style: AppTypography.bodyMedium.copyWith(
-                    color: AppColors.primary,
-                    fontWeight: FontWeight.w500,
-                    fontSize: 14.sp,
-                  ),
-                ),
-              ],
-            ),
+              ),
+            ],
           ),
         ],
       ),
     );
-  }
-
-  Future<void> _launchPhone(BuildContext context) async {
-    final Uri phoneUri = Uri(scheme: 'tel', path: _contactNumber);
-    if (await canLaunchUrl(phoneUri)) {
-      await launchUrl(phoneUri);
-    }
   }
 }
