@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:myapp/features/auth/presentation/screen/login_screen.dart';
 import 'package:myapp/features/auth/presentation/screens/splash_screen.dart';
-import 'package:myapp/features/auth/presentation/screens/home_screen.dart';
+import 'package:myapp/features/navigation/presentation/screens/main_navigation_screen.dart';
 
 import '../../features/auth/presentation/screens/registration/personal_details_screen.dart';
 import '../../features/auth/presentation/screens/registration/professional_details_screen.dart';
@@ -136,7 +136,7 @@ class AppRouter {
       // Dashboard/Home route
       case dashboard:
       case home:
-        return _buildRoute(const HomeScreen());
+        return _buildRoute(const MainNavigationScreen());
 
       // Unknown route
       default:

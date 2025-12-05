@@ -2,7 +2,7 @@ import 'dart:developer';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:myapp/features/auth/presentation/screens/home_screen.dart';
+import 'package:myapp/features/navigation/presentation/screens/main_navigation_screen.dart';
 import 'package:razorpay_flutter/razorpay_flutter.dart';
 import 'package:myapp/app/theme/colors.dart';
 import '../../../../../app/router/app_router.dart';
@@ -406,7 +406,7 @@ class _PaymentScreenState extends ConsumerState<PaymentScreen> {
                           Navigator.pushAndRemoveUntil(
                             context,
                             MaterialPageRoute(
-                              builder: (_) => const HomeScreen(),
+                              builder: (_) => const MainNavigationScreen(),
                             ),
                             (route) => false, // remove everything
                           );

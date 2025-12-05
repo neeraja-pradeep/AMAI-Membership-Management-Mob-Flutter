@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:myapp/app/theme/colors.dart';
-import 'package:myapp/features/auth/presentation/screens/home_screen.dart';
+import 'package:myapp/features/navigation/presentation/screens/main_navigation_screen.dart';
 import 'package:myapp/features/auth/presentation/screens/registration/personal_details_screen.dart';
 import 'package:myapp/features/auth/presentation/screens/registration/register_screen.dart';
 import '../screens/forgot_password/forgot_password_screen.dart';
@@ -71,7 +71,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
           // Navigator.pushReplacementNamed(context, '/home');
           Navigator.of(
             context,
-          ).push(MaterialPageRoute(builder: (context) => const HomeScreen()));
+          ).push(MaterialPageRoute(builder: (context) => const MainNavigationScreen()));
           break;
         case AuthStateError(:final message):
           // Show error snackbar
