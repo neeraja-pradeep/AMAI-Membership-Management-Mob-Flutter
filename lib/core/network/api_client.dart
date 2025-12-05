@@ -200,11 +200,22 @@ class ApiClient {
     }
 
     try {
-      // Try to access a protected endpoint to verify session
-      final response = await _dio.get('/api/users/profile/');
+      // Try to access the session validation endpoint
+      final response = await _dio.get('/api/session/validate/');
 
       // If we get a 200, session is valid
-      return response.statusCode == 200;
+      if (response.statusCode == 200) {
+        return true;
+      }
+
+      // 401/403 means session is invalid
+      if (response.statusCode == 401 || response.statusCode == 403) {
+        return false;
+      }
+
+      // For other status codes, try checking addresses endpoint as fallback
+      final fallbackResponse = await _dio.get('/api/accounts/addresses/');
+      return fallbackResponse.statusCode == 200;
     } catch (e) {
       debugPrint('Session validation failed: $e');
       return false;

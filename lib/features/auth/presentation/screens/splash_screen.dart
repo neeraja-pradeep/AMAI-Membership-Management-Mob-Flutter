@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -36,17 +37,20 @@ class _SplashScreenState extends ConsumerState<SplashScreen> {
 
     // Check if session cookie exists
     final hasSession = await apiClient.hasValidSession();
+    debugPrint('[SplashScreen] hasSession: $hasSession');
 
     if (!mounted) return;
 
     if (hasSession) {
       // Validate session with server
       final isValid = await apiClient.validateSessionWithServer();
+      debugPrint('[SplashScreen] isValid: $isValid');
 
       if (!mounted) return;
 
       if (isValid) {
         // Session is valid, go to home
+        debugPrint('[SplashScreen] Navigating to HomeScreen');
         Navigator.pushAndRemoveUntil(
           context,
           MaterialPageRoute(builder: (_) => const HomeScreen()),
@@ -54,6 +58,7 @@ class _SplashScreenState extends ConsumerState<SplashScreen> {
         );
       } else {
         // Session expired on server, clear cookies and go to login
+        debugPrint('[SplashScreen] Session invalid, clearing cookies');
         await apiClient.clearCookies();
         if (!mounted) return;
         Navigator.pushAndRemoveUntil(
@@ -64,6 +69,7 @@ class _SplashScreenState extends ConsumerState<SplashScreen> {
       }
     } else {
       // No session, go to login
+      debugPrint('[SplashScreen] No session, navigating to LoginScreen');
       Navigator.pushAndRemoveUntil(
         context,
         MaterialPageRoute(builder: (_) => const LoginScreen()),
