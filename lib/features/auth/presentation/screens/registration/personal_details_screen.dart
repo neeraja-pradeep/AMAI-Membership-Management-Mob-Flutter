@@ -59,7 +59,9 @@ class _PersonalDetailsScreenState extends ConsumerState<PersonalDetailsScreen> {
 
     _firstNameController = TextEditingController();
     _lastNameController = TextEditingController();
-    _emailController = TextEditingController(text: widget.email); // Pre-fill with passed email
+    _emailController = TextEditingController(
+      text: widget.email,
+    ); // Pre-fill with passed email
     _phoneController = TextEditingController();
     _waPhoneController = TextEditingController();
     _dobController = TextEditingController();
@@ -211,6 +213,8 @@ class _PersonalDetailsScreenState extends ConsumerState<PersonalDetailsScreen> {
             "${personalDetails.dateOfBirth.year}-${personalDetails.dateOfBirth.month.toString().padLeft(2, '0')}-${personalDetails.dateOfBirth.day.toString().padLeft(2, '0')}",
         'gender': personalDetails.gender,
         'blood_group': personalDetails.bloodGroup,
+        'bams_start_year ': personalDetails.bamsStartYear,
+        'institution_name': personalDetails.institutionName,
       };
 
       try {
@@ -222,6 +226,7 @@ class _PersonalDetailsScreenState extends ConsumerState<PersonalDetailsScreen> {
         final applicationId = responseData['application']?['id'];
 
         if (userId == null || applicationId == null) {
+          debugPrint(responseData.toString());
           _showError(responseData['detail'] ?? 'Something went wrong');
           return;
         }
@@ -341,7 +346,8 @@ class _PersonalDetailsScreenState extends ConsumerState<PersonalDetailsScreen> {
                                 setState(() {
                                   _sameAsPhone = v ?? false;
                                   if (_sameAsPhone) {
-                                    _waPhoneController.text = _phoneController.text;
+                                    _waPhoneController.text =
+                                        _phoneController.text;
                                   }
                                 });
                                 _autoSave();
