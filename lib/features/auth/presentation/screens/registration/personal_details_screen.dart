@@ -49,6 +49,7 @@ class _PersonalDetailsScreenState extends ConsumerState<PersonalDetailsScreen> {
   String? _selectedBloodGroup;
   String? _selectedMagazineType;
   DateTime? _dateOfBirth;
+  bool _sameAsPhone = false;
 
   late String role;
 
@@ -165,7 +166,7 @@ class _PersonalDetailsScreenState extends ConsumerState<PersonalDetailsScreen> {
       bamsStartYear: role == "student"
           ? _bamsStartYearController.text.trim()
           : null,
-      magazinePreference: role == "house_surgeon"
+      magazinePreference: (role == "house_surgeon" || role == "practitioner")
           ? _selectedMagazineType
           : null,
     );
@@ -324,16 +325,50 @@ class _PersonalDetailsScreenState extends ConsumerState<PersonalDetailsScreen> {
                   ),
 
                   SizedBox(height: 16.h),
-                  const Text("Whatsapp Number"),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      const Text("Whatsapp Number"),
+                      Row(
+                        children: [
+                          SizedBox(
+                            height: 24.h,
+                            width: 24.w,
+                            child: Checkbox(
+                              value: _sameAsPhone,
+                              activeColor: AppColors.brown,
+                              onChanged: (v) {
+                                setState(() {
+                                  _sameAsPhone = v ?? false;
+                                  if (_sameAsPhone) {
+                                    _waPhoneController.text = _phoneController.text;
+                                  }
+                                });
+                                _autoSave();
+                              },
+                            ),
+                          ),
+                          SizedBox(width: 4.w),
+                          Text(
+                            "Same as phone",
+                            style: TextStyle(fontSize: 12.sp),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
                   SizedBox(height: 10.h),
                   TextFormField(
                     controller: _waPhoneController,
                     maxLength: 10,
+                    enabled: !_sameAsPhone,
                     keyboardType: TextInputType.phone,
                     onChanged: (_) => _autoSave(),
                     validator: (v) => v!.length != 10 ? "Invalid" : null,
                     decoration: InputDecoration(
                       prefixText: "+91 ",
+                      filled: _sameAsPhone,
+                      fillColor: _sameAsPhone ? Colors.grey[200] : null,
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(12.r),
                       ),
@@ -358,6 +393,7 @@ class _PersonalDetailsScreenState extends ConsumerState<PersonalDetailsScreen> {
                       Radio<String>(
                         value: "male",
                         groupValue: _selectedGender,
+                        activeColor: AppColors.brown,
                         onChanged: (v) {
                           setState(() => _selectedGender = v);
                           _autoSave();
@@ -367,19 +403,40 @@ class _PersonalDetailsScreenState extends ConsumerState<PersonalDetailsScreen> {
                       Radio<String>(
                         value: "female",
                         groupValue: _selectedGender,
+                        activeColor: AppColors.brown,
                         onChanged: (v) {
                           setState(() => _selectedGender = v);
                           _autoSave();
                         },
                       ),
                       const Text("Female"),
+                      Radio<String>(
+                        value: "other",
+                        groupValue: _selectedGender,
+                        activeColor: AppColors.brown,
+                        onChanged: (v) {
+                          setState(() => _selectedGender = v);
+                          _autoSave();
+                        },
+                      ),
+                      const Text("Other"),
                     ],
                   ),
 
                   SizedBox(height: 16.h),
                   const Text("Blood Group"),
-                  DropdownButtonFormField(
+                  SizedBox(height: 10.h),
+                  DropdownButtonFormField<String>(
                     value: _selectedBloodGroup,
+                    decoration: InputDecoration(
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12.r),
+                      ),
+                      contentPadding: EdgeInsets.symmetric(
+                        horizontal: 16.w,
+                        vertical: 12.h,
+                      ),
+                    ),
                     items: ['A+', 'A-', 'B+', 'B-', 'AB+', 'AB-', 'O+', 'O-']
                         .map((e) => DropdownMenuItem(value: e, child: Text(e)))
                         .toList(),
@@ -404,11 +461,20 @@ class _PersonalDetailsScreenState extends ConsumerState<PersonalDetailsScreen> {
                     SizedBox(height: 20.h),
                   ],
 
-                  if (role == 'house_surgeon') ...[
+                  if (role == 'house_surgeon' || role == 'practitioner') ...[
                     const Text("APTA Magazine Type"),
                     SizedBox(height: 10.h),
-                    DropdownButtonFormField(
+                    DropdownButtonFormField<String>(
                       value: _selectedMagazineType,
+                      decoration: InputDecoration(
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(12.r),
+                        ),
+                        contentPadding: EdgeInsets.symmetric(
+                          horizontal: 16.w,
+                          vertical: 12.h,
+                        ),
+                      ),
                       items: ["Physical Copy", "Digital Copy", "Both"]
                           .map(
                             (e) => DropdownMenuItem(value: e, child: Text(e)),
