@@ -2,6 +2,7 @@ import 'dart:developer';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:myapp/features/auth/presentation/screens/home_screen.dart';
 import 'package:razorpay_flutter/razorpay_flutter.dart';
 import 'package:myapp/app/theme/colors.dart';
 import '../../../../../app/router/app_router.dart';
@@ -168,7 +169,6 @@ class _PaymentScreenState extends ConsumerState<PaymentScreen> {
         signature: response.signature!,
       );
 
-      debugPrint('hi');
       debugPrint(result.toString());
       if (!mounted) return;
 
@@ -290,10 +290,15 @@ class _PaymentScreenState extends ConsumerState<PaymentScreen> {
                       ),
                       SizedBox(height: 20.h),
                       TextButton(
-                        onPressed: () => Navigator.popUntil(
-                          context,
-                          (route) => route.isFirst,
-                        ),
+                        onPressed: () {
+                          Navigator.pushAndRemoveUntil(
+                            context,
+                            MaterialPageRoute(
+                              builder: (_) => const HomeScreen(),
+                            ),
+                            (route) => false, // remove everything
+                          );
+                        },
                         child: Text(
                           "Back to Home",
                           style: TextStyle(fontSize: 16.sp, color: Colors.blue),
