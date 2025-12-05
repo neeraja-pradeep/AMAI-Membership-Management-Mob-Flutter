@@ -27,7 +27,7 @@ class MyApp extends StatelessWidget {
       designSize: const Size(390, 844), // Adjust for your UI
       minTextAdapt: true,
       builder: (context, child) {
-        return MaterialApp(
+        return const MaterialApp(
           debugShowCheckedModeBanner: false,
 
           // 👇 this is required so navigation works

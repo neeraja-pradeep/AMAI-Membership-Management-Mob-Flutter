@@ -111,16 +111,13 @@ class _SplashScreenState extends ConsumerState<SplashScreen> {
             SizedBox(height: 8.h),
             Text(
               "Ayurveda Medical Association of India",
-              style: TextStyle(
-                fontSize: 14.sp,
-                color: Colors.grey[600],
-              ),
+              style: TextStyle(fontSize: 14.sp, color: Colors.grey[600]),
             ),
             SizedBox(height: 48.h),
             SizedBox(
               width: 32.w,
               height: 32.h,
-              child: CircularProgressIndicator(
+              child: const CircularProgressIndicator(
                 strokeWidth: 3,
                 valueColor: AlwaysStoppedAnimation<Color>(AppColors.brown),
               ),
