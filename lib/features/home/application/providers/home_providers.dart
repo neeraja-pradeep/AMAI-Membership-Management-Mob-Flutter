@@ -24,11 +24,13 @@ export 'package:myapp/core/network/api_client_provider.dart';
 // ============== Core Providers ==============
 
 /// Provider for current user ID
-/// TODO: Replace with actual user ID from authenticated session
-/// This is a temporary placeholder until proper auth state management is implemented
+/// Gets the user ID from the loaded membership data
+/// Falls back to 0 if membership is not loaded yet
 final userIdProvider = Provider<int>((ref) {
-  // TODO: Get actual user ID from session/auth state
-  return 7; // Temporary placeholder
+  final membershipState = ref.watch(membershipStateProvider);
+  // Get user ID from loaded membership card
+  final userId = membershipState.currentData?.userId;
+  return userId ?? 0;
 });
 
 /// Provider for Connectivity

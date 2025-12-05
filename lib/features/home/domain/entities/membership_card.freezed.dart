@@ -31,6 +31,9 @@ mixin _$MembershipCard {
   /// Whether the membership is currently active
   bool get isActive => throw _privateConstructorUsedError;
 
+  /// User ID from the API (for profile operations)
+  int? get userId => throw _privateConstructorUsedError;
+
   /// Membership type (student, house_surgeon, practitioner, honorary)
   String? get membershipType => throw _privateConstructorUsedError;
 
@@ -54,6 +57,7 @@ abstract class $MembershipCardCopyWith<$Res> {
       String membershipNumber,
       DateTime validUntil,
       bool isActive,
+      int? userId,
       String? membershipType,
       DateTime? startDate});
 }
@@ -76,6 +80,7 @@ class _$MembershipCardCopyWithImpl<$Res, $Val extends MembershipCard>
     Object? membershipNumber = null,
     Object? validUntil = null,
     Object? isActive = null,
+    Object? userId = freezed,
     Object? membershipType = freezed,
     Object? startDate = freezed,
   }) {
@@ -100,6 +105,10 @@ class _$MembershipCardCopyWithImpl<$Res, $Val extends MembershipCard>
           ? _value.isActive
           : isActive // ignore: cast_nullable_to_non_nullable
               as bool,
+      userId: freezed == userId
+          ? _value.userId
+          : userId // ignore: cast_nullable_to_non_nullable
+              as int?,
       membershipType: freezed == membershipType
           ? _value.membershipType
           : membershipType // ignore: cast_nullable_to_non_nullable
@@ -126,6 +135,7 @@ abstract class _$$MembershipCardImplCopyWith<$Res>
       String membershipNumber,
       DateTime validUntil,
       bool isActive,
+      int? userId,
       String? membershipType,
       DateTime? startDate});
 }
@@ -146,6 +156,7 @@ class __$$MembershipCardImplCopyWithImpl<$Res>
     Object? membershipNumber = null,
     Object? validUntil = null,
     Object? isActive = null,
+    Object? userId = freezed,
     Object? membershipType = freezed,
     Object? startDate = freezed,
   }) {
@@ -170,6 +181,10 @@ class __$$MembershipCardImplCopyWithImpl<$Res>
           ? _value.isActive
           : isActive // ignore: cast_nullable_to_non_nullable
               as bool,
+      userId: freezed == userId
+          ? _value.userId
+          : userId // ignore: cast_nullable_to_non_nullable
+              as int?,
       membershipType: freezed == membershipType
           ? _value.membershipType
           : membershipType // ignore: cast_nullable_to_non_nullable
@@ -191,6 +206,7 @@ class _$MembershipCardImpl extends _MembershipCard {
       required this.membershipNumber,
       required this.validUntil,
       required this.isActive,
+      this.userId,
       this.membershipType,
       this.startDate})
       : super._();
@@ -215,6 +231,10 @@ class _$MembershipCardImpl extends _MembershipCard {
   @override
   final bool isActive;
 
+  /// User ID from the API (for profile operations)
+  @override
+  final int? userId;
+
   /// Membership type (student, house_surgeon, practitioner, honorary)
   @override
   final String? membershipType;
@@ -225,7 +245,7 @@ class _$MembershipCardImpl extends _MembershipCard {
 
   @override
   String toString() {
-    return 'MembershipCard(id: $id, holderName: $holderName, membershipNumber: $membershipNumber, validUntil: $validUntil, isActive: $isActive, membershipType: $membershipType, startDate: $startDate)';
+    return 'MembershipCard(id: $id, holderName: $holderName, membershipNumber: $membershipNumber, validUntil: $validUntil, isActive: $isActive, userId: $userId, membershipType: $membershipType, startDate: $startDate)';
   }
 
   @override
@@ -242,6 +262,8 @@ class _$MembershipCardImpl extends _MembershipCard {
                 other.validUntil == validUntil) &&
             (identical(other.isActive, isActive) ||
                 other.isActive == isActive) &&
+            (identical(other.userId, userId) ||
+                other.userId == userId) &&
             (identical(other.membershipType, membershipType) ||
                 other.membershipType == membershipType) &&
             (identical(other.startDate, startDate) ||
@@ -250,7 +272,7 @@ class _$MembershipCardImpl extends _MembershipCard {
 
   @override
   int get hashCode => Object.hash(runtimeType, id, holderName, membershipNumber,
-      validUntil, isActive, membershipType, startDate);
+      validUntil, isActive, userId, membershipType, startDate);
 
   @JsonKey(ignore: true)
   @override
@@ -267,6 +289,7 @@ abstract class _MembershipCard extends MembershipCard {
       required final String membershipNumber,
       required final DateTime validUntil,
       required final bool isActive,
+      final int? userId,
       final String? membershipType,
       final DateTime? startDate}) = _$MembershipCardImpl;
   const _MembershipCard._() : super._();
@@ -291,6 +314,10 @@ abstract class _MembershipCard extends MembershipCard {
 
   /// Whether the membership is currently active
   bool get isActive;
+  @override
+
+  /// User ID from the API (for profile operations)
+  int? get userId;
   @override
 
   /// Membership type (student, house_surgeon, practitioner, honorary)

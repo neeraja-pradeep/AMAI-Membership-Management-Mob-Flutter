@@ -13,6 +13,7 @@ class MembershipCardModel {
     required this.userFirstName,
     required this.endDate,
     required this.status,
+    this.user,
     this.membershipType,
     this.startDate,
     this.createdAt,
@@ -41,6 +42,9 @@ class MembershipCardModel {
   @JsonKey(name: 'status')
   final String status;
 
+  @JsonKey(name: 'user')
+  final int? user;
+
   @JsonKey(name: 'membership_type')
   final String? membershipType;
 
@@ -64,6 +68,7 @@ class MembershipCardModel {
       membershipNumber: membershipNumber,
       validUntil: _parseDate(endDate),
       isActive: isActive,
+      userId: user,
       membershipType: membershipType,
       startDate: startDate != null ? _parseDate(startDate!) : null,
     );

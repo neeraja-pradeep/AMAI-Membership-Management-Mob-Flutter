@@ -23,6 +23,9 @@ class MembershipCard with _$MembershipCard {
     /// Whether the membership is currently active
     required bool isActive,
 
+    /// User ID from the API (for profile operations)
+    int? userId,
+
     /// Membership type (student, house_surgeon, practitioner, honorary)
     String? membershipType,
 
