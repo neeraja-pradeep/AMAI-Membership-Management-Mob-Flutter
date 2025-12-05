@@ -205,12 +205,9 @@ class _PaymentScreenState extends ConsumerState<PaymentScreen> {
                   )
                 : Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisAlignment: MainAxisAlignment.center,
                     children: [
                       // Step Indicator
-                      const RegistrationStepIndicator(
-                        currentStep: 4,
-                        stepTitle: "Payment",
-                      ),
 
                       // Order Summary Card
                       Container(
@@ -313,7 +310,11 @@ class _PaymentScreenState extends ConsumerState<PaymentScreen> {
                               : Row(
                                   mainAxisAlignment: MainAxisAlignment.center,
                                   children: [
-                                    Icon(Icons.lock, size: 20.sp),
+                                    Icon(
+                                      Icons.lock,
+                                      size: 20.sp,
+                                      color: Colors.white,
+                                    ),
                                     SizedBox(width: 8.w),
                                     Text(
                                       totalPayable != null
@@ -321,6 +322,7 @@ class _PaymentScreenState extends ConsumerState<PaymentScreen> {
                                           : "Pay Now",
                                       style: TextStyle(
                                         fontSize: 16.sp,
+                                        color: Colors.white,
                                         fontWeight: FontWeight.w600,
                                       ),
                                     ),
@@ -424,7 +426,12 @@ class _PaymentScreenState extends ConsumerState<PaymentScreen> {
     );
   }
 
-  Widget _priceRow(String label, String value, {bool bold = false, bool highlight = false}) {
+  Widget _priceRow(
+    String label,
+    String value, {
+    bool bold = false,
+    bool highlight = false,
+  }) {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
@@ -507,10 +514,7 @@ class _PaymentScreenState extends ConsumerState<PaymentScreen> {
                   SizedBox(height: 4.h),
                   Text(
                     "Cards, UPI, Netbanking & Wallets",
-                    style: TextStyle(
-                      fontSize: 12.sp,
-                      color: Colors.grey[600],
-                    ),
+                    style: TextStyle(fontSize: 12.sp, color: Colors.grey[600]),
                   ),
                 ],
               ),
