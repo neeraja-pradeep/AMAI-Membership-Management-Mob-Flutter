@@ -45,9 +45,11 @@ class ApiClient {
         'Content-Type': 'application/json',
         'Accept': 'application/json',
       },
-      // Don't throw on 304 status
+      // Don't throw on 304 or 404 status (404 may contain application_status in body)
       validateStatus: (status) =>
-          (status != null && status >= 200 && status < 300) || status == 304,
+          (status != null && status >= 200 && status < 300) ||
+          status == 304 ||
+          status == 404,
     );
 
     _dio.interceptors.addAll([
