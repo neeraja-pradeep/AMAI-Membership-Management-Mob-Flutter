@@ -4,6 +4,27 @@ import 'package:cookie_jar/cookie_jar.dart';
 import 'package:path_provider/path_provider.dart';
 import 'dart:io';
 import 'package:flutter/foundation.dart';
+import 'package:myapp/core/network/endpoints.dart';
+import 'package:myapp/core/network/network_exceptions.dart';
+
+/// Response wrapper that includes data, status code, and timestamp
+class ApiResponse<T> {
+  const ApiResponse({
+    required this.data,
+    required this.statusCode,
+    this.timestamp,
+  });
+
+  final T? data;
+  final int statusCode;
+  final String? timestamp;
+
+  /// Check if response is 304 Not Modified
+  bool get isNotModified => statusCode == 304;
+
+  /// Check if response is successful (2xx)
+  bool get isSuccess => statusCode >= 200 && statusCode < 300;
+}
 
 /// API client with Dio, cookie management, and interceptors
 ///
@@ -11,20 +32,23 @@ import 'package:flutter/foundation.dart';
 /// - Automatic cookie persistence via path_provider
 /// - SSL/TLS security (rejects self-signed certificates in production)
 /// - Request/response logging (debug mode only)
-/// - Error handling
+/// - Error handling with ApiResponse wrapper
 /// - Timeout configuration (30s for production)
 /// - Session validation for auto-login
+/// - CSRF token auto-extraction from cookies
 class ApiClient {
   late final Dio _dio;
   late final PersistCookieJar _cookieJar;
   bool _isInitialized = false;
+  int? _devUserId;
 
   static const String kBaseUrl = 'https://amai.nexogms.com';
   static const Duration kConnectionTimeout = Duration(seconds: 30);
   static const Duration kReceiveTimeout = Duration(seconds: 30);
   static const Duration kSendTimeout = Duration(seconds: 30);
 
-  ApiClient() {
+  ApiClient({int? devUserId}) {
+    _devUserId = devUserId;
     _dio = Dio(
       BaseOptions(
         baseUrl: kBaseUrl,
@@ -35,12 +59,20 @@ class ApiClient {
           'Content-Type': 'application/json',
           'Accept': 'application/json',
         },
-        // SECURITY: Validate SSL certificates
-        validateStatus: (status) => status != null && status < 500,
+        // Don't throw on 304 or 404 status (404 may contain application_status in body)
+        validateStatus: (status) =>
+            (status != null && status >= 200 && status < 300) ||
+            status == 304 ||
+            status == 404,
       ),
     );
 
     _configureSecurity();
+  }
+
+  /// Set dev user ID (for development/testing purposes)
+  void setDevUserId(int userId) {
+    _devUserId = userId;
   }
 
   /// Initialize the API client (must be called before first use)
@@ -100,6 +132,10 @@ class ApiClient {
           if (csrf != null) {
             options.headers['X-CSRFToken'] = csrf;
           }
+          // Add dev header if set (for development/testing)
+          if (_devUserId != null) {
+            options.headers['dev'] = _devUserId.toString();
+          }
           return handler.next(options);
         },
       ),
@@ -114,20 +150,21 @@ class ApiClient {
             final method = options.method;
             // Don't log request body for login/register (contains passwords)
             if (!path.contains('login') && !path.contains('register')) {
-              // print('[API] $method $path');
+              debugPrint('[API] $method $path');
             } else {
-              // print('[API] $method $path [BODY HIDDEN FOR SECURITY]');
+              debugPrint('[API] $method $path [BODY HIDDEN FOR SECURITY]');
             }
             return handler.next(options);
           },
           onResponse: (response, handler) {
-            // print(
-            //   '[API] ${response.statusCode} ${response.requestOptions.path}',
-            // );
+            debugPrint(
+              '[API] ${response.statusCode} ${response.requestOptions.path}',
+            );
             return handler.next(response);
           },
           onError: (error, handler) {
-            // print('[API ERROR] ${error.requestOptions.path}: ${error.message}');
+            debugPrint(
+                '[API ERROR] ${error.requestOptions.path}: ${error.message}');
             return handler.next(error);
           },
         ),
@@ -222,7 +259,7 @@ class ApiClient {
     }
   }
 
-  /// GET request
+  /// GET request (returns raw Dio Response)
   Future<Response<T>> get<T>(
     String path, {
     Map<String, dynamic>? queryParameters,
@@ -237,7 +274,31 @@ class ApiClient {
     );
   }
 
-  /// POST request
+  /// GET request with ApiResponse wrapper
+  Future<ApiResponse<T>> getWithResponse<T>(
+    String path, {
+    Map<String, dynamic>? queryParameters,
+    String? ifModifiedSince,
+    T Function(dynamic json)? fromJson,
+  }) async {
+    try {
+      final response = await _dio.get<dynamic>(
+        path,
+        queryParameters: queryParameters,
+        options: Options(
+          headers: ifModifiedSince != null
+              ? {'If-Modified-Since': ifModifiedSince}
+              : null,
+        ),
+      );
+
+      return _handleResponse<T>(response, fromJson);
+    } on DioException catch (e) {
+      throw NetworkExceptionMapper.fromDioException(e);
+    }
+  }
+
+  /// POST request (returns raw Dio Response)
   ///
   /// Supports progress tracking for file uploads via onSendProgress
   Future<Response<T>> post<T>(
@@ -258,7 +319,33 @@ class ApiClient {
     );
   }
 
-  /// PUT request
+  /// POST request with ApiResponse wrapper
+  Future<ApiResponse<T>> postWithResponse<T>(
+    String path, {
+    dynamic data,
+    Map<String, dynamic>? queryParameters,
+    String? ifModifiedSince,
+    T Function(dynamic json)? fromJson,
+  }) async {
+    try {
+      final response = await _dio.post<dynamic>(
+        path,
+        data: data,
+        queryParameters: queryParameters,
+        options: Options(
+          headers: ifModifiedSince != null
+              ? {'If-Modified-Since': ifModifiedSince}
+              : null,
+        ),
+      );
+
+      return _handleResponse<T>(response, fromJson);
+    } on DioException catch (e) {
+      throw NetworkExceptionMapper.fromDioException(e);
+    }
+  }
+
+  /// PUT request (returns raw Dio Response)
   Future<Response<T>> put<T>(
     String path, {
     dynamic data,
@@ -275,7 +362,47 @@ class ApiClient {
     );
   }
 
-  /// DELETE request
+  /// PUT request with ApiResponse wrapper
+  Future<ApiResponse<T>> putWithResponse<T>(
+    String path, {
+    dynamic data,
+    Map<String, dynamic>? queryParameters,
+    T Function(dynamic json)? fromJson,
+  }) async {
+    try {
+      final response = await _dio.put<dynamic>(
+        path,
+        data: data,
+        queryParameters: queryParameters,
+      );
+
+      return _handleResponse<T>(response, fromJson);
+    } on DioException catch (e) {
+      throw NetworkExceptionMapper.fromDioException(e);
+    }
+  }
+
+  /// PATCH request with ApiResponse wrapper
+  Future<ApiResponse<T>> patch<T>(
+    String path, {
+    dynamic data,
+    Map<String, dynamic>? queryParameters,
+    T Function(dynamic json)? fromJson,
+  }) async {
+    try {
+      final response = await _dio.patch<dynamic>(
+        path,
+        data: data,
+        queryParameters: queryParameters,
+      );
+
+      return _handleResponse<T>(response, fromJson);
+    } on DioException catch (e) {
+      throw NetworkExceptionMapper.fromDioException(e);
+    }
+  }
+
+  /// DELETE request (returns raw Dio Response)
   Future<Response<T>> delete<T>(
     String path, {
     dynamic data,
@@ -289,6 +416,61 @@ class ApiClient {
       queryParameters: queryParameters,
       options: options,
       cancelToken: cancelToken,
+    );
+  }
+
+  /// DELETE request with ApiResponse wrapper
+  Future<ApiResponse<T>> deleteWithResponse<T>(
+    String path, {
+    dynamic data,
+    Map<String, dynamic>? queryParameters,
+    T Function(dynamic json)? fromJson,
+  }) async {
+    try {
+      final response = await _dio.delete<dynamic>(
+        path,
+        data: data,
+        queryParameters: queryParameters,
+      );
+
+      return _handleResponse<T>(response, fromJson);
+    } on DioException catch (e) {
+      throw NetworkExceptionMapper.fromDioException(e);
+    }
+  }
+
+  /// Handle response and extract timestamp from headers
+  ApiResponse<T> _handleResponse<T>(
+    Response<dynamic> response,
+    T Function(dynamic json)? fromJson,
+  ) {
+    final statusCode = response.statusCode ?? 500;
+
+    // Handle 304 Not Modified
+    if (statusCode == 304) {
+      return ApiResponse<T>(
+        data: null,
+        statusCode: statusCode,
+        timestamp: null,
+      );
+    }
+
+    // Extract Last-Modified timestamp from response headers
+    final timestamp = response.headers.value('Last-Modified') ??
+        response.headers.value('Date');
+
+    // Parse response data
+    T? data;
+    if (response.data != null && fromJson != null) {
+      data = fromJson(response.data);
+    } else if (response.data is T) {
+      data = response.data as T;
+    }
+
+    return ApiResponse<T>(
+      data: data,
+      statusCode: statusCode,
+      timestamp: timestamp,
     );
   }
 

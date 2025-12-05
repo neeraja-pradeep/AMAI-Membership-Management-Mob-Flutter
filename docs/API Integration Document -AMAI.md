@@ -10,6 +10,8 @@ All endpoints are non-authenticated and return JSON responses. Use REST GET call
 
 User IDs
 Superadmin - 2
+Practitioner - 43
+HS - 44
 
 
 Headers -
@@ -21,39 +23,65 @@ Note:- The timestamp mentioned here must be the timestamp fetched from the heade
 
 Customer App
 
-Screen : Login 
-a) Login
-Endpoint:
-https://amai.nexogms.com/api/schema/swagger-ui/#/Authentication/auth_login
-POST endpoint: https://amai.nexogms.com/api/accounts/login/
-payload:{
-  "email": "user@example.com",
-  "password": "securepassword123"
-}
+Screen : Home  Screen Quick Actions
+Aswas Plus
+a. Aswas plus card
 
+Swagger link : https://amai.nexogms.com/api/schema/swagger-ui/#/Insurance/insurance_policy_me
 
-Screen : Registration 
-a) Registration Form 1
-Endpoint:
-https://amai.nexogms.com/api/schema/swagger-ui/#/Membership/membership_register
+Required Fields: policy_status, user_name, policy_number, end_date
 
-Required fields:- email, password,  phone, wa_phone, first_name, last_name, membership_type[student, practitioner, house_surgeon, honorary], blood_group, bams_start_year, institution_name, 
-POST endpoint:https://amai.nexogms.com/api/membership/register/
+POST Endpoint : :https://amai.nexogms.com/api/membership/insurance-policies/me/
 
-b) Registration Form 2 -  Address
-Endpoint:
-https://amai.nexogms.com/api/schema/swagger-ui/#/accounts/accounts_addresses_create
+b. Nominee Information
+Swagger link : https://amai.nexogms.com/api/schema/swagger-ui/#/Insurance%20Nominees/insurance_nominee_me
+Required Fields : nominee_name, relationship, contact_number 
+GET endpoint : https://amai.nexogms.com/api/membership/insurance-nominees/me/
 
-Required fields:- address_line1(House No. / Building Name), address_line2(Street / Locality / Area), city(Post Office), postal_code(Post Code), country(Country), state(State), district(District), is_primary 
-Post endpoint:https://amai.nexogms.com/api/accounts/addresses/
+Screen : Membership renewal 
+Choose your membership type
+a. Membership
 
-b) Registration Form 3 -  Documents
-Endpoint:
-https://amai.nexogms.com/api/schema/swagger-ui/#/membership/membership_application_documents_create
+Swagger link : https://amai.nexogms.com/api/schema/swagger-ui/#/membership/membership_digital_products_retrieve
 
-Required Fields: application, document_file, document_type 
+GET endpoint: https://amai.nexogms.com/api/membership/digital-products/2/
+ID - 2 
 
-Post endpoint:https://amai.nexogms.com/api/membership/application-documents/
+Required Fields:- product_name, base_price
+
+Aswas Plus
+
+Swagger link: https://amai.nexogms.com/api/schema/swagger-ui/#/membership/membership_digital_products_retrieve
+
+GET endpoint: https://amai.nexogms.com/api/membership/digital-products/2/
+ID - 2 
+
+Required Fields:- product_name, base_price
+
+b) Proceed to Payment 
+Membership
+
+Swagger link : [Initiate Payment] https://amai.nexogms.com/api/schema/swagger-ui/#/Membership/membership_payment_create
+
+POST endpoint: https://amai.nexogms.com/api/membership/membership/payment/
+
+Required Fields : user
+
+Endpoint : [ Verify Payment ] https://amai.nexogms.com/api/schema/swagger-ui/#/Membership/membership_verify_payment
+
+POST endpoint: https://amai.nexogms.com/api/membership/membership/verify/
+Required fields :  razorpay_order_id, razorpay_payment_id, razorpay_signature
+
+- Aswas Plus 
+Swagger link : [Initiate Payment] https://amai.nexogms.com/api/schema/swagger-ui/#/Insurance/insurance_renewal_create
+No Payload
+POST endpoint: https://amai.nexogms.com/api/membership/insurance/renewal/
+
+Swagger link : [Verify Payement]
+https://amai.nexogms.com/api/schema/swagger-ui/#/Insurance/insurance_renewal_verify_payment
+Required Fields : razorpay_order_id, razorpay_payment_id, razorpay_signature
+POST endpoint: https://amai.nexogms.com/api/membership/insurance/renewal/verify/
+
 
 
 
