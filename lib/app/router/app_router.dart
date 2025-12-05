@@ -125,12 +125,6 @@ class AppRouter {
       case registrationPayment:
         return _buildRoute(const PaymentScreen());
 
-      case registrationSuccess:
-        final registrationId = settings.arguments as String?;
-        return _buildRoute(
-          RegistrationSuccessScreen(registrationId: registrationId),
-        );
-
       // Dashboard route
       case dashboard:
       case home:

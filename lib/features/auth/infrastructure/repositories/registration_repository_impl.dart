@@ -1,5 +1,6 @@
 import 'dart:io';
 import 'package:dio/dio.dart';
+import 'package:flutter/foundation.dart';
 import '../../domain/entities/registration/practitioner_registration.dart';
 import '../../domain/entities/registration/document_upload.dart';
 import '../../domain/entities/registration/registration_error.dart';
@@ -45,10 +46,6 @@ class RegistrationRepositoryImpl implements RegistrationRepository {
     try {
       final response = await _api.initiatePayment(userId: userId);
 
-      if (!response.containsKey("razorpay_order_id")) {
-        throw RegistrationError.paymentFailed("Order ID missing in response");
-      }
-
       return response;
     } on DioException catch (e) {
       throw _mapDioExceptionToPaymentError(e);
@@ -75,6 +72,7 @@ class RegistrationRepositoryImpl implements RegistrationRepository {
     required String signature,
   }) async {
     try {
+      debugPrint("reached imple");
       final body = {
         "razorpay_order_id": orderId,
         "razorpay_payment_id": paymentId,
@@ -83,7 +81,12 @@ class RegistrationRepositoryImpl implements RegistrationRepository {
 
       final response = await _api.verifyPayment(data: body);
 
-      return response["verified"] == true;
+      // ignore: avoid_print
+      debugPrint(" The Response Is $response");
+      // ignore: avoid_print
+      print(" HIIIII");
+
+      return response["message"] == "Membership payment verified successfully";
     } on DioException catch (e) {
       throw _mapDioExceptionToPaymentError(e);
     } catch (_) {

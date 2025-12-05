@@ -39,8 +39,7 @@ class _ProfessionalDetailsScreenState
 
   final Set<String> _selectedQualifications = {};
   final Set<String> _selectedCategories = {};
-
-  late String role = "";
+  String role = "";
 
   static const List<String> dropdownStates = [
     "Kerala",
@@ -91,11 +90,6 @@ class _ProfessionalDetailsScreenState
   @override
   void initState() {
     super.initState();
-
-    final state = ref.read(registrationProvider);
-    if (state is RegistrationStateInProgress) {
-      role = state.registration.personalDetails?.membershipType ?? "";
-    }
 
     /// Practitioner controllers
     _medicalCouncilNoController = TextEditingController();
@@ -157,21 +151,21 @@ class _ProfessionalDetailsScreenState
           professional.membershipDistrict ?? '';
       _membershipAreaController.text = professional.membershipArea ?? '';
 
-      if ((professional.professionalDetails1 ?? '').isNotEmpty) {
+      if ((professional.professionalDetails1).isNotEmpty) {
         _selectedQualifications
           ..clear()
           ..addAll(
-            professional.professionalDetails1!
+            professional.professionalDetails1
                 .split(',')
                 .where((e) => e.trim().isNotEmpty),
           );
       }
 
-      if ((professional.professionalDetails2 ?? '').isNotEmpty) {
+      if ((professional.professionalDetails2).isNotEmpty) {
         _selectedCategories
           ..clear()
           ..addAll(
-            professional.professionalDetails2!
+            professional.professionalDetails2
                 .split(',')
                 .where((e) => e.trim().isNotEmpty),
           );
@@ -234,8 +228,7 @@ class _ProfessionalDetailsScreenState
       final personalDetails = state.registration.personalDetails!;
       final professionalDetails = state.registration.professionalDetails!;
 
-      /// Role Based Payload
-      final membershipData = {
+      Map<String, dynamic> membershipData = {
         'membership_type': personalDetails.membershipType,
         'first_name': personalDetails.firstName,
         'email': personalDetails.email,
@@ -246,20 +239,21 @@ class _ProfessionalDetailsScreenState
             "${personalDetails.dateOfBirth.year}-${personalDetails.dateOfBirth.month.toString().padLeft(2, '0')}-${personalDetails.dateOfBirth.day.toString().padLeft(2, '0')}",
         'gender': personalDetails.gender,
         'blood_group': personalDetails.bloodGroup,
-
-        /// COMMON FIELD
         'medical_council_state': professionalDetails.medicalCouncilState,
+      };
 
-        /// Role-specific mapping:
-        if (role == "practitioner") ...{
+      if (role == "practitioner") {
+        membershipData.addAll({
           'medical_council_no': professionalDetails.medicalCouncilNo,
           'central_council_no': professionalDetails.centralCouncilNo,
           'ug_college': professionalDetails.ugCollege,
           'professional_details': professionalDetails.professionalDetails1,
           'academic_details': professionalDetails.professionalDetails2,
-        },
+        });
+      }
 
-        if (role == "house_surgeon") ...{
+      if (role == "house_surgeon") {
+        membershipData.addAll({
           'provisional_registration_no':
               professionalDetails.provisionalRegistrationNumber,
           'council_district_no': professionalDetails.councilDistrictNumber,
@@ -267,8 +261,8 @@ class _ProfessionalDetailsScreenState
           'state': professionalDetails.state,
           'membership_district': professionalDetails.membershipDistrict,
           'membership_area': professionalDetails.membershipArea,
-        },
-      };
+        });
+      }
 
       final notifier = ref.read(registrationProvider.notifier);
 
@@ -282,7 +276,7 @@ class _ProfessionalDetailsScreenState
 
       if (userId == null || applicationId == null) {
         _showError(
-          (responseData['detail'] as String?) ??
+          (responseData['error'] as String?) ??
               "Failed to create application. Please try again.",
         );
         return;
@@ -308,6 +302,12 @@ class _ProfessionalDetailsScreenState
 
   @override
   Widget build(BuildContext context) {
+    final regState = ref.watch(registrationProvider);
+
+    if (regState is RegistrationStateInProgress) {
+      role = regState.registration.personalDetails?.membershipType ?? "";
+    }
+
     /// Skip screen for students
     if (role == "student") {
       return const Scaffold(body: Center(child: CircularProgressIndicator()));

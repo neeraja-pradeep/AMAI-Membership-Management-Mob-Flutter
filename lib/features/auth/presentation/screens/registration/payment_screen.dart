@@ -4,7 +4,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:razorpay_flutter/razorpay_flutter.dart';
 import 'package:myapp/app/theme/colors.dart';
-
 import '../../../../../app/router/app_router.dart';
 import '../../../application/notifiers/registration_state_notifier.dart';
 import '../../../application/states/registration_state.dart';
@@ -18,25 +17,29 @@ class PaymentScreen extends ConsumerStatefulWidget {
 
 class _PaymentScreenState extends ConsumerState<PaymentScreen> {
   final Razorpay _razorpay = Razorpay();
-  bool _isProcessing = false;
-  String? _selectedPaymentMethod;
 
-  /// Pricing Breakdown (driven by backend)
-  final double gstRate = 0.18;
+  bool _isProcessing = false;
+  bool _isLoadingDetails = true;
+  bool _paymentComplete = false;
+
   double? subtotal;
   double? gstAmount;
   double? totalPayable;
 
   String? orderId;
-  int? _razorpayAmountPaise; // amount to send to Razorpay (from API)
+  int? _razorpayAmountPaise;
 
-  int? _userId; // 🔥 pulled from registrationProvider
+  String? _prefillEmail;
+  String? _prefillPhone;
+
+  int? _userId;
+
+  String? _selectedPaymentMethod = "razorpay";
 
   @override
   void initState() {
     super.initState();
 
-    // Read userId from Riverpod once the widget is built
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _initFromProvider();
     });
@@ -46,11 +49,10 @@ class _PaymentScreenState extends ConsumerState<PaymentScreen> {
     _razorpay.on(Razorpay.EVENT_EXTERNAL_WALLET, _onExternalWallet);
   }
 
-  void _initFromProvider() {
+  void _initFromProvider() async {
     final state = ref.read(registrationProvider);
 
     if (state is RegistrationStateResumePrompt) {
-      // If it was a resume prompt, resume then re-init
       ref
           .read(registrationProvider.notifier)
           .resumeRegistration(state.existingRegistration);
@@ -60,16 +62,54 @@ class _PaymentScreenState extends ConsumerState<PaymentScreen> {
 
     if (state is! RegistrationStateInProgress) {
       _showError("Registration not in progress.");
+      setState(() => _isLoadingDetails = false);
       return;
     }
 
-    final reg = state.registration;
-
-    // ✅ Assuming you added userId to PractitionerRegistration
-    _userId = reg.userId;
+    _userId = state.registration.userId;
 
     if (_userId == null) {
-      _showError("Missing user ID from registration. Please restart the flow.");
+      _showError("User ID missing — restart registration.");
+      setState(() => _isLoadingDetails = false);
+      return;
+    }
+
+    await _fetchPaymentDetails();
+  }
+
+  Future<void> _fetchPaymentDetails() async {
+    try {
+      final notifier = ref.read(registrationProvider.notifier);
+      final response = await notifier.initiatePayment(userId: _userId!);
+
+      debugPrint("Payment init response: $response");
+
+      orderId = response["order_id"] as String?;
+      final rawAmount = response["amount"];
+
+      if (orderId == null || rawAmount == null) {
+        throw Exception("Invalid data from server (order/amount null)");
+      }
+
+      if (rawAmount is double) {
+        _razorpayAmountPaise = (rawAmount * 100).toInt();
+      } else if (rawAmount is int) {
+        _razorpayAmountPaise = rawAmount * 100;
+      }
+
+      _prefillEmail = response["email"] as String?;
+      _prefillPhone = response["phone"] as String?;
+
+      setState(() {
+        totalPayable = (rawAmount is num) ? rawAmount.toDouble() : null;
+        subtotal = totalPayable;
+        gstAmount = 0.0;
+        _isLoadingDetails = false;
+      });
+    } catch (e, st) {
+      log("Error fetching payment details: $e\n$st");
+      _showError("Failed to load payment details.");
+      setState(() => _isLoadingDetails = false);
     }
   }
 
@@ -79,66 +119,38 @@ class _PaymentScreenState extends ConsumerState<PaymentScreen> {
     super.dispose();
   }
 
-  /// STEP 1 — Initiate payment + Get pricing + order ID from backend
   Future<void> _processPayment() async {
-    if (_selectedPaymentMethod == null) {
-      _showError("Please select a payment method.");
+    if (_selectedPaymentMethod != "razorpay") {
+      _showError("Please select Razorpay to continue.");
       return;
     }
 
-    if (_userId == null) {
-      _showError("User not found in registration state.");
+    if (orderId == null || _razorpayAmountPaise == null) {
+      _showError("Payment details not loaded yet.");
       return;
     }
 
     setState(() => _isProcessing = true);
 
     try {
-      final notifier = ref.read(registrationProvider.notifier);
-
-      // 🔹 Call backend: POST /membership/payment/ (or your mapped method)
-      final response = await notifier.initiatePayment(userId: _userId!);
-
-      // Expected:
-      // response["amount"] → int, in paise (e.g. 118000 = ₹1180.00)
-      // response["razorpay_order_id"]
-      // response["phone"], response["email"] (for prefill)
-
-      orderId = response["razorpay_order_id"] as String?;
-      _razorpayAmountPaise = response["amount"] as int?;
-
-      if (_razorpayAmountPaise == null || orderId == null) {
-        _showError("Invalid payment details from server.");
-        setState(() => _isProcessing = false);
-        return;
-      }
-
-      // Convert paise → rupees
-      final totalRupees = _razorpayAmountPaise! / 100.0;
-
-      // Derive subtotal & GST from total using gstRate
-      final base = totalRupees / (1 + gstRate);
-      final gst = totalRupees - base;
-
-      setState(() {
-        totalPayable = totalRupees;
-        subtotal = base;
-        gstAmount = gst;
-      });
-
       final options = {
-        "key": "rzp_live_xxxxxxxxx", // 🔥 replace with your real Razorpay key
-        "amount": _razorpayAmountPaise, // in paise
-        "currency": "INR",
+        "key": "rzp_test_RZlZ38QcLdQOEK",
         "order_id": orderId,
+        "amount": _razorpayAmountPaise,
+        "currency": "INR",
         "name": "AMAI Membership",
-        "description": "Membership Fees",
-        "prefill": {"contact": response["phone"], "email": response["email"]},
+        "description": "Membership Fee",
+        "prefill": {
+          "email": _prefillEmail ?? "",
+          "contact": _prefillPhone ?? "",
+        },
       };
 
+      log("Opening Razorpay with options: $options");
       _razorpay.open(options);
     } catch (e) {
-      _showError("Payment initiation failed: $e");
+      log("Error opening Razorpay: $e");
+      _showError("Couldn't start payment. Please try again.");
     } finally {
       if (mounted) {
         setState(() => _isProcessing = false);
@@ -146,52 +158,31 @@ class _PaymentScreenState extends ConsumerState<PaymentScreen> {
     }
   }
 
-  /// STEP 2 — Successfully paid → verify on backend
   Future<void> _onPaymentSuccess(PaymentSuccessResponse response) async {
-    log("SUCCESS: ${response.paymentId}");
-
-    // 🔧 Fix for: 'String?' can't be assigned to 'String'
-    final orderId = response.orderId;
-    final paymentId = response.paymentId;
-    final signature = response.signature;
-
-    if (orderId == null || paymentId == null || signature == null) {
-      _showError("Invalid payment response from Razorpay.");
-      return;
-    }
-
     try {
       final notifier = ref.read(registrationProvider.notifier);
 
-      await notifier.verifyPayment(
-        orderId: orderId,
-        paymentId: paymentId,
-        signature: signature,
+      final result = await notifier.verifyPayment(
+        orderId: response.orderId!,
+        paymentId: response.paymentId!,
+        signature: response.signature!,
       );
 
+      debugPrint('hi');
+      debugPrint(result.toString());
       if (!mounted) return;
 
-      Navigator.pushNamedAndRemoveUntil(
-        context,
-        AppRouter.registrationSuccess,
-        (_) => false,
-      );
-    } catch (e) {
-      _showError("Payment verification failed: $e");
+      setState(() => _paymentComplete = true);
+    } catch (e, st) {
+      _showError("Payment verification failed.");
     }
   }
 
   void _onPaymentError(PaymentFailureResponse response) {
-    _showError("Payment Failed. Try again.");
+    _showError("Payment Failed. Please try again.");
   }
 
-  void _onExternalWallet(ExternalWalletResponse response) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text("Selected external wallet: ${response.walletName}"),
-      ),
-    );
-  }
+  void _onExternalWallet(ExternalWalletResponse response) {}
 
   void _showError(String msg) {
     ScaffoldMessenger.of(
@@ -202,171 +193,153 @@ class _PaymentScreenState extends ConsumerState<PaymentScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.white,
-      appBar: AppBar(
-        backgroundColor: Colors.white,
-        elevation: 0,
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: Colors.black),
-          onPressed: _isProcessing ? null : () => Navigator.pop(context),
-        ),
-        title: const Text(
-          "Register Here",
-          style: TextStyle(fontWeight: FontWeight.bold),
-        ),
-      ),
-      body: Padding(
-        padding: EdgeInsets.all(24.w),
-        child: Column(
-          children: [
-            SizedBox(height: 30.h),
-
-            /// --- UI SAME AS BEFORE ---
-            Align(
-              alignment: Alignment.centerLeft,
-              child: Text(
-                "Payment Breakdown",
-                style: TextStyle(fontSize: 18.sp, fontWeight: FontWeight.bold),
-              ),
-            ),
-            SizedBox(height: 20.h),
-
-            _priceRow(
-              "Subtotal",
-              subtotal != null ? "₹${subtotal!.toStringAsFixed(2)}" : "—",
-            ),
-            _priceRow(
-              "GST (18%)",
-              gstAmount != null ? "₹${gstAmount!.toStringAsFixed(2)}" : "—",
-            ),
-
-            Divider(height: 32.h, thickness: 1),
-
-            _priceRow(
-              "Total Payable",
-              totalPayable != null
-                  ? "₹${totalPayable!.toStringAsFixed(2)}"
-                  : "—",
-              bold: true,
-              color: AppColors.brown,
-            ),
-
-            SizedBox(height: 30.h),
-
-            Align(
-              alignment: Alignment.centerLeft,
-              child: Text(
-                "Select Payment Method",
-                style: TextStyle(fontSize: 16.sp, fontWeight: FontWeight.w600),
-              ),
-            ),
-            SizedBox(height: 18.h),
-
-            _paymentOption("UPI", "upi", Icons.account_balance_wallet),
-            SizedBox(height: 12.h),
-            _paymentOption("Net Banking", "netbanking", Icons.account_balance),
-            SizedBox(height: 12.h),
-            _paymentOption("Credit/Debit Card", "card", Icons.credit_card),
-
-            const Spacer(),
-
-            SizedBox(
-              width: double.infinity,
-              height: 50.h,
-              child: ElevatedButton(
-                onPressed: _isProcessing ? null : _processPayment,
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: AppColors.brown,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12.r),
+      appBar: AppBar(title: const Text("Payment")),
+      body: Stack(
+        children: [
+          Padding(
+            padding: EdgeInsets.all(24.w),
+            child: _isLoadingDetails
+                ? const Center(child: CircularProgressIndicator())
+                : Column(
+                    children: [
+                      _priceRow(
+                        "Amount",
+                        totalPayable != null
+                            ? "₹${totalPayable!.toStringAsFixed(2)}"
+                            : "—",
+                      ),
+                      _priceRow("GST", "₹0.00"),
+                      const Divider(),
+                      _priceRow(
+                        "Total Payable",
+                        totalPayable != null
+                            ? "₹${totalPayable!.toStringAsFixed(2)}"
+                            : "—",
+                        bold: true,
+                      ),
+                      const SizedBox(height: 24),
+                      _paymentOption(
+                        "Razorpay",
+                        "razorpay",
+                        Icons.account_balance_wallet,
+                      ),
+                      const Spacer(),
+                      ElevatedButton(
+                        onPressed: _isProcessing ? null : _processPayment,
+                        style: ElevatedButton.styleFrom(
+                          minimumSize: const Size(double.infinity, 50),
+                          backgroundColor: AppColors.brown,
+                        ),
+                        child: _isProcessing
+                            ? const CircularProgressIndicator(
+                                color: Colors.white,
+                              )
+                            : Text(
+                                totalPayable != null
+                                    ? "Pay ₹${totalPayable!.toStringAsFixed(2)}"
+                                    : "Pay",
+                              ),
+                      ),
+                    ],
                   ),
-                ),
-                child: _isProcessing
-                    ? const CircularProgressIndicator(
-                        color: Colors.white,
-                        strokeWidth: 2,
-                      )
-                    : Text(
-                        "Pay Now",
+          ),
+
+          /// SUCCESS CARD OVERLAY
+          if (_paymentComplete)
+            Container(
+              width: double.infinity,
+              height: double.infinity,
+              color: Colors.black.withOpacity(0.4),
+              child: Center(
+                child: Container(
+                  padding: EdgeInsets.all(22.w),
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(16.r),
+                    boxShadow: [
+                      const BoxShadow(
+                        color: Colors.black26,
+                        blurRadius: 10,
+                        spreadRadius: 2,
+                      ),
+                    ],
+                  ),
+                  width: 300.w,
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Icon(
+                        Icons.check_circle,
+                        color: Colors.green,
+                        size: 60.sp,
+                      ),
+                      SizedBox(height: 16.h),
+                      Text(
+                        "Successfully Registered 🎉",
+                        textAlign: TextAlign.center,
                         style: TextStyle(
-                          fontSize: 16.sp,
-                          fontWeight: FontWeight.w600,
+                          fontSize: 20.sp,
+                          fontWeight: FontWeight.bold,
                         ),
                       ),
+                      SizedBox(height: 12.h),
+                      Text(
+                        "Thank you for registering!\nYour application has been successfully submitted and is now pending administrative review.",
+                        textAlign: TextAlign.center,
+                        style: TextStyle(fontSize: 14.sp, height: 1.4),
+                      ),
+                      SizedBox(height: 20.h),
+                      TextButton(
+                        onPressed: () => Navigator.popUntil(
+                          context,
+                          (route) => route.isFirst,
+                        ),
+                        child: Text(
+                          "Back to Home",
+                          style: TextStyle(fontSize: 16.sp, color: Colors.blue),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
               ),
             ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _priceRow(
-    String label,
-    String value, {
-    bool bold = false,
-    Color? color,
-  }) {
-    return Padding(
-      padding: EdgeInsets.symmetric(vertical: 6.h),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          Text(
-            label,
-            style: TextStyle(
-              fontSize: 15.sp,
-              fontWeight: bold ? FontWeight.w600 : FontWeight.normal,
-            ),
-          ),
-          Text(
-            value,
-            style: TextStyle(
-              fontSize: 15.sp,
-              fontWeight: bold ? FontWeight.bold : FontWeight.normal,
-              color: color ?? Colors.black,
-            ),
-          ),
         ],
       ),
     );
   }
 
-  Widget _paymentOption(String title, String value, IconData icon) {
-    final selected = _selectedPaymentMethod == value;
-
-    return GestureDetector(
-      onTap: () => setState(() => _selectedPaymentMethod = value),
-      child: Container(
-        padding: EdgeInsets.all(16.r),
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(12.r),
-          border: Border.all(
-            color: selected ? AppColors.brown : Colors.grey.shade300,
-            width: selected ? 2 : 1,
+  Widget _priceRow(String label, String value, {bool bold = false}) {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: [
+        Text(
+          label,
+          style: TextStyle(
+            fontSize: 16,
+            fontWeight: bold ? FontWeight.w600 : FontWeight.normal,
           ),
-          color: selected ? AppColors.brown.withOpacity(0.1) : Colors.white,
         ),
-        child: Row(
-          children: [
-            Icon(icon, color: selected ? AppColors.brown : Colors.grey[600]),
-            SizedBox(width: 12.w),
-            Expanded(
-              child: Text(
-                title,
-                style: TextStyle(
-                  fontSize: 15.sp,
-                  fontWeight: selected ? FontWeight.w600 : FontWeight.normal,
-                  color: selected ? AppColors.brown : Colors.black,
-                ),
-              ),
-            ),
-            Icon(
-              selected ? Icons.radio_button_checked : Icons.radio_button_off,
-              color: selected ? AppColors.brown : Colors.grey,
-            ),
-          ],
+        Text(
+          value,
+          style: TextStyle(
+            fontSize: 16,
+            fontWeight: bold ? FontWeight.w700 : FontWeight.normal,
+          ),
         ),
+      ],
+    );
+  }
+
+  Widget _paymentOption(String title, String value, IconData icon) {
+    return ListTile(
+      leading: Icon(icon, color: AppColors.brown),
+      title: Text(title),
+      trailing: Radio(
+        value: value,
+        groupValue: _selectedPaymentMethod,
+        onChanged: (val) =>
+            setState(() => _selectedPaymentMethod = val as String),
       ),
     );
   }

@@ -84,8 +84,10 @@ class Endpoints {
   /// Validate current session
   static const String sessionValidate = '/api/session/validate/';
 
-  static const String initiatePayment = "/api/membership/membership/payment/";
-  static const String verifyPayment = "/api/membership/membership/verify/";
+  static const String initiatePayment =
+      "/api/membership/membership/register/payment/";
+  static const String verifyPayment =
+      "/api/membership/membership/register/verify/";
 
   // ==================== Helpers ====================
 

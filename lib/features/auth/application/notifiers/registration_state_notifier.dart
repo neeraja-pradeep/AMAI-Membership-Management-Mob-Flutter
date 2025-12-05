@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:uuid/uuid.dart';
 
@@ -283,15 +284,17 @@ class RegistrationStateNotifier extends StateNotifier<RegistrationState> {
 
       final response = await _repository.initiatePayment(userId: userId);
 
+      debugPrint(response.toString());
+
       // Extract Razorpay order ID
-      final orderId = response["order_id"] ?? response["razorpay_order_id"];
+      final orderId = response["order_id"];
 
       if (orderId == null) {
         throw Exception("Payment session could not be created");
       }
 
       return {
-        "orderId": orderId,
+        "order_id": orderId,
         "amount": response["amount"],
         "currency": response["currency"] ?? "INR",
       };
@@ -310,8 +313,6 @@ class RegistrationStateNotifier extends StateNotifier<RegistrationState> {
     required String orderId,
     required String signature,
   }) async {
-    if (state is! RegistrationStateInProgress) return false;
-
     try {
       state = const RegistrationStateLoading(
         message: "Verifying transaction...",
@@ -322,6 +323,8 @@ class RegistrationStateNotifier extends StateNotifier<RegistrationState> {
         paymentId: paymentId,
         signature: signature,
       );
+
+      debugPrint(verified.toString());
 
       if (!verified) {
         state = RegistrationStatePaymentFailed(
@@ -353,6 +356,7 @@ class RegistrationStateNotifier extends StateNotifier<RegistrationState> {
         code: "VERIFY_PAYMENT_ERROR",
         canRetry: false,
       );
+
       return false;
     }
   }
