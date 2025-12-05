@@ -201,9 +201,20 @@ class _AswasePlusScreenState extends ConsumerState<AswasePlusScreen> {
 
   /// Handles request change button press
   void _onRequestNomineeChange() {
+    // Get the first nominee from the state
+    final nomineesState = ref.read(nomineesStateProvider);
+    final nominees = nomineesState.currentData;
+
+    if (nominees == null || nominees.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('No nominee data available')),
+      );
+      return;
+    }
+
     Navigator.of(context).push(
       MaterialPageRoute<void>(
-        builder: (context) => const EditNomineeScreen(),
+        builder: (context) => EditNomineeScreen(nominee: nominees.first),
       ),
     );
   }

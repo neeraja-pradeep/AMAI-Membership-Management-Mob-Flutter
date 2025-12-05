@@ -3,12 +3,18 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:myapp/app/theme/colors.dart';
 import 'package:myapp/features/aswas_plus/application/providers/registration_providers.dart';
-import 'package:myapp/features/home/application/providers/home_providers.dart';
+import 'package:myapp/features/aswas_plus/domain/entities/nominee.dart';
 
 /// Edit Nominee Details Screen (Practitioner only)
 /// Allows practitioners to edit their ASWAS Plus nominee information
 class EditNomineeScreen extends ConsumerStatefulWidget {
-  const EditNomineeScreen({super.key});
+  const EditNomineeScreen({
+    required this.nominee,
+    super.key,
+  });
+
+  /// The nominee data to edit
+  final Nominee nominee;
 
   @override
   ConsumerState<EditNomineeScreen> createState() => _EditNomineeScreenState();
@@ -41,11 +47,42 @@ class _EditNomineeScreenState extends ConsumerState<EditNomineeScreen> {
   @override
   void initState() {
     super.initState();
-    _nameController = TextEditingController();
-    _contactController = TextEditingController();
-    _emailController = TextEditingController();
-    _addressController = TextEditingController();
-    _allocationController = TextEditingController();
+    // Initialize controllers with existing nominee data
+    _nameController = TextEditingController(text: widget.nominee.nomineeName);
+    _contactController =
+        TextEditingController(text: widget.nominee.contactNumber);
+    _emailController = TextEditingController(text: widget.nominee.email ?? '');
+    _addressController =
+        TextEditingController(text: widget.nominee.address ?? '');
+    _allocationController =
+        TextEditingController(text: widget.nominee.allocationPercentage ?? '');
+
+    // Pre-fill relationship dropdown
+    _selectedRelation = _getRelationshipDisplayValue(widget.nominee.relationship);
+
+    // Pre-fill date of birth
+    if (widget.nominee.dateOfBirth != null &&
+        widget.nominee.dateOfBirth!.isNotEmpty) {
+      _selectedDateOfBirth = DateTime.tryParse(widget.nominee.dateOfBirth!);
+    }
+
+    // Pre-fill is primary
+    _isPrimary = widget.nominee.isPrimary;
+  }
+
+  /// Converts API relationship value to display value
+  String? _getRelationshipDisplayValue(String relationship) {
+    final lowerRelation = relationship.toLowerCase();
+    for (final option in _relationOptions) {
+      if (option.toLowerCase() == lowerRelation) {
+        return option;
+      }
+    }
+    // Handle 'parent' case which maps to Father/Mother
+    if (lowerRelation == 'parent') {
+      return 'Father';
+    }
+    return null;
   }
 
   @override
@@ -560,9 +597,6 @@ class _EditNomineeScreenState extends ConsumerState<EditNomineeScreen> {
       _isSubmitting = true;
     });
 
-    // Get user ID for the API call
-    final userId = ref.read(userIdProvider);
-
     // Build the payload
     final payload = <String, dynamic>{
       'nominee_name': _nameController.text.trim(),
@@ -586,11 +620,11 @@ class _EditNomineeScreenState extends ConsumerState<EditNomineeScreen> {
       payload['allocation_percentage'] = _allocationController.text.trim();
     }
 
-    // Call the PATCH API
+    // Call the PATCH API using the nominee's ID
     final result = await ref.read(
       nomineeUpdateProvider(
         NomineeUpdateParams(
-          nomineeId: userId,
+          nomineeId: widget.nominee.id,
           payload: payload,
         ),
       ).future,
