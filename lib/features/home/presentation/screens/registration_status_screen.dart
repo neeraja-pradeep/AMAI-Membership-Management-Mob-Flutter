@@ -1,9 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:myapp/app/theme/colors.dart';
 import 'package:myapp/app/theme/typography.dart';
-import 'package:myapp/features/auth/application/providers/auth_provider.dart';
 
 /// Registration Status screen shown when membership application is pending or rejected
 /// Displays appropriate message based on status
@@ -473,32 +471,27 @@ class RegistrationStatusScreen extends StatelessWidget {
 
   /// Builds the Back to Login button (for rejected status)
   Widget _buildBackToLoginButton(BuildContext context) {
-    return Consumer(
-      builder: (context, ref, child) {
-        return SizedBox(
-          width: double.infinity,
-          child: ElevatedButton(
-            onPressed: () {
-              // Log out the user and navigate to login
-              ref.read(authStateProvider.notifier).logout();
-            },
-            style: ElevatedButton.styleFrom(
-              backgroundColor: AppColors.primary,
-              padding: EdgeInsets.symmetric(vertical: 16.h),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(12.r),
-              ),
-            ),
-            child: Text(
-              'Back to Login',
-              style: AppTypography.buttonMedium.copyWith(
-                color: AppColors.white,
-                fontWeight: FontWeight.w600,
-              ),
-            ),
+    return SizedBox(
+      width: double.infinity,
+      child: ElevatedButton(
+        onPressed: () {
+          // Static button - no action
+        },
+        style: ElevatedButton.styleFrom(
+          backgroundColor: AppColors.primary,
+          padding: EdgeInsets.symmetric(vertical: 16.h),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12.r),
           ),
-        );
-      },
+        ),
+        child: Text(
+          'Back to Login',
+          style: AppTypography.buttonMedium.copyWith(
+            color: AppColors.white,
+            fontWeight: FontWeight.w600,
+          ),
+        ),
+      ),
     );
   }
 }
