@@ -5,6 +5,7 @@ import 'package:myapp/app/theme/colors.dart';
 import 'package:myapp/features/auth/presentation/screens/home_screen.dart';
 import 'package:myapp/features/auth/presentation/screens/registration/personal_details_screen.dart';
 import 'package:myapp/features/auth/presentation/screens/registration/register_screen.dart';
+import '../screens/forgot_password/forgot_password_screen.dart';
 import '../../application/providers/auth_provider.dart';
 import '../../application/states/auth_state.dart';
 import '../components/email_field.dart';
@@ -182,7 +183,14 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                               ),
 
                               TextButton(
-                                onPressed: () {},
+                                onPressed: () {
+                                  Navigator.of(context).push(
+                                    MaterialPageRoute(
+                                      builder: (context) =>
+                                          const ForgotPasswordScreen(),
+                                    ),
+                                  );
+                                },
                                 child: const Text(
                                   'Forgot Password ?',
                                   style: TextStyle(
