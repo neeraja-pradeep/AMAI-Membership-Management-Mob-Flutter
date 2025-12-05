@@ -6,7 +6,7 @@ import 'package:myapp/app/theme/colors.dart';
 import 'package:myapp/core/network/api_client_provider.dart';
 
 import '../screen/login_screen.dart';
-import 'home_screen.dart';
+import 'package:myapp/features/home/presentation/screens/home_screen.dart';
 
 /// Splash screen that checks session and redirects accordingly
 ///
