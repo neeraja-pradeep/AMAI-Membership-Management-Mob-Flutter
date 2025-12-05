@@ -14,6 +14,7 @@ import 'package:myapp/features/home/presentation/components/membership_card_widg
 import 'package:myapp/features/home/presentation/components/quick_actions_section.dart';
 import 'package:myapp/features/home/presentation/components/upcoming_events_section.dart';
 import 'package:myapp/features/home/presentation/components/upcoming_event_mini_card.dart';
+import 'package:myapp/features/home/presentation/components/announcement_mini_card.dart';
 import 'package:myapp/features/membership/presentation/screens/membership_screen.dart';
 import 'package:myapp/features/aswas_plus/presentation/screens/aswas_plus_screen.dart';
 import 'package:flutter_svg/flutter_svg.dart';
@@ -250,6 +251,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
   Widget _buildMembershipCard() {
     final membershipState = ref.watch(membershipStateProvider);
     final eventsState = ref.watch(eventsStateProvider);
+    final announcementsState = ref.watch(announcementsStateProvider);
 
     // Get event within a week if available
     final upcomingEventWithinWeek = eventsState.maybeWhen(
@@ -258,6 +260,17 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
             .where((event) => UpcomingEventMiniCard.isWithinWeek(event))
             .toList();
         return eventsWithinWeek.isNotEmpty ? eventsWithinWeek.first : null;
+      },
+      orElse: () => null,
+    );
+
+    // Get announcement within a week if available
+    final announcementWithinWeek = announcementsState.maybeWhen(
+      loaded: (announcements) {
+        final announcementsWithinWeek = announcements
+            .where((announcement) => AnnouncementMiniCard.isWithinWeek(announcement))
+            .toList();
+        return announcementsWithinWeek.isNotEmpty ? announcementsWithinWeek.first : null;
       },
       orElse: () => null,
     );
@@ -336,6 +349,14 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
               event: upcomingEventWithinWeek,
               onRegisterTap: () {
                 // TODO: Navigate to event registration
+              },
+            ),
+          // Announcement card (only if announcement within a week exists)
+          if (announcementWithinWeek != null)
+            AnnouncementMiniCard(
+              announcement: announcementWithinWeek,
+              onTap: () {
+                // TODO: Navigate to announcement details
               },
             ),
         ],
