@@ -72,3 +72,47 @@ final insuranceVerificationProvider =
     }
   },
 );
+
+/// Parameters for nominee update request
+class NomineeUpdateParams {
+  const NomineeUpdateParams({
+    required this.nomineeId,
+    required this.payload,
+  });
+
+  final int nomineeId;
+  final Map<String, dynamic> payload;
+}
+
+/// Provider for insurance nominee update API call
+/// Takes NomineeUpdateParams and returns Either<Failure, bool>
+final nomineeUpdateProvider =
+    FutureProvider.autoDispose.family<Either<Failure, bool>, NomineeUpdateParams>(
+  (ref, params) async {
+    final apiClient = ref.watch(apiClientProvider);
+
+    try {
+      final response = await apiClient.patch<Map<String, dynamic>>(
+        Endpoints.insuranceNomineeById(params.nomineeId),
+        data: params.payload,
+        fromJson: (json) => json as Map<String, dynamic>,
+      );
+
+      if (response.isSuccess) {
+        return const Right(true);
+      } else {
+        return const Left(
+          ServerFailure(
+            message: 'Failed to update nominee. Please try again.',
+          ),
+        );
+      }
+    } catch (e) {
+      return Left(
+        ServerFailure(
+          message: e.toString(),
+        ),
+      );
+    }
+  },
+);

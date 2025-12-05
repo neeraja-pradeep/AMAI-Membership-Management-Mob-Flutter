@@ -100,4 +100,9 @@ class Endpoints {
   /// Insurance verification endpoint
   /// POST: Verify Razorpay payment for insurance registration
   static const String insuranceVerify = '$apiPrefix/membership/insurance/verify/';
+
+  /// Insurance nominee update endpoint
+  /// PATCH: Update insurance nominee details
+  static String insuranceNomineeById(int nomineeId) =>
+      '$apiPrefix/membership/insurance-nominees/$nomineeId/';
 }

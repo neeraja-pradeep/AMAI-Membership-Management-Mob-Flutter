@@ -16,6 +16,7 @@ import 'package:myapp/features/aswas_plus/presentation/components/note_card.dart
 import 'package:myapp/features/aswas_plus/presentation/components/not_enrolled_card.dart';
 import 'package:myapp/features/aswas_plus/presentation/screens/register_here_screen.dart';
 import 'package:myapp/features/aswas_plus/presentation/screens/renew_membership_screen.dart';
+import 'package:myapp/features/profile/presentation/screens/edit_nominee_screen.dart';
 
 /// ASWAS Plus Screen - displays insurance policy details
 /// Shows policy information for enrolled users
@@ -200,9 +201,9 @@ class _AswasePlusScreenState extends ConsumerState<AswasePlusScreen> {
 
   /// Handles request change button press
   void _onRequestNomineeChange() {
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text('Request change feature coming soon'),
+    Navigator.of(context).push(
+      MaterialPageRoute<void>(
+        builder: (context) => const EditNomineeScreen(),
       ),
     );
   }

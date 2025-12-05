@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:myapp/app/theme/colors.dart';
+import 'package:myapp/features/aswas_plus/application/providers/registration_providers.dart';
+import 'package:myapp/features/home/application/providers/home_providers.dart';
 
 /// Edit Nominee Details Screen (Practitioner only)
 /// Allows practitioners to edit their ASWAS Plus nominee information
@@ -373,8 +375,25 @@ class _EditNomineeScreenState extends ConsumerState<EditNomineeScreen> {
       _isSubmitting = true;
     });
 
-    // Simulate API call (static for now)
-    await Future.delayed(const Duration(seconds: 2));
+    // Get user ID for the API call
+    final userId = ref.read(userIdProvider);
+
+    // Build the payload
+    final payload = {
+      'nominee_name': _nameController.text.trim(),
+      'relationship': _selectedRelation!.toLowerCase(),
+      'contact_number': _contactController.text.trim(),
+    };
+
+    // Call the PATCH API
+    final result = await ref.read(
+      nomineeUpdateProvider(
+        NomineeUpdateParams(
+          nomineeId: userId,
+          payload: payload,
+        ),
+      ).future,
+    );
 
     if (!mounted) return;
 
@@ -382,8 +401,21 @@ class _EditNomineeScreenState extends ConsumerState<EditNomineeScreen> {
       _isSubmitting = false;
     });
 
-    // Show success dialog
-    _showSuccessDialog();
+    result.fold(
+      (failure) {
+        // Show error message
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(failure.message),
+            backgroundColor: AppColors.error,
+          ),
+        );
+      },
+      (success) {
+        // Show success dialog
+        _showSuccessDialog();
+      },
+    );
   }
 
   void _showSuccessDialog() {
