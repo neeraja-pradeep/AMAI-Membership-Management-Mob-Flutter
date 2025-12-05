@@ -349,4 +349,30 @@ class AuthRepositoryImpl implements AuthRepository {
     _connectivitySubscription?.cancel();
     _retryTimer?.cancel();
   }
+
+  @override
+  Future<bool> sendOtp({required String phoneNumber}) async {
+    try {
+      return await _authApi.sendOtp(phoneNumber: phoneNumber);
+    } catch (e) {
+      rethrow;
+    }
+  }
+
+  @override
+  Future<bool> verifyOtpAndResetPassword({
+    required String phoneNumber,
+    required String otpCode,
+    required String newPassword,
+  }) async {
+    try {
+      return await _authApi.verifyOtpAndResetPassword(
+        phoneNumber: phoneNumber,
+        otpCode: otpCode,
+        newPassword: newPassword,
+      );
+    } catch (e) {
+      rethrow;
+    }
+  }
 }

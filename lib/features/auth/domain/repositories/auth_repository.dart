@@ -48,4 +48,20 @@ abstract class AuthRepository {
   ///
   /// Removes all cached auth data
   Future<void> clearCache();
+
+  /// Send OTP for forgot password
+  ///
+  /// Sends OTP to the provided phone number
+  /// Returns true on success
+  Future<bool> sendOtp({required String phoneNumber});
+
+  /// Verify OTP and reset password
+  ///
+  /// Verifies OTP and sets new password
+  /// Returns true on success
+  Future<bool> verifyOtpAndResetPassword({
+    required String phoneNumber,
+    required String otpCode,
+    required String newPassword,
+  });
 }

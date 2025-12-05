@@ -131,6 +131,52 @@ class AuthApi {
     return true;
   }
 
+  /// Send OTP for forgot password
+  ///
+  /// POST /api/auth/otp-signin/
+  ///
+  /// Sends OTP to the provided phone number
+  /// Returns true on success
+  /// Throws AuthException on failure
+  Future<bool> sendOtp({required String phoneNumber}) async {
+    try {
+      await _apiClient.post<Map<String, dynamic>>(
+        Endpoints.otpSignIn,
+        data: {'phone_number': phoneNumber},
+      );
+      return true;
+    } on DioException catch (e) {
+      throw _handleDioException(e);
+    }
+  }
+
+  /// Verify OTP and reset password
+  ///
+  /// POST /api/auth/otp-signin/
+  ///
+  /// Verifies OTP and sets new password
+  /// Returns true on success
+  /// Throws AuthException on failure
+  Future<bool> verifyOtpAndResetPassword({
+    required String phoneNumber,
+    required String otpCode,
+    required String newPassword,
+  }) async {
+    try {
+      await _apiClient.post<Map<String, dynamic>>(
+        Endpoints.otpSignIn,
+        data: {
+          'phone_number': phoneNumber,
+          'otp_code': otpCode,
+          'new_password': newPassword,
+        },
+      );
+      return true;
+    } on DioException catch (e) {
+      throw _handleDioException(e);
+    }
+  }
+
   /// Reset login attempt counter (call after successful login or timeout)
   void resetLoginAttempts() {
     _loginAttemptCount = 0;

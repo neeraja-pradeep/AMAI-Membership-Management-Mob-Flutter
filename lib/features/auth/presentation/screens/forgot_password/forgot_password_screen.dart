@@ -1,25 +1,28 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:myapp/app/theme/colors.dart';
 
+import '../../../application/providers/forgot_password_provider.dart';
+import '../../../application/states/forgot_password_state.dart';
 import 'otp_verification_screen.dart';
 
 /// Forgot Password Screen - Phone Number Entry
 ///
 /// First step in the password reset flow
 /// User enters their phone number with +91 prefix
-class ForgotPasswordScreen extends StatefulWidget {
+class ForgotPasswordScreen extends ConsumerStatefulWidget {
   const ForgotPasswordScreen({super.key});
 
   @override
-  State<ForgotPasswordScreen> createState() => _ForgotPasswordScreenState();
+  ConsumerState<ForgotPasswordScreen> createState() =>
+      _ForgotPasswordScreenState();
 }
 
-class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
+class _ForgotPasswordScreenState extends ConsumerState<ForgotPasswordScreen> {
   final _formKey = GlobalKey<FormState>();
   final _phoneController = TextEditingController();
-  bool _isLoading = false;
 
   @override
   void dispose() {
@@ -29,31 +32,40 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
 
   Future<void> _handleSendCode() async {
     if (_formKey.currentState?.validate() ?? false) {
-      setState(() {
-        _isLoading = true;
-      });
-
-      // Simulate API call to send OTP
-      await Future.delayed(const Duration(seconds: 2));
-
-      setState(() {
-        _isLoading = false;
-      });
-
-      if (mounted) {
-        Navigator.of(context).push(
-          MaterialPageRoute(
-            builder: (context) => OtpVerificationScreen(
-              phoneNumber: '+91${_phoneController.text.trim()}',
-            ),
-          ),
-        );
-      }
+      final phoneNumber = '+91${_phoneController.text.trim()}';
+      ref.read(forgotPasswordProvider.notifier).sendOtp(
+            phoneNumber: phoneNumber,
+          );
     }
   }
 
   @override
   Widget build(BuildContext context) {
+    final forgotPasswordState = ref.watch(forgotPasswordProvider);
+    final isLoading = forgotPasswordState is ForgotPasswordLoading;
+
+    // Listen to state changes
+    ref.listen<ForgotPasswordState>(forgotPasswordProvider, (previous, next) {
+      if (next is ForgotPasswordOtpSent) {
+        // Navigate to OTP verification screen
+        Navigator.of(context).push(
+          MaterialPageRoute(
+            builder: (context) => OtpVerificationScreen(
+              phoneNumber: next.phoneNumber,
+            ),
+          ),
+        );
+      } else if (next is ForgotPasswordError) {
+        // Show error snackbar
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(next.message),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    });
+
     return Scaffold(
       body: Container(
         width: double.infinity,
@@ -77,7 +89,10 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
                   Align(
                     alignment: Alignment.centerLeft,
                     child: IconButton(
-                      onPressed: () => Navigator.of(context).pop(),
+                      onPressed: () {
+                        ref.read(forgotPasswordProvider.notifier).reset();
+                        Navigator.of(context).pop();
+                      },
                       icon: Icon(
                         Icons.arrow_back_ios,
                         size: 24.sp,
@@ -209,7 +224,7 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
                         SizedBox(
                           height: 50.h,
                           child: ElevatedButton(
-                            onPressed: _isLoading ? null : _handleSendCode,
+                            onPressed: isLoading ? null : _handleSendCode,
                             style: ElevatedButton.styleFrom(
                               backgroundColor: AppColors.brown,
                               shape: RoundedRectangleBorder(
@@ -217,7 +232,7 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
                               ),
                               elevation: 0,
                             ),
-                            child: _isLoading
+                            child: isLoading
                                 ? SizedBox(
                                     width: 24.w,
                                     height: 24.h,
@@ -243,7 +258,10 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
 
                         // Back to login
                         TextButton(
-                          onPressed: () => Navigator.of(context).pop(),
+                          onPressed: () {
+                            ref.read(forgotPasswordProvider.notifier).reset();
+                            Navigator.of(context).pop();
+                          },
                           child: Text(
                             'Back to Login',
                             style: TextStyle(

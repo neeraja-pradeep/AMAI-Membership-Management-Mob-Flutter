@@ -1,14 +1,17 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:myapp/app/theme/colors.dart';
 
+import '../../../application/providers/forgot_password_provider.dart';
+import '../../../application/states/forgot_password_state.dart';
 import '../../components/password_reset_success_dialog.dart';
 
 /// Reset Password Screen
 ///
 /// Third and final step in the password reset flow
 /// User enters new password and confirms it
-class ResetPasswordScreen extends StatefulWidget {
+class ResetPasswordScreen extends ConsumerStatefulWidget {
   final String phoneNumber;
   final String otp;
 
@@ -19,15 +22,15 @@ class ResetPasswordScreen extends StatefulWidget {
   });
 
   @override
-  State<ResetPasswordScreen> createState() => _ResetPasswordScreenState();
+  ConsumerState<ResetPasswordScreen> createState() =>
+      _ResetPasswordScreenState();
 }
 
-class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
+class _ResetPasswordScreenState extends ConsumerState<ResetPasswordScreen> {
   final _formKey = GlobalKey<FormState>();
   final _newPasswordController = TextEditingController();
   final _confirmPasswordController = TextEditingController();
 
-  bool _isLoading = false;
   bool _obscureNewPassword = true;
   bool _obscureConfirmPassword = true;
 
@@ -40,30 +43,39 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
 
   Future<void> _handleResetPassword() async {
     if (_formKey.currentState?.validate() ?? false) {
-      setState(() {
-        _isLoading = true;
-      });
+      ref.read(forgotPasswordProvider.notifier).verifyOtpAndResetPassword(
+            phoneNumber: widget.phoneNumber,
+            otpCode: widget.otp,
+            newPassword: _newPasswordController.text,
+          );
+    }
+  }
 
-      // Simulate API call to reset password
-      await Future.delayed(const Duration(seconds: 2));
+  @override
+  Widget build(BuildContext context) {
+    final forgotPasswordState = ref.watch(forgotPasswordProvider);
+    final isLoading = forgotPasswordState is ForgotPasswordLoading;
 
-      setState(() {
-        _isLoading = false;
-      });
-
-      if (mounted) {
+    // Listen to state changes
+    ref.listen<ForgotPasswordState>(forgotPasswordProvider, (previous, next) {
+      if (next is ForgotPasswordSuccess) {
         // Show success dialog
         showDialog(
           context: context,
           barrierDismissible: false,
           builder: (context) => const PasswordResetSuccessDialog(),
         );
+      } else if (next is ForgotPasswordError) {
+        // Show error snackbar
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(next.message),
+            backgroundColor: Colors.red,
+          ),
+        );
       }
-    }
-  }
+    });
 
-  @override
-  Widget build(BuildContext context) {
     return Scaffold(
       body: Container(
         width: double.infinity,
@@ -313,8 +325,7 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
                         SizedBox(
                           height: 50.h,
                           child: ElevatedButton(
-                            onPressed:
-                                _isLoading ? null : _handleResetPassword,
+                            onPressed: isLoading ? null : _handleResetPassword,
                             style: ElevatedButton.styleFrom(
                               backgroundColor: AppColors.brown,
                               shape: RoundedRectangleBorder(
@@ -322,7 +333,7 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
                               ),
                               elevation: 0,
                             ),
-                            child: _isLoading
+                            child: isLoading
                                 ? SizedBox(
                                     width: 24.w,
                                     height: 24.h,

@@ -1,21 +1,26 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:myapp/app/theme/colors.dart';
+
+import '../../application/providers/forgot_password_provider.dart';
 
 /// Password Reset Success Dialog
 ///
 /// Displayed after successful password reset
 /// Shows a centered container with success message
-class PasswordResetSuccessDialog extends StatelessWidget {
+class PasswordResetSuccessDialog extends ConsumerWidget {
   const PasswordResetSuccessDialog({super.key});
 
-  void _navigateToLogin(BuildContext context) {
+  void _navigateToLogin(BuildContext context, WidgetRef ref) {
+    // Reset the forgot password provider state
+    ref.read(forgotPasswordProvider.notifier).reset();
     // Pop until we reach the login screen
     Navigator.of(context).popUntil((route) => route.isFirst);
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     return Dialog(
       backgroundColor: Colors.transparent,
       insetPadding: EdgeInsets.symmetric(horizontal: 24.w),
@@ -95,7 +100,7 @@ class PasswordResetSuccessDialog extends StatelessWidget {
               width: double.infinity,
               height: 50.h,
               child: ElevatedButton(
-                onPressed: () => _navigateToLogin(context),
+                onPressed: () => _navigateToLogin(context, ref),
                 style: ElevatedButton.styleFrom(
                   backgroundColor: AppColors.brown,
                   shape: RoundedRectangleBorder(

@@ -2,16 +2,19 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:myapp/app/theme/colors.dart';
 
+import '../../../application/providers/forgot_password_provider.dart';
+import '../../../application/states/forgot_password_state.dart';
 import 'reset_password_screen.dart';
 
 /// OTP Verification Screen
 ///
 /// Second step in the password reset flow
 /// User enters the 6-digit OTP received on their phone
-class OtpVerificationScreen extends StatefulWidget {
+class OtpVerificationScreen extends ConsumerStatefulWidget {
   final String phoneNumber;
 
   const OtpVerificationScreen({
@@ -20,10 +23,11 @@ class OtpVerificationScreen extends StatefulWidget {
   });
 
   @override
-  State<OtpVerificationScreen> createState() => _OtpVerificationScreenState();
+  ConsumerState<OtpVerificationScreen> createState() =>
+      _OtpVerificationScreenState();
 }
 
-class _OtpVerificationScreenState extends State<OtpVerificationScreen> {
+class _OtpVerificationScreenState extends ConsumerState<OtpVerificationScreen> {
   final List<TextEditingController> _otpControllers = List.generate(
     6,
     (_) => TextEditingController(),
@@ -33,7 +37,7 @@ class _OtpVerificationScreenState extends State<OtpVerificationScreen> {
     (_) => FocusNode(),
   );
 
-  bool _isLoading = false;
+  bool _isResending = false;
   bool _canResend = false;
   int _resendTimer = 30;
   Timer? _timer;
@@ -77,24 +81,50 @@ class _OtpVerificationScreenState extends State<OtpVerificationScreen> {
   }
 
   Future<void> _handleResendOtp() async {
-    if (!_canResend) return;
+    if (!_canResend || _isResending) return;
 
-    // Simulate resend API call
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text('OTP sent successfully'),
-        backgroundColor: Colors.green,
-      ),
-    );
+    setState(() {
+      _isResending = true;
+    });
 
-    _startResendTimer();
+    try {
+      await ref
+          .read(forgotPasswordProvider.notifier)
+          .sendOtp(phoneNumber: widget.phoneNumber);
+
+      if (mounted) {
+        final state = ref.read(forgotPasswordProvider);
+        if (state is ForgotPasswordOtpSent) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('OTP sent successfully'),
+              backgroundColor: Colors.green,
+            ),
+          );
+          _startResendTimer();
+        } else if (state is ForgotPasswordError) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(state.message),
+              backgroundColor: Colors.red,
+            ),
+          );
+        }
+      }
+    } finally {
+      if (mounted) {
+        setState(() {
+          _isResending = false;
+        });
+      }
+    }
   }
 
   String get _otpValue {
     return _otpControllers.map((c) => c.text).join();
   }
 
-  Future<void> _handleVerifyOtp() async {
+  void _handleVerifyOtp() {
     final otp = _otpValue;
 
     if (otp.length != 6) {
@@ -107,27 +137,15 @@ class _OtpVerificationScreenState extends State<OtpVerificationScreen> {
       return;
     }
 
-    setState(() {
-      _isLoading = true;
-    });
-
-    // Simulate OTP verification API call
-    await Future.delayed(const Duration(seconds: 2));
-
-    setState(() {
-      _isLoading = false;
-    });
-
-    if (mounted) {
-      Navigator.of(context).push(
-        MaterialPageRoute(
-          builder: (context) => ResetPasswordScreen(
-            phoneNumber: widget.phoneNumber,
-            otp: otp,
-          ),
+    // Navigate to reset password screen with OTP
+    Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (context) => ResetPasswordScreen(
+          phoneNumber: widget.phoneNumber,
+          otp: otp,
         ),
-      );
-    }
+      ),
+    );
   }
 
   void _onOtpChanged(int index, String value) {
@@ -289,17 +307,30 @@ class _OtpVerificationScreenState extends State<OtpVerificationScreen> {
                         ),
                       ),
                       TextButton(
-                        onPressed: _canResend ? _handleResendOtp : null,
-                        child: Text(
-                          _canResend
-                              ? 'Resend OTP'
-                              : 'Resend in ${_resendTimer}s',
-                          style: TextStyle(
-                            fontSize: 14.sp,
-                            fontWeight: FontWeight.w600,
-                            color: _canResend ? AppColors.brown : Colors.grey,
-                          ),
-                        ),
+                        onPressed:
+                            _canResend && !_isResending ? _handleResendOtp : null,
+                        child: _isResending
+                            ? SizedBox(
+                                width: 16.w,
+                                height: 16.h,
+                                child: const CircularProgressIndicator(
+                                  strokeWidth: 2,
+                                  valueColor: AlwaysStoppedAnimation<Color>(
+                                    AppColors.brown,
+                                  ),
+                                ),
+                              )
+                            : Text(
+                                _canResend
+                                    ? 'Resend OTP'
+                                    : 'Resend in ${_resendTimer}s',
+                                style: TextStyle(
+                                  fontSize: 14.sp,
+                                  fontWeight: FontWeight.w600,
+                                  color:
+                                      _canResend ? AppColors.brown : Colors.grey,
+                                ),
+                              ),
                       ),
                     ],
                   ),
@@ -310,7 +341,7 @@ class _OtpVerificationScreenState extends State<OtpVerificationScreen> {
                   SizedBox(
                     height: 50.h,
                     child: ElevatedButton(
-                      onPressed: _isLoading ? null : _handleVerifyOtp,
+                      onPressed: _handleVerifyOtp,
                       style: ElevatedButton.styleFrom(
                         backgroundColor: AppColors.brown,
                         shape: RoundedRectangleBorder(
@@ -318,25 +349,14 @@ class _OtpVerificationScreenState extends State<OtpVerificationScreen> {
                         ),
                         elevation: 0,
                       ),
-                      child: _isLoading
-                          ? SizedBox(
-                              width: 24.w,
-                              height: 24.h,
-                              child: const CircularProgressIndicator(
-                                strokeWidth: 2,
-                                valueColor: AlwaysStoppedAnimation<Color>(
-                                  Colors.white,
-                                ),
-                              ),
-                            )
-                          : Text(
-                              'Verify',
-                              style: TextStyle(
-                                fontSize: 16.sp,
-                                fontWeight: FontWeight.w600,
-                                color: Colors.white,
-                              ),
-                            ),
+                      child: Text(
+                        'Verify',
+                        style: TextStyle(
+                          fontSize: 16.sp,
+                          fontWeight: FontWeight.w600,
+                          color: Colors.white,
+                        ),
+                      ),
                     ),
                   ),
                 ],
