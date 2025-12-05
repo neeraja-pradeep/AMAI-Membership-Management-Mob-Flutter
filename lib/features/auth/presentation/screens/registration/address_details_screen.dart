@@ -332,33 +332,41 @@ class _AddressDetailsScreenState extends ConsumerState<AddressDetailsScreen> {
     required Function(String?) onDistrictChange,
   }) {
     return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        SizedBox(height: 18.h),
-        _buildLabel("Address Line 1"),
-        TextInputField(controller: address1, hintText: "Building / House No"),
+        SizedBox(height: 16.h),
+        const Text("House/No Building"),
+        SizedBox(height: 10.h),
+        TextInputField(controller: address1, hintText: "House No / Building Name"),
 
-        SizedBox(height: 18.h),
-        _buildLabel("Address Line 2"),
+        SizedBox(height: 16.h),
+        const Text("Street / Locality / Area"),
+        SizedBox(height: 10.h),
         TextInputField(controller: address2, hintText: "Street, Landmark"),
 
-        SizedBox(height: 18.h),
-        _buildLabel("Country"),
+        SizedBox(height: 16.h),
+        const Text("Country"),
+        SizedBox(height: 10.h),
         _buildDropdown(["India", "USA"], country, onCountryChange),
 
-        SizedBox(height: 18.h),
-        _buildLabel("State"),
+        SizedBox(height: 16.h),
+        const Text("State"),
+        SizedBox(height: 10.h),
         _buildDropdown(_states[country] ?? [], state, onStateChange),
 
-        SizedBox(height: 18.h),
-        _buildLabel("District"),
+        SizedBox(height: 16.h),
+        const Text("District"),
+        SizedBox(height: 10.h),
         _buildDropdown(_districts[state] ?? [], district, onDistrictChange),
 
-        SizedBox(height: 18.h),
-        _buildLabel("City / Post Office"),
+        SizedBox(height: 16.h),
+        const Text("City / Post Office"),
+        SizedBox(height: 10.h),
         TextInputField(controller: city, hintText: "City Name"),
 
-        SizedBox(height: 18.h),
-        _buildLabel("Postal Code"),
+        SizedBox(height: 16.h),
+        const Text("Postal Code"),
+        SizedBox(height: 10.h),
         TextInputField(
           controller: postal,
           keyboardType: TextInputType.number,
@@ -380,10 +388,14 @@ class _AddressDetailsScreenState extends ConsumerState<AddressDetailsScreen> {
     String? value,
     Function(String?) onChanged,
   ) {
-    return DropdownButtonFormField(
+    return DropdownButtonFormField<String>(
       value: items.contains(value) ? value : null,
       decoration: InputDecoration(
         border: OutlineInputBorder(borderRadius: BorderRadius.circular(12.r)),
+        contentPadding: EdgeInsets.symmetric(
+          horizontal: 16.w,
+          vertical: 12.h,
+        ),
       ),
       hint: const Text("Select"),
       items: items
@@ -413,11 +425,20 @@ class _AddressDetailsScreenState extends ConsumerState<AddressDetailsScreen> {
         // Checkbox
         Row(
           children: [
-            Checkbox(value: isSame, onChanged: (v) => toggle(v ?? false)),
+            SizedBox(
+              height: 24.h,
+              width: 24.w,
+              child: Checkbox(
+                value: isSame,
+                activeColor: AppColors.brown,
+                onChanged: (v) => toggle(v ?? false),
+              ),
+            ),
+            SizedBox(width: 8.w),
             Expanded(
               child: Text(
                 "Same as Communication Address",
-                style: TextStyle(fontSize: 15.sp),
+                style: TextStyle(fontSize: 14.sp),
               ),
             ),
           ],
@@ -443,6 +464,7 @@ class _AddressDetailsScreenState extends ConsumerState<AddressDetailsScreen> {
         child: Form(
           key: _formKey,
           child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               const RegistrationStepIndicator(
                 currentStep: 3,
@@ -451,9 +473,8 @@ class _AddressDetailsScreenState extends ConsumerState<AddressDetailsScreen> {
 
               Text(
                 "Communication Address",
-                style: TextStyle(fontSize: 18.sp, fontWeight: FontWeight.w600),
+                style: TextStyle(fontSize: 18.sp, fontWeight: FontWeight.bold),
               ),
-              SizedBox(height: 8.h),
 
               _buildAddressFields(
                 address1: _addressLine1Controller,
