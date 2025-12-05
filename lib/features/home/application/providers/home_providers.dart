@@ -22,7 +22,7 @@ import 'package:myapp/features/home/infrastructure/repositories/home_repository_
 /// Provider for current user ID
 /// TODO: Replace with actual user ID from auth state
 final userIdProvider = Provider<int>((ref) {
-  return 87; // Practitioner user ID
+  return 43; // Practitioner user ID
 });
 
 /// Provider for API client
