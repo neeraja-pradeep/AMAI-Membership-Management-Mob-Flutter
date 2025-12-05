@@ -23,9 +23,8 @@ class AnnouncementMiniCard extends StatelessWidget {
     return GestureDetector(
       onTap: onTap,
       child: Container(
-        width: MediaQuery.of(context).size.width - 32.w,
+        width: double.infinity,
         height: 180.h,
-        margin: EdgeInsets.only(right: 16.w),
         decoration: BoxDecoration(
           color: AppColors.white,
           borderRadius: BorderRadius.circular(16.r),

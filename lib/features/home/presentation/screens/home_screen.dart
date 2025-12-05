@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -29,6 +31,11 @@ class HomeScreen extends ConsumerStatefulWidget {
 }
 
 class _HomeScreenState extends ConsumerState<HomeScreen> {
+  final PageController _cardPageController = PageController();
+  Timer? _autoScrollTimer;
+  int _currentCardPage = 0;
+  int _totalCardPages = 1;
+
   @override
   void initState() {
     super.initState();
@@ -38,6 +45,28 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
       ref.read(aswasStateProvider.notifier).initialize();
       ref.read(eventsStateProvider.notifier).initialize();
       ref.read(announcementsStateProvider.notifier).initialize();
+    });
+    // Start auto-scroll timer
+    _startAutoScroll();
+  }
+
+  @override
+  void dispose() {
+    _autoScrollTimer?.cancel();
+    _cardPageController.dispose();
+    super.dispose();
+  }
+
+  void _startAutoScroll() {
+    _autoScrollTimer = Timer.periodic(const Duration(seconds: 3), (timer) {
+      if (_totalCardPages > 1 && _cardPageController.hasClients) {
+        _currentCardPage = (_currentCardPage + 1) % _totalCardPages;
+        _cardPageController.animateToPage(
+          _currentCardPage,
+          duration: const Duration(milliseconds: 300),
+          curve: Curves.easeInOut,
+        );
+      }
     });
   }
 
@@ -247,7 +276,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     );
   }
 
-  /// Builds the membership card section with horizontal scroll
+  /// Builds the membership card section with horizontal scroll and auto-scroll
   Widget _buildMembershipCard() {
     final membershipState = ref.watch(membershipStateProvider);
     final eventsState = ref.watch(eventsStateProvider);
@@ -275,91 +304,111 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
       orElse: () => null,
     );
 
-    return SizedBox(
-      height: 180.h,
-      child: ListView(
-        scrollDirection: Axis.horizontal,
-        padding: EdgeInsets.zero,
-        children: [
-          // Membership card
-          SizedBox(
-            width: MediaQuery.of(context).size.width,
-            child: membershipState.when(
-              initial: () => const MembershipCardShimmer(),
-              loading: (previousData) {
-                if (previousData != null) {
-                  return Stack(
-                    children: [
-                      MembershipCardWidget(membershipCard: previousData),
-                      Positioned.fill(
-                        child: Container(
-                          decoration: BoxDecoration(
-                            color: AppColors.white.withOpacity(0.5),
-                            borderRadius: BorderRadius.circular(16.r),
-                          ),
-                          child: Center(
-                            child: SizedBox(
-                              width: 24.w,
-                              height: 24.h,
-                              child: const CircularProgressIndicator(
-                                strokeWidth: 2,
-                                valueColor: AlwaysStoppedAnimation<Color>(
-                                  AppColors.primary,
-                                ),
-                              ),
-                            ),
+    // Build list of card pages
+    final List<Widget> cardPages = [
+      // Membership card (always first) - has internal margin
+      membershipState.when(
+        initial: () => const MembershipCardShimmer(),
+        loading: (previousData) {
+          if (previousData != null) {
+            return Stack(
+              children: [
+                MembershipCardWidget(membershipCard: previousData),
+                Positioned.fill(
+                  child: Container(
+                    margin: EdgeInsets.symmetric(horizontal: 16.w),
+                    decoration: BoxDecoration(
+                      color: AppColors.white.withOpacity(0.5),
+                      borderRadius: BorderRadius.circular(16.r),
+                    ),
+                    child: Center(
+                      child: SizedBox(
+                        width: 24.w,
+                        height: 24.h,
+                        child: const CircularProgressIndicator(
+                          strokeWidth: 2,
+                          valueColor: AlwaysStoppedAnimation<Color>(
+                            AppColors.primary,
                           ),
                         ),
                       ),
-                    ],
-                  );
-                }
-                return const MembershipCardShimmer();
-              },
-              loaded: (membershipCard) {
-                return MembershipCardWidget(
-                  membershipCard: membershipCard,
-                  onTap: () {
-                    Navigator.of(context).push(
-                      MaterialPageRoute<void>(
-                        builder: (context) => const MembershipScreen(),
-                      ),
-                    ).then((_) => _onRefresh());
-                  },
-                );
-              },
-              error: (failure, cachedData) {
-                if (cachedData != null) {
-                  return MembershipCardWidget(membershipCard: cachedData);
-                }
-                return MembershipCardEmpty(
-                  onApply: _onRefresh,
-                );
-              },
-              empty: () => MembershipCardEmpty(
-                onApply: () {
-                  // TODO: Navigate to membership application
-                },
-              ),
-            ),
+                    ),
+                  ),
+                ),
+              ],
+            );
+          }
+          return const MembershipCardShimmer();
+        },
+        loaded: (membershipCard) {
+          return MembershipCardWidget(
+            membershipCard: membershipCard,
+            onTap: () {
+              Navigator.of(context).push(
+                MaterialPageRoute<void>(
+                  builder: (context) => const MembershipScreen(),
+                ),
+              ).then((_) => _onRefresh());
+            },
+          );
+        },
+        error: (failure, cachedData) {
+          if (cachedData != null) {
+            return MembershipCardWidget(membershipCard: cachedData);
+          }
+          return MembershipCardEmpty(
+            onApply: _onRefresh,
+          );
+        },
+        empty: () => MembershipCardEmpty(
+          onApply: () {
+            // TODO: Navigate to membership application
+          },
+        ),
+      ),
+    ];
+
+    // Add upcoming event card if available
+    if (upcomingEventWithinWeek != null) {
+      cardPages.add(
+        Padding(
+          padding: EdgeInsets.symmetric(horizontal: 16.w),
+          child: UpcomingEventMiniCard(
+            event: upcomingEventWithinWeek,
+            onRegisterTap: () {
+              // TODO: Navigate to event registration
+            },
           ),
-          // Upcoming event card (only if event within a week exists)
-          if (upcomingEventWithinWeek != null)
-            UpcomingEventMiniCard(
-              event: upcomingEventWithinWeek,
-              onRegisterTap: () {
-                // TODO: Navigate to event registration
-              },
-            ),
-          // Announcement card (only if announcement within a week exists)
-          if (announcementWithinWeek != null)
-            AnnouncementMiniCard(
-              announcement: announcementWithinWeek,
-              onTap: () {
-                // TODO: Navigate to announcement details
-              },
-            ),
-        ],
+        ),
+      );
+    }
+
+    // Add announcement card if available
+    if (announcementWithinWeek != null) {
+      cardPages.add(
+        Padding(
+          padding: EdgeInsets.symmetric(horizontal: 16.w),
+          child: AnnouncementMiniCard(
+            announcement: announcementWithinWeek,
+            onTap: () {
+              // TODO: Navigate to announcement details
+            },
+          ),
+        ),
+      );
+    }
+
+    // Update total pages for auto-scroll
+    _totalCardPages = cardPages.length;
+
+    return SizedBox(
+      height: 180.h,
+      child: PageView(
+        controller: _cardPageController,
+        onPageChanged: (index) {
+          _currentCardPage = index;
+        },
+        children: cardPages,
       ),
     );
   }
