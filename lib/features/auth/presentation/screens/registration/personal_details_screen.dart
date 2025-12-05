@@ -11,6 +11,7 @@ import '../../../../../app/router/app_router.dart';
 import '../../../application/notifiers/registration_state_notifier.dart';
 import '../../../domain/entities/registration/personal_details.dart';
 import '../../components/date_picker_field.dart';
+import '../../components/registration_step_indicator.dart';
 import '../../components/text_input_field.dart';
 import '../../widgets/exit_confirmation_dialog.dart';
 
@@ -271,6 +272,10 @@ class _PersonalDetailsScreenState extends ConsumerState<PersonalDetailsScreen> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
+                  const RegistrationStepIndicator(
+                    currentStep: 1,
+                    stepTitle: "Personal Details",
+                  ),
                   const Text("First Name"),
                   SizedBox(height: 10.h),
                   TextInputField(

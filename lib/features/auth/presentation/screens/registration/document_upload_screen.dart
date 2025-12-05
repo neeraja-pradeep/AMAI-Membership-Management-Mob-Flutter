@@ -9,6 +9,7 @@ import '../../../../../app/router/app_router.dart';
 import '../../../application/notifiers/registration_state_notifier.dart';
 import '../../../application/states/registration_state.dart';
 import '../../../domain/entities/registration/document_upload.dart';
+import '../../components/registration_step_indicator.dart';
 
 class DocumentUploadScreen extends ConsumerStatefulWidget {
   const DocumentUploadScreen({super.key});
@@ -255,13 +256,9 @@ class _DocumentUploadScreenState extends ConsumerState<DocumentUploadScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            SizedBox(height: 10.h),
-
-            Center(
-              child: Text(
-                "Step 4 of 4",
-                style: TextStyle(fontSize: 16.sp, fontWeight: FontWeight.w600),
-              ),
+            const RegistrationStepIndicator(
+              currentStep: 4,
+              stepTitle: "Document Upload",
             ),
 
             if (isUploading)

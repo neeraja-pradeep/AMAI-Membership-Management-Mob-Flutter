@@ -7,6 +7,7 @@ import 'package:myapp/features/auth/application/states/registration_state.dart';
 import '../../../../../app/router/app_router.dart';
 import '../../../application/notifiers/registration_state_notifier.dart';
 import '../../../domain/entities/registration/professional_details.dart';
+import '../../components/registration_step_indicator.dart';
 import '../../components/text_input_field.dart';
 
 class ProfessionalDetailsScreen extends ConsumerStatefulWidget {
@@ -325,17 +326,10 @@ class _ProfessionalDetailsScreenState
           key: _formKey,
           child: Column(
             children: [
-              SizedBox(height: 10.h),
-              Text(
-                "Step 2 of 4",
-                style: TextStyle(fontWeight: FontWeight.w600, fontSize: 16.sp),
+              const RegistrationStepIndicator(
+                currentStep: 2,
+                stepTitle: "Professional Details",
               ),
-              SizedBox(height: 20.h),
-              Text(
-                "Professional Details",
-                style: TextStyle(fontSize: 20.sp, fontWeight: FontWeight.bold),
-              ),
-              SizedBox(height: 25.h),
 
               if (role == "practitioner") _buildPractitionerUI(),
               if (role == "house_surgeon") _buildHouseSurgeonUI(),

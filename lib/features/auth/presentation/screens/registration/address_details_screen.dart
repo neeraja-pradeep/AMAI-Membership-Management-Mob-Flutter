@@ -7,6 +7,7 @@ import 'package:myapp/features/auth/application/states/registration_state.dart';
 import '../../../../../app/router/app_router.dart';
 import '../../../application/notifiers/registration_state_notifier.dart';
 import '../../../domain/entities/registration/address_details.dart';
+import '../../components/registration_step_indicator.dart';
 import '../../components/text_input_field.dart';
 
 class AddressDetailsScreen extends ConsumerStatefulWidget {
@@ -443,16 +444,16 @@ class _AddressDetailsScreenState extends ConsumerState<AddressDetailsScreen> {
           key: _formKey,
           child: Column(
             children: [
-              Text(
-                "Step 3 of 4",
-                style: TextStyle(fontSize: 16.sp, fontWeight: FontWeight.w600),
+              const RegistrationStepIndicator(
+                currentStep: 3,
+                stepTitle: "Address Details",
               ),
-              SizedBox(height: 20.h),
 
               Text(
                 "Communication Address",
-                style: TextStyle(fontSize: 20.sp, fontWeight: FontWeight.bold),
+                style: TextStyle(fontSize: 18.sp, fontWeight: FontWeight.w600),
               ),
+              SizedBox(height: 8.h),
 
               _buildAddressFields(
                 address1: _addressLine1Controller,
