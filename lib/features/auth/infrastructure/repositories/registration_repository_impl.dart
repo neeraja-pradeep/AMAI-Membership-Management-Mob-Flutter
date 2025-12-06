@@ -306,6 +306,28 @@ class RegistrationRepositoryImpl implements RegistrationRepository {
 
       // Handle Map response
       if (data is Map<String, dynamic>) {
+        // Check for 'error' field (backend specific format)
+        if (data['error'] != null) {
+          final error = data['error'];
+          if (error is String) {
+            final lowerError = error.toLowerCase();
+            // Check for duplicate email
+            if (lowerError.contains('email') && lowerError.contains('exist')) {
+              return RegistrationError.duplicateEmail(error);
+            }
+            // Check for duplicate phone
+            if (lowerError.contains('phone') && lowerError.contains('exist')) {
+              return RegistrationError.duplicatePhone(error);
+            }
+            // Return as general validation error
+            return RegistrationError(
+              type: RegistrationErrorType.serverValidation,
+              message: error,
+              canRetry: false,
+            );
+          }
+        }
+
         // Check for 'detail' field (common in DRF)
         if (data['detail'] != null) {
           final detail = data['detail'];
@@ -347,7 +369,7 @@ class RegistrationRepositoryImpl implements RegistrationRepository {
         final errorMessages = <String>[];
 
         data.forEach((key, value) {
-          if (key == 'code' || key == 'message') return;
+          if (key == 'code' || key == 'message' || key == 'error') return;
 
           if (value is List && value.isNotEmpty) {
             final errorMsg = value.first.toString();
