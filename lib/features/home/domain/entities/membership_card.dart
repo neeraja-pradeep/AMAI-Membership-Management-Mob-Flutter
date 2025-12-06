@@ -1,3 +1,7 @@
+import 'package:collection/collection.dart' show DeepCollectionEquality;
+// ignore: implementation_imports
+import 'package:collection/src/unmodifiable_wrappers.dart'
+    show EqualUnmodifiableListView;
 import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:intl/intl.dart';
 

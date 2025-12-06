@@ -9,11 +9,6 @@ part of 'membership_card.dart';
 // FreezedGenerator
 // **************************************************************************
 
-// ignore_for_file: implementation_imports
-import 'package:collection/collection.dart' show DeepCollectionEquality;
-import 'package:collection/src/unmodifiable_wrappers.dart'
-    show EqualUnmodifiableListView;
-
 T _$identity<T>(T value) => value;
 
 final _privateConstructorUsedError = UnsupportedError(
