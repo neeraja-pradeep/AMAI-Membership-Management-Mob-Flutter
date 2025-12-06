@@ -51,17 +51,15 @@ class AuthStateNotifier extends StateNotifier<AuthState> {
     state = const AuthStateLoading();
 
     try {
-      final success = await _loginUseCase.execute(
+      final userId = await _loginUseCase.execute(
         email: email,
         password: password,
         rememberMe: rememberMe,
       );
 
-      if (success) {
-        state = const AuthStateAuthenticated();
-      } else {
-        state = const AuthStateError("Login failed.");
-      }
+      // Login successful if we get here (no exception thrown)
+      // userId may be null if API doesn't return user data, but login still succeeded
+      state = AuthStateAuthenticated(userId: userId);
     } on AuthException catch (e) {
       state = AuthStateError(e.message);
     } catch (e) {
@@ -91,4 +89,14 @@ final authProvider = StateNotifierProvider<AuthStateNotifier, AuthState>((ref) {
 final isAuthenticatedProvider = Provider<bool>((ref) {
   final auth = ref.watch(authProvider);
   return auth is AuthStateAuthenticated;
+});
+
+/// Provider for the authenticated user's ID from login response
+/// Returns null if not authenticated or if user ID was not in the login response
+final authUserIdProvider = Provider<int?>((ref) {
+  final auth = ref.watch(authProvider);
+  if (auth is AuthStateAuthenticated) {
+    return auth.userId;
+  }
+  return null;
 });

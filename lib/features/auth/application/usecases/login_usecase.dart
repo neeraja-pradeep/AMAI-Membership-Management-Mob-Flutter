@@ -12,9 +12,9 @@ class LoginUseCase {
 
   /// Execute login
   ///
-  /// Returns User and Session on success
+  /// Returns user ID on success, null if user data not in response
   /// Throws exception on failure
-  Future<bool> execute({
+  Future<int?> execute({
     required String email,
     required String password,
     required bool rememberMe,
@@ -32,7 +32,7 @@ class LoginUseCase {
       throw Exception('Invalid email format');
     }
 
-    // Call repository
+    // Call repository - returns user ID
     return await _repository.login(email: email, password: password);
   }
 

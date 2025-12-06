@@ -15,8 +15,9 @@ class AuthStateLoading extends AuthState {
 /// User successfully authenticated
 class AuthStateAuthenticated extends AuthState {
   final bool isLoggedIn;
+  final int? userId;
 
-  const AuthStateAuthenticated({this.isLoggedIn = true});
+  const AuthStateAuthenticated({this.isLoggedIn = true, this.userId});
 }
 
 /// User logged out / not logged in

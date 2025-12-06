@@ -5,6 +5,7 @@ import 'package:fpdart/fpdart.dart';
 import 'package:myapp/core/error/failure.dart';
 import 'package:myapp/core/network/api_client.dart';
 import 'package:myapp/core/network/endpoints.dart';
+import 'package:myapp/features/auth/application/providers/auth_provider.dart';
 import 'package:myapp/features/home/application/providers/home_providers.dart';
 import 'package:myapp/features/profile/application/states/profile_state.dart';
 import 'package:myapp/features/profile/domain/repositories/profile_repository.dart';
@@ -53,9 +54,17 @@ class ProfileNotifier extends StateNotifier<ProfileState> {
     state = const ProfileState.loading();
 
     final repository = _ref.read(profileRepositoryProvider);
+    final userId = _ref.read(authUserIdProvider);
 
-    // Use session-based endpoint (no userId needed)
-    final result = await repository.getCurrentProfileData();
+    // Use user ID from auth state (from login response)
+    if (userId == null) {
+      state = const ProfileState.error(
+        failure: ServerFailure(message: 'User not authenticated'),
+      );
+      return;
+    }
+
+    final result = await repository.getProfileData(userId: userId);
 
     result.fold(
       (failure) {
@@ -73,9 +82,18 @@ class ProfileNotifier extends StateNotifier<ProfileState> {
     state = ProfileState.loading(previousData: previousData);
 
     final repository = _ref.read(profileRepositoryProvider);
+    final userId = _ref.read(authUserIdProvider);
 
-    // Use session-based endpoint (no userId needed)
-    final result = await repository.getCurrentProfileData();
+    // Use user ID from auth state (from login response)
+    if (userId == null) {
+      state = ProfileState.error(
+        failure: const ServerFailure(message: 'User not authenticated'),
+        cachedData: previousData,
+      );
+      return;
+    }
+
+    final result = await repository.getProfileData(userId: userId);
 
     result.fold(
       (failure) {

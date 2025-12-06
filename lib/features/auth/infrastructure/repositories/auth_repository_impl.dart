@@ -75,11 +75,11 @@ class AuthRepositoryImpl implements AuthRepository {
   /// 5. Save to Hive asynchronously (don't block navigation)
   /// 6. Navigate to next screen
   @override
-  Future<bool> login({required String email, required String password}) async {
+  Future<int?> login({required String email, required String password}) async {
     try {
       final response = await _authApi.login(email: email, password: password);
 
-      // backend returns: { "detail": "Login successful" }
+      // backend returns: { "detail": "Login successful", "user": { "id": 4, ... } }
       if (response.detail.toLowerCase() == "login successful") {
         // Store login status locally (so app remembers user)
         // await _authLocalDs.saveIsLoggedIn(true);
@@ -87,10 +87,11 @@ class AuthRepositoryImpl implements AuthRepository {
         // // (Optional) store email if you need it later
         // await _authLocalDs.saveEmail(email);
 
-        return true;
+        // Return user ID from response
+        return response.userId;
       }
 
-      return false; // unexpected text from backend
+      return null; // unexpected text from backend
     } catch (e) {
       rethrow;
     }

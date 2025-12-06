@@ -8,9 +8,9 @@ import '../entities/user_role.dart';
 abstract class AuthRepository {
   /// Login with email and password
   ///
-  /// Returns User and Session on success
+  /// Returns user ID on success, null if user data not in response
   /// Throws exception on failure
-  Future<bool> login({required String email, required String password});
+  Future<int?> login({required String email, required String password});
 
   /// Register with selected role (Phase 1)
   ///
