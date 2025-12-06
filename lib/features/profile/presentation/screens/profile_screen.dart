@@ -17,6 +17,8 @@ import 'package:myapp/features/profile/presentation/screens/edit_academic_detail
 import 'package:myapp/features/profile/presentation/screens/edit_professional_details_screen.dart';
 import 'package:myapp/features/profile/presentation/screens/edit_nominee_screen.dart';
 import 'package:myapp/features/home/application/providers/home_providers.dart';
+import 'package:myapp/features/auth/application/providers/auth_provider.dart';
+import 'package:myapp/features/auth/presentation/screen/login_screen.dart';
 
 /// Profile Screen - displays user profile with conditional UI based on membership type
 class ProfileScreen extends ConsumerStatefulWidget {
@@ -465,9 +467,17 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
             child: const Text('Cancel'),
           ),
           TextButton(
-            onPressed: () {
+            onPressed: () async {
               Navigator.of(context).pop();
-              // TODO: Implement actual logout
+              await ref.read(authProvider.notifier).logout();
+              if (mounted) {
+                Navigator.of(context).pushAndRemoveUntil(
+                  MaterialPageRoute<void>(
+                    builder: (context) => const LoginScreen(),
+                  ),
+                  (route) => false,
+                );
+              }
             },
             child: const Text(
               'Logout',
