@@ -72,18 +72,6 @@ class _AswasePlusScreenState extends ConsumerState<AswasePlusScreen> {
         ),
       ),
       centerTitle: true,
-      actions: [
-        IconButton(
-          icon: Icon(
-            Icons.notifications_outlined,
-            color: AppColors.textPrimary,
-            size: 24.sp,
-          ),
-          onPressed: () {
-            // Static for now
-          },
-        ),
-      ],
     );
   }
 

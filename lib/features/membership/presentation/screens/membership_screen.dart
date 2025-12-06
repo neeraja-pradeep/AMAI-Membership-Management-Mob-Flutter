@@ -70,18 +70,6 @@ class _MembershipScreenState extends ConsumerState<MembershipScreen> {
         ),
       ),
       centerTitle: true,
-      actions: [
-        IconButton(
-          icon: Icon(
-            Icons.notifications_outlined,
-            color: AppColors.textPrimary,
-            size: 24.sp,
-          ),
-          onPressed: () {
-            // Static notification icon - no functionality for now
-          },
-        ),
-      ],
     );
   }
 

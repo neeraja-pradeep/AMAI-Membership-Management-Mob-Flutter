@@ -170,18 +170,6 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
         backgroundColor: AppColors.white,
         elevation: 0,
         centerTitle: true,
-        actions: [
-          IconButton(
-            onPressed: () {
-              // TODO: Navigate to notifications
-            },
-            icon: Icon(
-              Icons.notifications_outlined,
-              color: AppColors.textPrimary,
-              size: 24.sp,
-            ),
-          ),
-        ],
       ),
       body: state.when(
         initial: () => const ProfileLoadingShimmer(),
