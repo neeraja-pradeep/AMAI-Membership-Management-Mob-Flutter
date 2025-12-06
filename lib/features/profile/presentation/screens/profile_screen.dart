@@ -298,7 +298,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
 
                 Navigator.of(context).push(
                   MaterialPageRoute<void>(
-                    builder: (context) => EditNomineeScreen(nominee: nominees.first),
+                    builder: (context) => EditNomineeScreen(nominees: nominees),
                   ),
                 );
               },

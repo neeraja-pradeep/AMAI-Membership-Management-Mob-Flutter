@@ -9,12 +9,12 @@ import 'package:myapp/features/aswas_plus/domain/entities/nominee.dart';
 /// Allows practitioners to edit their ASWAS Plus nominee information
 class EditNomineeScreen extends ConsumerStatefulWidget {
   const EditNomineeScreen({
-    required this.nominee,
+    required this.nominees,
     super.key,
   });
 
-  /// The nominee data to edit
-  final Nominee nominee;
+  /// The list of nominees to display and edit
+  final List<Nominee> nominees;
 
   @override
   ConsumerState<EditNomineeScreen> createState() => _EditNomineeScreenState();
@@ -22,52 +22,38 @@ class EditNomineeScreen extends ConsumerStatefulWidget {
 
 class _EditNomineeScreenState extends ConsumerState<EditNomineeScreen> {
   final _formKey = GlobalKey<FormState>();
-  late TextEditingController _nameController;
-  late TextEditingController _contactController;
-  late TextEditingController _emailController;
-  late TextEditingController _addressController;
-  late TextEditingController _allocationController;
-  String? _selectedRelation;
-  DateTime? _selectedDateOfBirth;
-  bool _isPrimary = false;
+  late List<_NomineeFormData> _nomineeForms;
+  int? _editingNomineeIndex;
   bool _isSubmitting = false;
 
-  // Relation options (static for now - will be from API later)
+  // Relation options - same as register_here_screen
   final List<String> _relationOptions = [
     'Spouse',
-    'Father',
-    'Mother',
-    'Son',
-    'Daughter',
-    'Brother',
-    'Sister',
+    'Child',
+    'Parent',
+    'Sibling',
     'Other',
   ];
 
   @override
   void initState() {
     super.initState();
-    // Initialize controllers with existing nominee data
-    _nameController = TextEditingController(text: widget.nominee.nomineeName);
-    _contactController =
-        TextEditingController(text: widget.nominee.contactNumber);
-    _emailController = TextEditingController(text: widget.nominee.email ?? '');
-    _addressController =
-        TextEditingController(text: widget.nominee.address ?? '');
-    _allocationController =
-        TextEditingController(text: widget.nominee.allocationPercentage ?? '');
-
-    // Pre-fill relationship dropdown
-    _selectedRelation = _getRelationshipDisplayValue(widget.nominee.relationship);
-
-    // Pre-fill date of birth
-    if (widget.nominee.dateOfBirth != null &&
-        widget.nominee.dateOfBirth!.isNotEmpty) {
-      _selectedDateOfBirth = DateTime.tryParse(widget.nominee.dateOfBirth!);
-    }
-
-    // Pre-fill is primary
-    _isPrimary = widget.nominee.isPrimary;
+    // Initialize form data for each nominee
+    _nomineeForms = widget.nominees.map((nominee) {
+      return _NomineeFormData(
+        nominee: nominee,
+        nameController: TextEditingController(text: nominee.nomineeName),
+        contactController: TextEditingController(text: nominee.contactNumber),
+        emailController: TextEditingController(text: nominee.email ?? ''),
+        addressController: TextEditingController(text: nominee.address ?? ''),
+        allocationController: TextEditingController(text: nominee.allocationPercentage ?? ''),
+        selectedRelation: _getRelationshipDisplayValue(nominee.relationship),
+        selectedDateOfBirth: nominee.dateOfBirth != null && nominee.dateOfBirth!.isNotEmpty
+            ? DateTime.tryParse(nominee.dateOfBirth!)
+            : null,
+        isPrimary: nominee.isPrimary,
+      );
+    }).toList();
   }
 
   /// Converts API relationship value to display value
@@ -87,11 +73,9 @@ class _EditNomineeScreenState extends ConsumerState<EditNomineeScreen> {
 
   @override
   void dispose() {
-    _nameController.dispose();
-    _contactController.dispose();
-    _emailController.dispose();
-    _addressController.dispose();
-    _allocationController.dispose();
+    for (final form in _nomineeForms) {
+      form.dispose();
+    }
     super.dispose();
   }
 
@@ -129,7 +113,7 @@ class _EditNomineeScreenState extends ConsumerState<EditNomineeScreen> {
 
               // Section Header
               Text(
-                'ASWAS Plus Nominee',
+                'ASWAS Plus Nominees',
                 style: TextStyle(
                   fontSize: 16.sp,
                   fontWeight: FontWeight.w600,
@@ -138,7 +122,7 @@ class _EditNomineeScreenState extends ConsumerState<EditNomineeScreen> {
               ),
               SizedBox(height: 8.h),
               Text(
-                'Please provide the details of your nominee for ASWAS Plus insurance benefits.',
+                'Your registered nominees for ASWAS Plus insurance benefits.',
                 style: TextStyle(
                   fontSize: 14.sp,
                   color: AppColors.textSecondary,
@@ -146,176 +130,276 @@ class _EditNomineeScreenState extends ConsumerState<EditNomineeScreen> {
               ),
               SizedBox(height: 24.h),
 
-              // Nominee Details Card
-              Container(
-                padding: EdgeInsets.all(16.w),
-                decoration: BoxDecoration(
-                  color: AppColors.white,
-                  borderRadius: BorderRadius.circular(12.r),
-                  boxShadow: [
-                    BoxShadow(
-                      color: AppColors.cardShadow,
-                      blurRadius: 8,
-                      offset: const Offset(0, 2),
-                    ),
-                  ],
-                ),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    // Name Field
-                    _buildTextField(
-                      label: 'Nominee Name',
-                      controller: _nameController,
-                      validator: (value) {
-                        if (value == null || value.isEmpty) {
-                          return 'Nominee name is required';
-                        }
-                        return null;
-                      },
-                    ),
-                    SizedBox(height: 16.h),
+              // Display all nominees
+              ...List.generate(_nomineeForms.length, (index) {
+                return Padding(
+                  padding: EdgeInsets.only(bottom: 16.h),
+                  child: _buildNomineeCard(index),
+                );
+              }),
 
-                    // Relation Dropdown
-                    _buildDropdownField(
-                      label: 'Relationship',
-                      value: _selectedRelation,
-                      items: _relationOptions,
-                      onChanged: (value) {
-                        setState(() {
-                          _selectedRelation = value;
-                        });
-                      },
-                    ),
-                    SizedBox(height: 16.h),
-
-                    // Date of Birth Field
-                    _buildDatePickerField(
-                      label: 'Date of Birth',
-                      selectedDate: _selectedDateOfBirth,
-                      onDateSelected: (date) {
-                        setState(() {
-                          _selectedDateOfBirth = date;
-                        });
-                      },
-                    ),
-                    SizedBox(height: 16.h),
-
-                    // Contact Field
-                    _buildTextField(
-                      label: 'Contact Number',
-                      controller: _contactController,
-                      keyboardType: TextInputType.phone,
-                      validator: (value) {
-                        if (value == null || value.isEmpty) {
-                          return 'Contact number is required';
-                        }
-                        if (value.length < 10) {
-                          return 'Please enter a valid phone number';
-                        }
-                        return null;
-                      },
-                    ),
-                    SizedBox(height: 16.h),
-
-                    // Email Field
-                    _buildTextField(
-                      label: 'Email',
-                      controller: _emailController,
-                      keyboardType: TextInputType.emailAddress,
-                      validator: (value) {
-                        if (value != null && value.isNotEmpty) {
-                          final emailRegex = RegExp(
-                            r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$',
-                          );
-                          if (!emailRegex.hasMatch(value)) {
-                            return 'Please enter a valid email address';
-                          }
-                        }
-                        return null;
-                      },
-                    ),
-                    SizedBox(height: 16.h),
-
-                    // Address Field
-                    _buildTextField(
-                      label: 'Address',
-                      controller: _addressController,
-                      maxLines: 3,
-                    ),
-                    SizedBox(height: 16.h),
-
-                    // Allocation Percentage Field
-                    _buildTextField(
-                      label: 'Allocation Percentage',
-                      controller: _allocationController,
-                      keyboardType: TextInputType.number,
-                      validator: (value) {
-                        if (value != null && value.isNotEmpty) {
-                          final percentage = double.tryParse(value);
-                          if (percentage == null ||
-                              percentage < 0 ||
-                              percentage > 100) {
-                            return 'Please enter a valid percentage (0-100)';
-                          }
-                        }
-                        return null;
-                      },
-                    ),
-                    SizedBox(height: 16.h),
-
-                    // Is Primary Switch
-                    _buildSwitchField(
-                      label: 'Primary Nominee',
-                      value: _isPrimary,
-                      onChanged: (value) {
-                        setState(() {
-                          _isPrimary = value;
-                        });
-                      },
-                    ),
-                  ],
-                ),
-              ),
-
-              SizedBox(height: 32.h),
-
-              // Submit Button
-              SizedBox(
-                width: double.infinity,
-                child: ElevatedButton(
-                  onPressed: _isSubmitting ? null : _onSubmit,
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: AppColors.primary,
-                    padding: EdgeInsets.symmetric(vertical: 14.h),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(8.r),
-                    ),
-                  ),
-                  child: _isSubmitting
-                      ? SizedBox(
-                          height: 20.h,
-                          width: 20.h,
-                          child: CircularProgressIndicator(
-                            strokeWidth: 2.w,
-                            valueColor:
-                                AlwaysStoppedAnimation<Color>(AppColors.white),
-                          ),
-                        )
-                      : Text(
-                          'Submit Request',
-                          style: TextStyle(
-                            fontSize: 16.sp,
-                            fontWeight: FontWeight.w600,
-                            color: AppColors.white,
-                          ),
-                        ),
-                ),
-              ),
               SizedBox(height: 24.h),
             ],
           ),
         ),
+      ),
+    );
+  }
+
+  /// Builds a card for each nominee
+  Widget _buildNomineeCard(int index) {
+    final form = _nomineeForms[index];
+    final isEditing = _editingNomineeIndex == index;
+
+    return Container(
+      padding: EdgeInsets.all(16.w),
+      decoration: BoxDecoration(
+        color: AppColors.white,
+        borderRadius: BorderRadius.circular(12.r),
+        boxShadow: [
+          BoxShadow(
+            color: AppColors.cardShadow,
+            blurRadius: 8,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // Nominee header
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Row(
+                children: [
+                  Text(
+                    'Nominee ${index + 1}',
+                    style: TextStyle(
+                      fontSize: 15.sp,
+                      fontWeight: FontWeight.w600,
+                      color: AppColors.primary,
+                    ),
+                  ),
+                  if (form.isPrimary) ...[
+                    SizedBox(width: 8.w),
+                    Container(
+                      padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 2.h),
+                      decoration: BoxDecoration(
+                        color: AppColors.success.withOpacity(0.1),
+                        borderRadius: BorderRadius.circular(4.r),
+                      ),
+                      child: Text(
+                        'Primary',
+                        style: TextStyle(
+                          fontSize: 10.sp,
+                          fontWeight: FontWeight.w500,
+                          color: AppColors.success,
+                        ),
+                      ),
+                    ),
+                  ],
+                ],
+              ),
+              TextButton(
+                onPressed: () {
+                  setState(() {
+                    _editingNomineeIndex = isEditing ? null : index;
+                  });
+                },
+                child: Text(
+                  isEditing ? 'Close' : 'Edit',
+                  style: TextStyle(
+                    fontSize: 14.sp,
+                    color: AppColors.primary,
+                  ),
+                ),
+              ),
+            ],
+          ),
+          SizedBox(height: 12.h),
+
+          if (!isEditing) ...[
+            // Display mode - show summary
+            _buildInfoRow('Name', form.nameController.text),
+            _buildInfoRow('Relationship', form.selectedRelation ?? '-'),
+            _buildInfoRow('Contact', form.contactController.text),
+            if (form.emailController.text.isNotEmpty)
+              _buildInfoRow('Email', form.emailController.text),
+          ] else ...[
+            // Edit mode - show form fields
+            _buildTextField(
+              label: 'Nominee Name',
+              controller: form.nameController,
+              validator: (value) {
+                if (value == null || value.isEmpty) {
+                  return 'Nominee name is required';
+                }
+                return null;
+              },
+            ),
+            SizedBox(height: 16.h),
+
+            _buildDropdownField(
+              label: 'Relationship',
+              value: form.selectedRelation,
+              items: _relationOptions,
+              onChanged: (value) {
+                setState(() {
+                  form.selectedRelation = value;
+                });
+              },
+            ),
+            SizedBox(height: 16.h),
+
+            _buildDatePickerField(
+              label: 'Date of Birth',
+              selectedDate: form.selectedDateOfBirth,
+              onDateSelected: (date) {
+                setState(() {
+                  form.selectedDateOfBirth = date;
+                });
+              },
+            ),
+            SizedBox(height: 16.h),
+
+            _buildTextField(
+              label: 'Contact Number',
+              controller: form.contactController,
+              keyboardType: TextInputType.phone,
+              prefixText: '+91 ',
+              validator: (value) {
+                if (value == null || value.isEmpty) {
+                  return 'Contact number is required';
+                }
+                if (value.length < 10) {
+                  return 'Please enter a valid phone number';
+                }
+                return null;
+              },
+            ),
+            SizedBox(height: 16.h),
+
+            _buildTextField(
+              label: 'Email',
+              controller: form.emailController,
+              keyboardType: TextInputType.emailAddress,
+              validator: (value) {
+                if (value != null && value.isNotEmpty) {
+                  final emailRegex = RegExp(
+                    r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$',
+                  );
+                  if (!emailRegex.hasMatch(value)) {
+                    return 'Please enter a valid email address';
+                  }
+                }
+                return null;
+              },
+            ),
+            SizedBox(height: 16.h),
+
+            _buildTextField(
+              label: 'Address',
+              controller: form.addressController,
+              maxLines: 3,
+            ),
+            SizedBox(height: 16.h),
+
+            _buildTextField(
+              label: 'Allocation Percentage',
+              controller: form.allocationController,
+              keyboardType: TextInputType.number,
+              validator: (value) {
+                if (value != null && value.isNotEmpty) {
+                  final percentage = double.tryParse(value);
+                  if (percentage == null ||
+                      percentage < 0 ||
+                      percentage > 100) {
+                    return 'Please enter a valid percentage (0-100)';
+                  }
+                }
+                return null;
+              },
+            ),
+            SizedBox(height: 16.h),
+
+            _buildSwitchField(
+              label: 'Primary Nominee',
+              value: form.isPrimary,
+              onChanged: (value) {
+                setState(() {
+                  form.isPrimary = value;
+                });
+              },
+            ),
+            SizedBox(height: 16.h),
+
+            // Submit Button for this nominee
+            SizedBox(
+              width: double.infinity,
+              child: ElevatedButton(
+                onPressed: _isSubmitting ? null : () => _onSubmitNominee(index),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: AppColors.primary,
+                  padding: EdgeInsets.symmetric(vertical: 14.h),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(8.r),
+                  ),
+                ),
+                child: _isSubmitting
+                    ? SizedBox(
+                        height: 20.h,
+                        width: 20.h,
+                        child: CircularProgressIndicator(
+                          strokeWidth: 2.w,
+                          valueColor:
+                              AlwaysStoppedAnimation<Color>(AppColors.white),
+                        ),
+                      )
+                    : Text(
+                        'Submit Request',
+                        style: TextStyle(
+                          fontSize: 16.sp,
+                          fontWeight: FontWeight.w600,
+                          color: AppColors.white,
+                        ),
+                      ),
+              ),
+            ),
+          ],
+        ],
+      ),
+    );
+  }
+
+  /// Builds an info row for display mode
+  Widget _buildInfoRow(String label, String value) {
+    return Padding(
+      padding: EdgeInsets.only(bottom: 8.h),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          SizedBox(
+            width: 100.w,
+            child: Text(
+              label,
+              style: TextStyle(
+                fontSize: 13.sp,
+                color: AppColors.textSecondary,
+              ),
+            ),
+          ),
+          Expanded(
+            child: Text(
+              value,
+              style: TextStyle(
+                fontSize: 13.sp,
+                fontWeight: FontWeight.w500,
+                color: AppColors.textPrimary,
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }
@@ -367,6 +451,7 @@ class _EditNomineeScreenState extends ConsumerState<EditNomineeScreen> {
     TextInputType keyboardType = TextInputType.text,
     String? Function(String?)? validator,
     int maxLines = 1,
+    String? prefixText,
   }) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -388,6 +473,11 @@ class _EditNomineeScreenState extends ConsumerState<EditNomineeScreen> {
           decoration: InputDecoration(
             filled: true,
             fillColor: AppColors.grey50,
+            prefixText: prefixText,
+            prefixStyle: TextStyle(
+              fontSize: 14.sp,
+              color: AppColors.textPrimary,
+            ),
             border: OutlineInputBorder(
               borderRadius: BorderRadius.circular(8.r),
               borderSide: BorderSide(color: AppColors.grey300),
@@ -578,12 +668,14 @@ class _EditNomineeScreenState extends ConsumerState<EditNomineeScreen> {
     );
   }
 
-  Future<void> _onSubmit() async {
+  Future<void> _onSubmitNominee(int index) async {
     if (!_formKey.currentState!.validate()) {
       return;
     }
 
-    if (_selectedRelation == null) {
+    final form = _nomineeForms[index];
+
+    if (form.selectedRelation == null) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: const Text('Please select the relation with nominee'),
@@ -599,32 +691,32 @@ class _EditNomineeScreenState extends ConsumerState<EditNomineeScreen> {
 
     // Build the payload
     final payload = <String, dynamic>{
-      'nominee_name': _nameController.text.trim(),
-      'relationship': _selectedRelation!.toLowerCase(),
-      'contact_number': _contactController.text.trim(),
-      'is_primary': _isPrimary,
+      'nominee_name': form.nameController.text.trim(),
+      'relationship': form.selectedRelation!.toLowerCase(),
+      'contact_number': form.contactController.text.trim(),
+      'is_primary': form.isPrimary,
     };
 
     // Add optional fields only if they have values
-    if (_selectedDateOfBirth != null) {
+    if (form.selectedDateOfBirth != null) {
       payload['date_of_birth'] =
-          '${_selectedDateOfBirth!.year}-${_selectedDateOfBirth!.month.toString().padLeft(2, '0')}-${_selectedDateOfBirth!.day.toString().padLeft(2, '0')}';
+          '${form.selectedDateOfBirth!.year}-${form.selectedDateOfBirth!.month.toString().padLeft(2, '0')}-${form.selectedDateOfBirth!.day.toString().padLeft(2, '0')}';
     }
-    if (_emailController.text.trim().isNotEmpty) {
-      payload['email'] = _emailController.text.trim();
+    if (form.emailController.text.trim().isNotEmpty) {
+      payload['email'] = form.emailController.text.trim();
     }
-    if (_addressController.text.trim().isNotEmpty) {
-      payload['address'] = _addressController.text.trim();
+    if (form.addressController.text.trim().isNotEmpty) {
+      payload['address'] = form.addressController.text.trim();
     }
-    if (_allocationController.text.trim().isNotEmpty) {
-      payload['allocation_percentage'] = _allocationController.text.trim();
+    if (form.allocationController.text.trim().isNotEmpty) {
+      payload['allocation_percentage'] = form.allocationController.text.trim();
     }
 
     // Call the PATCH API using the nominee's ID
     final result = await ref.read(
       nomineeUpdateProvider(
         NomineeUpdateParams(
-          nomineeId: widget.nominee.id,
+          nomineeId: form.nominee.id,
           payload: payload,
         ),
       ).future,
@@ -634,6 +726,7 @@ class _EditNomineeScreenState extends ConsumerState<EditNomineeScreen> {
 
     setState(() {
       _isSubmitting = false;
+      _editingNomineeIndex = null;
     });
 
     result.fold(
@@ -682,5 +775,38 @@ class _EditNomineeScreenState extends ConsumerState<EditNomineeScreen> {
         ],
       ),
     );
+  }
+}
+
+/// Helper class to manage form data for each nominee
+class _NomineeFormData {
+  _NomineeFormData({
+    required this.nominee,
+    required this.nameController,
+    required this.contactController,
+    required this.emailController,
+    required this.addressController,
+    required this.allocationController,
+    this.selectedRelation,
+    this.selectedDateOfBirth,
+    this.isPrimary = false,
+  });
+
+  final Nominee nominee;
+  final TextEditingController nameController;
+  final TextEditingController contactController;
+  final TextEditingController emailController;
+  final TextEditingController addressController;
+  final TextEditingController allocationController;
+  String? selectedRelation;
+  DateTime? selectedDateOfBirth;
+  bool isPrimary;
+
+  void dispose() {
+    nameController.dispose();
+    contactController.dispose();
+    emailController.dispose();
+    addressController.dispose();
+    allocationController.dispose();
   }
 }
