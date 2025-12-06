@@ -253,7 +253,7 @@ class _AddressDetailsScreenState extends ConsumerState<AddressDetailsScreen> {
         'country': _selectedCountry ?? '',
         'state': _selectedState ?? '',
         'district': _selectedDistrict ?? '',
-        'type': 'communication',
+        'type': 'communications',
         'user': userId,
       };
 
