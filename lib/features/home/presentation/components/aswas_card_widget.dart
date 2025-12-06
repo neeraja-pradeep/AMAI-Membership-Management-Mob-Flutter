@@ -137,8 +137,8 @@ class AswasCardWidget extends StatelessWidget {
 
   /// Builds the action buttons row
   Widget _buildActionButtons() {
-    // Only show View Details button when policy is active
-    if (aswasPlus.isActive) {
+    // Only show View Details button when policy is active or pending
+    if (aswasPlus.isActive || aswasPlus.isPending) {
       return AswasCardButton(
         label: 'View Details',
         svgAsset: 'assets/svg/details.svg',
