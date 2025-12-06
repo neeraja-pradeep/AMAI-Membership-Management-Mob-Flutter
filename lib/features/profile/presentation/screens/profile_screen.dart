@@ -38,6 +38,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
     // Initialize profile data fetch
     WidgetsBinding.instance.addPostFrameCallback((_) {
       ref.read(profileStateProvider.notifier).initialize();
+      ref.read(nomineesStateProvider.notifier).initialize();
     });
   }
 
