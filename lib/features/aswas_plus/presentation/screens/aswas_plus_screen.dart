@@ -214,7 +214,7 @@ class _AswasePlusScreenState extends ConsumerState<AswasePlusScreen> {
 
     Navigator.of(context).push(
       MaterialPageRoute<void>(
-        builder: (context) => EditNomineeScreen(nominee: nominees.first),
+        builder: (context) => EditNomineeScreen(nominees: nominees),
       ),
     );
   }

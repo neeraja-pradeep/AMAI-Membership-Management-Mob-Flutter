@@ -6,7 +6,7 @@ import 'package:myapp/core/config/razorpay_config.dart';
 import 'package:myapp/features/aswas_plus/application/providers/registration_providers.dart';
 import 'package:myapp/features/aswas_plus/infrastructure/models/registration_response_model.dart';
 import 'package:razorpay_flutter/razorpay_flutter.dart';
-import 'package:myapp/features/home/presentation/screens/main_navigation_screen.dart';
+import 'package:myapp/features/navigation/presentation/screens/main_navigation_screen.dart';
 
 /// Registration Payment Screen for ASWAS Plus
 /// Shows payment options after successful registration submission
