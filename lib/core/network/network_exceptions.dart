@@ -111,6 +111,39 @@ class NetworkExceptionMapper {
       if (data.containsKey('detail')) {
         return data['detail'].toString();
       }
+      if (data.containsKey('non_field_errors')) {
+        final errors = data['non_field_errors'];
+        if (errors is List && errors.isNotEmpty) {
+          return errors.first.toString();
+        }
+      }
+
+      // Handle field-specific errors (e.g., {"address_line1": ["This field is required."]})
+      final errorMessages = <String>[];
+      data.forEach((key, value) {
+        if (value is List && value.isNotEmpty) {
+          final errorMsg = value.first.toString();
+          // Format field name for display (e.g., address_line1 -> Address Line1)
+          final fieldName = key.replaceAll('_', ' ').split(' ').map((word) =>
+            word.isNotEmpty ? '${word[0].toUpperCase()}${word.substring(1)}' : ''
+          ).join(' ');
+          errorMessages.add('$fieldName: $errorMsg');
+        } else if (value is String && value.isNotEmpty) {
+          final fieldName = key.replaceAll('_', ' ').split(' ').map((word) =>
+            word.isNotEmpty ? '${word[0].toUpperCase()}${word.substring(1)}' : ''
+          ).join(' ');
+          errorMessages.add('$fieldName: $value');
+        }
+      });
+
+      if (errorMessages.isNotEmpty) {
+        return errorMessages.join('\n');
+      }
+    }
+
+    // Handle string response
+    if (data is String && data.isNotEmpty) {
+      return data;
     }
 
     return _defaultMessageForStatusCode(response.statusCode ?? 500);
