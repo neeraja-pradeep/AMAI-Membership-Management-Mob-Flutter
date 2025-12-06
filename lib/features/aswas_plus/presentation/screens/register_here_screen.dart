@@ -7,6 +7,7 @@ import 'package:myapp/features/aswas_plus/application/providers/registration_pro
 import 'package:myapp/features/aswas_plus/infrastructure/models/registration_response_model.dart';
 import 'package:myapp/features/aswas_plus/presentation/screens/registration_payment_screen.dart';
 import 'package:myapp/features/home/application/providers/home_providers.dart';
+import 'package:myapp/features/profile/application/providers/profile_providers.dart';
 
 /// Register Here Screen for ASWAS Plus registration
 /// Allows non-enrolled users to register for insurance policy
@@ -58,6 +59,43 @@ class _RegisterHereScreenState extends ConsumerState<RegisterHereScreen> {
     _parentNameController = TextEditingController();
     // Add one empty nominee by default
     _nominees.add(NomineeFormData());
+    // Auto-fill from profile data
+    _prefillFromProfile();
+  }
+
+  /// Pre-fill form fields from user profile data
+  void _prefillFromProfile() {
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final profileState = ref.read(profileStateProvider);
+      final userProfile = profileState.currentData?.userProfile;
+
+      if (userProfile != null) {
+        setState(() {
+          // Pre-fill name
+          _nameController.text = userProfile.firstName;
+
+          // Pre-fill parent name if available
+          if (userProfile.parentName != null) {
+            _parentNameController.text = userProfile.parentName!;
+          }
+
+          // Pre-fill date of birth if available
+          _selectedDateOfBirth = userProfile.dateOfBirth;
+
+          // Pre-fill marital status if available
+          if (userProfile.maritalStatus != null) {
+            _selectedMaritalStatus = _mapMaritalStatus(userProfile.maritalStatus);
+          }
+        });
+      }
+    });
+  }
+
+  /// Maps marital status from API format to dropdown format
+  String? _mapMaritalStatus(String? status) {
+    if (status == null || status.isEmpty) return null;
+    // Capitalize first letter to match dropdown options
+    return status[0].toUpperCase() + status.substring(1).toLowerCase();
   }
 
   @override
