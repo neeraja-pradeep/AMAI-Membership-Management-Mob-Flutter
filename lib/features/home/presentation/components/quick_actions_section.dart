@@ -125,7 +125,7 @@ class QuickActionsSection extends StatelessWidget {
       _QuickActionData(
         svgAsset: 'assets/svg/ecommerce.svg',
         label: 'Ecommerce',
-        onTap: onAcademyTap,
+        onTap: null,
         iconColor: AppColors.white,
         backgroundColor: AppColors.newPrimaryLight,
       ),
