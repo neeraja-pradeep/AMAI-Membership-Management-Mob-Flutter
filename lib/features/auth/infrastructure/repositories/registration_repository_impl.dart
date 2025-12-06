@@ -1,6 +1,7 @@
 import 'dart:io';
 import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart';
+import 'package:myapp/core/network/network_exceptions.dart';
 import '../../domain/entities/registration/practitioner_registration.dart';
 import '../../domain/entities/registration/document_upload.dart';
 import '../../domain/entities/registration/registration_error.dart';
@@ -194,6 +195,8 @@ class RegistrationRepositoryImpl implements RegistrationRepository {
     try {
       // Submit to API
       return await _api.submitMembershipRegistration(data: membershipData);
+    } on ServerException catch (e) {
+      throw _mapServerExceptionToRegistrationError(e);
     } on DioException catch (e) {
       throw _mapDioExceptionToSubmissionError(e);
     } catch (e) {
@@ -206,6 +209,8 @@ class RegistrationRepositoryImpl implements RegistrationRepository {
     try {
       // Submit to API
       return await _api.submitAddress(data: data);
+    } on ServerException catch (e) {
+      throw _mapServerExceptionToRegistrationError(e);
     } on DioException catch (e) {
       throw _mapDioExceptionToSubmissionError(e);
     } catch (e) {
@@ -216,7 +221,7 @@ class RegistrationRepositoryImpl implements RegistrationRepository {
   @override
   Future<Map<String, dynamic>> submitDocument({
     required File documentFile,
-    required int application, // <-- CHANGE TYPE HERE
+    required int application,
     required String documentType,
   }) async {
     try {
@@ -226,6 +231,8 @@ class RegistrationRepositoryImpl implements RegistrationRepository {
         documentFile: documentFile,
         documentType: documentType,
       );
+    } on ServerException catch (e) {
+      throw _mapServerExceptionToRegistrationError(e);
     } on DioException catch (e) {
       throw _mapDioExceptionToSubmissionError(e);
     } catch (e) {
@@ -441,6 +448,40 @@ class RegistrationRepositoryImpl implements RegistrationRepository {
 
     // Default to payment failed
     return RegistrationError.paymentFailed('Payment verification failed');
+  }
+
+  /// Map ServerException to RegistrationError
+  /// ServerException is thrown by ApiClient when DioException occurs
+  RegistrationError _mapServerExceptionToRegistrationError(ServerException e) {
+    final message = e.message;
+    final lowerMessage = message.toLowerCase();
+
+    // Check for duplicate email
+    if (lowerMessage.contains('email') && lowerMessage.contains('exist')) {
+      return RegistrationError.duplicateEmail(message);
+    }
+
+    // Check for duplicate phone
+    if (lowerMessage.contains('phone') && lowerMessage.contains('exist')) {
+      return RegistrationError.duplicatePhone(message);
+    }
+
+    // Check for session expired
+    if (e.statusCode == 401) {
+      return RegistrationError.sessionExpired();
+    }
+
+    // Check for server error
+    if (e.statusCode >= 500) {
+      return RegistrationError.serverError();
+    }
+
+    // Return the backend message as validation error
+    return RegistrationError(
+      type: RegistrationErrorType.serverValidation,
+      message: message,
+      canRetry: false,
+    );
   }
 
   // ==================== Data Conversion ====================
