@@ -39,7 +39,7 @@ class _EditAcademicDetailsScreenState
   /// Pre-fills checkboxes based on academicDetails from membership API
   void _prefillAcademicDetails() {
     final membershipState = ref.read(membershipStateProvider);
-    final academicDetails = membershipState.membershipCard?.academicDetails;
+    final academicDetails = membershipState.currentData?.academicDetails;
 
     if (academicDetails != null && academicDetails.isNotEmpty) {
       setState(() {
