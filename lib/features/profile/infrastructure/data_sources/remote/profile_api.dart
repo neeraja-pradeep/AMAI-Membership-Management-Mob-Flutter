@@ -36,6 +36,18 @@ abstract class ProfileApi {
     required int userId,
     required Map<String, dynamic> data,
   });
+
+  /// Updates user personal information (raw response)
+  ///
+  /// [userId] - The user ID to update
+  /// [data] - Map containing the fields to update
+  ///
+  /// Returns ApiResponse without parsing the response body
+  /// Use this when the API response format differs from UserProfileModel
+  Future<ApiResponse<Map<String, dynamic>>> updatePersonalInfoRaw({
+    required int userId,
+    required Map<String, dynamic> data,
+  });
 }
 
 /// Implementation of ProfileApi using ApiClient
@@ -108,6 +120,24 @@ class ProfileApiImpl implements ProfileApi {
 
     return ApiResponse<UserProfileModel>(
       data: userProfile,
+      statusCode: response.statusCode,
+      timestamp: response.timestamp,
+    );
+  }
+
+  @override
+  Future<ApiResponse<Map<String, dynamic>>> updatePersonalInfoRaw({
+    required int userId,
+    required Map<String, dynamic> data,
+  }) async {
+    final response = await apiClient.patch<Map<String, dynamic>>(
+      Endpoints.userProfile(userId),
+      data: data,
+      fromJson: (json) => json as Map<String, dynamic>,
+    );
+
+    return ApiResponse<Map<String, dynamic>>(
+      data: response.data,
       statusCode: response.statusCode,
       timestamp: response.timestamp,
     );

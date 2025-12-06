@@ -49,9 +49,9 @@ abstract class ProfileRepository {
   ///   - blood_group: User's blood group
   ///
   /// Returns:
-  /// - Right(UserProfile) on success
+  /// - Right(true) on success
   /// - Left(Failure) on error
-  Future<Either<Failure, UserProfile>> updatePersonalInfo({
+  Future<Either<Failure, bool>> updatePersonalInfo({
     required int userId,
     required Map<String, dynamic> data,
   });

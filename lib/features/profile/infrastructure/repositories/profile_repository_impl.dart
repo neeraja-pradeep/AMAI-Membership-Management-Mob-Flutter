@@ -157,7 +157,7 @@ class ProfileRepositoryImpl implements ProfileRepository {
   }
 
   @override
-  Future<Either<Failure, UserProfile>> updatePersonalInfo({
+  Future<Either<Failure, bool>> updatePersonalInfo({
     required int userId,
     required Map<String, dynamic> data,
   }) async {
@@ -170,13 +170,13 @@ class ProfileRepositoryImpl implements ProfileRepository {
     }
 
     try {
-      final response = await profileApi.updatePersonalInfo(
+      final response = await profileApi.updatePersonalInfoRaw(
         userId: userId,
         data: data,
       );
 
-      if (response.isSuccess && response.data != null) {
-        return right(response.data!.toDomain());
+      if (response.isSuccess) {
+        return right(true);
       }
 
       return left(const ServerFailure(message: 'Failed to update personal information'));

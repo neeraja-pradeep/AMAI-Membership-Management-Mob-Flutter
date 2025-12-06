@@ -588,7 +588,7 @@ class _EditPersonalInfoScreenState
           ),
         );
       },
-      (updatedProfile) {
+      (success) {
         // Set pending request state to true
         setState(() {
           _hasPendingRequest = true;
