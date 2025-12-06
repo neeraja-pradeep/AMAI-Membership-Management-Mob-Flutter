@@ -20,6 +20,7 @@ import 'package:myapp/features/home/presentation/components/announcement_mini_ca
 import 'package:myapp/features/membership/presentation/screens/membership_screen.dart';
 import 'package:myapp/features/aswas_plus/presentation/screens/aswas_plus_screen.dart';
 import 'package:myapp/features/profile/presentation/screens/profile_screen.dart';
+import 'package:myapp/features/profile/application/providers/profile_providers.dart';
 import 'package:myapp/features/academy/presentation/screens/academy_screen.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 
@@ -47,6 +48,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
       ref.read(aswasStateProvider.notifier).initialize();
       ref.read(eventsStateProvider.notifier).initialize();
       ref.read(announcementsStateProvider.notifier).initialize();
+      ref.read(profileStateProvider.notifier).initialize();
     });
     // Start auto-scroll timer
     _startAutoScroll();
@@ -271,23 +273,72 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
 
   /// Builds the profile avatar for the header
   Widget _buildProfileAvatar() {
-    return GestureDetector(
-      onTap: () {
-        Navigator.of(context).push(
-          MaterialPageRoute<void>(
-            builder: (context) => const ProfileScreen(),
+    return Consumer(
+      builder: (context, ref, child) {
+        final profileState = ref.watch(profileStateProvider);
+        final userProfile = profileState.currentData;
+
+        return GestureDetector(
+          onTap: () {
+            Navigator.of(context).push(
+              MaterialPageRoute<void>(
+                builder: (context) => const ProfileScreen(),
+              ),
+            );
+          },
+          child: Container(
+            width: 44.w,
+            height: 44.h,
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              border: Border.all(color: AppColors.white.withOpacity(0.3), width: 2),
+            ),
+            child: ClipOval(
+              child: userProfile != null && userProfile.hasProfilePicture
+                  ? Image.network(
+                      userProfile.profilePictureUrl!,
+                      fit: BoxFit.cover,
+                      width: 44.w,
+                      height: 44.h,
+                      errorBuilder: (context, error, stackTrace) {
+                        return _buildInitialsAvatar(userProfile.initials);
+                      },
+                      loadingBuilder: (context, child, loadingProgress) {
+                        if (loadingProgress == null) return child;
+                        return Center(
+                          child: SizedBox(
+                            width: 16.w,
+                            height: 16.h,
+                            child: const CircularProgressIndicator(
+                              strokeWidth: 2,
+                              color: AppColors.white,
+                            ),
+                          ),
+                        );
+                      },
+                    )
+                  : _buildInitialsAvatar(userProfile?.initials ?? ''),
+            ),
           ),
         );
       },
-      child: Container(
-        width: 44.w,
-        height: 44.h,
-        decoration: BoxDecoration(
-          shape: BoxShape.circle,
-          border: Border.all(color: AppColors.white.withOpacity(0.3), width: 2),
-        ),
-        child: ClipOval(
-          child: Image.asset('assets/home/profile.png', fit: BoxFit.cover),
+    );
+  }
+
+  /// Builds initials avatar for fallback
+  Widget _buildInitialsAvatar(String initials) {
+    return Container(
+      width: 44.w,
+      height: 44.h,
+      color: AppColors.primary,
+      child: Center(
+        child: Text(
+          initials,
+          style: TextStyle(
+            fontSize: 16.sp,
+            fontWeight: FontWeight.w600,
+            color: AppColors.white,
+          ),
         ),
       ),
     );
