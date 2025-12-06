@@ -1,11 +1,13 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:myapp/app/theme/colors.dart';
 import 'package:myapp/app/theme/typography.dart';
+import 'package:myapp/features/home/application/providers/home_providers.dart';
 
 /// Registration Status screen shown when membership application is pending or rejected
 /// Displays appropriate message based on status
-class RegistrationStatusScreen extends StatelessWidget {
+class RegistrationStatusScreen extends ConsumerStatefulWidget {
   const RegistrationStatusScreen({
     super.key,
     this.isRejected = false,
@@ -15,6 +17,17 @@ class RegistrationStatusScreen extends StatelessWidget {
   final bool isRejected;
 
   @override
+  ConsumerState<RegistrationStatusScreen> createState() =>
+      _RegistrationStatusScreenState();
+}
+
+class _RegistrationStatusScreenState
+    extends ConsumerState<RegistrationStatusScreen> {
+  Future<void> _onRefresh() async {
+    await ref.read(membershipStateProvider.notifier).refresh();
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Scaffold(
       body: Container(
@@ -22,34 +35,52 @@ class RegistrationStatusScreen extends StatelessWidget {
           gradient: AppColors.lightBackgroundGradient,
         ),
         child: SafeArea(
-          child: Padding(
-            padding: EdgeInsets.symmetric(horizontal: 16.w),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                SizedBox(height: 24.h),
-                // Heading
-                Text(
-                  'Registration Status',
-                  style: AppTypography.headlineMedium.copyWith(
-                    fontSize: 24.sp,
-                    fontWeight: FontWeight.w600,
-                    color: AppColors.textPrimary,
+          child: RefreshIndicator(
+            onRefresh: _onRefresh,
+            color: AppColors.primary,
+            child: SingleChildScrollView(
+              physics: const AlwaysScrollableScrollPhysics(),
+              child: ConstrainedBox(
+                constraints: BoxConstraints(
+                  minHeight: MediaQuery.of(context).size.height -
+                      MediaQuery.of(context).padding.top -
+                      MediaQuery.of(context).padding.bottom,
+                ),
+                child: Padding(
+                  padding: EdgeInsets.symmetric(horizontal: 16.w),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      SizedBox(height: 24.h),
+                      // Heading
+                      Text(
+                        'Registration Status',
+                        style: AppTypography.headlineMedium.copyWith(
+                          fontSize: 24.sp,
+                          fontWeight: FontWeight.w600,
+                          color: AppColors.textPrimary,
+                        ),
+                      ),
+                      SizedBox(height: 24.h),
+                      // Status Card
+                      widget.isRejected
+                          ? _buildRejectedCard()
+                          : _buildReviewCard(),
+                      SizedBox(height: 16.h),
+                      // Timeline Card (only for pending) or Help Card (for rejected)
+                      widget.isRejected
+                          ? _buildHelpCard(context)
+                          : _buildTimelineCard(),
+                      SizedBox(height: 40.h),
+                      // Bottom Button
+                      widget.isRejected
+                          ? _buildBackToLoginButton(context)
+                          : _buildContactSupportButton(),
+                      SizedBox(height: 24.h),
+                    ],
                   ),
                 ),
-                SizedBox(height: 24.h),
-                // Status Card
-                isRejected ? _buildRejectedCard() : _buildReviewCard(),
-                SizedBox(height: 16.h),
-                // Timeline Card (only for pending) or Help Card (for rejected)
-                isRejected ? _buildHelpCard(context) : _buildTimelineCard(),
-                const Spacer(),
-                // Bottom Button
-                isRejected
-                    ? _buildBackToLoginButton(context)
-                    : _buildContactSupportButton(),
-                SizedBox(height: 24.h),
-              ],
+              ),
             ),
           ),
         ),
