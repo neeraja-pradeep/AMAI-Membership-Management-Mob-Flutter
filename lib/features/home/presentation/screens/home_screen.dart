@@ -92,35 +92,42 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                 _buildTopSection(),
                 SizedBox(height: 24.h),
                 // Quick Actions section
-                QuickActionsSection(
-                  onViewAll: () {
-                    // TODO: Navigate to all quick actions
-                  },
-                  onMembershipTap: () {
-                    // Navigate to membership screen
-                    Navigator.of(context).push(
-                      MaterialPageRoute<void>(
-                        builder: (context) => const MembershipScreen(),
-                      ),
-                    ).then((_) => _onRefresh());
-                  },
-                  onAswasePlusTap: () {
-                    // Navigate to Aswas Plus screen
-                    Navigator.of(context).push(
-                      MaterialPageRoute<void>(
-                        builder: (context) => const AswasePlusScreen(),
-                      ),
-                    ).then((_) => _onRefresh());
-                  },
-                  onAcademyTap: () {
-                    Navigator.of(context).push(
-                      MaterialPageRoute<void>(
-                        builder: (context) => const AcademyScreen(),
-                      ),
+                Consumer(
+                  builder: (context, ref, child) {
+                    final membershipState = ref.watch(membershipStateProvider);
+                    final membershipType = membershipState.currentData?.membershipType;
+                    return QuickActionsSection(
+                      membershipType: membershipType,
+                      onViewAll: () {
+                        // TODO: Navigate to all quick actions
+                      },
+                      onMembershipTap: () {
+                        // Navigate to membership screen
+                        Navigator.of(context).push(
+                          MaterialPageRoute<void>(
+                            builder: (context) => const MembershipScreen(),
+                          ),
+                        ).then((_) => _onRefresh());
+                      },
+                      onAswasePlusTap: () {
+                        // Navigate to Aswas Plus screen
+                        Navigator.of(context).push(
+                          MaterialPageRoute<void>(
+                            builder: (context) => const AswasePlusScreen(),
+                          ),
+                        ).then((_) => _onRefresh());
+                      },
+                      onAcademyTap: () {
+                        Navigator.of(context).push(
+                          MaterialPageRoute<void>(
+                            builder: (context) => const AcademyScreen(),
+                          ),
+                        );
+                      },
+                      onContactsTap: () {
+                        // TODO: Navigate to Contacts
+                      },
                     );
-                  },
-                  onContactsTap: () {
-                    // TODO: Navigate to Contacts
                   },
                 ),
                 // Aswas Plus card (only shows if active policy exists)

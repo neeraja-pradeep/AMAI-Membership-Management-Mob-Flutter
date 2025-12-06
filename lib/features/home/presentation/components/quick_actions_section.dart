@@ -14,6 +14,7 @@ class QuickActionsSection extends StatelessWidget {
     this.onAswasePlusTap,
     this.onAcademyTap,
     this.onContactsTap,
+    this.membershipType,
   });
 
   /// Callback when "View All" is tapped
@@ -30,6 +31,9 @@ class QuickActionsSection extends StatelessWidget {
 
   /// Callback when Contacts action is tapped
   final VoidCallback? onContactsTap;
+
+  /// Membership type to conditionally show/hide ASWAS Plus
+  final String? membershipType;
 
   @override
   Widget build(BuildContext context) {
@@ -84,7 +88,10 @@ class QuickActionsSection extends StatelessWidget {
 
   /// Returns the list of quick action items
   List<_QuickActionData> _getQuickActions() {
-    return [
+    // Check if ASWAS Plus should be hidden for student or house_surgeon
+    final hideAswasPlus = membershipType == 'student' || membershipType == 'house_surgeon';
+
+    final actions = <_QuickActionData>[
       _QuickActionData(
         svgAsset: 'assets/svg/membership.svg',
         label: 'Membership',
@@ -92,13 +99,22 @@ class QuickActionsSection extends StatelessWidget {
         iconColor: AppColors.white,
         backgroundColor: AppColors.newPrimaryLight,
       ),
-      _QuickActionData(
-        svgAsset: 'assets/svg/aswas.svg',
-        label: 'Aswas Plus',
-        onTap: onAswasePlusTap,
-        iconColor: AppColors.white,
-        backgroundColor: AppColors.newPrimaryLight,
-      ),
+    ];
+
+    // Only add ASWAS Plus if not student or house_surgeon
+    if (!hideAswasPlus) {
+      actions.add(
+        _QuickActionData(
+          svgAsset: 'assets/svg/aswas.svg',
+          label: 'Aswas Plus',
+          onTap: onAswasePlusTap,
+          iconColor: AppColors.white,
+          backgroundColor: AppColors.newPrimaryLight,
+        ),
+      );
+    }
+
+    actions.addAll([
       _QuickActionData(
         svgAsset: 'assets/svg/academy.svg',
         label: 'Academy',
@@ -120,7 +136,9 @@ class QuickActionsSection extends StatelessWidget {
         iconColor: AppColors.white,
         backgroundColor: AppColors.newPrimaryLight,
       ),
-    ];
+    ]);
+
+    return actions;
   }
 }
 
