@@ -423,6 +423,7 @@ class _RegisterHereScreenState extends ConsumerState<RegisterHereScreen> {
             label: 'Nominee Mobile Number',
             controller: nominee.mobileController,
             keyboardType: TextInputType.phone,
+            prefixText: '+91 ',
             validator: (value) {
               if (value == null || value.isEmpty) {
                 return 'Mobile number is required';
@@ -596,6 +597,7 @@ class _RegisterHereScreenState extends ConsumerState<RegisterHereScreen> {
     TextInputType keyboardType = TextInputType.text,
     String? Function(String?)? validator,
     int maxLines = 1,
+    String? prefixText,
   }) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -617,6 +619,11 @@ class _RegisterHereScreenState extends ConsumerState<RegisterHereScreen> {
           decoration: InputDecoration(
             filled: true,
             fillColor: AppColors.white,
+            prefixText: prefixText,
+            prefixStyle: TextStyle(
+              fontSize: 14.sp,
+              color: AppColors.textPrimary,
+            ),
             border: OutlineInputBorder(
               borderRadius: BorderRadius.circular(8.r),
               borderSide: BorderSide(color: AppColors.grey300),
