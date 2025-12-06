@@ -5,6 +5,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:intl/intl.dart';
 import 'package:myapp/app/theme/colors.dart';
 import 'package:myapp/features/auth/application/states/registration_state.dart';
+import 'package:myapp/features/auth/domain/entities/registration/registration_error.dart';
 import 'package:myapp/features/auth/domain/entities/user_role.dart';
 
 import '../../../../../app/router/app_router.dart';
@@ -236,8 +237,10 @@ class _PersonalDetailsScreenState extends ConsumerState<PersonalDetailsScreen> {
 
         if (!mounted) return;
         Navigator.pushNamed(context, AppRouter.registrationAddress);
+      } on RegistrationError catch (e) {
+        _showError(e.message);
       } catch (e) {
-        _showError("Failed: $e");
+        _showError("Something went wrong. Please try again.");
       }
 
       return;
