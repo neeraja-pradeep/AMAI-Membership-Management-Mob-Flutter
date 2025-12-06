@@ -380,7 +380,13 @@ class _AddressDetailsScreenState extends ConsumerState<AddressDetailsScreen> {
         SizedBox(height: 16.h),
         const Text("City / Post Office"),
         SizedBox(height: 10.h),
-        TextInputField(controller: city, hintText: "City Name"),
+        TextInputField(
+          controller: city,
+          hintText: "City Name",
+          inputFormatters: [
+            FilteringTextInputFormatter.allow(RegExp(r'[a-zA-Z\s]')),
+          ],
+        ),
 
         SizedBox(height: 16.h),
         const Text("Postal Code"),
@@ -388,7 +394,10 @@ class _AddressDetailsScreenState extends ConsumerState<AddressDetailsScreen> {
         TextInputField(
           controller: postal,
           keyboardType: TextInputType.number,
-          inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+          inputFormatters: [
+            FilteringTextInputFormatter.digitsOnly,
+            LengthLimitingTextInputFormatter(6),
+          ],
         ),
       ],
     );
