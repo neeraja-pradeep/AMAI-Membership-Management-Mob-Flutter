@@ -6,6 +6,7 @@ import 'package:myapp/core/config/razorpay_config.dart';
 import 'package:myapp/features/aswas_plus/domain/entities/renewal_response.dart';
 import 'package:myapp/features/home/application/providers/home_providers.dart';
 import 'package:razorpay_flutter/razorpay_flutter.dart';
+import 'package:myapp/features/home/presentation/screens/main_navigation_screen.dart';
 
 /// Select Payment Method Screen
 /// Shows payment options and total amount for renewal
@@ -86,7 +87,12 @@ class _SelectPaymentMethodScreenState extends ConsumerState<SelectPaymentMethodS
             ),
           );
           // Navigate back to home
-          Navigator.of(context).popUntil((route) => route.isFirst);
+          Navigator.of(context).pushAndRemoveUntil(
+            MaterialPageRoute<void>(
+              builder: (context) => const MainNavigationScreen(),
+            ),
+            (route) => false,
+          );
         } else {
           // Show verification failed message
           ScaffoldMessenger.of(context).showSnackBar(
