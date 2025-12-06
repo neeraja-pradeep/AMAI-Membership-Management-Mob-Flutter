@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:myapp/app/theme/colors.dart';
 import 'package:myapp/features/auth/application/states/registration_state.dart';
+import 'package:myapp/features/auth/domain/entities/registration/registration_error.dart';
 import '../../../../../app/router/app_router.dart';
 import '../../../application/notifiers/registration_state_notifier.dart';
 import '../../../domain/entities/registration/address_details.dart';
@@ -321,8 +322,10 @@ class _AddressDetailsScreenState extends ConsumerState<AddressDetailsScreen> {
         AppRouter.registrationDocuments,
         arguments: {"applicationId": applicationId, "role": role},
       );
+    } on RegistrationError catch (e) {
+      _showError(e.message);
     } catch (e) {
-      _showError(e.toString());
+      _showError("Something went wrong. Please try again.");
     }
   }
 

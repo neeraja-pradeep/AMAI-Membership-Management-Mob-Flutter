@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:myapp/app/theme/colors.dart';
+import 'package:myapp/features/auth/domain/entities/registration/registration_error.dart';
 import 'package:myapp/features/navigation/presentation/screens/main_navigation_screen.dart';
 
 import '../../../../../app/router/app_router.dart';
@@ -147,8 +148,10 @@ class _DocumentUploadScreenState extends ConsumerState<DocumentUploadScreen> {
           backgroundColor: Colors.green,
         ),
       );
+    } on RegistrationError catch (e) {
+      _showError(e.message);
     } catch (e) {
-      _showError("Upload failed: $e");
+      _showError("Upload failed. Please try again.");
     } finally {
       if (mounted) {
         setState(() {

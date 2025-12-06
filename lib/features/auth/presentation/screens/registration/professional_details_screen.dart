@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:myapp/app/theme/colors.dart';
 import 'package:myapp/features/auth/application/states/registration_state.dart';
+import 'package:myapp/features/auth/domain/entities/registration/registration_error.dart';
 
 import '../../../../../app/router/app_router.dart';
 import '../../../application/notifiers/registration_state_notifier.dart';
@@ -292,8 +293,10 @@ class _ProfessionalDetailsScreenState
 
       // Address screen will read userId/applicationId from provider
       Navigator.pushNamed(context, AppRouter.registrationAddress);
+    } on RegistrationError catch (e) {
+      _showError(e.message);
     } catch (e) {
-      _showError("Registration failed: $e");
+      _showError("Something went wrong. Please try again.");
     } finally {
       if (mounted) setState(() => _isSubmitting = false);
     }

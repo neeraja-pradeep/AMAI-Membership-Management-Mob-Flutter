@@ -302,36 +302,96 @@ class RegistrationRepositoryImpl implements RegistrationRepository {
 
     // 400 Bad Request (validation errors)
     if (e.response?.statusCode == 400) {
-      final data = e.response?.data as Map<String, dynamic>?;
+      final data = e.response?.data;
 
-      // Check for duplicate email
-      if (data?['code'] == 'DUPLICATE_EMAIL') {
-        return RegistrationError.duplicateEmail(
-          data?['message'] as String? ?? 'Email already registered',
-        );
-      }
+      // Handle Map response
+      if (data is Map<String, dynamic>) {
+        // Check for 'detail' field (common in DRF)
+        if (data['detail'] != null) {
+          final detail = data['detail'];
+          if (detail is String) {
+            return RegistrationError(
+              type: RegistrationErrorType.serverValidation,
+              message: detail,
+              canRetry: false,
+            );
+          }
+        }
 
-      // Check for duplicate phone
-      if (data?['code'] == 'DUPLICATE_PHONE') {
-        return RegistrationError.duplicatePhone(
-          data?['message'] as String? ?? 'Phone already registered',
-        );
-      }
+        // Check for 'code' field
+        if (data['code'] == 'DUPLICATE_EMAIL') {
+          return RegistrationError.duplicateEmail(
+            data['message'] as String? ?? 'Email already registered',
+          );
+        }
+        if (data['code'] == 'DUPLICATE_PHONE') {
+          return RegistrationError.duplicatePhone(
+            data['message'] as String? ?? 'Phone already registered',
+          );
+        }
 
-      // Field validation errors
-      if (data?['errors'] != null) {
+        // Check for 'non_field_errors' (common in DRF)
+        if (data['non_field_errors'] != null) {
+          final errors = data['non_field_errors'];
+          if (errors is List && errors.isNotEmpty) {
+            return RegistrationError(
+              type: RegistrationErrorType.serverValidation,
+              message: errors.first.toString(),
+              canRetry: false,
+            );
+          }
+        }
+
+        // Check for field-specific errors (e.g., {"email": ["This email already exists"]})
         final fieldErrors = <String, String>{};
-        final errors = data!['errors'] as Map<String, dynamic>;
+        final errorMessages = <String>[];
 
-        errors.forEach((key, value) {
+        data.forEach((key, value) {
+          if (key == 'code' || key == 'message') return;
+
           if (value is List && value.isNotEmpty) {
-            fieldErrors[key] = value.first as String;
+            final errorMsg = value.first.toString();
+            fieldErrors[key] = errorMsg;
+
+            // Check for duplicate indicators in the error message
+            final lowerError = errorMsg.toLowerCase();
+            if (key == 'email' && (lowerError.contains('exist') || lowerError.contains('already') || lowerError.contains('duplicate'))) {
+              errorMessages.add('Email already registered');
+            } else if (key == 'phone' && (lowerError.contains('exist') || lowerError.contains('already') || lowerError.contains('duplicate'))) {
+              errorMessages.add('Phone number already registered');
+            } else {
+              // Format field name for display
+              final fieldName = key.replaceAll('_', ' ').split(' ').map((word) =>
+                word.isNotEmpty ? '${word[0].toUpperCase()}${word.substring(1)}' : ''
+              ).join(' ');
+              errorMessages.add('$fieldName: $errorMsg');
+            }
           } else if (value is String) {
             fieldErrors[key] = value;
+            final fieldName = key.replaceAll('_', ' ').split(' ').map((word) =>
+              word.isNotEmpty ? '${word[0].toUpperCase()}${word.substring(1)}' : ''
+            ).join(' ');
+            errorMessages.add('$fieldName: $value');
           }
         });
 
-        return RegistrationError.validation(fieldErrors);
+        if (errorMessages.isNotEmpty) {
+          return RegistrationError(
+            type: RegistrationErrorType.serverValidation,
+            message: errorMessages.join('\n'),
+            fieldErrors: fieldErrors.isNotEmpty ? fieldErrors : null,
+            canRetry: false,
+          );
+        }
+      }
+
+      // Handle string response
+      if (data is String && data.isNotEmpty) {
+        return RegistrationError(
+          type: RegistrationErrorType.serverValidation,
+          message: data,
+          canRetry: false,
+        );
       }
     }
 
