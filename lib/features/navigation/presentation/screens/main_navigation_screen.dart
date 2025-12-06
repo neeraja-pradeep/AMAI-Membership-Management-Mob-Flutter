@@ -5,6 +5,7 @@ import 'package:myapp/app/theme/colors.dart';
 import 'package:myapp/features/home/application/providers/home_providers.dart';
 import 'package:myapp/features/home/presentation/screens/home_screen.dart';
 import 'package:myapp/features/home/presentation/screens/registration_status_screen.dart';
+import 'package:myapp/features/profile/application/providers/profile_providers.dart';
 import 'package:myapp/features/profile/presentation/screens/profile_screen.dart';
 
 /// Main navigation screen with bottom navigation bar
@@ -108,6 +109,8 @@ class _MainNavigationScreenState extends ConsumerState<MainNavigationScreen> {
         setState(() {
           _currentIndex = index;
         });
+        // Refresh relevant providers when switching tabs (uses if-modified-since)
+        _refreshProvidersForTab(index);
       },
       behavior: HitTestBehavior.opaque,
       child: Container(
@@ -137,6 +140,21 @@ class _MainNavigationScreenState extends ConsumerState<MainNavigationScreen> {
         ),
       ),
     );
+  }
+
+  /// Refreshes relevant providers when switching to a tab
+  /// Uses if-modified-since strategy for efficient data fetching
+  void _refreshProvidersForTab(int tabIndex) {
+    switch (tabIndex) {
+      case 0: // Home tab
+        ref.read(membershipStateProvider.notifier).refresh();
+        ref.read(aswasStateProvider.notifier).refresh();
+        break;
+      case 3: // Profile tab
+        ref.read(profileStateProvider.notifier).refresh();
+        ref.read(nomineesStateProvider.notifier).refresh();
+        break;
+    }
   }
 }
 
