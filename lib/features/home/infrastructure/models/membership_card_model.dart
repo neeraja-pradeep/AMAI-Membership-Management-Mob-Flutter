@@ -20,6 +20,10 @@ class MembershipCardModel {
     this.updatedAt,
     this.academicDetails,
     this.professionalDetails,
+    this.medicalCouncilState,
+    this.medicalCouncilNo,
+    this.centralCouncilNo,
+    this.ugCollege,
   });
 
   /// Computed property to check if membership is active
@@ -65,6 +69,18 @@ class MembershipCardModel {
   @JsonKey(name: 'professional_details')
   final List<String>? professionalDetails;
 
+  @JsonKey(name: 'medical_council_state')
+  final String? medicalCouncilState;
+
+  @JsonKey(name: 'medical_council_no')
+  final String? medicalCouncilNo;
+
+  @JsonKey(name: 'central_council_no')
+  final String? centralCouncilNo;
+
+  @JsonKey(name: 'ug_college')
+  final String? ugCollege;
+
   /// Converts model to JSON map
   Map<String, dynamic> toJson() => _$MembershipCardModelToJson(this);
 
@@ -81,6 +97,10 @@ class MembershipCardModel {
       startDate: startDate != null ? _parseDate(startDate!) : null,
       academicDetails: academicDetails,
       professionalDetails: professionalDetails,
+      medicalCouncilState: medicalCouncilState,
+      medicalCouncilNo: medicalCouncilNo,
+      centralCouncilNo: centralCouncilNo,
+      ugCollege: ugCollege,
     );
   }
 

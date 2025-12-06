@@ -90,10 +90,11 @@ class _EditProfessionalDetailsScreenState
     });
   }
 
-  /// Pre-fills checkboxes based on professionalDetails from membership API
+  /// Pre-fills checkboxes and input fields based on membership API data
   void _prefillProfessionalDetails() {
     final membershipState = ref.read(membershipStateProvider);
-    final professionalDetails = membershipState.currentData?.professionalDetails;
+    final membershipData = membershipState.currentData;
+    final professionalDetails = membershipData?.professionalDetails;
 
     if (professionalDetails != null && professionalDetails.isNotEmpty) {
       // Convert to uppercase for case-insensitive comparison
@@ -117,6 +118,25 @@ class _EditProfessionalDetailsScreenState
         _esiSelected = upperCaseDetails.contains('ESI');
         _otherSelected = upperCaseDetails.contains('OTHER');
       });
+    }
+
+    // Pre-fill medical council input fields
+    if (membershipData != null) {
+      setState(() {
+        if (membershipData.medicalCouncilState != null &&
+            _stateOptions.contains(membershipData.medicalCouncilState)) {
+          _selectedMedicalCouncilState = membershipData.medicalCouncilState;
+        }
+      });
+      if (membershipData.medicalCouncilNo != null) {
+        _medicalCouncilNoController.text = membershipData.medicalCouncilNo!;
+      }
+      if (membershipData.centralCouncilNo != null) {
+        _centralCouncilNoController.text = membershipData.centralCouncilNo!;
+      }
+      if (membershipData.ugCollege != null) {
+        _ugCollegeController.text = membershipData.ugCollege!;
+      }
     }
   }
 

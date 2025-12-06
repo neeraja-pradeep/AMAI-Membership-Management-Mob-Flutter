@@ -24,6 +24,10 @@ MembershipCardModel _$MembershipCardModelFromJson(Map<String, dynamic> json) =>
       professionalDetails: (json['professional_details'] as List<dynamic>?)
           ?.map((e) => e as String)
           .toList(),
+      medicalCouncilState: json['medical_council_state'] as String?,
+      medicalCouncilNo: json['medical_council_no'] as String?,
+      centralCouncilNo: json['central_council_no'] as String?,
+      ugCollege: json['ug_college'] as String?,
     );
 
 Map<String, dynamic> _$MembershipCardModelToJson(
@@ -41,6 +45,10 @@ Map<String, dynamic> _$MembershipCardModelToJson(
       'updated_at': instance.updatedAt,
       'academic_details': instance.academicDetails,
       'professional_details': instance.professionalDetails,
+      'medical_council_state': instance.medicalCouncilState,
+      'medical_council_no': instance.medicalCouncilNo,
+      'central_council_no': instance.centralCouncilNo,
+      'ug_college': instance.ugCollege,
     };
 
 MembershipDetailResponse _$MembershipDetailResponseFromJson(

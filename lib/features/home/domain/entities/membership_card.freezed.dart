@@ -51,6 +51,18 @@ mixin _$MembershipCard {
   /// Professional details (list of professional categories)
   List<String>? get professionalDetails => throw _privateConstructorUsedError;
 
+  /// Medical council state
+  String? get medicalCouncilState => throw _privateConstructorUsedError;
+
+  /// Medical council number
+  String? get medicalCouncilNo => throw _privateConstructorUsedError;
+
+  /// Central council number
+  String? get centralCouncilNo => throw _privateConstructorUsedError;
+
+  /// UG College
+  String? get ugCollege => throw _privateConstructorUsedError;
+
   @JsonKey(ignore: true)
   $MembershipCardCopyWith<MembershipCard> get copyWith =>
       throw _privateConstructorUsedError;
@@ -72,7 +84,11 @@ abstract class $MembershipCardCopyWith<$Res> {
       String? membershipType,
       DateTime? startDate,
       List<String>? academicDetails,
-      List<String>? professionalDetails});
+      List<String>? professionalDetails,
+      String? medicalCouncilState,
+      String? medicalCouncilNo,
+      String? centralCouncilNo,
+      String? ugCollege});
 }
 
 /// @nodoc
@@ -98,6 +114,10 @@ class _$MembershipCardCopyWithImpl<$Res, $Val extends MembershipCard>
     Object? startDate = freezed,
     Object? academicDetails = freezed,
     Object? professionalDetails = freezed,
+    Object? medicalCouncilState = freezed,
+    Object? medicalCouncilNo = freezed,
+    Object? centralCouncilNo = freezed,
+    Object? ugCollege = freezed,
   }) {
     return _then(_value.copyWith(
       id: null == id
@@ -140,6 +160,22 @@ class _$MembershipCardCopyWithImpl<$Res, $Val extends MembershipCard>
           ? _value.professionalDetails
           : professionalDetails // ignore: cast_nullable_to_non_nullable
               as List<String>?,
+      medicalCouncilState: freezed == medicalCouncilState
+          ? _value.medicalCouncilState
+          : medicalCouncilState // ignore: cast_nullable_to_non_nullable
+              as String?,
+      medicalCouncilNo: freezed == medicalCouncilNo
+          ? _value.medicalCouncilNo
+          : medicalCouncilNo // ignore: cast_nullable_to_non_nullable
+              as String?,
+      centralCouncilNo: freezed == centralCouncilNo
+          ? _value.centralCouncilNo
+          : centralCouncilNo // ignore: cast_nullable_to_non_nullable
+              as String?,
+      ugCollege: freezed == ugCollege
+          ? _value.ugCollege
+          : ugCollege // ignore: cast_nullable_to_non_nullable
+              as String?,
     ) as $Val);
   }
 }
@@ -162,7 +198,11 @@ abstract class _$$MembershipCardImplCopyWith<$Res>
       String? membershipType,
       DateTime? startDate,
       List<String>? academicDetails,
-      List<String>? professionalDetails});
+      List<String>? professionalDetails,
+      String? medicalCouncilState,
+      String? medicalCouncilNo,
+      String? centralCouncilNo,
+      String? ugCollege});
 }
 
 /// @nodoc
@@ -186,6 +226,10 @@ class __$$MembershipCardImplCopyWithImpl<$Res>
     Object? startDate = freezed,
     Object? academicDetails = freezed,
     Object? professionalDetails = freezed,
+    Object? medicalCouncilState = freezed,
+    Object? medicalCouncilNo = freezed,
+    Object? centralCouncilNo = freezed,
+    Object? ugCollege = freezed,
   }) {
     return _then(_$MembershipCardImpl(
       id: null == id
@@ -228,6 +272,22 @@ class __$$MembershipCardImplCopyWithImpl<$Res>
           ? _value._professionalDetails
           : professionalDetails // ignore: cast_nullable_to_non_nullable
               as List<String>?,
+      medicalCouncilState: freezed == medicalCouncilState
+          ? _value.medicalCouncilState
+          : medicalCouncilState // ignore: cast_nullable_to_non_nullable
+              as String?,
+      medicalCouncilNo: freezed == medicalCouncilNo
+          ? _value.medicalCouncilNo
+          : medicalCouncilNo // ignore: cast_nullable_to_non_nullable
+              as String?,
+      centralCouncilNo: freezed == centralCouncilNo
+          ? _value.centralCouncilNo
+          : centralCouncilNo // ignore: cast_nullable_to_non_nullable
+              as String?,
+      ugCollege: freezed == ugCollege
+          ? _value.ugCollege
+          : ugCollege // ignore: cast_nullable_to_non_nullable
+              as String?,
     ));
   }
 }
@@ -245,7 +305,11 @@ class _$MembershipCardImpl extends _MembershipCard {
       this.membershipType,
       this.startDate,
       final List<String>? academicDetails,
-      final List<String>? professionalDetails})
+      final List<String>? professionalDetails,
+      this.medicalCouncilState,
+      this.medicalCouncilNo,
+      this.centralCouncilNo,
+      this.ugCollege})
       : _academicDetails = academicDetails,
         _professionalDetails = professionalDetails,
         super._();
@@ -306,9 +370,25 @@ class _$MembershipCardImpl extends _MembershipCard {
     return EqualUnmodifiableListView(value);
   }
 
+  /// Medical council state
+  @override
+  final String? medicalCouncilState;
+
+  /// Medical council number
+  @override
+  final String? medicalCouncilNo;
+
+  /// Central council number
+  @override
+  final String? centralCouncilNo;
+
+  /// UG College
+  @override
+  final String? ugCollege;
+
   @override
   String toString() {
-    return 'MembershipCard(id: $id, holderName: $holderName, membershipNumber: $membershipNumber, validUntil: $validUntil, isActive: $isActive, userId: $userId, membershipType: $membershipType, startDate: $startDate, academicDetails: $academicDetails, professionalDetails: $professionalDetails)';
+    return 'MembershipCard(id: $id, holderName: $holderName, membershipNumber: $membershipNumber, validUntil: $validUntil, isActive: $isActive, userId: $userId, membershipType: $membershipType, startDate: $startDate, academicDetails: $academicDetails, professionalDetails: $professionalDetails, medicalCouncilState: $medicalCouncilState, medicalCouncilNo: $medicalCouncilNo, centralCouncilNo: $centralCouncilNo, ugCollege: $ugCollege)';
   }
 
   @override
@@ -334,7 +414,15 @@ class _$MembershipCardImpl extends _MembershipCard {
             const DeepCollectionEquality()
                 .equals(other._academicDetails, _academicDetails) &&
             const DeepCollectionEquality()
-                .equals(other._professionalDetails, _professionalDetails));
+                .equals(other._professionalDetails, _professionalDetails) &&
+            (identical(other.medicalCouncilState, medicalCouncilState) ||
+                other.medicalCouncilState == medicalCouncilState) &&
+            (identical(other.medicalCouncilNo, medicalCouncilNo) ||
+                other.medicalCouncilNo == medicalCouncilNo) &&
+            (identical(other.centralCouncilNo, centralCouncilNo) ||
+                other.centralCouncilNo == centralCouncilNo) &&
+            (identical(other.ugCollege, ugCollege) ||
+                other.ugCollege == ugCollege));
   }
 
   @override
@@ -349,7 +437,11 @@ class _$MembershipCardImpl extends _MembershipCard {
       membershipType,
       startDate,
       const DeepCollectionEquality().hash(_academicDetails),
-      const DeepCollectionEquality().hash(_professionalDetails));
+      const DeepCollectionEquality().hash(_professionalDetails),
+      medicalCouncilState,
+      medicalCouncilNo,
+      centralCouncilNo,
+      ugCollege);
 
   @JsonKey(ignore: true)
   @override
@@ -370,7 +462,11 @@ abstract class _MembershipCard extends MembershipCard {
       final String? membershipType,
       final DateTime? startDate,
       final List<String>? academicDetails,
-      final List<String>? professionalDetails}) = _$MembershipCardImpl;
+      final List<String>? professionalDetails,
+      final String? medicalCouncilState,
+      final String? medicalCouncilNo,
+      final String? centralCouncilNo,
+      final String? ugCollege}) = _$MembershipCardImpl;
   const _MembershipCard._() : super._();
 
   @override
@@ -413,6 +509,22 @@ abstract class _MembershipCard extends MembershipCard {
 
   /// Professional details (list of professional categories)
   List<String>? get professionalDetails;
+  @override
+
+  /// Medical council state
+  String? get medicalCouncilState;
+  @override
+
+  /// Medical council number
+  String? get medicalCouncilNo;
+  @override
+
+  /// Central council number
+  String? get centralCouncilNo;
+  @override
+
+  /// UG College
+  String? get ugCollege;
   @override
   @JsonKey(ignore: true)
   _$$MembershipCardImplCopyWith<_$MembershipCardImpl> get copyWith =>

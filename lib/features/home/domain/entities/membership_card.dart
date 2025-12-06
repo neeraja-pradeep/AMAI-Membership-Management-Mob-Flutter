@@ -37,6 +37,18 @@ class MembershipCard with _$MembershipCard {
 
     /// Professional details (list of professional categories)
     List<String>? professionalDetails,
+
+    /// Medical council state
+    String? medicalCouncilState,
+
+    /// Medical council number
+    String? medicalCouncilNo,
+
+    /// Central council number
+    String? centralCouncilNo,
+
+    /// UG College
+    String? ugCollege,
   }) = _MembershipCard;
 
   const MembershipCard._();
