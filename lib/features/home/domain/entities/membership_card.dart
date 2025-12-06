@@ -31,6 +31,9 @@ class MembershipCard with _$MembershipCard {
 
     /// Membership start date
     DateTime? startDate,
+
+    /// Academic details (list of qualifications like UG, PG, PhD, etc.)
+    List<String>? academicDetails,
   }) = _MembershipCard;
 
   const MembershipCard._();

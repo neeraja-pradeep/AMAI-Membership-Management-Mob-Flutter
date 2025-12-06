@@ -28,6 +28,32 @@ class _EditAcademicDetailsScreenState
   bool _hasPendingRequest = false;
 
   @override
+  void initState() {
+    super.initState();
+    // Pre-fill checkboxes from membership data
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _prefillAcademicDetails();
+    });
+  }
+
+  /// Pre-fills checkboxes based on academicDetails from membership API
+  void _prefillAcademicDetails() {
+    final membershipState = ref.read(membershipStateProvider);
+    final academicDetails = membershipState.membershipCard?.academicDetails;
+
+    if (academicDetails != null && academicDetails.isNotEmpty) {
+      setState(() {
+        _ugSelected = academicDetails.contains('UG');
+        _pgSelected = academicDetails.contains('PG');
+        _phdSelected = academicDetails.contains('PhD');
+        _ccrasSelected = academicDetails.contains('CCRAS');
+        _pgDiplomaSelected = academicDetails.contains('PG Diploma');
+        _otherSelected = academicDetails.contains('Other');
+      });
+    }
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: AppColors.background,

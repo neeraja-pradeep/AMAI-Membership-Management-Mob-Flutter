@@ -18,6 +18,9 @@ MembershipCardModel _$MembershipCardModelFromJson(Map<String, dynamic> json) =>
       startDate: json['start_date'] as String?,
       createdAt: json['created_at'] as String?,
       updatedAt: json['updated_at'] as String?,
+      academicDetails: (json['academic_details'] as List<dynamic>?)
+          ?.map((e) => e as String)
+          .toList(),
     );
 
 Map<String, dynamic> _$MembershipCardModelToJson(
@@ -33,6 +36,7 @@ Map<String, dynamic> _$MembershipCardModelToJson(
       'start_date': instance.startDate,
       'created_at': instance.createdAt,
       'updated_at': instance.updatedAt,
+      'academic_details': instance.academicDetails,
     };
 
 MembershipDetailResponse _$MembershipDetailResponseFromJson(

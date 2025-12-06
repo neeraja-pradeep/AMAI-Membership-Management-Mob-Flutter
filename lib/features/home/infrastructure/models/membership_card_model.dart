@@ -18,6 +18,7 @@ class MembershipCardModel {
     this.startDate,
     this.createdAt,
     this.updatedAt,
+    this.academicDetails,
   });
 
   /// Computed property to check if membership is active
@@ -57,6 +58,9 @@ class MembershipCardModel {
   @JsonKey(name: 'updated_at')
   final String? updatedAt;
 
+  @JsonKey(name: 'academic_details')
+  final List<String>? academicDetails;
+
   /// Converts model to JSON map
   Map<String, dynamic> toJson() => _$MembershipCardModelToJson(this);
 
@@ -71,6 +75,7 @@ class MembershipCardModel {
       userId: user,
       membershipType: membershipType,
       startDate: startDate != null ? _parseDate(startDate!) : null,
+      academicDetails: academicDetails,
     );
   }
 

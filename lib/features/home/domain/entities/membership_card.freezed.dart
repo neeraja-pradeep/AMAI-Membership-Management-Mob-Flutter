@@ -9,6 +9,11 @@ part of 'membership_card.dart';
 // FreezedGenerator
 // **************************************************************************
 
+// ignore_for_file: implementation_imports
+import 'package:collection/collection.dart' show DeepCollectionEquality;
+import 'package:collection/src/unmodifiable_wrappers.dart'
+    show EqualUnmodifiableListView;
+
 T _$identity<T>(T value) => value;
 
 final _privateConstructorUsedError = UnsupportedError(
@@ -40,6 +45,9 @@ mixin _$MembershipCard {
   /// Membership start date
   DateTime? get startDate => throw _privateConstructorUsedError;
 
+  /// Academic details (list of qualifications like UG, PG, PhD, etc.)
+  List<String>? get academicDetails => throw _privateConstructorUsedError;
+
   @JsonKey(ignore: true)
   $MembershipCardCopyWith<MembershipCard> get copyWith =>
       throw _privateConstructorUsedError;
@@ -59,7 +67,8 @@ abstract class $MembershipCardCopyWith<$Res> {
       bool isActive,
       int? userId,
       String? membershipType,
-      DateTime? startDate});
+      DateTime? startDate,
+      List<String>? academicDetails});
 }
 
 /// @nodoc
@@ -83,6 +92,7 @@ class _$MembershipCardCopyWithImpl<$Res, $Val extends MembershipCard>
     Object? userId = freezed,
     Object? membershipType = freezed,
     Object? startDate = freezed,
+    Object? academicDetails = freezed,
   }) {
     return _then(_value.copyWith(
       id: null == id
@@ -117,6 +127,10 @@ class _$MembershipCardCopyWithImpl<$Res, $Val extends MembershipCard>
           ? _value.startDate
           : startDate // ignore: cast_nullable_to_non_nullable
               as DateTime?,
+      academicDetails: freezed == academicDetails
+          ? _value.academicDetails
+          : academicDetails // ignore: cast_nullable_to_non_nullable
+              as List<String>?,
     ) as $Val);
   }
 }
@@ -137,7 +151,8 @@ abstract class _$$MembershipCardImplCopyWith<$Res>
       bool isActive,
       int? userId,
       String? membershipType,
-      DateTime? startDate});
+      DateTime? startDate,
+      List<String>? academicDetails});
 }
 
 /// @nodoc
@@ -159,6 +174,7 @@ class __$$MembershipCardImplCopyWithImpl<$Res>
     Object? userId = freezed,
     Object? membershipType = freezed,
     Object? startDate = freezed,
+    Object? academicDetails = freezed,
   }) {
     return _then(_$MembershipCardImpl(
       id: null == id
@@ -193,6 +209,10 @@ class __$$MembershipCardImplCopyWithImpl<$Res>
           ? _value.startDate
           : startDate // ignore: cast_nullable_to_non_nullable
               as DateTime?,
+      academicDetails: freezed == academicDetails
+          ? _value._academicDetails
+          : academicDetails // ignore: cast_nullable_to_non_nullable
+              as List<String>?,
     ));
   }
 }
@@ -208,8 +228,10 @@ class _$MembershipCardImpl extends _MembershipCard {
       required this.isActive,
       this.userId,
       this.membershipType,
-      this.startDate})
-      : super._();
+      this.startDate,
+      final List<String>? academicDetails})
+      : _academicDetails = academicDetails,
+        super._();
 
   /// Unique identifier
   @override
@@ -243,9 +265,21 @@ class _$MembershipCardImpl extends _MembershipCard {
   @override
   final DateTime? startDate;
 
+  /// Academic details (list of qualifications like UG, PG, PhD, etc.)
+  final List<String>? _academicDetails;
+
+  /// Academic details (list of qualifications like UG, PG, PhD, etc.)
+  @override
+  List<String>? get academicDetails {
+    final value = _academicDetails;
+    if (value == null) return null;
+    // ignore: implicit_dynamic_type
+    return EqualUnmodifiableListView(value);
+  }
+
   @override
   String toString() {
-    return 'MembershipCard(id: $id, holderName: $holderName, membershipNumber: $membershipNumber, validUntil: $validUntil, isActive: $isActive, userId: $userId, membershipType: $membershipType, startDate: $startDate)';
+    return 'MembershipCard(id: $id, holderName: $holderName, membershipNumber: $membershipNumber, validUntil: $validUntil, isActive: $isActive, userId: $userId, membershipType: $membershipType, startDate: $startDate, academicDetails: $academicDetails)';
   }
 
   @override
@@ -267,12 +301,23 @@ class _$MembershipCardImpl extends _MembershipCard {
             (identical(other.membershipType, membershipType) ||
                 other.membershipType == membershipType) &&
             (identical(other.startDate, startDate) ||
-                other.startDate == startDate));
+                other.startDate == startDate) &&
+            const DeepCollectionEquality()
+                .equals(other._academicDetails, _academicDetails));
   }
 
   @override
-  int get hashCode => Object.hash(runtimeType, id, holderName, membershipNumber,
-      validUntil, isActive, userId, membershipType, startDate);
+  int get hashCode => Object.hash(
+      runtimeType,
+      id,
+      holderName,
+      membershipNumber,
+      validUntil,
+      isActive,
+      userId,
+      membershipType,
+      startDate,
+      const DeepCollectionEquality().hash(_academicDetails));
 
   @JsonKey(ignore: true)
   @override
@@ -291,7 +336,8 @@ abstract class _MembershipCard extends MembershipCard {
       required final bool isActive,
       final int? userId,
       final String? membershipType,
-      final DateTime? startDate}) = _$MembershipCardImpl;
+      final DateTime? startDate,
+      final List<String>? academicDetails}) = _$MembershipCardImpl;
   const _MembershipCard._() : super._();
 
   @override
@@ -326,6 +372,10 @@ abstract class _MembershipCard extends MembershipCard {
 
   /// Membership start date
   DateTime? get startDate;
+  @override
+
+  /// Academic details (list of qualifications like UG, PG, PhD, etc.)
+  List<String>? get academicDetails;
   @override
   @JsonKey(ignore: true)
   _$$MembershipCardImplCopyWith<_$MembershipCardImpl> get copyWith =>
