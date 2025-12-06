@@ -276,7 +276,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     return Consumer(
       builder: (context, ref, child) {
         final profileState = ref.watch(profileStateProvider);
-        final userProfile = profileState.currentData;
+        final userProfile = profileState.userProfile;
 
         return GestureDetector(
           onTap: () {
