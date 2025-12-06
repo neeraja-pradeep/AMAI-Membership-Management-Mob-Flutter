@@ -231,6 +231,18 @@ class _AddressDetailsScreenState extends ConsumerState<AddressDetailsScreen> {
 
       final notifier = ref.read(registrationProvider.notifier);
 
+      // Get userId from registration state
+      final regStateForUserId = ref.read(registrationProvider);
+      int? userId;
+      if (regStateForUserId is RegistrationStateInProgress) {
+        userId = regStateForUserId.registration.userId;
+      }
+
+      if (userId == null) {
+        _showError("User information missing. Please try again.");
+        return;
+      }
+
       // 1️⃣ Communication address (always from main fields)
       final communicationData = {
         'address_line1': _addressLine1Controller.text.trim(),
@@ -240,7 +252,8 @@ class _AddressDetailsScreenState extends ConsumerState<AddressDetailsScreen> {
         'country': _selectedCountry ?? '',
         'state': _selectedState ?? '',
         'district': _selectedDistrict ?? '',
-        'type': 'communications',
+        'type': 'communication',
+        'user': userId,
       };
 
       // 🔁 Always submit communication
@@ -263,6 +276,7 @@ class _AddressDetailsScreenState extends ConsumerState<AddressDetailsScreen> {
                 'state': _aptaState ?? '',
                 'district': _aptaDistrict ?? '',
                 'type': 'apta',
+                'user': userId,
               };
 
         await notifier.submitAddress(data: aptaData);
@@ -284,6 +298,7 @@ class _AddressDetailsScreenState extends ConsumerState<AddressDetailsScreen> {
               'state': _permState ?? '',
               'district': _permDistrict ?? '',
               'type': 'permanent',
+              'user': userId,
             };
 
       await notifier.submitAddress(data: permanentData);
