@@ -84,6 +84,40 @@ class _EditProfessionalDetailsScreenState
     _medicalCouncilNoController = TextEditingController();
     _centralCouncilNoController = TextEditingController();
     _ugCollegeController = TextEditingController();
+    // Pre-fill checkboxes from membership data
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _prefillProfessionalDetails();
+    });
+  }
+
+  /// Pre-fills checkboxes based on professionalDetails from membership API
+  void _prefillProfessionalDetails() {
+    final membershipState = ref.read(membershipStateProvider);
+    final professionalDetails = membershipState.currentData?.professionalDetails;
+
+    if (professionalDetails != null && professionalDetails.isNotEmpty) {
+      // Convert to uppercase for case-insensitive comparison
+      final upperCaseDetails = professionalDetails.map((e) => e.toUpperCase()).toList();
+      setState(() {
+        _researcherSelected = upperCaseDetails.contains('RESEARCHER');
+        _pgScholarSelected = upperCaseDetails.contains('PG SCHOLAR');
+        _pgDiplomaScholarSelected = upperCaseDetails.contains('PG DIPLOMA SCHOLAR');
+        _deptOfIsmSelected = upperCaseDetails.contains('DEPT OF ISM');
+        _deptOfNamSelected = upperCaseDetails.contains('DEPT OF NAM');
+        _deptOfNhmSelected = upperCaseDetails.contains('DEPT OF NHM');
+        _aidedCollegeSelected = upperCaseDetails.contains('AIDED COLLEGE');
+        _govtCollegeSelected = upperCaseDetails.contains('GOVT COLLEGE');
+        _pvtCollegeSelected = upperCaseDetails.contains('PVT COLLEGE');
+        _pvtSectorCollegeSelected = upperCaseDetails.contains('PVT SECTOR COLLEGE');
+        _retdSelected = upperCaseDetails.contains('RETIRED (RETD)');
+        _pvtPracticeSelected = upperCaseDetails.contains('PRIVATE PRACTICE');
+        _manufacturerSelected = upperCaseDetails.contains('MANUFACTURER');
+        _militaryServiceSelected = upperCaseDetails.contains('MILITARY SERVICE');
+        _centralGovtSelected = upperCaseDetails.contains('CENTRAL GOVT');
+        _esiSelected = upperCaseDetails.contains('ESI');
+        _otherSelected = upperCaseDetails.contains('OTHER');
+      });
+    }
   }
 
   @override

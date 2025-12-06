@@ -34,6 +34,9 @@ class MembershipCard with _$MembershipCard {
 
     /// Academic details (list of qualifications like UG, PG, PhD, etc.)
     List<String>? academicDetails,
+
+    /// Professional details (list of professional categories)
+    List<String>? professionalDetails,
   }) = _MembershipCard;
 
   const MembershipCard._();
