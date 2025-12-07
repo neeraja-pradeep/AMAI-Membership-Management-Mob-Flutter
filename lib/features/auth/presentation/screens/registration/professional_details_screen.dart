@@ -488,9 +488,10 @@ class _ProfessionalDetailsScreenState
         border: Border.all(color: Colors.grey[300]!),
       ),
       child: DropdownButtonFormField(
+        isExpanded: true,
         decoration: const InputDecoration(border: InputBorder.none),
         items: data
-            .map((e) => DropdownMenuItem(value: e, child: Text(e)))
+            .map((e) => DropdownMenuItem(value: e, child: Text(e, overflow: TextOverflow.ellipsis)))
             .toList(),
         validator: (v) => v == null ? "Required" : null,
         onChanged: callback,
