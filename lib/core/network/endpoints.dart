@@ -20,9 +20,9 @@ class Endpoints {
   /// Logout current user
   static const String logout = '/api/accounts/logout/';
 
-  /// POST /api/auth/otp-signin/
-  /// Send OTP for forgot password / Verify OTP and reset password
-  static const String otpSignIn = '/api/auth/otp-signin/';
+  /// POST /api/accounts/send-otp/
+  /// Send OTP for forgot password
+  static const String otpSignIn = '/api/accounts/send-otp/';
 
   /// POST /api/membership/register/
   /// Register new user (includes role selection)
