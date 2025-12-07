@@ -76,7 +76,7 @@ class Endpoints {
 
   /// User profile endpoint (session-based)
   /// GET: Retrieve user profile for authenticated user
-  static const String userProfileMe = '$apiPrefix/accounts/users/';
+  static const String userProfileMe = '$apiPrefix/accounts/users/me/';
 
   /// User profile endpoint by ID (legacy)
   /// GET: Retrieve user profile by ID

@@ -54,17 +54,8 @@ class ProfileNotifier extends StateNotifier<ProfileState> {
     state = const ProfileState.loading();
 
     final repository = _ref.read(profileRepositoryProvider);
-    final userId = _ref.read(authUserIdProvider);
 
-    // Use user ID from auth state (from login response)
-    if (userId == null) {
-      state = const ProfileState.error(
-        failure: ServerFailure(message: 'User not authenticated'),
-      );
-      return;
-    }
-
-    final result = await repository.getProfileData(userId: userId);
+    final result = await repository.getCurrentProfileData();
 
     result.fold(
       (failure) {
@@ -82,18 +73,8 @@ class ProfileNotifier extends StateNotifier<ProfileState> {
     state = ProfileState.loading(previousData: previousData);
 
     final repository = _ref.read(profileRepositoryProvider);
-    final userId = _ref.read(authUserIdProvider);
 
-    // Use user ID from auth state (from login response)
-    if (userId == null) {
-      state = ProfileState.error(
-        failure: const ServerFailure(message: 'User not authenticated'),
-        cachedData: previousData,
-      );
-      return;
-    }
-
-    final result = await repository.getProfileData(userId: userId);
+    final result = await repository.getCurrentProfileData();
 
     result.fold(
       (failure) {
