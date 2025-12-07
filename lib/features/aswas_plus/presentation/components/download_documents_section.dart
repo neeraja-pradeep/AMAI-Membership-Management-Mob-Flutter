@@ -1,29 +1,19 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:flutter_svg/flutter_svg.dart';
 import 'package:myapp/app/theme/colors.dart';
+import 'package:myapp/features/home/application/providers/home_providers.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 /// Download Documents Section for ASWAS Plus screen
 /// Provides buttons to download policy documents, claim forms, etc.
-class DownloadDocumentsSection extends StatelessWidget {
-  const DownloadDocumentsSection({
-    this.policyDocumentUrl,
-    this.claimFormUrl,
-    this.renewalGuidelinesUrl,
-    super.key,
-  });
-
-  /// URL for policy document download
-  final String? policyDocumentUrl;
-
-  /// URL for claim form download
-  final String? claimFormUrl;
-
-  /// URL for renewal guidelines download
-  final String? renewalGuidelinesUrl;
+class DownloadDocumentsSection extends ConsumerWidget {
+  const DownloadDocumentsSection({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final documentsAsync = ref.watch(aswasDocumentsProvider);
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -53,30 +43,87 @@ class DownloadDocumentsSection extends StatelessWidget {
               ),
             ],
           ),
-          child: Column(
-            children: [
-              _buildDocumentItem(
-                context: context,
-                icon: Icons.description_outlined,
-                label: 'Policy Document',
-                onTap: () => _handleDownload(context, 'Policy Document'),
-              ),
-              Divider(height: 24.h, color: AppColors.grey200),
-              _buildDocumentItem(
-                context: context,
-                icon: Icons.assignment_outlined,
-                label: 'Claim Form',
-                onTap: () => _handleDownload(context, 'Claim Form'),
-              ),
-              Divider(height: 24.h, color: AppColors.grey200),
-              _buildDocumentItem(
-                context: context,
-                icon: Icons.article_outlined,
-                label: 'Renewal Guidelines',
-                onTap: () => _handleDownload(context, 'Renewal Guidelines'),
-              ),
-            ],
+          child: documentsAsync.when(
+            loading: () => _buildLoadingState(),
+            error: (error, stack) => _buildErrorState(context, ref),
+            data: (documents) => _buildDocumentsList(context, documents),
           ),
+        ),
+      ],
+    );
+  }
+
+  /// Builds the documents list from API data
+  Widget _buildDocumentsList(BuildContext context, List<Map<String, dynamic>> documents) {
+    // Find documents by title
+    final policyDoc = _findDocumentByTitle(documents, 'Policy Document');
+    final claimDoc = _findDocumentByTitle(documents, 'Claim Form');
+    final renewalDoc = _findDocumentByTitle(documents, 'Renewal Guidelines');
+
+    return Column(
+      children: [
+        _buildDocumentItem(
+          context: context,
+          icon: Icons.description_outlined,
+          label: 'Policy Document',
+          fileUrl: policyDoc?['file_url'] as String?,
+        ),
+        Divider(height: 24.h, color: AppColors.grey200),
+        _buildDocumentItem(
+          context: context,
+          icon: Icons.assignment_outlined,
+          label: 'Claim Form',
+          fileUrl: claimDoc?['file_url'] as String?,
+        ),
+        Divider(height: 24.h, color: AppColors.grey200),
+        _buildDocumentItem(
+          context: context,
+          icon: Icons.article_outlined,
+          label: 'Renewal Guidelines',
+          fileUrl: renewalDoc?['file_url'] as String?,
+        ),
+      ],
+    );
+  }
+
+  /// Finds a document by its title (case-insensitive)
+  Map<String, dynamic>? _findDocumentByTitle(List<Map<String, dynamic>> documents, String title) {
+    for (final doc in documents) {
+      final docTitle = doc['title'] as String?;
+      if (docTitle != null && docTitle.toLowerCase() == title.toLowerCase()) {
+        return doc;
+      }
+    }
+    return null;
+  }
+
+  /// Builds loading state
+  Widget _buildLoadingState() {
+    return Column(
+      children: [
+        _buildDocumentItemShimmer(),
+        SizedBox(height: 16.h),
+        _buildDocumentItemShimmer(),
+        SizedBox(height: 16.h),
+        _buildDocumentItemShimmer(),
+      ],
+    );
+  }
+
+  /// Builds error state
+  Widget _buildErrorState(BuildContext context, WidgetRef ref) {
+    return Column(
+      children: [
+        Icon(Icons.error_outline, color: AppColors.error, size: 32.sp),
+        SizedBox(height: 8.h),
+        Text(
+          'Failed to load documents',
+          style: TextStyle(fontSize: 14.sp, color: AppColors.textSecondary),
+        ),
+        SizedBox(height: 8.h),
+        TextButton(
+          onPressed: () => ref.invalidate(aswasDocumentsProvider),
+          child: Text('Retry', style: TextStyle(color: AppColors.primary)),
         ),
       ],
     );
@@ -87,10 +134,12 @@ class DownloadDocumentsSection extends StatelessWidget {
     required BuildContext context,
     required IconData icon,
     required String label,
-    required VoidCallback onTap,
+    required String? fileUrl,
   }) {
+    final isAvailable = fileUrl != null && fileUrl.isNotEmpty;
+
     return InkWell(
-      onTap: onTap,
+      onTap: isAvailable ? () => _handleDownload(context, label, fileUrl) : null,
       borderRadius: BorderRadius.circular(8.r),
       child: Padding(
         padding: EdgeInsets.symmetric(vertical: 4.h),
@@ -100,12 +149,14 @@ class DownloadDocumentsSection extends StatelessWidget {
               width: 40.w,
               height: 40.h,
               decoration: BoxDecoration(
-                color: AppColors.primary.withOpacity(0.1),
+                color: isAvailable
+                    ? AppColors.primary.withOpacity(0.1)
+                    : AppColors.grey200,
                 borderRadius: BorderRadius.circular(8.r),
               ),
               child: Icon(
                 icon,
-                color: AppColors.primary,
+                color: isAvailable ? AppColors.primary : AppColors.grey400,
                 size: 20.sp,
               ),
             ),
@@ -116,13 +167,13 @@ class DownloadDocumentsSection extends StatelessWidget {
                 style: TextStyle(
                   fontSize: 14.sp,
                   fontWeight: FontWeight.w500,
-                  color: AppColors.textPrimary,
+                  color: isAvailable ? AppColors.textPrimary : AppColors.grey400,
                 ),
               ),
             ),
             Icon(
               Icons.download_outlined,
-              color: AppColors.primary,
+              color: isAvailable ? AppColors.primary : AppColors.grey400,
               size: 20.sp,
             ),
           ],
@@ -131,14 +182,74 @@ class DownloadDocumentsSection extends StatelessWidget {
     );
   }
 
-  /// Handles document download
-  void _handleDownload(BuildContext context, String documentName) {
-    // Static for now - will integrate with url_launcher later
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text('$documentName download coming soon'),
-      ),
+  /// Builds shimmer for document item
+  Widget _buildDocumentItemShimmer() {
+    return Row(
+      children: [
+        Container(
+          width: 40.w,
+          height: 40.h,
+          decoration: BoxDecoration(
+            color: AppColors.grey200,
+            borderRadius: BorderRadius.circular(8.r),
+          ),
+        ),
+        SizedBox(width: 12.w),
+        Expanded(
+          child: Container(
+            height: 16.h,
+            decoration: BoxDecoration(
+              color: AppColors.grey200,
+              borderRadius: BorderRadius.circular(4.r),
+            ),
+          ),
+        ),
+        SizedBox(width: 12.w),
+        Container(
+          width: 24.w,
+          height: 24.h,
+          decoration: BoxDecoration(
+            color: AppColors.grey200,
+            borderRadius: BorderRadius.circular(4.r),
+          ),
+        ),
+      ],
     );
+  }
+
+  /// Handles document download using url_launcher
+  Future<void> _handleDownload(BuildContext context, String documentName, String fileUrl) async {
+    // Ensure URL has https:// prefix
+    String fullUrl = fileUrl;
+    if (!fileUrl.startsWith('http://') && !fileUrl.startsWith('https://')) {
+      fullUrl = 'https://$fileUrl';
+    }
+
+    final uri = Uri.parse(fullUrl);
+
+    try {
+      if (await canLaunchUrl(uri)) {
+        await launchUrl(uri, mode: LaunchMode.externalApplication);
+      } else {
+        if (context.mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text('Could not open $documentName'),
+              backgroundColor: AppColors.error,
+            ),
+          );
+        }
+      }
+    } catch (e) {
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Error opening $documentName'),
+            backgroundColor: AppColors.error,
+          ),
+        );
+      }
+    }
   }
 }
 

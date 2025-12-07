@@ -526,3 +526,12 @@ class NomineesNotifier extends StateNotifier<NomineesState> {
     state = const NomineesState.initial();
   }
 }
+
+// ============== ASWAS Documents Provider ==============
+
+/// Provider for fetching ASWAS library documents
+final aswasDocumentsProvider = FutureProvider.autoDispose<List<Map<String, dynamic>>>((ref) async {
+  final homeApi = ref.watch(homeApiProvider);
+  final response = await homeApi.fetchAswasDocuments();
+  return response.data ?? [];
+});

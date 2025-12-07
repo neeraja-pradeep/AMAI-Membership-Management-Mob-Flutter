@@ -121,6 +121,13 @@ abstract class HomeApi {
     required String razorpayPaymentId,
     required String razorpaySignature,
   });
+
+  /// Fetches ASWAS library documents
+  ///
+  /// Returns HomeApiResponse containing:
+  /// - List of document maps on success (200)
+  /// - null data on error
+  Future<HomeApiResponse<List<Map<String, dynamic>>>> fetchAswasDocuments();
 }
 
 /// Implementation of HomeApi using ApiClient
@@ -393,6 +400,32 @@ class HomeApiImpl implements HomeApi {
 
     return HomeApiResponse<bool>(
       data: response.isSuccess,
+      statusCode: response.statusCode,
+      timestamp: response.timestamp,
+    );
+  }
+
+  @override
+  Future<HomeApiResponse<List<Map<String, dynamic>>>> fetchAswasDocuments() async {
+    final response = await apiClient.get<Map<String, dynamic>>(
+      Endpoints.libraryDocuments,
+      queryParameters: {'doc_type': 'aswas'},
+      fromJson: (json) => json as Map<String, dynamic>,
+    );
+
+    List<Map<String, dynamic>>? documents;
+
+    if (response.data != null) {
+      final results = response.data!['results'] as List<dynamic>?;
+      if (results != null) {
+        documents = results
+            .map((e) => e as Map<String, dynamic>)
+            .toList();
+      }
+    }
+
+    return HomeApiResponse<List<Map<String, dynamic>>>(
+      data: documents ?? [],
       statusCode: response.statusCode,
       timestamp: response.timestamp,
     );

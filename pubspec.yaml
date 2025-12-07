@@ -94,6 +94,9 @@ dependencies:
   # Image Picker
   image_picker: ^1.0.7
 
+  # URL Launcher
+  url_launcher: ^6.2.5
+
   # Environment Variables
   flutter_dotenv: ^5.1.0
 

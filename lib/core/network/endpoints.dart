@@ -184,6 +184,10 @@ class Endpoints {
 
   // ==================== Library Endpoints ====================
 
+  /// Library documents endpoint
+  /// GET: Retrieve library documents (filter by doc_type)
+  static const String libraryDocuments = '$apiPrefix/library/documents/';
+
   /// Announcements list endpoint
   static const String announcements = '$apiPrefix/library/announcements/';
 
