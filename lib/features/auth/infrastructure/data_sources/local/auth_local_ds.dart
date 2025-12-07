@@ -1,3 +1,4 @@
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:hive/hive.dart';
 import '../../../../../core/storage/hive/boxes.dart';
 import '../../../../../core/storage/hive/keys.dart';
@@ -113,5 +114,51 @@ class AuthLocalDs {
   Future<void> deleteSession() async {
     final box = await SecureHiveStorage.openEncryptedBox(HiveBoxes.authBox);
     await box.delete('session');
+  }
+
+  // ============== REMEMBER ME (Secure Storage) ==============
+
+  static const _secureStorage = FlutterSecureStorage(
+    aOptions: AndroidOptions(encryptedSharedPreferences: true),
+    iOptions: IOSOptions(accessibility: KeychainAccessibility.first_unlock),
+  );
+
+  static const _rememberEmailKey = 'remember_me_email';
+  static const _rememberPasswordKey = 'remember_me_password';
+
+  /// Save credentials for "Remember Me" (OS-level encryption)
+  ///
+  /// SECURITY: Uses flutter_secure_storage which stores in:
+  /// - iOS: Keychain (hardware-encrypted)
+  /// - Android: EncryptedSharedPreferences (AES encryption)
+  Future<void> saveRememberMeCredentials({
+    required String email,
+    required String password,
+  }) async {
+    await _secureStorage.write(key: _rememberEmailKey, value: email);
+    await _secureStorage.write(key: _rememberPasswordKey, value: password);
+  }
+
+  /// Get saved "Remember Me" credentials
+  ///
+  /// Returns null values if no credentials saved
+  Future<({String? email, String? password})> getRememberMeCredentials() async {
+    final email = await _secureStorage.read(key: _rememberEmailKey);
+    final password = await _secureStorage.read(key: _rememberPasswordKey);
+    return (email: email, password: password);
+  }
+
+  /// Clear "Remember Me" credentials
+  ///
+  /// Called when user unchecks "Remember Me" or logs out
+  Future<void> clearRememberMeCredentials() async {
+    await _secureStorage.delete(key: _rememberEmailKey);
+    await _secureStorage.delete(key: _rememberPasswordKey);
+  }
+
+  /// Check if "Remember Me" credentials exist
+  Future<bool> hasRememberMeCredentials() async {
+    final email = await _secureStorage.read(key: _rememberEmailKey);
+    return email != null && email.isNotEmpty;
   }
 }

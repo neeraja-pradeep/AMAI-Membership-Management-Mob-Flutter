@@ -9,8 +9,21 @@ abstract class AuthRepository {
   /// Login with email and password
   ///
   /// Returns user ID on success, null if user data not in response
+  /// If rememberMe is true, saves credentials securely for auto-fill
   /// Throws exception on failure
-  Future<int?> login({required String email, required String password});
+  Future<int?> login({
+    required String email,
+    required String password,
+    bool rememberMe = false,
+  });
+
+  /// Get saved "Remember Me" credentials
+  ///
+  /// Returns email and password if saved, null otherwise
+  Future<({String? email, String? password})> getRememberMeCredentials();
+
+  /// Clear "Remember Me" credentials
+  Future<void> clearRememberMeCredentials();
 
   /// Register with selected role (Phase 1)
   ///

@@ -75,17 +75,25 @@ class AuthRepositoryImpl implements AuthRepository {
   /// 5. Save to Hive asynchronously (don't block navigation)
   /// 6. Navigate to next screen
   @override
-  Future<int?> login({required String email, required String password}) async {
+  Future<int?> login({
+    required String email,
+    required String password,
+    bool rememberMe = false,
+  }) async {
     try {
       final response = await _authApi.login(email: email, password: password);
 
       // backend returns: { "detail": "Login successful", "user": { "id": 4, ... } }
       if (response.detail.toLowerCase() == "login successful") {
-        // Store login status locally (so app remembers user)
-        // await _authLocalDs.saveIsLoggedIn(true);
-
-        // // (Optional) store email if you need it later
-        // await _authLocalDs.saveEmail(email);
+        // Handle "Remember Me" - save or clear credentials
+        if (rememberMe) {
+          await _authLocalDs.saveRememberMeCredentials(
+            email: email,
+            password: password,
+          );
+        } else {
+          await _authLocalDs.clearRememberMeCredentials();
+        }
 
         // Return user ID from response
         return response.userId;
@@ -95,6 +103,16 @@ class AuthRepositoryImpl implements AuthRepository {
     } catch (e) {
       rethrow;
     }
+  }
+
+  @override
+  Future<({String? email, String? password})> getRememberMeCredentials() async {
+    return await _authLocalDs.getRememberMeCredentials();
+  }
+
+  @override
+  Future<void> clearRememberMeCredentials() async {
+    await _authLocalDs.clearRememberMeCredentials();
   }
 
   /// Save auth data asynchronously (non-blocking)

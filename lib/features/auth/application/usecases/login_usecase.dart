@@ -33,7 +33,11 @@ class LoginUseCase {
     }
 
     // Call repository - returns user ID
-    return await _repository.login(email: email, password: password);
+    return await _repository.login(
+      email: email,
+      password: password,
+      rememberMe: rememberMe,
+    );
   }
 
   /// Validate email format

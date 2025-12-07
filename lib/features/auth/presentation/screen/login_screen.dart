@@ -8,6 +8,7 @@ import 'package:myapp/features/auth/presentation/screens/registration/register_s
 import '../screens/forgot_password/forgot_password_screen.dart';
 import '../../application/providers/auth_provider.dart';
 import '../../application/states/auth_state.dart';
+import '../../infrastructure/repositories/auth_repository_provider.dart';
 import '../components/email_field.dart';
 import '../components/offline_banner.dart';
 import '../components/password_field.dart';
@@ -32,6 +33,24 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
   bool _rememberMe = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadRememberMeCredentials();
+  }
+
+  Future<void> _loadRememberMeCredentials() async {
+    final credentials =
+        await ref.read(authRepositoryProvider).getRememberMeCredentials();
+    if (credentials.email != null && credentials.password != null) {
+      setState(() {
+        _emailController.text = credentials.email!;
+        _passwordController.text = credentials.password!;
+        _rememberMe = true;
+      });
+    }
+  }
 
   @override
   void dispose() {
