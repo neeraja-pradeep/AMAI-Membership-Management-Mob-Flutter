@@ -16,7 +16,7 @@ class ForgotPasswordNotifier extends StateNotifier<ForgotPasswordState> {
 
   /// Send OTP to phone number
   ///
-  /// POST /api/auth/otp-signin/
+  /// POST /api/accounts/send-otp/
   /// Payload: { "phone_number": "+919497883832" }
   Future<void> sendOtp({required String phoneNumber}) async {
     state = const ForgotPasswordLoading();
@@ -36,6 +36,44 @@ class ForgotPasswordNotifier extends StateNotifier<ForgotPasswordState> {
       state = ForgotPasswordError(message: e.message);
     } catch (e) {
       state = ForgotPasswordError(message: e.toString());
+    }
+  }
+
+  /// Verify OTP
+  ///
+  /// POST /api/accounts/verify-otp/
+  /// Payload: { "phone_number": "+919497883832", "otp_code": "123456" }
+  Future<bool> verifyOtp({
+    required String phoneNumber,
+    required String otpCode,
+  }) async {
+    state = const ForgotPasswordLoading();
+
+    try {
+      final repo = _ref.read(authRepositoryProvider);
+      final success = await repo.verifyOtp(
+        phoneNumber: phoneNumber,
+        otpCode: otpCode,
+      );
+
+      if (success) {
+        state = ForgotPasswordOtpVerified(
+          phoneNumber: phoneNumber,
+          otpCode: otpCode,
+        );
+        return true;
+      } else {
+        state = const ForgotPasswordError(
+          message: 'Invalid OTP. Please try again.',
+        );
+        return false;
+      }
+    } on AuthException catch (e) {
+      state = ForgotPasswordError(message: e.message);
+      return false;
+    } catch (e) {
+      state = ForgotPasswordError(message: e.toString());
+      return false;
     }
   }
 

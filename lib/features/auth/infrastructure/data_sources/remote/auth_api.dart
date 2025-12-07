@@ -133,7 +133,7 @@ class AuthApi {
 
   /// Send OTP for forgot password
   ///
-  /// POST /api/auth/otp-signin/
+  /// POST /api/accounts/send-otp/
   ///
   /// Sends OTP to the provided phone number
   /// Returns true on success
@@ -143,6 +143,31 @@ class AuthApi {
       await _apiClient.post<Map<String, dynamic>>(
         Endpoints.otpSignIn,
         data: {'phone_number': phoneNumber},
+      );
+      return true;
+    } on DioException catch (e) {
+      throw _handleDioException(e);
+    }
+  }
+
+  /// Verify OTP for forgot password
+  ///
+  /// POST /api/accounts/verify-otp/
+  ///
+  /// Verifies OTP and returns user info on success
+  /// Returns true on success
+  /// Throws AuthException on failure
+  Future<bool> verifyOtp({
+    required String phoneNumber,
+    required String otpCode,
+  }) async {
+    try {
+      await _apiClient.post<Map<String, dynamic>>(
+        Endpoints.verifyOtp,
+        data: {
+          'phone_number': phoneNumber,
+          'otp_code': otpCode,
+        },
       );
       return true;
     } on DioException catch (e) {

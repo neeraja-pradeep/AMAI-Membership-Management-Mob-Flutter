@@ -24,6 +24,10 @@ class Endpoints {
   /// Send OTP for forgot password
   static const String otpSignIn = '/api/accounts/send-otp/';
 
+  /// POST /api/accounts/verify-otp/
+  /// Verify OTP for forgot password
+  static const String verifyOtp = '/api/accounts/verify-otp/';
+
   /// POST /api/membership/register/
   /// Register new user (includes role selection)
   static const String register = '/api/membership/register/';

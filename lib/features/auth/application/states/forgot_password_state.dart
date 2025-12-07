@@ -22,6 +22,17 @@ class ForgotPasswordOtpSent extends ForgotPasswordState {
   const ForgotPasswordOtpSent({required this.phoneNumber});
 }
 
+/// OTP verified successfully - ready for password reset
+class ForgotPasswordOtpVerified extends ForgotPasswordState {
+  final String phoneNumber;
+  final String otpCode;
+
+  const ForgotPasswordOtpVerified({
+    required this.phoneNumber,
+    required this.otpCode,
+  });
+}
+
 /// OTP verified and password reset successful
 class ForgotPasswordSuccess extends ForgotPasswordState {
   const ForgotPasswordSuccess();

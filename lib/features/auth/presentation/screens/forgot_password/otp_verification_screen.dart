@@ -38,6 +38,7 @@ class _OtpVerificationScreenState extends ConsumerState<OtpVerificationScreen> {
   );
 
   bool _isResending = false;
+  bool _isVerifying = false;
   bool _canResend = false;
   int _resendTimer = 30;
   Timer? _timer;
@@ -124,7 +125,7 @@ class _OtpVerificationScreenState extends ConsumerState<OtpVerificationScreen> {
     return _otpControllers.map((c) => c.text).join();
   }
 
-  void _handleVerifyOtp() {
+  Future<void> _handleVerifyOtp() async {
     final otp = _otpValue;
 
     if (otp.length != 6) {
@@ -137,15 +138,49 @@ class _OtpVerificationScreenState extends ConsumerState<OtpVerificationScreen> {
       return;
     }
 
-    // Navigate to reset password screen with OTP
-    Navigator.of(context).push(
-      MaterialPageRoute(
-        builder: (context) => ResetPasswordScreen(
-          phoneNumber: widget.phoneNumber,
-          otp: otp,
-        ),
-      ),
-    );
+    if (_isVerifying) return;
+
+    setState(() {
+      _isVerifying = true;
+    });
+
+    try {
+      // Verify OTP with backend
+      final success = await ref
+          .read(forgotPasswordProvider.notifier)
+          .verifyOtp(phoneNumber: widget.phoneNumber, otpCode: otp);
+
+      if (!mounted) return;
+
+      if (success) {
+        // OTP verified - navigate to reset password screen
+        Navigator.of(context).push(
+          MaterialPageRoute(
+            builder: (context) => ResetPasswordScreen(
+              phoneNumber: widget.phoneNumber,
+              otp: otp,
+            ),
+          ),
+        );
+      } else {
+        // Show error from state
+        final state = ref.read(forgotPasswordProvider);
+        if (state is ForgotPasswordError) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(state.message),
+              backgroundColor: Colors.red,
+            ),
+          );
+        }
+      }
+    } finally {
+      if (mounted) {
+        setState(() {
+          _isVerifying = false;
+        });
+      }
+    }
   }
 
   void _onOtpChanged(int index, String value) {
@@ -341,7 +376,7 @@ class _OtpVerificationScreenState extends ConsumerState<OtpVerificationScreen> {
                   SizedBox(
                     height: 50.h,
                     child: ElevatedButton(
-                      onPressed: _handleVerifyOtp,
+                      onPressed: _isVerifying ? null : _handleVerifyOtp,
                       style: ElevatedButton.styleFrom(
                         backgroundColor: AppColors.brown,
                         shape: RoundedRectangleBorder(
@@ -349,14 +384,25 @@ class _OtpVerificationScreenState extends ConsumerState<OtpVerificationScreen> {
                         ),
                         elevation: 0,
                       ),
-                      child: Text(
-                        'Verify',
-                        style: TextStyle(
-                          fontSize: 16.sp,
-                          fontWeight: FontWeight.w600,
-                          color: Colors.white,
-                        ),
-                      ),
+                      child: _isVerifying
+                          ? SizedBox(
+                              width: 24.w,
+                              height: 24.h,
+                              child: const CircularProgressIndicator(
+                                strokeWidth: 2,
+                                valueColor: AlwaysStoppedAnimation<Color>(
+                                  Colors.white,
+                                ),
+                              ),
+                            )
+                          : Text(
+                              'Verify',
+                              style: TextStyle(
+                                fontSize: 16.sp,
+                                fontWeight: FontWeight.w600,
+                                color: Colors.white,
+                              ),
+                            ),
                     ),
                   ),
                 ],

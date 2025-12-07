@@ -379,6 +379,21 @@ class AuthRepositoryImpl implements AuthRepository {
   }
 
   @override
+  Future<bool> verifyOtp({
+    required String phoneNumber,
+    required String otpCode,
+  }) async {
+    try {
+      return await _authApi.verifyOtp(
+        phoneNumber: phoneNumber,
+        otpCode: otpCode,
+      );
+    } catch (e) {
+      rethrow;
+    }
+  }
+
+  @override
   Future<bool> verifyOtpAndResetPassword({
     required String phoneNumber,
     required String otpCode,
