@@ -365,7 +365,7 @@ class _AddressDetailsScreenState extends ConsumerState<AddressDetailsScreen> {
         SizedBox(height: 16.h),
         const Text("Country"),
         SizedBox(height: 10.h),
-        _buildDropdown(["India", "USA"], country, onCountryChange),
+        _buildDropdown(["India"], country, onCountryChange),
 
         SizedBox(height: 16.h),
         const Text("State"),
