@@ -85,10 +85,6 @@ class _ProfessionalDetailsScreenState
 
   static const List<String> dropdownCountry = [
     "India",
-    "UAE",
-    "USA",
-    "UK",
-    "Other",
   ];
 
   static const List<String> _qualificationOptions = [
