@@ -127,6 +127,13 @@ class ProfilePictureUploadParams {
   final String imagePath;
 }
 
+/// Provider for fetching user addresses
+final addressesProvider = FutureProvider.autoDispose<List<Map<String, dynamic>>>((ref) async {
+  final profileApi = ref.watch(profileApiProvider);
+  final response = await profileApi.fetchAddresses();
+  return response.data ?? [];
+});
+
 /// Provider for uploading profile picture
 final profilePictureUploadProvider = FutureProvider.autoDispose
     .family<Either<Failure, bool>, ProfilePictureUploadParams>(

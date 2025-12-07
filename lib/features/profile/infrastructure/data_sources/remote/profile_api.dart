@@ -48,6 +48,13 @@ abstract class ProfileApi {
     required int userId,
     required Map<String, dynamic> data,
   });
+
+  /// Fetches current user's addresses
+  ///
+  /// Returns ApiResponse containing:
+  /// - List of address maps on success (200)
+  /// - null data on error
+  Future<ApiResponse<List<Map<String, dynamic>>>> fetchAddresses();
 }
 
 /// Implementation of ProfileApi using ApiClient
@@ -138,6 +145,28 @@ class ProfileApiImpl implements ProfileApi {
 
     return ApiResponse<Map<String, dynamic>>(
       data: response.data,
+      statusCode: response.statusCode,
+      timestamp: response.timestamp,
+    );
+  }
+
+  @override
+  Future<ApiResponse<List<Map<String, dynamic>>>> fetchAddresses() async {
+    final response = await apiClient.get<List<dynamic>>(
+      Endpoints.addressesMe,
+      fromJson: (json) => json as List<dynamic>,
+    );
+
+    List<Map<String, dynamic>>? addresses;
+
+    if (response.data != null) {
+      addresses = response.data!
+          .map((e) => e as Map<String, dynamic>)
+          .toList();
+    }
+
+    return ApiResponse<List<Map<String, dynamic>>>(
+      data: addresses,
       statusCode: response.statusCode,
       timestamp: response.timestamp,
     );

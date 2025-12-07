@@ -66,6 +66,10 @@ class _EditAddressScreenState extends ConsumerState<EditAddressScreen> {
   void initState() {
     super.initState();
     _initializeFormData();
+    // Pre-fill addresses after build
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _prefillAddressData();
+    });
   }
 
   void _initializeFormData() {
@@ -76,6 +80,55 @@ class _EditAddressScreenState extends ConsumerState<EditAddressScreen> {
     _districtController = TextEditingController();
     _cityController = TextEditingController();
     _selectedCountry = 'India';
+  }
+
+  /// Pre-fills address fields from API data
+  void _prefillAddressData() {
+    final addressesAsync = ref.read(addressesProvider);
+    addressesAsync.whenData((addresses) {
+      if (addresses.isEmpty) return;
+
+      // Find communications address first, then fall back to first address
+      Map<String, dynamic>? addressToUse;
+      for (final addr in addresses) {
+        if (addr['type'] == 'communications') {
+          addressToUse = addr;
+          break;
+        }
+      }
+      addressToUse ??= addresses.first;
+
+      setState(() {
+        // Pre-fill text fields
+        _houseNoController.text = addressToUse?['address_line1'] ?? '';
+        _streetController.text = addressToUse?['address_line2'] ?? '';
+        _cityController.text = addressToUse?['city'] ?? '';
+        _postalCodeController.text = addressToUse?['postal_code'] ?? '';
+        _districtController.text = addressToUse?['district'] ?? '';
+
+        // Pre-fill country dropdown
+        final country = addressToUse?['country'];
+        if (country != null && _countryOptions.contains(country)) {
+          _selectedCountry = country;
+        }
+
+        // Pre-fill state dropdown
+        final state = addressToUse?['state'];
+        if (state != null && _stateOptions.contains(state)) {
+          _selectedState = state;
+        }
+
+        // Set address type checkboxes based on available addresses
+        for (final addr in addresses) {
+          if (addr['type'] == 'apta') {
+            _isAptaMailingAddress = true;
+          }
+          if (addr['type'] == 'permanent') {
+            _isPermanentAddress = true;
+          }
+        }
+      });
+    });
   }
 
   @override
