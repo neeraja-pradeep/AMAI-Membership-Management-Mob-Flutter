@@ -10,6 +10,9 @@ import 'package:myapp/features/auth/presentation/screens/splash_screen.dart';
 import 'package:myapp/features/home/infrastructure/data_sources/local/home_local_ds.dart';
 import 'package:myapp/features/membership/infrastructure/data_sources/local/membership_local_ds.dart';
 
+/// Global navigator key for navigation from anywhere (e.g., API interceptors)
+final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
+
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
@@ -23,8 +26,16 @@ Future<void> main() async {
   await Hive.openBox(HomeBoxKeys.boxName);
   await Hive.openBox(MembershipBoxKeys.boxName);
 
-  // Initialize API client with cookie persistence
-  await apiClientInstance.initialize();
+  // Initialize API client with cookie persistence and session expiry handler
+  await apiClientInstance.initialize(
+    onSessionExpired: () {
+      // Navigate to login screen on session expiry (401/403)
+      navigatorKey.currentState?.pushNamedAndRemoveUntil(
+        AppRouter.login,
+        (route) => false,
+      );
+    },
+  );
 
   runApp(const ProviderScope(child: MyApp()));
 }
@@ -42,6 +53,7 @@ class MyApp extends StatelessWidget {
       builder: (context, child) {
         return MaterialApp(
           title: 'AMAI',
+          navigatorKey: navigatorKey,
           debugShowCheckedModeBanner: false,
           theme: ThemeData(
             colorScheme: ColorScheme.fromSeed(

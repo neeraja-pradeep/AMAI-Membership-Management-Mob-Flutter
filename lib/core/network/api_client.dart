@@ -41,6 +41,7 @@ class ApiClient {
   late final PersistCookieJar _cookieJar;
   bool _isInitialized = false;
   int? _devUserId;
+  VoidCallback? _onSessionExpired;
 
   static const String kBaseUrl = 'https://amai.nexogms.com';
   static const Duration kConnectionTimeout = Duration(seconds: 30);
@@ -79,9 +80,12 @@ class ApiClient {
   ///
   /// This sets up cookie persistence and interceptors.
   /// Call this in main() before runApp().
-  Future<void> initialize() async {
+  ///
+  /// [onSessionExpired] - Callback to invoke when session expires (401/403)
+  Future<void> initialize({VoidCallback? onSessionExpired}) async {
     if (_isInitialized) return;
 
+    _onSessionExpired = onSessionExpired;
     await _initializeCookieJar();
     _setupInterceptors();
     _isInitialized = true;
@@ -122,21 +126,48 @@ class ApiClient {
   /// - No manual token storage in Hive
   /// - No manual token extraction from response headers/body
   /// - CSRF token comes from cookies ONLY
+  /// - CSRF token only added for non-GET requests (POST, PUT, PATCH, DELETE)
   void _setupInterceptors() {
     // CSRF interceptor - MUST come before logging
-    // Automatically extracts CSRF token from cookies and adds to requests
+    // Automatically extracts CSRF token from cookies and adds to non-GET requests
     _dio.interceptors.add(
       InterceptorsWrapper(
         onRequest: (options, handler) async {
-          final csrf = await _getCsrfToken();
-          if (csrf != null) {
-            options.headers['X-CSRFToken'] = csrf;
+          // Only add CSRF token for non-GET requests
+          if (options.method.toUpperCase() != 'GET') {
+            final csrf = await _getCsrfToken();
+            if (csrf != null) {
+              options.headers['X-CSRFToken'] = csrf;
+            }
           }
           // Add dev header if set (for development/testing)
           if (_devUserId != null) {
             options.headers['dev'] = _devUserId.toString();
           }
           return handler.next(options);
+        },
+      ),
+    );
+
+    // Session expiry interceptor - handles 401/403 responses
+    // Clears cookies and navigates to login screen
+    _dio.interceptors.add(
+      InterceptorsWrapper(
+        onResponse: (response, handler) {
+          final statusCode = response.statusCode;
+          // Check for session expiry (401/403)
+          if (statusCode == 401 || statusCode == 403) {
+            _handleSessionExpiry();
+          }
+          return handler.next(response);
+        },
+        onError: (error, handler) {
+          final statusCode = error.response?.statusCode;
+          // Check for session expiry (401/403) on errors
+          if (statusCode == 401 || statusCode == 403) {
+            _handleSessionExpiry();
+          }
+          return handler.next(error);
         },
       ),
     );
@@ -170,6 +201,13 @@ class ApiClient {
         ),
       );
     }
+  }
+
+  /// Handle session expiry - clear cookies and invoke callback
+  Future<void> _handleSessionExpiry() async {
+    debugPrint('[API] Session expired (401/403) - clearing cookies and navigating to login');
+    await clearCookies();
+    _onSessionExpired?.call();
   }
 
   /// Extract CSRF token from cookies
