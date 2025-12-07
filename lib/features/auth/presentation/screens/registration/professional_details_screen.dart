@@ -249,8 +249,8 @@ class _ProfessionalDetailsScreenState
           'central_council_no': professionalDetails.centralCouncilNo,
           'ug_college': professionalDetails.ugCollege,
           // API expects JSON arrays, not comma-separated strings
-          'professional_details': _selectedQualifications.toList(),
-          'academic_details': _selectedCategories.toList(),
+          'academic_details': _selectedQualifications.toList(),
+          'professional_details': _selectedCategories.toList(),
         });
       }
 
