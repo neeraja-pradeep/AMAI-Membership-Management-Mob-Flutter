@@ -77,13 +77,9 @@ abstract class AuthRepository {
     required String otpCode,
   });
 
-  /// Verify OTP and reset password
+  /// Reset password after OTP verification
   ///
-  /// Verifies OTP and sets new password
+  /// Resets password after successful OTP verification
   /// Returns true on success
-  Future<bool> verifyOtpAndResetPassword({
-    required String phoneNumber,
-    required String otpCode,
-    required String newPassword,
-  });
+  Future<bool> resetPassword({required String newPassword});
 }

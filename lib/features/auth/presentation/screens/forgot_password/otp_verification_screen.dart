@@ -156,10 +156,7 @@ class _OtpVerificationScreenState extends ConsumerState<OtpVerificationScreen> {
         // OTP verified - navigate to reset password screen
         Navigator.of(context).push(
           MaterialPageRoute(
-            builder: (context) => ResetPasswordScreen(
-              phoneNumber: widget.phoneNumber,
-              otp: otp,
-            ),
+            builder: (context) => const ResetPasswordScreen(),
           ),
         );
       } else {

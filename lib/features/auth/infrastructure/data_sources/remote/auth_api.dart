@@ -175,26 +175,18 @@ class AuthApi {
     }
   }
 
-  /// Verify OTP and reset password
+  /// Reset password after OTP verification
   ///
-  /// POST /api/auth/otp-signin/
+  /// POST /api/accounts/reset-password/
   ///
-  /// Verifies OTP and sets new password
+  /// Resets password after successful OTP verification
   /// Returns true on success
   /// Throws AuthException on failure
-  Future<bool> verifyOtpAndResetPassword({
-    required String phoneNumber,
-    required String otpCode,
-    required String newPassword,
-  }) async {
+  Future<bool> resetPassword({required String newPassword}) async {
     try {
       await _apiClient.post<Map<String, dynamic>>(
-        Endpoints.otpSignIn,
-        data: {
-          'phone_number': phoneNumber,
-          'otp_code': otpCode,
-          'new_password': newPassword,
-        },
+        Endpoints.resetPassword,
+        data: {'new_password': newPassword},
       );
       return true;
     } on DioException catch (e) {

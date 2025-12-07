@@ -77,28 +77,16 @@ class ForgotPasswordNotifier extends StateNotifier<ForgotPasswordState> {
     }
   }
 
-  /// Verify OTP and reset password
+  /// Reset password after OTP verification
   ///
-  /// POST /api/auth/otp-signin/
-  /// Payload: {
-  ///   "phone_number": "+919497883832",
-  ///   "otp_code": "521981",
-  ///   "new_password": "adminroot"
-  /// }
-  Future<void> verifyOtpAndResetPassword({
-    required String phoneNumber,
-    required String otpCode,
-    required String newPassword,
-  }) async {
+  /// POST /api/accounts/reset-password/
+  /// Payload: { "new_password": "newpassword123" }
+  Future<void> resetPassword({required String newPassword}) async {
     state = const ForgotPasswordLoading();
 
     try {
       final repo = _ref.read(authRepositoryProvider);
-      final success = await repo.verifyOtpAndResetPassword(
-        phoneNumber: phoneNumber,
-        otpCode: otpCode,
-        newPassword: newPassword,
-      );
+      final success = await repo.resetPassword(newPassword: newPassword);
 
       if (success) {
         state = const ForgotPasswordSuccess();

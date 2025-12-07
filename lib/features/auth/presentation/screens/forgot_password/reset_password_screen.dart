@@ -12,14 +12,7 @@ import '../../components/password_reset_success_dialog.dart';
 /// Third and final step in the password reset flow
 /// User enters new password and confirms it
 class ResetPasswordScreen extends ConsumerStatefulWidget {
-  final String phoneNumber;
-  final String otp;
-
-  const ResetPasswordScreen({
-    required this.phoneNumber,
-    required this.otp,
-    super.key,
-  });
+  const ResetPasswordScreen({super.key});
 
   @override
   ConsumerState<ResetPasswordScreen> createState() =>
@@ -43,9 +36,7 @@ class _ResetPasswordScreenState extends ConsumerState<ResetPasswordScreen> {
 
   Future<void> _handleResetPassword() async {
     if (_formKey.currentState?.validate() ?? false) {
-      ref.read(forgotPasswordProvider.notifier).verifyOtpAndResetPassword(
-            phoneNumber: widget.phoneNumber,
-            otpCode: widget.otp,
+      ref.read(forgotPasswordProvider.notifier).resetPassword(
             newPassword: _newPasswordController.text,
           );
     }

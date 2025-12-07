@@ -28,6 +28,10 @@ class Endpoints {
   /// Verify OTP for forgot password
   static const String verifyOtp = '/api/accounts/verify-otp/';
 
+  /// POST /api/accounts/reset-password/
+  /// Reset password after OTP verification
+  static const String resetPassword = '/api/accounts/reset-password/';
+
   /// POST /api/membership/register/
   /// Register new user (includes role selection)
   static const String register = '/api/membership/register/';
