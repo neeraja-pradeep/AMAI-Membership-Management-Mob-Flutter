@@ -12,10 +12,12 @@ class AswasCardModel {
     required this.policyNumber,
     required this.endDate,
     required this.policyStatus,
+    this.userName,
     this.productDescription,
     this.coverageAmount,
     this.premiumAmount,
     this.startDate,
+    this.policyPdfUrl,
     this.userId,
     this.productId,
     this.paymentId,
@@ -39,6 +41,9 @@ class AswasCardModel {
   @JsonKey(name: 'policy_status')
   final String policyStatus;
 
+  @JsonKey(name: 'user_name')
+  final String? userName;
+
   @JsonKey(name: 'product_description')
   final String? productDescription;
 
@@ -50,6 +55,9 @@ class AswasCardModel {
 
   @JsonKey(name: 'start_date')
   final String? startDate;
+
+  @JsonKey(name: 'policy_pdf_url')
+  final String? policyPdfUrl;
 
   @JsonKey(name: 'user')
   final int? userId;
@@ -76,10 +84,12 @@ class AswasCardModel {
       policyNumber: policyNumber,
       validUntil: _parseDate(endDate),
       policyStatus: policyStatus,
+      userName: userName,
       productDescription: productDescription,
       coverageAmount: coverageAmount,
       premiumAmount: premiumAmount,
       startDate: startDate != null ? _parseDate(startDate!) : null,
+      policyPdfUrl: policyPdfUrl,
     );
   }
 

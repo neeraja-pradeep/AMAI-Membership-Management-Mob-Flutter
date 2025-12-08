@@ -20,6 +20,9 @@ class AswasPlus with _$AswasPlus {
     /// Policy status (active, inactive, expired, etc.)
     required String policyStatus,
 
+    /// User name from API
+    String? userName,
+
     /// Product description
     String? productDescription,
 
@@ -31,6 +34,9 @@ class AswasPlus with _$AswasPlus {
 
     /// Policy start date
     DateTime? startDate,
+
+    /// Policy PDF URL for download
+    String? policyPdfUrl,
   }) = _AswasPlus;
 
   const AswasPlus._();

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:url_launcher/url_launcher.dart';
 import 'package:myapp/app/theme/colors.dart';
 import 'package:myapp/app/theme/typography.dart';
 import 'package:myapp/features/aswas_plus/domain/entities/nominee.dart';
@@ -109,6 +110,7 @@ class _AswasePlusScreenState extends ConsumerState<AswasePlusScreen> {
   /// Builds the main content with policy details
   Widget _buildContent(AswasPlus aswasPlus, {bool isLoading = false}) {
     final nomineesState = ref.watch(nomineesStateProvider);
+    final nomineesCount = nomineesState.currentData?.length ?? 0;
 
     return SingleChildScrollView(
       physics: const AlwaysScrollableScrollPhysics(),
@@ -119,7 +121,13 @@ class _AswasePlusScreenState extends ConsumerState<AswasePlusScreen> {
           // Policy Details Card
           PolicyDetailsCard(
             aswasPlus: aswasPlus,
+            nomineesCount: nomineesCount,
           ),
+
+          SizedBox(height: 12.h),
+
+          // Download PDF Button
+          _buildDownloadPdfButton(aswasPlus.policyPdfUrl),
 
           SizedBox(height: 24.h),
 
@@ -216,6 +224,79 @@ class _AswasePlusScreenState extends ConsumerState<AswasePlusScreen> {
     );
   }
 
+  /// Builds the Download PDF button
+  Widget _buildDownloadPdfButton(String? pdfUrl) {
+    return SizedBox(
+      width: double.infinity,
+      child: OutlinedButton.icon(
+        onPressed: () => _downloadPolicyPdf(pdfUrl),
+        icon: Icon(
+          Icons.download_rounded,
+          size: 20.sp,
+          color: AppColors.primary,
+        ),
+        label: Text(
+          'Download PDF',
+          style: TextStyle(
+            fontSize: 14.sp,
+            fontWeight: FontWeight.w600,
+            color: AppColors.primary,
+          ),
+        ),
+        style: OutlinedButton.styleFrom(
+          padding: EdgeInsets.symmetric(vertical: 12.h),
+          side: BorderSide(color: AppColors.primary, width: 1.5.w),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(8.r),
+          ),
+        ),
+      ),
+    );
+  }
+
+  /// Downloads the policy PDF
+  Future<void> _downloadPolicyPdf(String? pdfUrl) async {
+    if (pdfUrl == null || pdfUrl.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('PDF not available'),
+          backgroundColor: Colors.red,
+        ),
+      );
+      return;
+    }
+
+    String fullUrl = pdfUrl;
+    if (!pdfUrl.startsWith('http://') && !pdfUrl.startsWith('https://')) {
+      fullUrl = 'https://$pdfUrl';
+    }
+
+    try {
+      final uri = Uri.parse(fullUrl);
+      if (await canLaunchUrl(uri)) {
+        await launchUrl(uri, mode: LaunchMode.externalApplication);
+      } else {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('Could not open PDF'),
+              backgroundColor: Colors.red,
+            ),
+          );
+        }
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Error opening PDF: $e'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    }
+  }
+
   /// Builds the expired message widget
   Widget _buildExpiredMessage() {
     return Container(
@@ -277,6 +358,7 @@ class _AswasePlusScreenState extends ConsumerState<AswasePlusScreen> {
   /// Builds error state with cached data
   Widget _buildErrorWithCachedData(AswasPlus cachedData) {
     final nomineesState = ref.watch(nomineesStateProvider);
+    final nomineesCount = nomineesState.currentData?.length ?? 0;
 
     return Column(
       children: [
@@ -322,7 +404,10 @@ class _AswasePlusScreenState extends ConsumerState<AswasePlusScreen> {
               children: [
                 PolicyDetailsCard(
                   aswasPlus: cachedData,
+                  nomineesCount: nomineesCount,
                 ),
+                SizedBox(height: 12.h),
+                _buildDownloadPdfButton(cachedData.policyPdfUrl),
                 SizedBox(height: 24.h),
                 if (cachedData.isExpired) ...[
                   _buildExpiredMessage(),

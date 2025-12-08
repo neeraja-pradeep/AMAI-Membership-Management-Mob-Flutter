@@ -28,6 +28,9 @@ mixin _$AswasPlus {
   /// Policy status (active, inactive, expired, etc.)
   String get policyStatus => throw _privateConstructorUsedError;
 
+  /// User name from API
+  String? get userName => throw _privateConstructorUsedError;
+
   /// Product description
   String? get productDescription => throw _privateConstructorUsedError;
 
@@ -39,6 +42,9 @@ mixin _$AswasPlus {
 
   /// Policy start date
   DateTime? get startDate => throw _privateConstructorUsedError;
+
+  /// Policy PDF URL for download
+  String? get policyPdfUrl => throw _privateConstructorUsedError;
 
   @JsonKey(ignore: true)
   $AswasPlusCopyWith<AswasPlus> get copyWith =>
@@ -55,10 +61,12 @@ abstract class $AswasPlusCopyWith<$Res> {
       String policyNumber,
       DateTime validUntil,
       String policyStatus,
+      String? userName,
       String? productDescription,
       String? coverageAmount,
       String? premiumAmount,
-      DateTime? startDate});
+      DateTime? startDate,
+      String? policyPdfUrl});
 }
 
 /// @nodoc
@@ -78,10 +86,12 @@ class _$AswasPlusCopyWithImpl<$Res, $Val extends AswasPlus>
     Object? policyNumber = null,
     Object? validUntil = null,
     Object? policyStatus = null,
+    Object? userName = freezed,
     Object? productDescription = freezed,
     Object? coverageAmount = freezed,
     Object? premiumAmount = freezed,
     Object? startDate = freezed,
+    Object? policyPdfUrl = freezed,
   }) {
     return _then(_value.copyWith(
       id: null == id
@@ -100,6 +110,10 @@ class _$AswasPlusCopyWithImpl<$Res, $Val extends AswasPlus>
           ? _value.policyStatus
           : policyStatus // ignore: cast_nullable_to_non_nullable
               as String,
+      userName: freezed == userName
+          ? _value.userName
+          : userName // ignore: cast_nullable_to_non_nullable
+              as String?,
       productDescription: freezed == productDescription
           ? _value.productDescription
           : productDescription // ignore: cast_nullable_to_non_nullable
@@ -116,6 +130,10 @@ class _$AswasPlusCopyWithImpl<$Res, $Val extends AswasPlus>
           ? _value.startDate
           : startDate // ignore: cast_nullable_to_non_nullable
               as DateTime?,
+      policyPdfUrl: freezed == policyPdfUrl
+          ? _value.policyPdfUrl
+          : policyPdfUrl // ignore: cast_nullable_to_non_nullable
+              as String?,
     ) as $Val);
   }
 }
@@ -133,10 +151,12 @@ abstract class _$$AswasPlusImplCopyWith<$Res>
       String policyNumber,
       DateTime validUntil,
       String policyStatus,
+      String? userName,
       String? productDescription,
       String? coverageAmount,
       String? premiumAmount,
-      DateTime? startDate});
+      DateTime? startDate,
+      String? policyPdfUrl});
 }
 
 /// @nodoc
@@ -154,10 +174,12 @@ class __$$AswasPlusImplCopyWithImpl<$Res>
     Object? policyNumber = null,
     Object? validUntil = null,
     Object? policyStatus = null,
+    Object? userName = freezed,
     Object? productDescription = freezed,
     Object? coverageAmount = freezed,
     Object? premiumAmount = freezed,
     Object? startDate = freezed,
+    Object? policyPdfUrl = freezed,
   }) {
     return _then(_$AswasPlusImpl(
       id: null == id
@@ -176,6 +198,10 @@ class __$$AswasPlusImplCopyWithImpl<$Res>
           ? _value.policyStatus
           : policyStatus // ignore: cast_nullable_to_non_nullable
               as String,
+      userName: freezed == userName
+          ? _value.userName
+          : userName // ignore: cast_nullable_to_non_nullable
+              as String?,
       productDescription: freezed == productDescription
           ? _value.productDescription
           : productDescription // ignore: cast_nullable_to_non_nullable
@@ -192,6 +218,10 @@ class __$$AswasPlusImplCopyWithImpl<$Res>
           ? _value.startDate
           : startDate // ignore: cast_nullable_to_non_nullable
               as DateTime?,
+      policyPdfUrl: freezed == policyPdfUrl
+          ? _value.policyPdfUrl
+          : policyPdfUrl // ignore: cast_nullable_to_non_nullable
+              as String?,
     ));
   }
 }
@@ -204,10 +234,12 @@ class _$AswasPlusImpl extends _AswasPlus {
       required this.policyNumber,
       required this.validUntil,
       required this.policyStatus,
+      this.userName,
       this.productDescription,
       this.coverageAmount,
       this.premiumAmount,
-      this.startDate})
+      this.startDate,
+      this.policyPdfUrl})
       : super._();
 
   /// Unique identifier
@@ -226,6 +258,10 @@ class _$AswasPlusImpl extends _AswasPlus {
   @override
   final String policyStatus;
 
+  /// User name from API
+  @override
+  final String? userName;
+
   /// Product description
   @override
   final String? productDescription;
@@ -242,9 +278,13 @@ class _$AswasPlusImpl extends _AswasPlus {
   @override
   final DateTime? startDate;
 
+  /// Policy PDF URL for download
+  @override
+  final String? policyPdfUrl;
+
   @override
   String toString() {
-    return 'AswasPlus(id: $id, policyNumber: $policyNumber, validUntil: $validUntil, policyStatus: $policyStatus, productDescription: $productDescription, coverageAmount: $coverageAmount, premiumAmount: $premiumAmount, startDate: $startDate)';
+    return 'AswasPlus(id: $id, policyNumber: $policyNumber, validUntil: $validUntil, policyStatus: $policyStatus, userName: $userName, productDescription: $productDescription, coverageAmount: $coverageAmount, premiumAmount: $premiumAmount, startDate: $startDate, policyPdfUrl: $policyPdfUrl)';
   }
 
   @override
@@ -259,6 +299,8 @@ class _$AswasPlusImpl extends _AswasPlus {
                 other.validUntil == validUntil) &&
             (identical(other.policyStatus, policyStatus) ||
                 other.policyStatus == policyStatus) &&
+            (identical(other.userName, userName) ||
+                other.userName == userName) &&
             (identical(other.productDescription, productDescription) ||
                 other.productDescription == productDescription) &&
             (identical(other.coverageAmount, coverageAmount) ||
@@ -266,7 +308,9 @@ class _$AswasPlusImpl extends _AswasPlus {
             (identical(other.premiumAmount, premiumAmount) ||
                 other.premiumAmount == premiumAmount) &&
             (identical(other.startDate, startDate) ||
-                other.startDate == startDate));
+                other.startDate == startDate) &&
+            (identical(other.policyPdfUrl, policyPdfUrl) ||
+                other.policyPdfUrl == policyPdfUrl));
   }
 
   @override
@@ -276,10 +320,12 @@ class _$AswasPlusImpl extends _AswasPlus {
       policyNumber,
       validUntil,
       policyStatus,
+      userName,
       productDescription,
       coverageAmount,
       premiumAmount,
-      startDate);
+      startDate,
+      policyPdfUrl);
 
   @JsonKey(ignore: true)
   @override
@@ -294,10 +340,12 @@ abstract class _AswasPlus extends AswasPlus {
       required final String policyNumber,
       required final DateTime validUntil,
       required final String policyStatus,
+      final String? userName,
       final String? productDescription,
       final String? coverageAmount,
       final String? premiumAmount,
-      final DateTime? startDate}) = _$AswasPlusImpl;
+      final DateTime? startDate,
+      final String? policyPdfUrl}) = _$AswasPlusImpl;
   const _AswasPlus._() : super._();
 
   @override
@@ -318,6 +366,10 @@ abstract class _AswasPlus extends AswasPlus {
   String get policyStatus;
   @override
 
+  /// User name from API
+  String? get userName;
+  @override
+
   /// Product description
   String? get productDescription;
   @override
@@ -332,6 +384,10 @@ abstract class _AswasPlus extends AswasPlus {
 
   /// Policy start date
   DateTime? get startDate;
+  @override
+
+  /// Policy PDF URL for download
+  String? get policyPdfUrl;
   @override
   @JsonKey(ignore: true)
   _$$AswasPlusImplCopyWith<_$AswasPlusImpl> get copyWith =>

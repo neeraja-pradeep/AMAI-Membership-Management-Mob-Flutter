@@ -8,11 +8,15 @@ import 'package:myapp/features/home/domain/entities/aswas_plus.dart';
 class PolicyDetailsCard extends StatelessWidget {
   const PolicyDetailsCard({
     required this.aswasPlus,
+    this.nomineesCount = 0,
     super.key,
   });
 
   /// ASWAS Plus policy data
   final AswasPlus aswasPlus;
+
+  /// Number of nominees
+  final int nomineesCount;
 
   @override
   Widget build(BuildContext context) {
@@ -35,21 +39,83 @@ class PolicyDetailsCard extends StatelessWidget {
         children: [
           // Header with title and status badge
           _buildHeader(),
-          SizedBox(height: 20.h),
+          SizedBox(height: 16.h),
 
-          // Policy Number (displayed without label)
+          // User Name
+          if (aswasPlus.userName != null && aswasPlus.userName!.isNotEmpty)
+            Text(
+              aswasPlus.userName!,
+              style: TextStyle(
+                fontSize: 16.sp,
+                fontWeight: FontWeight.w600,
+                color: AppColors.textPrimary,
+              ),
+            ),
+          SizedBox(height: 8.h),
+
+          // Policy Number
           Text(
             aswasPlus.policyNumber,
             style: TextStyle(
               fontSize: 14.sp,
               fontWeight: FontWeight.w500,
-              color: AppColors.textPrimary,
+              color: AppColors.textSecondary,
             ),
           ),
-          SizedBox(height: 12.h),
+          SizedBox(height: 16.h),
 
-          // Valid Until
-          _buildDetailRow('Valid Until', aswasPlus.displayValidUntil),
+          // Number of Nominees and Valid Until in a row
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              // Number of Nominees
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'Nominees',
+                    style: TextStyle(
+                      fontSize: 12.sp,
+                      fontWeight: FontWeight.w400,
+                      color: AppColors.textSecondary,
+                    ),
+                  ),
+                  SizedBox(height: 4.h),
+                  Text(
+                    '$nomineesCount',
+                    style: TextStyle(
+                      fontSize: 14.sp,
+                      fontWeight: FontWeight.w600,
+                      color: AppColors.textPrimary,
+                    ),
+                  ),
+                ],
+              ),
+              // Valid Until
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.end,
+                children: [
+                  Text(
+                    'Valid Until',
+                    style: TextStyle(
+                      fontSize: 12.sp,
+                      fontWeight: FontWeight.w400,
+                      color: AppColors.textSecondary,
+                    ),
+                  ),
+                  SizedBox(height: 4.h),
+                  Text(
+                    aswasPlus.displayValidUntil,
+                    style: TextStyle(
+                      fontSize: 14.sp,
+                      fontWeight: FontWeight.w600,
+                      color: AppColors.textPrimary,
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
         ],
       ),
     );
