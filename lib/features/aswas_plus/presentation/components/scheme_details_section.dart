@@ -56,7 +56,7 @@ class SchemeDetailsSection extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                productDescription ?? _defaultSchemeDetails,
+                _defaultSchemeDetails,
                 style: TextStyle(
                   fontSize: 14.sp,
                   fontWeight: FontWeight.w400,
@@ -100,12 +100,22 @@ class SchemeDetailsSection extends StatelessWidget {
     );
   }
 
-  /// Default scheme details if not available from API
+  /// Static scheme details text
   static const String _defaultSchemeDetails =
-      'The Aswas Plus scheme is a social security scheme designed for AMAI family members, launched in 2017. '
+      'The Aswasplus scheme is a social security scheme designed for AMAI family members, launched in 2017. '
       'This family protection scheme has death claim settlement of 7 working days. '
       'It has lock in period of 2 years (except for accident deaths). '
-      'More than 5,000 AMAI members are already part of this scheme.';
+      'More than 5,000 AMAI members are already part of this scheme.\n\n'
+      'All AMAI members below the age of 55 years can join this scheme.\n\n'
+      'They need to pay:\n'
+      '1. A one-time joining fee (age-dependent)\n'
+      '2. Annual subscription fee of ₹300\n\n'
+      'For renewal, members must pay:\n'
+      '1. Annual subscription fee of ₹300\n'
+      '2. ₹200 per death claim\n\n'
+      'Renewals must be done before March 31st each year.\n\n'
+      'By joining this scheme, members can collectively contribute to a support system that benefits families in need during their difficult times. '
+      'Join this scheme to embody the spirit of mutual support where members look out for each other\'s families.';
 }
 
 /// Shimmer loading state for SchemeDetailsSection
