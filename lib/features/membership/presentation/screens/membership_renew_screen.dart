@@ -37,7 +37,7 @@ class _MembershipRenewScreenState extends ConsumerState<MembershipRenewScreen> {
         backgroundColor: AppColors.white,
         elevation: 0,
         leading: IconButton(
-          icon: Icon(Icons.arrow_back, color: AppColors.textPrimary),
+          icon: const Icon(Icons.arrow_back, color: AppColors.textPrimary),
           onPressed: () => Navigator.of(context).pop(),
         ),
       ),
@@ -90,7 +90,8 @@ class _MembershipRenewScreenState extends ConsumerState<MembershipRenewScreen> {
 
   Widget _buildMembershipCard(dynamic membershipState) {
     final membershipData = membershipState.currentData;
-    final membershipType = membershipData?.displayMembershipType ?? 'Membership';
+    final membershipType =
+        membershipData?.displayMembershipType ?? 'Membership';
 
     return Container(
       width: double.infinity,
@@ -98,10 +99,7 @@ class _MembershipRenewScreenState extends ConsumerState<MembershipRenewScreen> {
       decoration: BoxDecoration(
         color: AppColors.cardBackground,
         borderRadius: BorderRadius.circular(12.r),
-        border: Border.all(
-          color: AppColors.primary,
-          width: 2.w,
-        ),
+        border: Border.all(color: AppColors.primary, width: 2.w),
         boxShadow: [
           BoxShadow(
             color: AppColors.cardShadow,
@@ -118,16 +116,13 @@ class _MembershipRenewScreenState extends ConsumerState<MembershipRenewScreen> {
             height: 24.w,
             decoration: BoxDecoration(
               shape: BoxShape.circle,
-              border: Border.all(
-                color: AppColors.primary,
-                width: 2.w,
-              ),
+              border: Border.all(color: AppColors.primary, width: 2.w),
             ),
             child: Center(
               child: Container(
                 width: 12.w,
                 height: 12.w,
-                decoration: BoxDecoration(
+                decoration: const BoxDecoration(
                   shape: BoxShape.circle,
                   color: AppColors.primary,
                 ),
@@ -185,10 +180,7 @@ class _MembershipRenewScreenState extends ConsumerState<MembershipRenewScreen> {
       ),
       child: Column(
         children: [
-          _buildDetailRow(
-            'Full Name',
-            membershipData?.memberName ?? 'N/A',
-          ),
+          _buildDetailRow('Full Name', membershipData?.memberName ?? 'N/A'),
           SizedBox(height: 12.h),
           _buildDetailRow(
             'Membership ID',
@@ -266,8 +258,9 @@ class _MembershipRenewScreenState extends ConsumerState<MembershipRenewScreen> {
                         width: 20.h,
                         child: CircularProgressIndicator(
                           strokeWidth: 2.w,
-                          valueColor:
-                              AlwaysStoppedAnimation<Color>(AppColors.white),
+                          valueColor: const AlwaysStoppedAnimation<Color>(
+                            AppColors.white,
+                          ),
                         ),
                       )
                     : Text(
@@ -340,9 +333,8 @@ class _MembershipRenewScreenState extends ConsumerState<MembershipRenewScreen> {
           });
           Navigator.of(context).push(
             MaterialPageRoute<void>(
-              builder: (context) => MembershipPaymentScreen(
-                paymentResponse: paymentResponse,
-              ),
+              builder: (context) =>
+                  MembershipPaymentScreen(paymentResponse: paymentResponse),
             ),
           );
         },

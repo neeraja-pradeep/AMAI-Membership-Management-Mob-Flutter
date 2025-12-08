@@ -6,10 +6,7 @@ import 'package:myapp/features/profile/domain/entities/profile_data.dart';
 
 /// Personal information card showing membership details
 class PersonalInformationCard extends StatelessWidget {
-  const PersonalInformationCard({
-    super.key,
-    required this.profileData,
-  });
+  const PersonalInformationCard({super.key, required this.profileData});
 
   final ProfileData profileData;
 
@@ -22,10 +19,10 @@ class PersonalInformationCard extends StatelessWidget {
         color: AppColors.white,
         borderRadius: BorderRadius.circular(12.r),
         boxShadow: [
-          BoxShadow(
+          const BoxShadow(
             color: AppColors.cardShadow,
             blurRadius: 8,
-            offset: const Offset(0, 2),
+            offset: Offset(0, 2),
           ),
         ],
       ),
@@ -43,13 +40,22 @@ class PersonalInformationCard extends StatelessWidget {
           SizedBox(height: 16.h),
           _buildInfoRow('Member ID', profileData.membershipNumber ?? 'N/A'),
           _buildDivider(),
-          _buildInfoRow('Specialization', profileData.membershipType.displayName),
+          _buildInfoRow(
+            'Specialization',
+            profileData.membershipType.displayName,
+          ),
           _buildDivider(),
-          _buildInfoRow('Gender', profileData.userProfile.formattedGender ?? 'N/A'),
+          _buildInfoRow(
+            'Gender',
+            profileData.userProfile.formattedGender ?? 'N/A',
+          ),
           _buildDivider(),
           _buildInfoRow('Valid Until', _formatValidUntil()),
           _buildDivider(),
-          _buildInfoRow('Date of Birth', profileData.userProfile.formattedDateOfBirth ?? 'N/A'),
+          _buildInfoRow(
+            'Date of Birth',
+            profileData.userProfile.formattedDateOfBirth ?? 'N/A',
+          ),
         ],
       ),
     );
@@ -68,10 +74,7 @@ class PersonalInformationCard extends StatelessWidget {
         children: [
           Text(
             label,
-            style: TextStyle(
-              fontSize: 14.sp,
-              color: AppColors.textSecondary,
-            ),
+            style: TextStyle(fontSize: 14.sp, color: AppColors.textSecondary),
           ),
           Text(
             value,
@@ -87,9 +90,6 @@ class PersonalInformationCard extends StatelessWidget {
   }
 
   Widget _buildDivider() {
-    return Divider(
-      color: AppColors.dividerLight,
-      height: 1,
-    );
+    return const Divider(color: AppColors.dividerLight, height: 1);
   }
 }

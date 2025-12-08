@@ -23,6 +23,11 @@ class _PasswordFieldState extends State<PasswordField> {
       textInputAction: TextInputAction.done,
       decoration: InputDecoration(
         hintText: 'Enter your password',
+        hintStyle: TextStyle(
+          fontSize: 14.sp, // << change size
+          color: Colors.grey, // << change color
+          fontWeight: FontWeight.w300,
+        ),
 
         suffixIcon: IconButton(
           icon: Icon(

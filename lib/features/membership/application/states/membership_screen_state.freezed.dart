@@ -286,7 +286,7 @@ class _$LoadingImpl extends _Loading {
   @override
   int get hashCode => Object.hash(runtimeType, previousData);
 
-  @JsonKey(includeFromJson: false, includeToJson: false)
+  @JsonKey(ignore: true)
   @override
   @pragma('vm:prefer-inline')
   _$$LoadingImplCopyWith<_$LoadingImpl> get copyWith =>
@@ -380,7 +380,7 @@ abstract class _Loading extends MembershipScreenState {
   const _Loading._() : super._();
 
   MembershipStatus? get previousData;
-  @JsonKey(includeFromJson: false, includeToJson: false)
+  @JsonKey(ignore: true)
   _$$LoadingImplCopyWith<_$LoadingImpl> get copyWith =>
       throw _privateConstructorUsedError;
 }
@@ -451,7 +451,7 @@ class _$LoadedImpl extends _Loaded {
   @override
   int get hashCode => Object.hash(runtimeType, membershipStatus);
 
-  @JsonKey(includeFromJson: false, includeToJson: false)
+  @JsonKey(ignore: true)
   @override
   @pragma('vm:prefer-inline')
   _$$LoadedImplCopyWith<_$LoadedImpl> get copyWith =>
@@ -545,7 +545,7 @@ abstract class _Loaded extends MembershipScreenState {
   const _Loaded._() : super._();
 
   MembershipStatus get membershipStatus;
-  @JsonKey(includeFromJson: false, includeToJson: false)
+  @JsonKey(ignore: true)
   _$$LoadedImplCopyWith<_$LoadedImpl> get copyWith =>
       throw _privateConstructorUsedError;
 }
@@ -750,7 +750,7 @@ class _$ErrorImpl extends _Error {
   @override
   int get hashCode => Object.hash(runtimeType, failure, cachedData);
 
-  @JsonKey(includeFromJson: false, includeToJson: false)
+  @JsonKey(ignore: true)
   @override
   @pragma('vm:prefer-inline')
   _$$ErrorImplCopyWith<_$ErrorImpl> get copyWith =>
@@ -846,7 +846,7 @@ abstract class _Error extends MembershipScreenState {
 
   Failure get failure;
   MembershipStatus? get cachedData;
-  @JsonKey(includeFromJson: false, includeToJson: false)
+  @JsonKey(ignore: true)
   _$$ErrorImplCopyWith<_$ErrorImpl> get copyWith =>
       throw _privateConstructorUsedError;
 }

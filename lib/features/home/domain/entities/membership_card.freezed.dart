@@ -349,6 +349,7 @@ class _$MembershipCardImpl extends _MembershipCard {
   List<String>? get academicDetails {
     final value = _academicDetails;
     if (value == null) return null;
+    if (_academicDetails is EqualUnmodifiableListView) return _academicDetails;
     // ignore: implicit_dynamic_type
     return EqualUnmodifiableListView(value);
   }
@@ -361,6 +362,8 @@ class _$MembershipCardImpl extends _MembershipCard {
   List<String>? get professionalDetails {
     final value = _professionalDetails;
     if (value == null) return null;
+    if (_professionalDetails is EqualUnmodifiableListView)
+      return _professionalDetails;
     // ignore: implicit_dynamic_type
     return EqualUnmodifiableListView(value);
   }
@@ -400,8 +403,7 @@ class _$MembershipCardImpl extends _MembershipCard {
                 other.validUntil == validUntil) &&
             (identical(other.isActive, isActive) ||
                 other.isActive == isActive) &&
-            (identical(other.userId, userId) ||
-                other.userId == userId) &&
+            (identical(other.userId, userId) || other.userId == userId) &&
             (identical(other.membershipType, membershipType) ||
                 other.membershipType == membershipType) &&
             (identical(other.startDate, startDate) ||

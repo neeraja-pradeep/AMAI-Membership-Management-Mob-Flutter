@@ -61,6 +61,26 @@ class AppColors {
     transform: GradientRotation(178.93 * pi / 180),
   );
 
+  static const LinearGradient loginBackground = LinearGradient(
+    begin: Alignment.bottomCenter,
+    end: Alignment.topCenter,
+    colors: [
+      Color.fromRGBO(255, 255, 255, 0.0), // rgba(255,255,255,0)
+      Color.fromRGBO(244, 212, 212, 0.48), // rgba(244,212,212,0.48)
+    ],
+    stops: [0.6727, 0.9683], // same as 67.27% & 96.83%
+  );
+
+  static const LinearGradient splashBackground = LinearGradient(
+    begin: Alignment.topCenter,
+    end: Alignment.bottomCenter,
+    colors: [
+      Color(0xFFFFFFFF), // white
+      Color(0xFFF4E3E3), // soft pink
+    ],
+    stops: [0.0, 1.0],
+  );
+
   // ============== Text Colors ==============
   static const Color textPrimary = Color(0xFF212121);
   static const Color textSecondary = Color(0xFF757575);

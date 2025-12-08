@@ -99,112 +99,118 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Container(
-        width: double.infinity,
-        height: double.infinity,
-
-        // Background Image
-        decoration: const BoxDecoration(
-          image: DecorationImage(
-            image: AssetImage("assets/background.jpg"),
-            fit: BoxFit.cover,
-          ),
-        ),
-
-        child: Stack(
-          children: [
-            SingleChildScrollView(
-              child: Padding(
-                padding: EdgeInsets.symmetric(horizontal: 24.w),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: [
-                    SizedBox(height: 60.h),
-
-                    // Title
-                    Text(
-                      "Register",
-                      textAlign: TextAlign.center,
-                      style: TextStyle(
-                        fontSize: 30.sp,
-                        fontWeight: FontWeight.w700,
-                      ),
-                    ),
-
-                    SizedBox(height: 60.h),
-
-                    Form(
-                      key: _formKey,
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.stretch,
-                        children: [
-                          const Text(
-                            "Email / Username",
-                            style: TextStyle(
-                              fontWeight: FontWeight.w500,
-                              fontSize: 20,
-                            ),
-                          ),
-                          SizedBox(height: 16.h),
-
-                          EmailField(controller: _emailController),
-
-                          SizedBox(height: 20.h),
-                          const Text(
-                            "Password",
-                            style: TextStyle(
-                              fontWeight: FontWeight.w500,
-                              fontSize: 20,
-                            ),
-                          ),
-                          SizedBox(height: 16.h),
-
-                          PasswordField(controller: _passwordController),
-
-                          SizedBox(height: 20.h),
-                          const Text(
-                            "Confirm Password",
-                            style: TextStyle(
-                              fontWeight: FontWeight.w500,
-                              fontSize: 20,
-                            ),
-                          ),
-                          SizedBox(height: 16.h),
-
-                          PasswordField(controller: _confirmPasswordController),
-
-                          SizedBox(height: 40.h),
-
-                          SizedBox(
-                            height: 50.h,
-                            child: ElevatedButton(
-                              onPressed: _continueRegistration,
-                              style: ElevatedButton.styleFrom(
-                                backgroundColor: AppColors.brown,
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(30.r),
-                                ),
-                                elevation: 0,
-                              ),
-                              child: Text(
-                                'Continue Registration',
-                                style: TextStyle(
-                                  fontSize: 16.sp,
-                                  fontWeight: FontWeight.w600,
-                                  color: Colors.white,
-                                ),
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ],
-                ),
+      body: Stack(
+        children: [
+          Container(
+            width: double.infinity,
+            height: double.infinity,
+            decoration: const BoxDecoration(
+              image: DecorationImage(
+                image: AssetImage("assets/background.jpg"),
+                fit: BoxFit.cover,
               ),
             ),
-          ],
-        ),
+          ),
+
+          // gradient overlay
+          Container(
+            width: double.infinity,
+            height: double.infinity,
+            decoration: const BoxDecoration(
+              gradient: AppColors.loginBackground,
+            ),
+          ),
+          SingleChildScrollView(
+            child: Padding(
+              padding: EdgeInsets.symmetric(horizontal: 24.w),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  SizedBox(height: 100.h),
+
+                  // Title
+                  Text(
+                    "Set Login Credentials",
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                      fontSize: 24.sp,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+
+                  SizedBox(height: 40.h),
+
+                  Form(
+                    key: _formKey,
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: [
+                        Text(
+                          "Enter Email Id",
+                          style: TextStyle(
+                            fontWeight: FontWeight.w500,
+                            fontSize: 16.sp,
+                          ),
+                        ),
+                        SizedBox(height: 12.h),
+
+                        EmailField(controller: _emailController),
+
+                        SizedBox(height: 24.h),
+                        Text(
+                          "Set Password",
+                          style: TextStyle(
+                            fontWeight: FontWeight.w500,
+                            fontSize: 16.sp,
+                          ),
+                        ),
+                        SizedBox(height: 12.h),
+
+                        PasswordField(controller: _passwordController),
+
+                        SizedBox(height: 24.h),
+                        Text(
+                          "Confirm Password",
+                          style: TextStyle(
+                            fontWeight: FontWeight.w500,
+                            fontSize: 16.sp,
+                          ),
+                        ),
+                        SizedBox(height: 12.h),
+
+                        PasswordField(controller: _confirmPasswordController),
+
+                        SizedBox(height: 64.h),
+
+                        SizedBox(
+                          height: 50.h,
+                          child: ElevatedButton(
+                            onPressed: _continueRegistration,
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: AppColors.brown,
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(30.r),
+                              ),
+                              elevation: 0,
+                            ),
+                            child: Text(
+                              'Continue Registration',
+                              style: TextStyle(
+                                fontSize: 16.sp,
+                                fontWeight: FontWeight.w600,
+                                color: Colors.white,
+                              ),
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }

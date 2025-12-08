@@ -98,22 +98,30 @@ class _EditProfessionalDetailsScreenState
 
     if (professionalDetails != null && professionalDetails.isNotEmpty) {
       // Convert to uppercase for case-insensitive comparison
-      final upperCaseDetails = professionalDetails.map((e) => e.toUpperCase()).toList();
+      final upperCaseDetails = professionalDetails
+          .map((e) => e.toUpperCase())
+          .toList();
       setState(() {
         _researcherSelected = upperCaseDetails.contains('RESEARCHER');
         _pgScholarSelected = upperCaseDetails.contains('PG SCHOLAR');
-        _pgDiplomaScholarSelected = upperCaseDetails.contains('PG DIPLOMA SCHOLAR');
+        _pgDiplomaScholarSelected = upperCaseDetails.contains(
+          'PG DIPLOMA SCHOLAR',
+        );
         _deptOfIsmSelected = upperCaseDetails.contains('DEPT OF ISM');
         _deptOfNamSelected = upperCaseDetails.contains('DEPT OF NAM');
         _deptOfNhmSelected = upperCaseDetails.contains('DEPT OF NHM');
         _aidedCollegeSelected = upperCaseDetails.contains('AIDED COLLEGE');
         _govtCollegeSelected = upperCaseDetails.contains('GOVT COLLEGE');
         _pvtCollegeSelected = upperCaseDetails.contains('PVT COLLEGE');
-        _pvtSectorCollegeSelected = upperCaseDetails.contains('PVT SECTOR COLLEGE');
+        _pvtSectorCollegeSelected = upperCaseDetails.contains(
+          'PVT SECTOR COLLEGE',
+        );
         _retdSelected = upperCaseDetails.contains('RETIRED (RETD)');
         _pvtPracticeSelected = upperCaseDetails.contains('PRIVATE PRACTICE');
         _manufacturerSelected = upperCaseDetails.contains('MANUFACTURER');
-        _militaryServiceSelected = upperCaseDetails.contains('MILITARY SERVICE');
+        _militaryServiceSelected = upperCaseDetails.contains(
+          'MILITARY SERVICE',
+        );
         _centralGovtSelected = upperCaseDetails.contains('CENTRAL GOVT');
         _esiSelected = upperCaseDetails.contains('ESI');
         _otherSelected = upperCaseDetails.contains('OTHER');
@@ -165,7 +173,7 @@ class _EditProfessionalDetailsScreenState
         elevation: 0,
         centerTitle: true,
         leading: IconButton(
-          icon: Icon(Icons.arrow_back, color: AppColors.textPrimary),
+          icon: const Icon(Icons.arrow_back, color: AppColors.textPrimary),
           onPressed: () => Navigator.of(context).pop(),
         ),
       ),
@@ -213,11 +221,17 @@ class _EditProfessionalDetailsScreenState
                   decoration: BoxDecoration(
                     color: AppColors.warningLight,
                     borderRadius: BorderRadius.circular(8.r),
-                    border: Border.all(color: AppColors.warning.withOpacity(0.3)),
+                    border: Border.all(
+                      color: AppColors.warning.withOpacity(0.3),
+                    ),
                   ),
                   child: Row(
                     children: [
-                      Icon(Icons.hourglass_empty, color: AppColors.warning, size: 20.sp),
+                      Icon(
+                        Icons.hourglass_empty,
+                        color: AppColors.warning,
+                        size: 20.sp,
+                      ),
                       SizedBox(width: 12.w),
                       Expanded(
                         child: Text(
@@ -238,9 +252,13 @@ class _EditProfessionalDetailsScreenState
               SizedBox(
                 width: double.infinity,
                 child: ElevatedButton(
-                  onPressed: (_isSubmitting || _hasPendingRequest) ? null : _onSubmit,
+                  onPressed: (_isSubmitting || _hasPendingRequest)
+                      ? null
+                      : _onSubmit,
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: _hasPendingRequest ? AppColors.grey400 : AppColors.primary,
+                    backgroundColor: _hasPendingRequest
+                        ? AppColors.grey400
+                        : AppColors.primary,
                     disabledBackgroundColor: AppColors.grey300,
                     padding: EdgeInsets.symmetric(vertical: 14.h),
                     shape: RoundedRectangleBorder(
@@ -253,16 +271,21 @@ class _EditProfessionalDetailsScreenState
                           width: 20.h,
                           child: CircularProgressIndicator(
                             strokeWidth: 2.w,
-                            valueColor:
-                                AlwaysStoppedAnimation<Color>(AppColors.white),
+                            valueColor: const AlwaysStoppedAnimation<Color>(
+                              AppColors.white,
+                            ),
                           ),
                         )
                       : Text(
-                          _hasPendingRequest ? 'Request Pending Approval' : 'Submit Request',
+                          _hasPendingRequest
+                              ? 'Request Pending Approval'
+                              : 'Submit Request',
                           style: TextStyle(
                             fontSize: 16.sp,
                             fontWeight: FontWeight.w600,
-                            color: _hasPendingRequest ? AppColors.grey600 : AppColors.white,
+                            color: _hasPendingRequest
+                                ? AppColors.grey600
+                                : AppColors.white,
                           ),
                         ),
                 ),
@@ -290,10 +313,7 @@ class _EditProfessionalDetailsScreenState
           Expanded(
             child: Text(
               'Changes to your professional details require admin approval and may take some time to reflect.',
-              style: TextStyle(
-                fontSize: 12.sp,
-                color: AppColors.info,
-              ),
+              style: TextStyle(fontSize: 12.sp, color: AppColors.info),
             ),
           ),
         ],
@@ -319,10 +339,10 @@ class _EditProfessionalDetailsScreenState
         color: AppColors.white,
         borderRadius: BorderRadius.circular(12.r),
         boxShadow: [
-          BoxShadow(
+          const BoxShadow(
             color: AppColors.cardShadow,
             blurRadius: 8,
-            offset: const Offset(0, 2),
+            offset: Offset(0, 2),
           ),
         ],
       ),
@@ -334,9 +354,13 @@ class _EditProfessionalDetailsScreenState
           _buildCompactCheckboxItem('PG Scholar', _pgScholarSelected, (v) {
             setState(() => _pgScholarSelected = v ?? false);
           }),
-          _buildCompactCheckboxItem('PG Diploma Scholar', _pgDiplomaScholarSelected, (v) {
-            setState(() => _pgDiplomaScholarSelected = v ?? false);
-          }),
+          _buildCompactCheckboxItem(
+            'PG Diploma Scholar',
+            _pgDiplomaScholarSelected,
+            (v) {
+              setState(() => _pgDiplomaScholarSelected = v ?? false);
+            },
+          ),
           _buildCompactCheckboxItem('Dept of ISM', _deptOfIsmSelected, (v) {
             setState(() => _deptOfIsmSelected = v ?? false);
           }),
@@ -346,7 +370,9 @@ class _EditProfessionalDetailsScreenState
           _buildCompactCheckboxItem('Dept of NHM', _deptOfNhmSelected, (v) {
             setState(() => _deptOfNhmSelected = v ?? false);
           }),
-          _buildCompactCheckboxItem('Aided College', _aidedCollegeSelected, (v) {
+          _buildCompactCheckboxItem('Aided College', _aidedCollegeSelected, (
+            v,
+          ) {
             setState(() => _aidedCollegeSelected = v ?? false);
           }),
           _buildCompactCheckboxItem('Govt College', _govtCollegeSelected, (v) {
@@ -355,21 +381,31 @@ class _EditProfessionalDetailsScreenState
           _buildCompactCheckboxItem('PVT College', _pvtCollegeSelected, (v) {
             setState(() => _pvtCollegeSelected = v ?? false);
           }),
-          _buildCompactCheckboxItem('PVT Sector College', _pvtSectorCollegeSelected, (v) {
-            setState(() => _pvtSectorCollegeSelected = v ?? false);
-          }),
+          _buildCompactCheckboxItem(
+            'PVT Sector College',
+            _pvtSectorCollegeSelected,
+            (v) {
+              setState(() => _pvtSectorCollegeSelected = v ?? false);
+            },
+          ),
           _buildCompactCheckboxItem('Retired (RETD)', _retdSelected, (v) {
             setState(() => _retdSelected = v ?? false);
           }),
-          _buildCompactCheckboxItem('Private Practice', _pvtPracticeSelected, (v) {
+          _buildCompactCheckboxItem('Private Practice', _pvtPracticeSelected, (
+            v,
+          ) {
             setState(() => _pvtPracticeSelected = v ?? false);
           }),
           _buildCompactCheckboxItem('Manufacturer', _manufacturerSelected, (v) {
             setState(() => _manufacturerSelected = v ?? false);
           }),
-          _buildCompactCheckboxItem('Military Service', _militaryServiceSelected, (v) {
-            setState(() => _militaryServiceSelected = v ?? false);
-          }),
+          _buildCompactCheckboxItem(
+            'Military Service',
+            _militaryServiceSelected,
+            (v) {
+              setState(() => _militaryServiceSelected = v ?? false);
+            },
+          ),
           _buildCompactCheckboxItem('Central Govt', _centralGovtSelected, (v) {
             setState(() => _centralGovtSelected = v ?? false);
           }),
@@ -421,11 +457,7 @@ class _EditProfessionalDetailsScreenState
             ),
           ),
         ),
-        if (!isLast)
-          Divider(
-            color: AppColors.dividerLight,
-            height: 1,
-          ),
+        if (!isLast) const Divider(color: AppColors.dividerLight, height: 1),
       ],
     );
   }
@@ -437,10 +469,10 @@ class _EditProfessionalDetailsScreenState
         color: AppColors.white,
         borderRadius: BorderRadius.circular(12.r),
         boxShadow: [
-          BoxShadow(
+          const BoxShadow(
             color: AppColors.cardShadow,
             blurRadius: 8,
-            offset: const Offset(0, 2),
+            offset: Offset(0, 2),
           ),
         ],
       ),
@@ -511,27 +543,26 @@ class _EditProfessionalDetailsScreenState
             fillColor: AppColors.grey50,
             border: OutlineInputBorder(
               borderRadius: BorderRadius.circular(8.r),
-              borderSide: BorderSide(color: AppColors.grey300),
+              borderSide: const BorderSide(color: AppColors.grey300),
             ),
             enabledBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(8.r),
-              borderSide: BorderSide(color: AppColors.grey300),
+              borderSide: const BorderSide(color: AppColors.grey300),
             ),
             focusedBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(8.r),
-              borderSide: BorderSide(color: AppColors.primary, width: 2),
+              borderSide: const BorderSide(color: AppColors.primary, width: 2),
             ),
             errorBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(8.r),
-              borderSide: BorderSide(color: AppColors.error),
+              borderSide: const BorderSide(color: AppColors.error),
             ),
-            contentPadding:
-                EdgeInsets.symmetric(horizontal: 16.w, vertical: 12.h),
+            contentPadding: EdgeInsets.symmetric(
+              horizontal: 16.w,
+              vertical: 12.h,
+            ),
           ),
-          style: TextStyle(
-            fontSize: 14.sp,
-            color: AppColors.textPrimary,
-          ),
+          style: TextStyle(fontSize: 14.sp, color: AppColors.textPrimary),
         ),
       ],
     );
@@ -568,12 +599,9 @@ class _EditProfessionalDetailsScreenState
               isExpanded: true,
               hint: Text(
                 'Select $label',
-                style: TextStyle(
-                  fontSize: 14.sp,
-                  color: AppColors.textHint,
-                ),
+                style: TextStyle(fontSize: 14.sp, color: AppColors.textHint),
               ),
-              icon: Icon(
+              icon: const Icon(
                 Icons.keyboard_arrow_down,
                 color: AppColors.grey400,
               ),
@@ -606,18 +634,22 @@ class _EditProfessionalDetailsScreenState
     final selectedProfessionalDetails = <String>[];
     if (_researcherSelected) selectedProfessionalDetails.add('Researcher');
     if (_pgScholarSelected) selectedProfessionalDetails.add('PG Scholar');
-    if (_pgDiplomaScholarSelected) selectedProfessionalDetails.add('PG Diploma Scholar');
+    if (_pgDiplomaScholarSelected)
+      selectedProfessionalDetails.add('PG Diploma Scholar');
     if (_deptOfIsmSelected) selectedProfessionalDetails.add('Dept of ISM');
     if (_deptOfNamSelected) selectedProfessionalDetails.add('Dept of NAM');
     if (_deptOfNhmSelected) selectedProfessionalDetails.add('Dept of NHM');
     if (_aidedCollegeSelected) selectedProfessionalDetails.add('Aided College');
     if (_govtCollegeSelected) selectedProfessionalDetails.add('Govt College');
     if (_pvtCollegeSelected) selectedProfessionalDetails.add('PVT College');
-    if (_pvtSectorCollegeSelected) selectedProfessionalDetails.add('PVT Sector College');
+    if (_pvtSectorCollegeSelected)
+      selectedProfessionalDetails.add('PVT Sector College');
     if (_retdSelected) selectedProfessionalDetails.add('Retired (RETD)');
-    if (_pvtPracticeSelected) selectedProfessionalDetails.add('Private Practice');
+    if (_pvtPracticeSelected)
+      selectedProfessionalDetails.add('Private Practice');
     if (_manufacturerSelected) selectedProfessionalDetails.add('Manufacturer');
-    if (_militaryServiceSelected) selectedProfessionalDetails.add('Military Service');
+    if (_militaryServiceSelected)
+      selectedProfessionalDetails.add('Military Service');
     if (_centralGovtSelected) selectedProfessionalDetails.add('Central Govt');
     if (_esiSelected) selectedProfessionalDetails.add('ESI');
     if (_otherSelected) selectedProfessionalDetails.add('Other');
@@ -701,10 +733,7 @@ class _EditProfessionalDetailsScreenState
               Navigator.of(context).pop();
               Navigator.of(context).pop();
             },
-            child: Text(
-              'OK',
-              style: TextStyle(color: AppColors.primary),
-            ),
+            child: const Text('OK', style: TextStyle(color: AppColors.primary)),
           ),
         ],
       ),

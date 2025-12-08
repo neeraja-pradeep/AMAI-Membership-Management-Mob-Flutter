@@ -69,12 +69,15 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
               ),
               SizedBox(height: 16.h),
               ListTile(
-                leading: Icon(Icons.camera_alt, color: AppColors.primary),
+                leading: const Icon(Icons.camera_alt, color: AppColors.primary),
                 title: const Text('Camera'),
                 onTap: () => Navigator.pop(context, ImageSource.camera),
               ),
               ListTile(
-                leading: Icon(Icons.photo_library, color: AppColors.primary),
+                leading: const Icon(
+                  Icons.photo_library,
+                  color: AppColors.primary,
+                ),
                 title: const Text('Gallery'),
                 onTap: () => Navigator.pop(context, ImageSource.gallery),
               ),
@@ -182,7 +185,10 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
         loaded: (data) => _buildProfileContent(data),
         error: (failure, cachedData) {
           if (cachedData != null) {
-            return _buildProfileContent(cachedData, errorMessage: failure.message);
+            return _buildProfileContent(
+              cachedData,
+              errorMessage: failure.message,
+            );
           }
           return _buildErrorState(failure.message);
         },
@@ -237,9 +243,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
               ),
             SizedBox(height: 24.h),
             // Personal Information Card
-            PersonalInformationCard(
-              profileData: data,
-            ),
+            PersonalInformationCard(profileData: data),
             SizedBox(height: 16.h),
             // Edit Profile Options Card (conditional based on membership type)
             EditProfileOptionsCard(
@@ -247,9 +251,8 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
               onPersonalInfoTap: () {
                 Navigator.of(context).push(
                   MaterialPageRoute<void>(
-                    builder: (context) => EditPersonalInfoScreen(
-                      userProfile: data.userProfile,
-                    ),
+                    builder: (context) =>
+                        EditPersonalInfoScreen(userProfile: data.userProfile),
                   ),
                 );
               },
@@ -341,10 +344,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
           Expanded(
             child: Text(
               message,
-              style: TextStyle(
-                fontSize: 12.sp,
-                color: AppColors.error,
-              ),
+              style: TextStyle(fontSize: 12.sp, color: AppColors.error),
             ),
           ),
           TextButton(
@@ -370,11 +370,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(
-              Icons.error_outline,
-              size: 64.sp,
-              color: AppColors.grey400,
-            ),
+            Icon(Icons.error_outline, size: 64.sp, color: AppColors.grey400),
             SizedBox(height: 16.h),
             Text(
               'Unable to load profile',
@@ -388,10 +384,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
             Text(
               message,
               textAlign: TextAlign.center,
-              style: TextStyle(
-                fontSize: 14.sp,
-                color: AppColors.textSecondary,
-              ),
+              style: TextStyle(fontSize: 14.sp, color: AppColors.textSecondary),
             ),
             SizedBox(height: 24.h),
             ElevatedButton(
@@ -402,10 +395,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
               ),
               child: Text(
                 'Try Again',
-                style: TextStyle(
-                  fontSize: 14.sp,
-                  color: AppColors.white,
-                ),
+                style: TextStyle(fontSize: 14.sp, color: AppColors.white),
               ),
             ),
           ],

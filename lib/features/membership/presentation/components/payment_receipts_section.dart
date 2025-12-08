@@ -53,10 +53,10 @@ class PaymentReceiptsSection extends ConsumerWidget {
         color: AppColors.white,
         borderRadius: BorderRadius.circular(12.r),
         boxShadow: [
-          BoxShadow(
+          const BoxShadow(
             color: AppColors.cardShadow,
             blurRadius: 8,
-            offset: const Offset(0, 2),
+            offset: Offset(0, 2),
           ),
         ],
       ),
@@ -71,10 +71,7 @@ class PaymentReceiptsSection extends ConsumerWidget {
             SizedBox(height: 12.h),
             Text(
               'No payment history',
-              style: TextStyle(
-                fontSize: 14.sp,
-                color: AppColors.textSecondary,
-              ),
+              style: TextStyle(fontSize: 14.sp, color: AppColors.textSecondary),
             ),
           ],
         ),
@@ -90,10 +87,10 @@ class PaymentReceiptsSection extends ConsumerWidget {
         color: AppColors.white,
         borderRadius: BorderRadius.circular(12.r),
         boxShadow: [
-          BoxShadow(
+          const BoxShadow(
             color: AppColors.cardShadow,
             blurRadius: 8,
-            offset: const Offset(0, 2),
+            offset: Offset(0, 2),
           ),
         ],
       ),
@@ -116,19 +113,12 @@ class PaymentReceiptsSection extends ConsumerWidget {
       ),
       child: Row(
         children: [
-          Icon(
-            Icons.error_outline,
-            size: 20.sp,
-            color: AppColors.error,
-          ),
+          Icon(Icons.error_outline, size: 20.sp, color: AppColors.error),
           SizedBox(width: 8.w),
           Expanded(
             child: Text(
               'Failed to load payment receipts',
-              style: TextStyle(
-                fontSize: 14.sp,
-                color: AppColors.error,
-              ),
+              style: TextStyle(fontSize: 14.sp, color: AppColors.error),
             ),
           ),
         ],
@@ -143,10 +133,10 @@ class PaymentReceiptsSection extends ConsumerWidget {
         color: AppColors.white,
         borderRadius: BorderRadius.circular(12.r),
         boxShadow: [
-          BoxShadow(
+          const BoxShadow(
             color: AppColors.cardShadow,
             blurRadius: 8,
-            offset: const Offset(0, 2),
+            offset: Offset(0, 2),
           ),
         ],
       ),
@@ -154,10 +144,8 @@ class PaymentReceiptsSection extends ConsumerWidget {
         shrinkWrap: true,
         physics: const NeverScrollableScrollPhysics(),
         itemCount: receipts.length,
-        separatorBuilder: (context, index) => Divider(
-          color: AppColors.dividerLight,
-          height: 1,
-        ),
+        separatorBuilder: (context, index) =>
+            const Divider(color: AppColors.dividerLight, height: 1),
         itemBuilder: (context, index) {
           return PaymentReceiptItem(receipt: receipts[index]);
         },
@@ -168,10 +156,7 @@ class PaymentReceiptsSection extends ConsumerWidget {
 
 /// Individual payment receipt item widget
 class PaymentReceiptItem extends StatelessWidget {
-  const PaymentReceiptItem({
-    super.key,
-    required this.receipt,
-  });
+  const PaymentReceiptItem({super.key, required this.receipt});
 
   final PaymentReceiptModel receipt;
 
@@ -280,10 +265,7 @@ class PaymentReceiptItem extends StatelessWidget {
                   );
                 },
                 tooltip: 'View Receipt',
-                constraints: BoxConstraints(
-                  minWidth: 36.w,
-                  minHeight: 36.h,
-                ),
+                constraints: BoxConstraints(minWidth: 36.w, minHeight: 36.h),
                 padding: EdgeInsets.zero,
               ),
 
@@ -294,12 +276,10 @@ class PaymentReceiptItem extends StatelessWidget {
                   size: 20.sp,
                   color: AppColors.primary,
                 ),
-                onPressed: () => _downloadReceipt(context, receipt.receiptPdfUrl),
+                onPressed: () =>
+                    _downloadReceipt(context, receipt.receiptPdfUrl),
                 tooltip: 'Download Receipt',
-                constraints: BoxConstraints(
-                  minWidth: 36.w,
-                  minHeight: 36.h,
-                ),
+                constraints: BoxConstraints(minWidth: 36.w, minHeight: 36.h),
                 padding: EdgeInsets.zero,
               ),
             ],

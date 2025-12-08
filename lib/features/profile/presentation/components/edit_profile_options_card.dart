@@ -34,10 +34,10 @@ class EditProfileOptionsCard extends StatelessWidget {
         color: AppColors.white,
         borderRadius: BorderRadius.circular(12.r),
         boxShadow: [
-          BoxShadow(
+          const BoxShadow(
             color: AppColors.cardShadow,
             blurRadius: 8,
-            offset: const Offset(0, 2),
+            offset: Offset(0, 2),
           ),
         ],
       ),
@@ -59,10 +59,7 @@ class EditProfileOptionsCard extends StatelessWidget {
             onTap: onPersonalInfoTap,
           ),
           // Saved Addresses - visible to all
-          _buildOptionItem(
-            title: 'Saved Addresses',
-            onTap: onAddressesTap,
-          ),
+          _buildOptionItem(title: 'Saved Addresses', onTap: onAddressesTap),
           // Academic Details - Practitioner only
           if (membershipType == MembershipType.practitioner)
             _buildOptionItem(
@@ -84,8 +81,7 @@ class EditProfileOptionsCard extends StatelessWidget {
               isLast: true,
             ),
           // If student, last item is Saved Addresses
-          if (membershipType == MembershipType.student)
-            const SizedBox.shrink(),
+          if (membershipType == MembershipType.student) const SizedBox.shrink(),
         ],
       ),
     );
@@ -121,11 +117,7 @@ class EditProfileOptionsCard extends StatelessWidget {
             ),
           ),
         ),
-        if (!isLast)
-          Divider(
-            color: AppColors.dividerLight,
-            height: 1,
-          ),
+        if (!isLast) const Divider(color: AppColors.dividerLight, height: 1),
       ],
     );
   }

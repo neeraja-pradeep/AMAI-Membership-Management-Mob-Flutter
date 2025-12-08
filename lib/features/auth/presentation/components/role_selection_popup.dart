@@ -28,9 +28,10 @@ class _RoleSelectionPopupState extends State<RoleSelectionPopup> {
   @override
   Widget build(BuildContext context) {
     return Dialog(
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20.r)),
+      backgroundColor: Colors.white,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12.r)),
       child: Padding(
-        padding: EdgeInsets.all(24.w),
+        padding: EdgeInsets.all(20.w),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -39,11 +40,10 @@ class _RoleSelectionPopupState extends State<RoleSelectionPopup> {
             // Title
             Text(
               'Register as',
-              textAlign: TextAlign.center,
               style: TextStyle(
-                fontSize: 22.sp,
-                fontWeight: FontWeight.bold,
-                color: AppColors.brown,
+                fontSize: 20.sp,
+                fontWeight: FontWeight.w400,
+                color: AppColors.black,
               ),
             ),
 
@@ -60,7 +60,7 @@ class _RoleSelectionPopupState extends State<RoleSelectionPopup> {
               },
             ),
 
-            SizedBox(height: 12.h),
+            SizedBox(height: 7.h),
 
             _RoleOption(
               role: UserRole.houseSurgeon,
@@ -72,7 +72,7 @@ class _RoleSelectionPopupState extends State<RoleSelectionPopup> {
               },
             ),
 
-            SizedBox(height: 12.h),
+            SizedBox(height: 7.h),
 
             _RoleOption(
               role: UserRole.student,
@@ -88,40 +88,27 @@ class _RoleSelectionPopupState extends State<RoleSelectionPopup> {
 
             // Continue button
             SizedBox(
-              height: 50.h,
+              height: 44.h,
               child: ElevatedButton(
                 onPressed: _selectedRole != null ? _handleContinue : null,
                 style: ElevatedButton.styleFrom(
                   backgroundColor: AppColors.brown,
                   disabledBackgroundColor: Colors.grey[300],
                   shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12.r),
+                    borderRadius: BorderRadius.circular(50.r),
                   ),
                   elevation: 0,
                 ),
                 child: Text(
                   'Continue',
                   style: TextStyle(
-                    fontSize: 16.sp,
-                    fontWeight: FontWeight.w600,
+                    fontSize: 14.sp,
+                    fontWeight: FontWeight.w500,
                     color: _selectedRole != null
                         ? Colors.white
                         : Colors.grey[500],
                   ),
                 ),
-              ),
-            ),
-
-            SizedBox(height: 12.h),
-
-            // Cancel button
-            TextButton(
-              onPressed: () {
-                Navigator.pop(context);
-              },
-              child: Text(
-                'Cancel',
-                style: TextStyle(fontSize: 14.sp, color: Colors.grey[700]),
               ),
             ),
           ],
@@ -148,32 +135,29 @@ class _RoleOption extends StatelessWidget {
     return GestureDetector(
       onTap: onTap,
       child: Container(
-        padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 16.h),
+        padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 10.h),
         decoration: BoxDecoration(
           color: Colors.white,
           border: Border.all(
             color: isSelected ? AppColors.brown : Colors.grey[300]!,
-            width: isSelected ? 2 : 1,
+            width: isSelected ? 1 : 1,
           ),
-          borderRadius: BorderRadius.circular(12.r),
+          borderRadius: BorderRadius.circular(8.r),
         ),
         child: Row(
           children: [
             // Radio button
             Container(
-              width: 24.w,
-              height: 24.h,
+              width: 22.w,
+              height: 22.w,
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
                 border: Border.all(
                   color: isSelected ? AppColors.brown : Colors.grey[400]!,
-                  width: 2,
+                  width: 1,
                 ),
                 color: isSelected ? AppColors.brown : Colors.white,
               ),
-              child: isSelected
-                  ? Icon(Icons.check, size: 16.sp, color: Colors.white)
-                  : null,
             ),
 
             SizedBox(width: 12.w),
@@ -184,8 +168,8 @@ class _RoleOption extends StatelessWidget {
                 role.displayName,
                 style: TextStyle(
                   fontSize: 16.sp,
-                  fontWeight: isSelected ? FontWeight.w600 : FontWeight.normal,
-                  color: isSelected ? AppColors.brown : Colors.grey[800],
+                  fontWeight: isSelected ? FontWeight.w400 : FontWeight.normal,
+                  color: isSelected ? AppColors.black : Colors.grey[800],
                 ),
               ),
             ),

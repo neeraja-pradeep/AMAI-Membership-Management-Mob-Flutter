@@ -80,7 +80,9 @@ class _$ProfileStateCopyWithImpl<$Res, $Val extends ProfileState>
     implements $ProfileStateCopyWith<$Res> {
   _$ProfileStateCopyWithImpl(this._value, this._then);
 
+  // ignore: unused_field
   final $Val _value;
+  // ignore: unused_field
   final $Res Function($Val) _then;
 }
 
@@ -226,7 +228,8 @@ class __$$LoadingImplCopyWithImpl<$Res>
     return _then(_$LoadingImpl(
       previousData: freezed == previousData
           ? _value.previousData
-          : previousData as ProfileData?,
+          : previousData // ignore: cast_nullable_to_non_nullable
+              as ProfileData?,
     ));
   }
 
@@ -386,7 +389,8 @@ class __$$LoadedImplCopyWithImpl<$Res>
     return _then(_$LoadedImpl(
       data: null == data
           ? _value.data
-          : data as ProfileData,
+          : data // ignore: cast_nullable_to_non_nullable
+              as ProfileData,
     ));
   }
 
@@ -542,10 +546,12 @@ class __$$ErrorImplCopyWithImpl<$Res>
     return _then(_$ErrorImpl(
       failure: null == failure
           ? _value.failure
-          : failure as Failure,
+          : failure // ignore: cast_nullable_to_non_nullable
+              as Failure,
       cachedData: freezed == cachedData
           ? _value.cachedData
-          : cachedData as ProfileData?,
+          : cachedData // ignore: cast_nullable_to_non_nullable
+              as ProfileData?,
     ));
   }
 

@@ -84,7 +84,9 @@ class _RegisterHereScreenState extends ConsumerState<RegisterHereScreen> {
 
           // Pre-fill marital status if available
           if (userProfile.maritalStatus != null) {
-            _selectedMaritalStatus = _mapMaritalStatus(userProfile.maritalStatus);
+            _selectedMaritalStatus = _mapMaritalStatus(
+              userProfile.maritalStatus,
+            );
           }
         });
       }
@@ -125,7 +127,11 @@ class _RegisterHereScreenState extends ConsumerState<RegisterHereScreen> {
         elevation: 0,
         centerTitle: true,
         leading: IconButton(
-          icon: Icon(Icons.arrow_back_ios, color: AppColors.textPrimary, size: 20.sp),
+          icon: Icon(
+            Icons.arrow_back_ios,
+            color: AppColors.textPrimary,
+            size: 20.sp,
+          ),
           onPressed: () => Navigator.of(context).pop(),
         ),
       ),
@@ -301,7 +307,10 @@ class _RegisterHereScreenState extends ConsumerState<RegisterHereScreen> {
                 onTap: _removeLastNominee,
                 borderRadius: BorderRadius.circular(8.r),
                 child: Container(
-                  padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 8.h),
+                  padding: EdgeInsets.symmetric(
+                    horizontal: 16.w,
+                    vertical: 8.h,
+                  ),
                   decoration: BoxDecoration(
                     color: AppColors.error.withOpacity(0.1),
                     borderRadius: BorderRadius.circular(8.r),
@@ -368,11 +377,7 @@ class _RegisterHereScreenState extends ConsumerState<RegisterHereScreen> {
               if (_nominees.length > 1)
                 InkWell(
                   onTap: () => _removeNomineeAt(index),
-                  child: Icon(
-                    Icons.close,
-                    color: AppColors.error,
-                    size: 20.sp,
-                  ),
+                  child: Icon(Icons.close, color: AppColors.error, size: 20.sp),
                 ),
             ],
           ),
@@ -445,7 +450,9 @@ class _RegisterHereScreenState extends ConsumerState<RegisterHereScreen> {
               if (value == null || value.isEmpty) {
                 return 'Email is required';
               }
-              if (!RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$').hasMatch(value)) {
+              if (!RegExp(
+                r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$',
+              ).hasMatch(value)) {
                 return 'Please enter a valid email';
               }
               return null;
@@ -545,10 +552,7 @@ class _RegisterHereScreenState extends ConsumerState<RegisterHereScreen> {
           SizedBox(height: 8.h),
           Text(
             'Supported formats: PDF, JPG, PNG',
-            style: TextStyle(
-              fontSize: 12.sp,
-              color: AppColors.textHint,
-            ),
+            style: TextStyle(fontSize: 12.sp, color: AppColors.textHint),
           ),
         ],
       ),
@@ -575,7 +579,9 @@ class _RegisterHereScreenState extends ConsumerState<RegisterHereScreen> {
                 width: 20.h,
                 child: CircularProgressIndicator(
                   strokeWidth: 2.w,
-                  valueColor: AlwaysStoppedAnimation<Color>(AppColors.white),
+                  valueColor: const AlwaysStoppedAnimation<Color>(
+                    AppColors.white,
+                  ),
                 ),
               )
             : Text(
@@ -626,26 +632,26 @@ class _RegisterHereScreenState extends ConsumerState<RegisterHereScreen> {
             ),
             border: OutlineInputBorder(
               borderRadius: BorderRadius.circular(8.r),
-              borderSide: BorderSide(color: AppColors.grey300),
+              borderSide: const BorderSide(color: AppColors.grey300),
             ),
             enabledBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(8.r),
-              borderSide: BorderSide(color: AppColors.grey300),
+              borderSide: const BorderSide(color: AppColors.grey300),
             ),
             focusedBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(8.r),
-              borderSide: BorderSide(color: AppColors.primary, width: 2),
+              borderSide: const BorderSide(color: AppColors.primary, width: 2),
             ),
             errorBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(8.r),
-              borderSide: BorderSide(color: AppColors.error),
+              borderSide: const BorderSide(color: AppColors.error),
             ),
-            contentPadding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 12.h),
+            contentPadding: EdgeInsets.symmetric(
+              horizontal: 16.w,
+              vertical: 12.h,
+            ),
           ),
-          style: TextStyle(
-            fontSize: 14.sp,
-            color: AppColors.textPrimary,
-          ),
+          style: TextStyle(fontSize: 14.sp, color: AppColors.textPrimary),
         ),
       ],
     );
@@ -687,7 +693,9 @@ class _RegisterHereScreenState extends ConsumerState<RegisterHereScreen> {
                       : 'Select date',
                   style: TextStyle(
                     fontSize: 14.sp,
-                    color: value != null ? AppColors.textPrimary : AppColors.textHint,
+                    color: value != null
+                        ? AppColors.textPrimary
+                        : AppColors.textHint,
                   ),
                 ),
                 Icon(
@@ -735,12 +743,9 @@ class _RegisterHereScreenState extends ConsumerState<RegisterHereScreen> {
               isExpanded: true,
               hint: Text(
                 'Select $label',
-                style: TextStyle(
-                  fontSize: 14.sp,
-                  color: AppColors.textHint,
-                ),
+                style: TextStyle(fontSize: 14.sp, color: AppColors.textHint),
               ),
-              icon: Icon(
+              icon: const Icon(
                 Icons.keyboard_arrow_down,
                 color: AppColors.grey400,
               ),
@@ -884,7 +889,9 @@ class _RegisterHereScreenState extends ConsumerState<RegisterHereScreen> {
                       : 'Select date',
                   style: TextStyle(
                     fontSize: 14.sp,
-                    color: value != null ? AppColors.textPrimary : AppColors.textHint,
+                    color: value != null
+                        ? AppColors.textPrimary
+                        : AppColors.textHint,
                   ),
                 ),
                 Icon(
@@ -904,9 +911,7 @@ class _RegisterHereScreenState extends ConsumerState<RegisterHereScreen> {
   void _pickDocument() {
     // Static for now - will integrate with file_picker package later
     ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text('Document upload coming soon'),
-      ),
+      const SnackBar(content: Text('Document upload coming soon')),
     );
   }
 
@@ -992,7 +997,9 @@ class _RegisterHereScreenState extends ConsumerState<RegisterHereScreen> {
     };
 
     // Call API
-    final result = await ref.read(insuranceRegistrationProvider(payload).future);
+    final result = await ref.read(
+      insuranceRegistrationProvider(payload).future,
+    );
 
     if (!mounted) return;
 
@@ -1031,10 +1038,10 @@ class _RegisterHereScreenState extends ConsumerState<RegisterHereScreen> {
 /// Helper class to manage nominee form data
 class NomineeFormData {
   NomineeFormData()
-      : nameController = TextEditingController(),
-        addressController = TextEditingController(),
-        mobileController = TextEditingController(),
-        emailController = TextEditingController();
+    : nameController = TextEditingController(),
+      addressController = TextEditingController(),
+      mobileController = TextEditingController(),
+      emailController = TextEditingController();
 
   final TextEditingController nameController;
   final TextEditingController addressController;

@@ -10,10 +10,7 @@ import 'package:myapp/features/profile/domain/entities/user_profile.dart';
 /// Edit Personal Information Screen
 /// Allows users to edit their personal details
 class EditPersonalInfoScreen extends ConsumerStatefulWidget {
-  const EditPersonalInfoScreen({
-    super.key,
-    required this.userProfile,
-  });
+  const EditPersonalInfoScreen({super.key, required this.userProfile});
 
   final UserProfile userProfile;
 
@@ -65,11 +62,15 @@ class _EditPersonalInfoScreenState
 
     // Validate gender against dropdown options (set to null if not a valid option)
     final formattedGender = profile.formattedGender;
-    _selectedGender = _genderOptions.contains(formattedGender) ? formattedGender : null;
+    _selectedGender = _genderOptions.contains(formattedGender)
+        ? formattedGender
+        : null;
 
     // Validate blood group against dropdown options (set to null if not a valid option)
     final bloodGroup = profile.bloodGroup;
-    _selectedBloodGroup = _bloodGroupOptions.contains(bloodGroup) ? bloodGroup : null;
+    _selectedBloodGroup = _bloodGroupOptions.contains(bloodGroup)
+        ? bloodGroup
+        : null;
   }
 
   @override
@@ -98,7 +99,7 @@ class _EditPersonalInfoScreenState
         elevation: 0,
         centerTitle: true,
         leading: IconButton(
-          icon: Icon(Icons.arrow_back, color: AppColors.textPrimary),
+          icon: const Icon(Icons.arrow_back, color: AppColors.textPrimary),
           onPressed: () => Navigator.of(context).pop(),
         ),
       ),
@@ -135,8 +136,9 @@ class _EditPersonalInfoScreenState
                   if (value == null || value.isEmpty) {
                     return 'Email is required';
                   }
-                  if (!RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$')
-                      .hasMatch(value)) {
+                  if (!RegExp(
+                    r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$',
+                  ).hasMatch(value)) {
                     return 'Please enter a valid email';
                   }
                   return null;
@@ -247,11 +249,17 @@ class _EditPersonalInfoScreenState
                   decoration: BoxDecoration(
                     color: AppColors.warningLight,
                     borderRadius: BorderRadius.circular(8.r),
-                    border: Border.all(color: AppColors.warning.withOpacity(0.3)),
+                    border: Border.all(
+                      color: AppColors.warning.withOpacity(0.3),
+                    ),
                   ),
                   child: Row(
                     children: [
-                      Icon(Icons.hourglass_empty, color: AppColors.warning, size: 20.sp),
+                      Icon(
+                        Icons.hourglass_empty,
+                        color: AppColors.warning,
+                        size: 20.sp,
+                      ),
                       SizedBox(width: 12.w),
                       Expanded(
                         child: Text(
@@ -272,9 +280,13 @@ class _EditPersonalInfoScreenState
               SizedBox(
                 width: double.infinity,
                 child: ElevatedButton(
-                  onPressed: (_isSubmitting || _hasPendingRequest) ? null : _onSubmit,
+                  onPressed: (_isSubmitting || _hasPendingRequest)
+                      ? null
+                      : _onSubmit,
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: _hasPendingRequest ? AppColors.grey400 : AppColors.primary,
+                    backgroundColor: _hasPendingRequest
+                        ? AppColors.grey400
+                        : AppColors.primary,
                     disabledBackgroundColor: AppColors.grey300,
                     padding: EdgeInsets.symmetric(vertical: 14.h),
                     shape: RoundedRectangleBorder(
@@ -287,16 +299,21 @@ class _EditPersonalInfoScreenState
                           width: 20.h,
                           child: CircularProgressIndicator(
                             strokeWidth: 2.w,
-                            valueColor:
-                                AlwaysStoppedAnimation<Color>(AppColors.white),
+                            valueColor: const AlwaysStoppedAnimation<Color>(
+                              AppColors.white,
+                            ),
                           ),
                         )
                       : Text(
-                          _hasPendingRequest ? 'Request Pending Approval' : 'Submit Request',
+                          _hasPendingRequest
+                              ? 'Request Pending Approval'
+                              : 'Submit Request',
                           style: TextStyle(
                             fontSize: 16.sp,
                             fontWeight: FontWeight.w600,
-                            color: _hasPendingRequest ? AppColors.grey600 : AppColors.white,
+                            color: _hasPendingRequest
+                                ? AppColors.grey600
+                                : AppColors.white,
                           ),
                         ),
                 ),
@@ -324,10 +341,7 @@ class _EditPersonalInfoScreenState
           Expanded(
             child: Text(
               'Changes to your profile require admin approval and may take some time to reflect.',
-              style: TextStyle(
-                fontSize: 12.sp,
-                color: AppColors.info,
-              ),
+              style: TextStyle(fontSize: 12.sp, color: AppColors.info),
             ),
           ),
         ],
@@ -366,22 +380,24 @@ class _EditPersonalInfoScreenState
             fillColor: enabled ? AppColors.white : AppColors.grey100,
             border: OutlineInputBorder(
               borderRadius: BorderRadius.circular(8.r),
-              borderSide: BorderSide(color: AppColors.grey300),
+              borderSide: const BorderSide(color: AppColors.grey300),
             ),
             enabledBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(8.r),
-              borderSide: BorderSide(color: AppColors.grey300),
+              borderSide: const BorderSide(color: AppColors.grey300),
             ),
             focusedBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(8.r),
-              borderSide: BorderSide(color: AppColors.primary, width: 2),
+              borderSide: const BorderSide(color: AppColors.primary, width: 2),
             ),
             errorBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(8.r),
-              borderSide: BorderSide(color: AppColors.error),
+              borderSide: const BorderSide(color: AppColors.error),
             ),
-            contentPadding:
-                EdgeInsets.symmetric(horizontal: 16.w, vertical: 12.h),
+            contentPadding: EdgeInsets.symmetric(
+              horizontal: 16.w,
+              vertical: 12.h,
+            ),
           ),
           style: TextStyle(
             fontSize: 14.sp,
@@ -476,12 +492,9 @@ class _EditPersonalInfoScreenState
               isExpanded: true,
               hint: Text(
                 'Select $label',
-                style: TextStyle(
-                  fontSize: 14.sp,
-                  color: AppColors.textHint,
-                ),
+                style: TextStyle(fontSize: 14.sp, color: AppColors.textHint),
               ),
-              icon: Icon(
+              icon: const Icon(
                 Icons.keyboard_arrow_down,
                 color: AppColors.grey400,
               ),
@@ -551,7 +564,9 @@ class _EditPersonalInfoScreenState
 
     // Add date of birth if selected (format: YYYY-MM-DD)
     if (_selectedDateOfBirth != null) {
-      data['date_of_birth'] = DateFormat('yyyy-MM-dd').format(_selectedDateOfBirth!);
+      data['date_of_birth'] = DateFormat(
+        'yyyy-MM-dd',
+      ).format(_selectedDateOfBirth!);
     }
 
     // Add gender if selected (lowercase for API)
@@ -624,10 +639,7 @@ class _EditPersonalInfoScreenState
               Navigator.of(context).pop();
               Navigator.of(context).pop();
             },
-            child: Text(
-              'OK',
-              style: TextStyle(color: AppColors.primary),
-            ),
+            child: const Text('OK', style: TextStyle(color: AppColors.primary)),
           ),
         ],
       ),

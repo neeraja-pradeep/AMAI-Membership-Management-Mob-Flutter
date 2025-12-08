@@ -16,10 +16,19 @@ final _privateConstructorUsedError = UnsupportedError(
 
 /// @nodoc
 mixin _$ProfileData {
+  /// User profile information
   UserProfile get userProfile => throw _privateConstructorUsedError;
+
+  /// Membership type (from membership endpoint)
   MembershipType get membershipType => throw _privateConstructorUsedError;
+
+  /// Membership number
   String? get membershipNumber => throw _privateConstructorUsedError;
+
+  /// Membership status
   String? get membershipStatus => throw _privateConstructorUsedError;
+
+  /// Membership valid until date
   DateTime? get validUntil => throw _privateConstructorUsedError;
 
   @JsonKey(ignore: true)
@@ -33,13 +42,12 @@ abstract class $ProfileDataCopyWith<$Res> {
           ProfileData value, $Res Function(ProfileData) then) =
       _$ProfileDataCopyWithImpl<$Res, ProfileData>;
   @useResult
-  $Res call({
-    UserProfile userProfile,
-    MembershipType membershipType,
-    String? membershipNumber,
-    String? membershipStatus,
-    DateTime? validUntil,
-  });
+  $Res call(
+      {UserProfile userProfile,
+      MembershipType membershipType,
+      String? membershipNumber,
+      String? membershipStatus,
+      DateTime? validUntil});
 
   $UserProfileCopyWith<$Res> get userProfile;
 }
@@ -49,7 +57,9 @@ class _$ProfileDataCopyWithImpl<$Res, $Val extends ProfileData>
     implements $ProfileDataCopyWith<$Res> {
   _$ProfileDataCopyWithImpl(this._value, this._then);
 
+  // ignore: unused_field
   final $Val _value;
+  // ignore: unused_field
   final $Res Function($Val) _then;
 
   @pragma('vm:prefer-inline')
@@ -64,19 +74,24 @@ class _$ProfileDataCopyWithImpl<$Res, $Val extends ProfileData>
     return _then(_value.copyWith(
       userProfile: null == userProfile
           ? _value.userProfile
-          : userProfile as UserProfile,
+          : userProfile // ignore: cast_nullable_to_non_nullable
+              as UserProfile,
       membershipType: null == membershipType
           ? _value.membershipType
-          : membershipType as MembershipType,
+          : membershipType // ignore: cast_nullable_to_non_nullable
+              as MembershipType,
       membershipNumber: freezed == membershipNumber
           ? _value.membershipNumber
-          : membershipNumber as String?,
+          : membershipNumber // ignore: cast_nullable_to_non_nullable
+              as String?,
       membershipStatus: freezed == membershipStatus
           ? _value.membershipStatus
-          : membershipStatus as String?,
+          : membershipStatus // ignore: cast_nullable_to_non_nullable
+              as String?,
       validUntil: freezed == validUntil
           ? _value.validUntil
-          : validUntil as DateTime?,
+          : validUntil // ignore: cast_nullable_to_non_nullable
+              as DateTime?,
     ) as $Val);
   }
 
@@ -97,13 +112,12 @@ abstract class _$$ProfileDataImplCopyWith<$Res>
       __$$ProfileDataImplCopyWithImpl<$Res>;
   @override
   @useResult
-  $Res call({
-    UserProfile userProfile,
-    MembershipType membershipType,
-    String? membershipNumber,
-    String? membershipStatus,
-    DateTime? validUntil,
-  });
+  $Res call(
+      {UserProfile userProfile,
+      MembershipType membershipType,
+      String? membershipNumber,
+      String? membershipStatus,
+      DateTime? validUntil});
 
   @override
   $UserProfileCopyWith<$Res> get userProfile;
@@ -129,19 +143,24 @@ class __$$ProfileDataImplCopyWithImpl<$Res>
     return _then(_$ProfileDataImpl(
       userProfile: null == userProfile
           ? _value.userProfile
-          : userProfile as UserProfile,
+          : userProfile // ignore: cast_nullable_to_non_nullable
+              as UserProfile,
       membershipType: null == membershipType
           ? _value.membershipType
-          : membershipType as MembershipType,
+          : membershipType // ignore: cast_nullable_to_non_nullable
+              as MembershipType,
       membershipNumber: freezed == membershipNumber
           ? _value.membershipNumber
-          : membershipNumber as String?,
+          : membershipNumber // ignore: cast_nullable_to_non_nullable
+              as String?,
       membershipStatus: freezed == membershipStatus
           ? _value.membershipStatus
-          : membershipStatus as String?,
+          : membershipStatus // ignore: cast_nullable_to_non_nullable
+              as String?,
       validUntil: freezed == validUntil
           ? _value.validUntil
-          : validUntil as DateTime?,
+          : validUntil // ignore: cast_nullable_to_non_nullable
+              as DateTime?,
     ));
   }
 }
@@ -149,22 +168,31 @@ class __$$ProfileDataImplCopyWithImpl<$Res>
 /// @nodoc
 
 class _$ProfileDataImpl extends _ProfileData {
-  const _$ProfileDataImpl({
-    required this.userProfile,
-    required this.membershipType,
-    this.membershipNumber,
-    this.membershipStatus,
-    this.validUntil,
-  }) : super._();
+  const _$ProfileDataImpl(
+      {required this.userProfile,
+      required this.membershipType,
+      this.membershipNumber,
+      this.membershipStatus,
+      this.validUntil})
+      : super._();
 
+  /// User profile information
   @override
   final UserProfile userProfile;
+
+  /// Membership type (from membership endpoint)
   @override
   final MembershipType membershipType;
+
+  /// Membership number
   @override
   final String? membershipNumber;
+
+  /// Membership status
   @override
   final String? membershipStatus;
+
+  /// Membership valid until date
   @override
   final DateTime? validUntil;
 
@@ -178,16 +206,21 @@ class _$ProfileDataImpl extends _ProfileData {
     return identical(this, other) ||
         (other.runtimeType == runtimeType &&
             other is _$ProfileDataImpl &&
-            (identical(other.userProfile, userProfile) || other.userProfile == userProfile) &&
-            (identical(other.membershipType, membershipType) || other.membershipType == membershipType) &&
-            (identical(other.membershipNumber, membershipNumber) || other.membershipNumber == membershipNumber) &&
-            (identical(other.membershipStatus, membershipStatus) || other.membershipStatus == membershipStatus) &&
-            (identical(other.validUntil, validUntil) || other.validUntil == validUntil));
+            (identical(other.userProfile, userProfile) ||
+                other.userProfile == userProfile) &&
+            (identical(other.membershipType, membershipType) ||
+                other.membershipType == membershipType) &&
+            (identical(other.membershipNumber, membershipNumber) ||
+                other.membershipNumber == membershipNumber) &&
+            (identical(other.membershipStatus, membershipStatus) ||
+                other.membershipStatus == membershipStatus) &&
+            (identical(other.validUntil, validUntil) ||
+                other.validUntil == validUntil));
   }
 
   @override
-  int get hashCode => Object.hash(
-      runtimeType, userProfile, membershipType, membershipNumber, membershipStatus, validUntil);
+  int get hashCode => Object.hash(runtimeType, userProfile, membershipType,
+      membershipNumber, membershipStatus, validUntil);
 
   @JsonKey(ignore: true)
   @override
@@ -197,24 +230,33 @@ class _$ProfileDataImpl extends _ProfileData {
 }
 
 abstract class _ProfileData extends ProfileData {
-  const factory _ProfileData({
-    required final UserProfile userProfile,
-    required final MembershipType membershipType,
-    final String? membershipNumber,
-    final String? membershipStatus,
-    final DateTime? validUntil,
-  }) = _$ProfileDataImpl;
+  const factory _ProfileData(
+      {required final UserProfile userProfile,
+      required final MembershipType membershipType,
+      final String? membershipNumber,
+      final String? membershipStatus,
+      final DateTime? validUntil}) = _$ProfileDataImpl;
   const _ProfileData._() : super._();
 
   @override
+
+  /// User profile information
   UserProfile get userProfile;
   @override
+
+  /// Membership type (from membership endpoint)
   MembershipType get membershipType;
   @override
+
+  /// Membership number
   String? get membershipNumber;
   @override
+
+  /// Membership status
   String? get membershipStatus;
   @override
+
+  /// Membership valid until date
   DateTime? get validUntil;
   @override
   @JsonKey(ignore: true)

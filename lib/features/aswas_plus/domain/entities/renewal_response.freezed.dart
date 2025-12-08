@@ -421,7 +421,10 @@ abstract class $RenewalResponseCopyWith<$Res> {
       _$RenewalResponseCopyWithImpl<$Res, RenewalResponse>;
   @useResult
   $Res call(
-      {String orderId, int amount, String currency, PolicyPreview policyPreview});
+      {String orderId,
+      int amount,
+      String currency,
+      PolicyPreview policyPreview});
 
   $PolicyPreviewCopyWith<$Res> get policyPreview;
 }
@@ -482,7 +485,10 @@ abstract class _$$RenewalResponseImplCopyWith<$Res>
   @override
   @useResult
   $Res call(
-      {String orderId, int amount, String currency, PolicyPreview policyPreview});
+      {String orderId,
+      int amount,
+      String currency,
+      PolicyPreview policyPreview});
 
   @override
   $PolicyPreviewCopyWith<$Res> get policyPreview;

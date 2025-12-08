@@ -11,10 +11,7 @@ import 'package:myapp/features/navigation/presentation/screens/main_navigation_s
 /// Select Payment Method Screen
 /// Shows payment options and total amount for renewal
 class SelectPaymentMethodScreen extends ConsumerStatefulWidget {
-  const SelectPaymentMethodScreen({
-    super.key,
-    required this.renewalResponse,
-  });
+  const SelectPaymentMethodScreen({super.key, required this.renewalResponse});
 
   final RenewalResponse renewalResponse;
 
@@ -23,7 +20,8 @@ class SelectPaymentMethodScreen extends ConsumerStatefulWidget {
       _SelectPaymentMethodScreenState();
 }
 
-class _SelectPaymentMethodScreenState extends ConsumerState<SelectPaymentMethodScreen> {
+class _SelectPaymentMethodScreenState
+    extends ConsumerState<SelectPaymentMethodScreen> {
   late Razorpay _razorpay;
   bool _isProcessing = false;
 
@@ -143,10 +141,7 @@ class _SelectPaymentMethodScreenState extends ConsumerState<SelectPaymentMethodS
       'description': RazorpayConfig.description,
       'order_id': widget.renewalResponse.orderId,
       'timeout': RazorpayConfig.timeout,
-      'prefill': {
-        'contact': '',
-        'email': '',
-      },
+      'prefill': {'contact': '', 'email': ''},
       'theme': {
         'color': '#${RazorpayConfig.themeColor.toRadixString(16).substring(2)}',
       },
@@ -183,7 +178,7 @@ class _SelectPaymentMethodScreenState extends ConsumerState<SelectPaymentMethodS
         backgroundColor: AppColors.white,
         elevation: 0,
         leading: IconButton(
-          icon: Icon(Icons.arrow_back, color: AppColors.textPrimary),
+          icon: const Icon(Icons.arrow_back, color: AppColors.textPrimary),
           onPressed: () => Navigator.of(context).pop(),
         ),
       ),
@@ -330,11 +325,7 @@ class _SelectPaymentMethodScreenState extends ConsumerState<SelectPaymentMethodS
               color: AppColors.primary.withOpacity(0.1),
               borderRadius: BorderRadius.circular(12.r),
             ),
-            child: Icon(
-              icon,
-              size: 24.sp,
-              color: AppColors.primary,
-            ),
+            child: Icon(icon, size: 24.sp, color: AppColors.primary),
           ),
           SizedBox(width: 16.w),
           Expanded(
@@ -361,11 +352,7 @@ class _SelectPaymentMethodScreenState extends ConsumerState<SelectPaymentMethodS
               ],
             ),
           ),
-          Icon(
-            Icons.chevron_right,
-            size: 24.sp,
-            color: AppColors.grey400,
-          ),
+          Icon(Icons.chevron_right, size: 24.sp, color: AppColors.grey400),
         ],
       ),
     );
@@ -403,7 +390,9 @@ class _SelectPaymentMethodScreenState extends ConsumerState<SelectPaymentMethodS
                     width: 20.h,
                     child: CircularProgressIndicator(
                       strokeWidth: 2.w,
-                      valueColor: AlwaysStoppedAnimation<Color>(AppColors.white),
+                      valueColor: const AlwaysStoppedAnimation<Color>(
+                        AppColors.white,
+                      ),
                     ),
                   )
                 : Text(

@@ -10,10 +10,7 @@ import 'package:razorpay_flutter/razorpay_flutter.dart';
 /// Membership Payment Screen
 /// Shows payment options and total amount for membership renewal
 class MembershipPaymentScreen extends ConsumerStatefulWidget {
-  const MembershipPaymentScreen({
-    super.key,
-    required this.paymentResponse,
-  });
+  const MembershipPaymentScreen({super.key, required this.paymentResponse});
 
   final MembershipPaymentResponse paymentResponse;
 
@@ -138,13 +135,9 @@ class _MembershipPaymentScreenState
       'description': 'Membership Renewal',
       'order_id': widget.paymentResponse.orderId,
       'timeout': RazorpayConfig.timeout,
-      'prefill': {
-        'contact': '',
-        'email': '',
-      },
+      'prefill': {'contact': '', 'email': ''},
       'theme': {
-        'color':
-            '#${RazorpayConfig.themeColor.toRadixString(16).substring(2)}',
+        'color': '#${RazorpayConfig.themeColor.toRadixString(16).substring(2)}',
       },
     };
 
@@ -179,7 +172,7 @@ class _MembershipPaymentScreenState
         backgroundColor: AppColors.white,
         elevation: 0,
         leading: IconButton(
-          icon: Icon(Icons.arrow_back, color: AppColors.textPrimary),
+          icon: const Icon(Icons.arrow_back, color: AppColors.textPrimary),
           onPressed: () => Navigator.of(context).pop(),
         ),
       ),
@@ -342,7 +335,7 @@ class _MembershipPaymentScreenState
             ),
           ],
           SizedBox(height: 8.h),
-          Divider(color: AppColors.grey200),
+          const Divider(color: AppColors.grey200),
           SizedBox(height: 8.h),
           _buildBreakdownRow(
             'Total',
@@ -412,11 +405,7 @@ class _MembershipPaymentScreenState
               color: AppColors.primary.withOpacity(0.1),
               borderRadius: BorderRadius.circular(12.r),
             ),
-            child: Icon(
-              icon,
-              size: 24.sp,
-              color: AppColors.primary,
-            ),
+            child: Icon(icon, size: 24.sp, color: AppColors.primary),
           ),
           SizedBox(width: 16.w),
           Expanded(
@@ -443,11 +432,7 @@ class _MembershipPaymentScreenState
               ],
             ),
           ),
-          Icon(
-            Icons.chevron_right,
-            size: 24.sp,
-            color: AppColors.grey400,
-          ),
+          Icon(Icons.chevron_right, size: 24.sp, color: AppColors.grey400),
         ],
       ),
     );
@@ -485,7 +470,9 @@ class _MembershipPaymentScreenState
                     width: 20.h,
                     child: CircularProgressIndicator(
                       strokeWidth: 2.w,
-                      valueColor: AlwaysStoppedAnimation<Color>(AppColors.white),
+                      valueColor: const AlwaysStoppedAnimation<Color>(
+                        AppColors.white,
+                      ),
                     ),
                   )
                 : Text(

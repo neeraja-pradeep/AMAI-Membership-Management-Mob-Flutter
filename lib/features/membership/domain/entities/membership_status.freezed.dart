@@ -40,9 +40,7 @@ mixin _$MembershipStatus {
   /// URL to download membership PDF
   String? get membershipPdfUrl => throw _privateConstructorUsedError;
 
-  /// Create a copy of MembershipStatus
-  /// with the given fields replaced by the non-null parameter values.
-  @JsonKey(includeFromJson: false, includeToJson: false)
+  @JsonKey(ignore: true)
   $MembershipStatusCopyWith<MembershipStatus> get copyWith =>
       throw _privateConstructorUsedError;
 }
@@ -74,8 +72,6 @@ class _$MembershipStatusCopyWithImpl<$Res, $Val extends MembershipStatus>
   // ignore: unused_field
   final $Res Function($Val) _then;
 
-  /// Create a copy of MembershipStatus
-  /// with the given fields replaced by the non-null parameter values.
   @pragma('vm:prefer-inline')
   @override
   $Res call({
@@ -152,8 +148,6 @@ class __$$MembershipStatusImplCopyWithImpl<$Res>
       $Res Function(_$MembershipStatusImpl) _then)
       : super(_value, _then);
 
-  /// Create a copy of MembershipStatus
-  /// with the given fields replaced by the non-null parameter values.
   @pragma('vm:prefer-inline')
   @override
   $Res call({
@@ -280,9 +274,7 @@ class _$MembershipStatusImpl extends _MembershipStatus {
   int get hashCode => Object.hash(runtimeType, id, isActive, membershipType,
       validUntil, memberName, membershipNumber, startDate, membershipPdfUrl);
 
-  /// Create a copy of MembershipStatus
-  /// with the given fields replaced by the non-null parameter values.
-  @JsonKey(includeFromJson: false, includeToJson: false)
+  @JsonKey(ignore: true)
   @override
   @pragma('vm:prefer-inline')
   _$$MembershipStatusImplCopyWith<_$MembershipStatusImpl> get copyWith =>
@@ -302,42 +294,40 @@ abstract class _MembershipStatus extends MembershipStatus {
       final String? membershipPdfUrl}) = _$MembershipStatusImpl;
   const _MembershipStatus._() : super._();
 
-  /// Unique identifier for the membership
   @override
+
+  /// Unique identifier for the membership
   String get id;
+  @override
 
   /// Whether the membership is currently active
-  @override
   bool get isActive;
+  @override
 
   /// Membership type (student, house_surgeon, practitioner, honorary)
-  @override
   String get membershipType;
+  @override
 
   /// Membership validity end date
-  @override
   DateTime get validUntil;
+  @override
 
   /// Member's name for display
-  @override
   String get memberName;
+  @override
 
   /// Membership number for display
-  @override
   String get membershipNumber;
+  @override
 
   /// Membership start date
-  @override
   DateTime? get startDate;
+  @override
 
   /// URL to download membership PDF
-  @override
   String? get membershipPdfUrl;
-
-  /// Create a copy of MembershipStatus
-  /// with the given fields replaced by the non-null parameter values.
   @override
-  @JsonKey(includeFromJson: false, includeToJson: false)
+  @JsonKey(ignore: true)
   _$$MembershipStatusImplCopyWith<_$MembershipStatusImpl> get copyWith =>
       throw _privateConstructorUsedError;
 }

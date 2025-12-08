@@ -70,7 +70,7 @@ class _EditAcademicDetailsScreenState
         elevation: 0,
         centerTitle: true,
         leading: IconButton(
-          icon: Icon(Icons.arrow_back, color: AppColors.textPrimary),
+          icon: const Icon(Icons.arrow_back, color: AppColors.textPrimary),
           onPressed: () => Navigator.of(context).pop(),
         ),
       ),
@@ -95,10 +95,7 @@ class _EditAcademicDetailsScreenState
             SizedBox(height: 8.h),
             Text(
               'Please select all that apply',
-              style: TextStyle(
-                fontSize: 14.sp,
-                color: AppColors.textSecondary,
-              ),
+              style: TextStyle(fontSize: 14.sp, color: AppColors.textSecondary),
             ),
             SizedBox(height: 16.h),
 
@@ -109,10 +106,10 @@ class _EditAcademicDetailsScreenState
                 color: AppColors.white,
                 borderRadius: BorderRadius.circular(12.r),
                 boxShadow: [
-                  BoxShadow(
+                  const BoxShadow(
                     color: AppColors.cardShadow,
                     blurRadius: 8,
-                    offset: const Offset(0, 2),
+                    offset: Offset(0, 2),
                   ),
                 ],
               ),
@@ -202,7 +199,11 @@ class _EditAcademicDetailsScreenState
                 ),
                 child: Row(
                   children: [
-                    Icon(Icons.hourglass_empty, color: AppColors.warning, size: 20.sp),
+                    Icon(
+                      Icons.hourglass_empty,
+                      color: AppColors.warning,
+                      size: 20.sp,
+                    ),
                     SizedBox(width: 12.w),
                     Expanded(
                       child: Text(
@@ -223,9 +224,13 @@ class _EditAcademicDetailsScreenState
             SizedBox(
               width: double.infinity,
               child: ElevatedButton(
-                onPressed: (_isSubmitting || _hasPendingRequest) ? null : _onSubmit,
+                onPressed: (_isSubmitting || _hasPendingRequest)
+                    ? null
+                    : _onSubmit,
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: _hasPendingRequest ? AppColors.grey400 : AppColors.primary,
+                  backgroundColor: _hasPendingRequest
+                      ? AppColors.grey400
+                      : AppColors.primary,
                   disabledBackgroundColor: AppColors.grey300,
                   padding: EdgeInsets.symmetric(vertical: 14.h),
                   shape: RoundedRectangleBorder(
@@ -238,16 +243,21 @@ class _EditAcademicDetailsScreenState
                         width: 20.h,
                         child: CircularProgressIndicator(
                           strokeWidth: 2.w,
-                          valueColor:
-                              AlwaysStoppedAnimation<Color>(AppColors.white),
+                          valueColor: const AlwaysStoppedAnimation<Color>(
+                            AppColors.white,
+                          ),
                         ),
                       )
                     : Text(
-                        _hasPendingRequest ? 'Request Pending Approval' : 'Submit Request',
+                        _hasPendingRequest
+                            ? 'Request Pending Approval'
+                            : 'Submit Request',
                         style: TextStyle(
                           fontSize: 16.sp,
                           fontWeight: FontWeight.w600,
-                          color: _hasPendingRequest ? AppColors.grey600 : AppColors.white,
+                          color: _hasPendingRequest
+                              ? AppColors.grey600
+                              : AppColors.white,
                         ),
                       ),
               ),
@@ -274,10 +284,7 @@ class _EditAcademicDetailsScreenState
           Expanded(
             child: Text(
               'Changes to your academic details require admin approval and may take some time to reflect.',
-              style: TextStyle(
-                fontSize: 12.sp,
-                color: AppColors.info,
-              ),
+              style: TextStyle(fontSize: 12.sp, color: AppColors.info),
             ),
           ),
         ],
@@ -339,10 +346,7 @@ class _EditAcademicDetailsScreenState
   }
 
   Widget _buildDivider() {
-    return Divider(
-      color: AppColors.dividerLight,
-      height: 1,
-    );
+    return const Divider(color: AppColors.dividerLight, height: 1);
   }
 
   bool get _hasSelection =>
@@ -356,9 +360,8 @@ class _EditAcademicDetailsScreenState
   Future<void> _onSubmit() async {
     if (!_hasSelection) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content:
-              const Text('Please select at least one academic qualification'),
+        const SnackBar(
+          content: Text('Please select at least one academic qualification'),
           backgroundColor: AppColors.error,
         ),
       );
@@ -379,9 +382,7 @@ class _EditAcademicDetailsScreenState
     if (_otherSelected) selectedQualifications.add('Other');
 
     // Build the data map for API
-    final data = <String, dynamic>{
-      'academic_details': selectedQualifications,
-    };
+    final data = <String, dynamic>{'academic_details': selectedQualifications};
 
     // Call the API
     final repository = ref.read(profileRepositoryProvider);
@@ -443,10 +444,7 @@ class _EditAcademicDetailsScreenState
               Navigator.of(context).pop();
               Navigator.of(context).pop();
             },
-            child: Text(
-              'OK',
-              style: TextStyle(color: AppColors.primary),
-            ),
+            child: const Text('OK', style: TextStyle(color: AppColors.primary)),
           ),
         ],
       ),

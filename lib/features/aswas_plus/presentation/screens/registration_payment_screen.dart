@@ -63,8 +63,9 @@ class _RegistrationPaymentScreenState
       'razorpay_signature': signature,
     };
 
-    final result =
-        await ref.read(insuranceVerificationProvider(payload).future);
+    final result = await ref.read(
+      insuranceVerificationProvider(payload).future,
+    );
 
     if (!mounted) return;
 
@@ -121,10 +122,7 @@ class _RegistrationPaymentScreenState
             SizedBox(height: 12.h),
             Text(
               'Payment ID: $paymentId',
-              style: TextStyle(
-                fontSize: 12.sp,
-                color: AppColors.textSecondary,
-              ),
+              style: TextStyle(fontSize: 12.sp, color: AppColors.textSecondary),
             ),
           ],
         ),
@@ -138,10 +136,7 @@ class _RegistrationPaymentScreenState
                 (route) => false,
               );
             },
-            child: Text(
-              'OK',
-              style: TextStyle(color: AppColors.primary),
-            ),
+            child: const Text('OK', style: TextStyle(color: AppColors.primary)),
           ),
         ],
       ),
@@ -179,16 +174,14 @@ class _RegistrationPaymentScreenState
 
     var options = {
       'key': RazorpayConfig.apiKey,
-      'amount': (widget.registrationResponse.amount * 100).toInt(), // Amount in paise
+      'amount': (widget.registrationResponse.amount * 100)
+          .toInt(), // Amount in paise
       'currency': widget.registrationResponse.currency,
       'name': RazorpayConfig.companyName,
       'description': 'ASWAS Plus Registration',
       'order_id': widget.registrationResponse.orderId,
       'timeout': RazorpayConfig.timeout,
-      'prefill': {
-        'contact': '',
-        'email': '',
-      },
+      'prefill': {'contact': '', 'email': ''},
       'theme': {
         'color': '#${RazorpayConfig.themeColor.toRadixString(16).substring(2)}',
       },
@@ -225,7 +218,11 @@ class _RegistrationPaymentScreenState
         backgroundColor: AppColors.white,
         elevation: 0,
         leading: IconButton(
-          icon: Icon(Icons.arrow_back_ios, color: AppColors.textPrimary, size: 20.sp),
+          icon: Icon(
+            Icons.arrow_back_ios,
+            color: AppColors.textPrimary,
+            size: 20.sp,
+          ),
           onPressed: () => Navigator.of(context).pop(),
         ),
       ),
@@ -372,11 +369,7 @@ class _RegistrationPaymentScreenState
               color: AppColors.primary.withOpacity(0.1),
               borderRadius: BorderRadius.circular(12.r),
             ),
-            child: Icon(
-              icon,
-              size: 24.sp,
-              color: AppColors.primary,
-            ),
+            child: Icon(icon, size: 24.sp, color: AppColors.primary),
           ),
           SizedBox(width: 16.w),
           Expanded(
@@ -403,11 +396,7 @@ class _RegistrationPaymentScreenState
               ],
             ),
           ),
-          Icon(
-            Icons.chevron_right,
-            size: 24.sp,
-            color: AppColors.grey400,
-          ),
+          Icon(Icons.chevron_right, size: 24.sp, color: AppColors.grey400),
         ],
       ),
     );
@@ -445,7 +434,9 @@ class _RegistrationPaymentScreenState
                     width: 20.h,
                     child: CircularProgressIndicator(
                       strokeWidth: 2.w,
-                      valueColor: AlwaysStoppedAnimation<Color>(AppColors.white),
+                      valueColor: const AlwaysStoppedAnimation<Color>(
+                        AppColors.white,
+                      ),
                     ),
                   )
                 : Text(

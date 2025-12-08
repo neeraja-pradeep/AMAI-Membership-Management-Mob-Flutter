@@ -8,10 +8,7 @@ import 'package:myapp/features/aswas_plus/domain/entities/nominee.dart';
 /// Edit Nominee Details Screen (Practitioner only)
 /// Allows practitioners to edit their ASWAS Plus nominee information
 class EditNomineeScreen extends ConsumerStatefulWidget {
-  const EditNomineeScreen({
-    required this.nominees,
-    super.key,
-  });
+  const EditNomineeScreen({required this.nominees, super.key});
 
   /// The list of nominees to display and edit
   final List<Nominee> nominees;
@@ -46,9 +43,12 @@ class _EditNomineeScreenState extends ConsumerState<EditNomineeScreen> {
         contactController: TextEditingController(text: nominee.contactNumber),
         emailController: TextEditingController(text: nominee.email ?? ''),
         addressController: TextEditingController(text: nominee.address ?? ''),
-        allocationController: TextEditingController(text: nominee.allocationPercentage ?? ''),
+        allocationController: TextEditingController(
+          text: nominee.allocationPercentage ?? '',
+        ),
         selectedRelation: _getRelationshipDisplayValue(nominee.relationship),
-        selectedDateOfBirth: nominee.dateOfBirth != null && nominee.dateOfBirth!.isNotEmpty
+        selectedDateOfBirth:
+            nominee.dateOfBirth != null && nominee.dateOfBirth!.isNotEmpty
             ? DateTime.tryParse(nominee.dateOfBirth!)
             : null,
         isPrimary: nominee.isPrimary,
@@ -96,7 +96,7 @@ class _EditNomineeScreenState extends ConsumerState<EditNomineeScreen> {
         elevation: 0,
         centerTitle: true,
         leading: IconButton(
-          icon: Icon(Icons.arrow_back, color: AppColors.textPrimary),
+          icon: const Icon(Icons.arrow_back, color: AppColors.textPrimary),
           onPressed: () => Navigator.of(context).pop(),
         ),
       ),
@@ -157,10 +157,10 @@ class _EditNomineeScreenState extends ConsumerState<EditNomineeScreen> {
         color: AppColors.white,
         borderRadius: BorderRadius.circular(12.r),
         boxShadow: [
-          BoxShadow(
+          const BoxShadow(
             color: AppColors.cardShadow,
             blurRadius: 8,
-            offset: const Offset(0, 2),
+            offset: Offset(0, 2),
           ),
         ],
       ),
@@ -184,7 +184,10 @@ class _EditNomineeScreenState extends ConsumerState<EditNomineeScreen> {
                   if (form.isPrimary) ...[
                     SizedBox(width: 8.w),
                     Container(
-                      padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 2.h),
+                      padding: EdgeInsets.symmetric(
+                        horizontal: 8.w,
+                        vertical: 2.h,
+                      ),
                       decoration: BoxDecoration(
                         color: AppColors.success.withOpacity(0.1),
                         borderRadius: BorderRadius.circular(4.r),
@@ -209,10 +212,7 @@ class _EditNomineeScreenState extends ConsumerState<EditNomineeScreen> {
                 },
                 child: Text(
                   isEditing ? 'Close' : 'Edit',
-                  style: TextStyle(
-                    fontSize: 14.sp,
-                    color: AppColors.primary,
-                  ),
+                  style: TextStyle(fontSize: 14.sp, color: AppColors.primary),
                 ),
               ),
             ],
@@ -352,8 +352,9 @@ class _EditNomineeScreenState extends ConsumerState<EditNomineeScreen> {
                         width: 20.h,
                         child: CircularProgressIndicator(
                           strokeWidth: 2.w,
-                          valueColor:
-                              AlwaysStoppedAnimation<Color>(AppColors.white),
+                          valueColor: const AlwaysStoppedAnimation<Color>(
+                            AppColors.white,
+                          ),
                         ),
                       )
                     : Text(
@@ -383,10 +384,7 @@ class _EditNomineeScreenState extends ConsumerState<EditNomineeScreen> {
             width: 100.w,
             child: Text(
               label,
-              style: TextStyle(
-                fontSize: 13.sp,
-                color: AppColors.textSecondary,
-              ),
+              style: TextStyle(fontSize: 13.sp, color: AppColors.textSecondary),
             ),
           ),
           Expanded(
@@ -432,10 +430,7 @@ class _EditNomineeScreenState extends ConsumerState<EditNomineeScreen> {
                 SizedBox(height: 4.h),
                 Text(
                   'The nominee you specify here will be the beneficiary of your ASWAS Plus insurance. Changes require admin approval.',
-                  style: TextStyle(
-                    fontSize: 12.sp,
-                    color: AppColors.info,
-                  ),
+                  style: TextStyle(fontSize: 12.sp, color: AppColors.info),
                 ),
               ],
             ),
@@ -480,27 +475,26 @@ class _EditNomineeScreenState extends ConsumerState<EditNomineeScreen> {
             ),
             border: OutlineInputBorder(
               borderRadius: BorderRadius.circular(8.r),
-              borderSide: BorderSide(color: AppColors.grey300),
+              borderSide: const BorderSide(color: AppColors.grey300),
             ),
             enabledBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(8.r),
-              borderSide: BorderSide(color: AppColors.grey300),
+              borderSide: const BorderSide(color: AppColors.grey300),
             ),
             focusedBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(8.r),
-              borderSide: BorderSide(color: AppColors.primary, width: 2),
+              borderSide: const BorderSide(color: AppColors.primary, width: 2),
             ),
             errorBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(8.r),
-              borderSide: BorderSide(color: AppColors.error),
+              borderSide: const BorderSide(color: AppColors.error),
             ),
-            contentPadding:
-                EdgeInsets.symmetric(horizontal: 16.w, vertical: 12.h),
+            contentPadding: EdgeInsets.symmetric(
+              horizontal: 16.w,
+              vertical: 12.h,
+            ),
           ),
-          style: TextStyle(
-            fontSize: 14.sp,
-            color: AppColors.textPrimary,
-          ),
+          style: TextStyle(fontSize: 14.sp, color: AppColors.textPrimary),
         ),
       ],
     );
@@ -537,12 +531,9 @@ class _EditNomineeScreenState extends ConsumerState<EditNomineeScreen> {
               isExpanded: true,
               hint: Text(
                 'Select $label',
-                style: TextStyle(
-                  fontSize: 14.sp,
-                  color: AppColors.textHint,
-                ),
+                style: TextStyle(fontSize: 14.sp, color: AppColors.textHint),
               ),
-              icon: Icon(
+              icon: const Icon(
                 Icons.keyboard_arrow_down,
                 color: AppColors.grey400,
               ),
@@ -593,7 +584,7 @@ class _EditNomineeScreenState extends ConsumerState<EditNomineeScreen> {
               builder: (context, child) {
                 return Theme(
                   data: Theme.of(context).copyWith(
-                    colorScheme: ColorScheme.light(
+                    colorScheme: const ColorScheme.light(
                       primary: AppColors.primary,
                     ),
                   ),
@@ -677,8 +668,8 @@ class _EditNomineeScreenState extends ConsumerState<EditNomineeScreen> {
 
     if (form.selectedRelation == null) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: const Text('Please select the relation with nominee'),
+        const SnackBar(
+          content: Text('Please select the relation with nominee'),
           backgroundColor: AppColors.error,
         ),
       );
@@ -715,10 +706,7 @@ class _EditNomineeScreenState extends ConsumerState<EditNomineeScreen> {
     // Call the PATCH API using the nominee's ID
     final result = await ref.read(
       nomineeUpdateProvider(
-        NomineeUpdateParams(
-          nomineeId: form.nominee.id,
-          payload: payload,
-        ),
+        NomineeUpdateParams(nomineeId: form.nominee.id, payload: payload),
       ).future,
     );
 
@@ -767,10 +755,7 @@ class _EditNomineeScreenState extends ConsumerState<EditNomineeScreen> {
               Navigator.of(context).pop();
               Navigator.of(context).pop();
             },
-            child: Text(
-              'OK',
-              style: TextStyle(color: AppColors.primary),
-            ),
+            child: const Text('OK', style: TextStyle(color: AppColors.primary)),
           ),
         ],
       ),

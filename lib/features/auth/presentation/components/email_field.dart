@@ -15,7 +15,12 @@ class EmailField extends StatelessWidget {
       keyboardType: TextInputType.emailAddress,
       textInputAction: TextInputAction.next,
       decoration: InputDecoration(
-        hintText: 'Enter your email',
+        hintText: 'you@example.comm',
+        hintStyle: TextStyle(
+          fontSize: 14.sp, // << change size
+          color: Colors.grey, // << change color
+          fontWeight: FontWeight.w300,
+        ),
         suffixIcon: Icon(Icons.person, size: 20.sp),
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12.r),

@@ -89,7 +89,8 @@ class QuickActionsSection extends StatelessWidget {
   /// Returns the list of quick action items
   List<_QuickActionData> _getQuickActions() {
     // Check if ASWAS Plus should be hidden for student or house_surgeon
-    final hideAswasPlus = membershipType == 'student' || membershipType == 'house_surgeon';
+    final hideAswasPlus =
+        membershipType == 'student' || membershipType == 'house_surgeon';
 
     final actions = <_QuickActionData>[
       _QuickActionData(
@@ -122,7 +123,7 @@ class QuickActionsSection extends StatelessWidget {
         iconColor: AppColors.white,
         backgroundColor: AppColors.newPrimaryLight,
       ),
-      _QuickActionData(
+      const _QuickActionData(
         svgAsset: 'assets/svg/ecommerce.svg',
         label: 'Ecommerce',
         onTap: null,

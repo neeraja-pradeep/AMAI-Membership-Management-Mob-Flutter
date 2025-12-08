@@ -163,7 +163,7 @@ class _EditAddressScreenState extends ConsumerState<EditAddressScreen> {
         elevation: 0,
         centerTitle: true,
         leading: IconButton(
-          icon: Icon(Icons.arrow_back, color: AppColors.textPrimary),
+          icon: const Icon(Icons.arrow_back, color: AppColors.textPrimary),
           onPressed: () => Navigator.of(context).pop(),
         ),
       ),
@@ -309,11 +309,17 @@ class _EditAddressScreenState extends ConsumerState<EditAddressScreen> {
                   decoration: BoxDecoration(
                     color: AppColors.warningLight,
                     borderRadius: BorderRadius.circular(8.r),
-                    border: Border.all(color: AppColors.warning.withOpacity(0.3)),
+                    border: Border.all(
+                      color: AppColors.warning.withOpacity(0.3),
+                    ),
                   ),
                   child: Row(
                     children: [
-                      Icon(Icons.hourglass_empty, color: AppColors.warning, size: 20.sp),
+                      Icon(
+                        Icons.hourglass_empty,
+                        color: AppColors.warning,
+                        size: 20.sp,
+                      ),
                       SizedBox(width: 12.w),
                       Expanded(
                         child: Text(
@@ -334,9 +340,13 @@ class _EditAddressScreenState extends ConsumerState<EditAddressScreen> {
               SizedBox(
                 width: double.infinity,
                 child: ElevatedButton(
-                  onPressed: (_isSubmitting || _hasPendingRequest) ? null : _onSubmit,
+                  onPressed: (_isSubmitting || _hasPendingRequest)
+                      ? null
+                      : _onSubmit,
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: _hasPendingRequest ? AppColors.grey400 : AppColors.primary,
+                    backgroundColor: _hasPendingRequest
+                        ? AppColors.grey400
+                        : AppColors.primary,
                     disabledBackgroundColor: AppColors.grey300,
                     padding: EdgeInsets.symmetric(vertical: 14.h),
                     shape: RoundedRectangleBorder(
@@ -349,16 +359,21 @@ class _EditAddressScreenState extends ConsumerState<EditAddressScreen> {
                           width: 20.h,
                           child: CircularProgressIndicator(
                             strokeWidth: 2.w,
-                            valueColor:
-                                AlwaysStoppedAnimation<Color>(AppColors.white),
+                            valueColor: const AlwaysStoppedAnimation<Color>(
+                              AppColors.white,
+                            ),
                           ),
                         )
                       : Text(
-                          _hasPendingRequest ? 'Request Pending Approval' : 'Submit Request',
+                          _hasPendingRequest
+                              ? 'Request Pending Approval'
+                              : 'Submit Request',
                           style: TextStyle(
                             fontSize: 16.sp,
                             fontWeight: FontWeight.w600,
-                            color: _hasPendingRequest ? AppColors.grey600 : AppColors.white,
+                            color: _hasPendingRequest
+                                ? AppColors.grey600
+                                : AppColors.white,
                           ),
                         ),
                 ),
@@ -386,10 +401,7 @@ class _EditAddressScreenState extends ConsumerState<EditAddressScreen> {
           Expanded(
             child: Text(
               'Changes to your address require admin approval and may take some time to reflect.',
-              style: TextStyle(
-                fontSize: 12.sp,
-                color: AppColors.info,
-              ),
+              style: TextStyle(fontSize: 12.sp, color: AppColors.info),
             ),
           ),
         ],
@@ -435,27 +447,26 @@ class _EditAddressScreenState extends ConsumerState<EditAddressScreen> {
             fillColor: AppColors.white,
             border: OutlineInputBorder(
               borderRadius: BorderRadius.circular(8.r),
-              borderSide: BorderSide(color: AppColors.grey300),
+              borderSide: const BorderSide(color: AppColors.grey300),
             ),
             enabledBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(8.r),
-              borderSide: BorderSide(color: AppColors.grey300),
+              borderSide: const BorderSide(color: AppColors.grey300),
             ),
             focusedBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(8.r),
-              borderSide: BorderSide(color: AppColors.primary, width: 2),
+              borderSide: const BorderSide(color: AppColors.primary, width: 2),
             ),
             errorBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(8.r),
-              borderSide: BorderSide(color: AppColors.error),
+              borderSide: const BorderSide(color: AppColors.error),
             ),
-            contentPadding:
-                EdgeInsets.symmetric(horizontal: 16.w, vertical: 12.h),
+            contentPadding: EdgeInsets.symmetric(
+              horizontal: 16.w,
+              vertical: 12.h,
+            ),
           ),
-          style: TextStyle(
-            fontSize: 14.sp,
-            color: AppColors.textPrimary,
-          ),
+          style: TextStyle(fontSize: 14.sp, color: AppColors.textPrimary),
         ),
       ],
     );
@@ -492,12 +503,9 @@ class _EditAddressScreenState extends ConsumerState<EditAddressScreen> {
               isExpanded: true,
               hint: Text(
                 'Select $label',
-                style: TextStyle(
-                  fontSize: 14.sp,
-                  color: AppColors.textHint,
-                ),
+                style: TextStyle(fontSize: 14.sp, color: AppColors.textHint),
               ),
-              icon: Icon(
+              icon: const Icon(
                 Icons.keyboard_arrow_down,
                 color: AppColors.grey400,
               ),
@@ -543,10 +551,7 @@ class _EditAddressScreenState extends ConsumerState<EditAddressScreen> {
           Expanded(
             child: Text(
               label,
-              style: TextStyle(
-                fontSize: 14.sp,
-                color: AppColors.textPrimary,
-              ),
+              style: TextStyle(fontSize: 14.sp, color: AppColors.textPrimary),
             ),
           ),
         ],
@@ -561,8 +566,8 @@ class _EditAddressScreenState extends ConsumerState<EditAddressScreen> {
 
     if (_selectedState == null) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: const Text('Please select a state'),
+        const SnackBar(
+          content: Text('Please select a state'),
           backgroundColor: AppColors.error,
         ),
       );
@@ -655,10 +660,7 @@ class _EditAddressScreenState extends ConsumerState<EditAddressScreen> {
               Navigator.of(context).pop();
               Navigator.of(context).pop();
             },
-            child: Text(
-              'OK',
-              style: TextStyle(color: AppColors.primary),
-            ),
+            child: const Text('OK', style: TextStyle(color: AppColors.primary)),
           ),
         ],
       ),

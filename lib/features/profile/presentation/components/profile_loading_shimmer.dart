@@ -22,9 +22,10 @@ class _ProfileLoadingShimmerState extends State<ProfileLoadingShimmer>
       duration: const Duration(milliseconds: 1500),
       vsync: this,
     )..repeat();
-    _animation = Tween<double>(begin: 0.3, end: 0.6).animate(
-      CurvedAnimation(parent: _controller, curve: Curves.easeInOut),
-    );
+    _animation = Tween<double>(
+      begin: 0.3,
+      end: 0.6,
+    ).animate(CurvedAnimation(parent: _controller, curve: Curves.easeInOut));
   }
 
   @override
@@ -97,10 +98,10 @@ class _ProfileLoadingShimmerState extends State<ProfileLoadingShimmer>
         color: AppColors.white,
         borderRadius: BorderRadius.circular(12.r),
         boxShadow: [
-          BoxShadow(
+          const BoxShadow(
             color: AppColors.cardShadow,
             blurRadius: 8,
-            offset: const Offset(0, 2),
+            offset: Offset(0, 2),
           ),
         ],
       ),

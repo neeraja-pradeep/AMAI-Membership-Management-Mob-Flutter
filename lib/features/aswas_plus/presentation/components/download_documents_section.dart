@@ -54,7 +54,10 @@ class DownloadDocumentsSection extends ConsumerWidget {
   }
 
   /// Builds the documents list from API data
-  Widget _buildDocumentsList(BuildContext context, List<Map<String, dynamic>> documents) {
+  Widget _buildDocumentsList(
+    BuildContext context,
+    List<Map<String, dynamic>> documents,
+  ) {
     // Find documents by title
     final policyDoc = _findDocumentByTitle(documents, 'Policy Document');
     final claimDoc = _findDocumentByTitle(documents, 'Claim Form');
@@ -87,7 +90,10 @@ class DownloadDocumentsSection extends ConsumerWidget {
   }
 
   /// Finds a document by its title (case-insensitive)
-  Map<String, dynamic>? _findDocumentByTitle(List<Map<String, dynamic>> documents, String title) {
+  Map<String, dynamic>? _findDocumentByTitle(
+    List<Map<String, dynamic>> documents,
+    String title,
+  ) {
     for (final doc in documents) {
       final docTitle = doc['title'] as String?;
       if (docTitle != null && docTitle.toLowerCase() == title.toLowerCase()) {
@@ -123,7 +129,10 @@ class DownloadDocumentsSection extends ConsumerWidget {
         SizedBox(height: 8.h),
         TextButton(
           onPressed: () => ref.invalidate(aswasDocumentsProvider),
-          child: Text('Retry', style: TextStyle(color: AppColors.primary)),
+          child: const Text(
+            'Retry',
+            style: TextStyle(color: AppColors.primary),
+          ),
         ),
       ],
     );
@@ -139,7 +148,9 @@ class DownloadDocumentsSection extends ConsumerWidget {
     final isAvailable = fileUrl != null && fileUrl.isNotEmpty;
 
     return InkWell(
-      onTap: isAvailable ? () => _handleDownload(context, label, fileUrl) : null,
+      onTap: isAvailable
+          ? () => _handleDownload(context, label, fileUrl)
+          : null,
       borderRadius: BorderRadius.circular(8.r),
       child: Padding(
         padding: EdgeInsets.symmetric(vertical: 4.h),
@@ -167,7 +178,9 @@ class DownloadDocumentsSection extends ConsumerWidget {
                 style: TextStyle(
                   fontSize: 14.sp,
                   fontWeight: FontWeight.w500,
-                  color: isAvailable ? AppColors.textPrimary : AppColors.grey400,
+                  color: isAvailable
+                      ? AppColors.textPrimary
+                      : AppColors.grey400,
                 ),
               ),
             ),
@@ -218,7 +231,11 @@ class DownloadDocumentsSection extends ConsumerWidget {
   }
 
   /// Handles document download using url_launcher
-  Future<void> _handleDownload(BuildContext context, String documentName, String fileUrl) async {
+  Future<void> _handleDownload(
+    BuildContext context,
+    String documentName,
+    String fileUrl,
+  ) async {
     // Ensure URL has https:// prefix
     String fullUrl = fileUrl;
     if (!fileUrl.startsWith('http://') && !fileUrl.startsWith('https://')) {
@@ -300,7 +317,9 @@ class DownloadDocumentsSectionShimmer extends StatelessWidget {
       children: [
         _buildShimmerBox(width: 40.w, height: 40.h),
         SizedBox(width: 12.w),
-        Expanded(child: _buildShimmerBox(width: 120.w, height: 16.h)),
+        Expanded(
+          child: _buildShimmerBox(width: 120.w, height: 16.h),
+        ),
         _buildShimmerBox(width: 24.w, height: 24.h),
       ],
     );

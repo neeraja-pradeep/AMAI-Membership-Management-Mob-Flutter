@@ -13,10 +13,7 @@ import 'package:myapp/features/membership/presentation/screens/membership_paymen
 /// Renew Membership Screen
 /// Shows renewal options for membership and Aswas Plus
 class RenewMembershipScreen extends ConsumerStatefulWidget {
-  const RenewMembershipScreen({
-    super.key,
-    this.defaultSelectedProductId,
-  });
+  const RenewMembershipScreen({super.key, this.defaultSelectedProductId});
 
   /// Default product ID to select on screen load
   /// If null, defaults to Aswas Plus (for backward compatibility)
@@ -37,7 +34,8 @@ class _RenewMembershipScreenState extends ConsumerState<RenewMembershipScreen> {
       ref.read(renewalStateProvider.notifier).loadProducts();
       // Select the default product based on where navigation came from
       // If coming from membership screen, select membership; otherwise select Aswas Plus
-      final defaultProductId = widget.defaultSelectedProductId ?? RenewalProductIds.aswasPlus;
+      final defaultProductId =
+          widget.defaultSelectedProductId ?? RenewalProductIds.aswasPlus;
       ref.read(renewalStateProvider.notifier).selectProduct(defaultProductId);
     });
   }
@@ -58,7 +56,7 @@ class _RenewMembershipScreenState extends ConsumerState<RenewMembershipScreen> {
         backgroundColor: AppColors.white,
         elevation: 0,
         leading: IconButton(
-          icon: Icon(Icons.arrow_back, color: AppColors.textPrimary),
+          icon: const Icon(Icons.arrow_back, color: AppColors.textPrimary),
           onPressed: () => Navigator.of(context).pop(),
         ),
       ),
@@ -237,8 +235,9 @@ class _RenewMembershipScreenState extends ConsumerState<RenewMembershipScreen> {
                         width: 20.h,
                         child: CircularProgressIndicator(
                           strokeWidth: 2.w,
-                          valueColor:
-                              AlwaysStoppedAnimation<Color>(AppColors.white),
+                          valueColor: const AlwaysStoppedAnimation<Color>(
+                            AppColors.white,
+                          ),
                         ),
                       )
                     : Text(
@@ -329,15 +328,14 @@ class _RenewMembershipScreenState extends ConsumerState<RenewMembershipScreen> {
           if (paymentResponse != null) {
             Navigator.of(context).push(
               MaterialPageRoute<void>(
-                builder: (context) => MembershipPaymentScreen(
-                  paymentResponse: paymentResponse,
-                ),
+                builder: (context) =>
+                    MembershipPaymentScreen(paymentResponse: paymentResponse),
               ),
             );
           } else {
             ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(
-                content: const Text('Failed to initiate membership renewal'),
+              const SnackBar(
+                content: Text('Failed to initiate membership renewal'),
                 backgroundColor: AppColors.error,
               ),
             );
@@ -386,15 +384,14 @@ class _RenewMembershipScreenState extends ConsumerState<RenewMembershipScreen> {
           if (renewalResponse != null) {
             Navigator.of(context).push(
               MaterialPageRoute<void>(
-                builder: (context) => SelectPaymentMethodScreen(
-                  renewalResponse: renewalResponse,
-                ),
+                builder: (context) =>
+                    SelectPaymentMethodScreen(renewalResponse: renewalResponse),
               ),
             );
           } else {
             ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(
-                content: const Text('Failed to initiate renewal'),
+              const SnackBar(
+                content: Text('Failed to initiate renewal'),
                 backgroundColor: AppColors.error,
               ),
             );
@@ -464,7 +461,7 @@ class _RenewMembershipScreenState extends ConsumerState<RenewMembershipScreen> {
                       child: Container(
                         width: 12.w,
                         height: 12.w,
-                        decoration: BoxDecoration(
+                        decoration: const BoxDecoration(
                           shape: BoxShape.circle,
                           color: AppColors.primary,
                         ),
@@ -525,11 +522,7 @@ class _RenewMembershipScreenState extends ConsumerState<RenewMembershipScreen> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(
-              Icons.error_outline,
-              size: 64.sp,
-              color: AppColors.error,
-            ),
+            Icon(Icons.error_outline, size: 64.sp, color: AppColors.error),
             SizedBox(height: 16.h),
             Text(
               'Failed to load products',
@@ -543,10 +536,7 @@ class _RenewMembershipScreenState extends ConsumerState<RenewMembershipScreen> {
             Text(
               message,
               textAlign: TextAlign.center,
-              style: TextStyle(
-                fontSize: 14.sp,
-                color: AppColors.textSecondary,
-              ),
+              style: TextStyle(fontSize: 14.sp, color: AppColors.textSecondary),
             ),
             SizedBox(height: 24.h),
             ElevatedButton(

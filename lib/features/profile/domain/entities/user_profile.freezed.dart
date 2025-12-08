@@ -16,21 +16,52 @@ final _privateConstructorUsedError = UnsupportedError(
 
 /// @nodoc
 mixin _$UserProfile {
+  /// Unique user identifier
   int get id => throw _privateConstructorUsedError;
+
+  /// User's email address
   String get email => throw _privateConstructorUsedError;
+
+  /// User's phone number
   String get phone => throw _privateConstructorUsedError;
+
+  /// User's first name
   String get firstName => throw _privateConstructorUsedError;
+
+  /// User's last name (optional)
   String? get lastName => throw _privateConstructorUsedError;
+
+  /// Date of birth
   DateTime? get dateOfBirth => throw _privateConstructorUsedError;
+
+  /// Gender
   String? get gender => throw _privateConstructorUsedError;
+
+  /// Profile picture URL
   String? get profilePicture => throw _privateConstructorUsedError;
+
+  /// Profile picture path
   String? get profilePicturePath => throw _privateConstructorUsedError;
+
+  /// Whether user account is active
   bool get isActive => throw _privateConstructorUsedError;
+
+  /// Whether user is verified
   bool get isVerified => throw _privateConstructorUsedError;
+
+  /// Blood group
   String? get bloodGroup => throw _privateConstructorUsedError;
+
+  /// Parent's name
   String? get parentName => throw _privateConstructorUsedError;
+
+  /// Marital status
   String? get maritalStatus => throw _privateConstructorUsedError;
+
+  /// User role
   String? get role => throw _privateConstructorUsedError;
+
+  /// Last login timestamp
   DateTime? get lastLogin => throw _privateConstructorUsedError;
 
   @JsonKey(ignore: true)
@@ -44,24 +75,23 @@ abstract class $UserProfileCopyWith<$Res> {
           UserProfile value, $Res Function(UserProfile) then) =
       _$UserProfileCopyWithImpl<$Res, UserProfile>;
   @useResult
-  $Res call({
-    int id,
-    String email,
-    String phone,
-    String firstName,
-    String? lastName,
-    DateTime? dateOfBirth,
-    String? gender,
-    String? profilePicture,
-    String? profilePicturePath,
-    bool isActive,
-    bool isVerified,
-    String? bloodGroup,
-    String? parentName,
-    String? maritalStatus,
-    String? role,
-    DateTime? lastLogin,
-  });
+  $Res call(
+      {int id,
+      String email,
+      String phone,
+      String firstName,
+      String? lastName,
+      DateTime? dateOfBirth,
+      String? gender,
+      String? profilePicture,
+      String? profilePicturePath,
+      bool isActive,
+      bool isVerified,
+      String? bloodGroup,
+      String? parentName,
+      String? maritalStatus,
+      String? role,
+      DateTime? lastLogin});
 }
 
 /// @nodoc
@@ -69,7 +99,9 @@ class _$UserProfileCopyWithImpl<$Res, $Val extends UserProfile>
     implements $UserProfileCopyWith<$Res> {
   _$UserProfileCopyWithImpl(this._value, this._then);
 
+  // ignore: unused_field
   final $Val _value;
+  // ignore: unused_field
   final $Res Function($Val) _then;
 
   @pragma('vm:prefer-inline')
@@ -95,52 +127,68 @@ class _$UserProfileCopyWithImpl<$Res, $Val extends UserProfile>
     return _then(_value.copyWith(
       id: null == id
           ? _value.id
-          : id as int,
+          : id // ignore: cast_nullable_to_non_nullable
+              as int,
       email: null == email
           ? _value.email
-          : email as String,
+          : email // ignore: cast_nullable_to_non_nullable
+              as String,
       phone: null == phone
           ? _value.phone
-          : phone as String,
+          : phone // ignore: cast_nullable_to_non_nullable
+              as String,
       firstName: null == firstName
           ? _value.firstName
-          : firstName as String,
+          : firstName // ignore: cast_nullable_to_non_nullable
+              as String,
       lastName: freezed == lastName
           ? _value.lastName
-          : lastName as String?,
+          : lastName // ignore: cast_nullable_to_non_nullable
+              as String?,
       dateOfBirth: freezed == dateOfBirth
           ? _value.dateOfBirth
-          : dateOfBirth as DateTime?,
+          : dateOfBirth // ignore: cast_nullable_to_non_nullable
+              as DateTime?,
       gender: freezed == gender
           ? _value.gender
-          : gender as String?,
+          : gender // ignore: cast_nullable_to_non_nullable
+              as String?,
       profilePicture: freezed == profilePicture
           ? _value.profilePicture
-          : profilePicture as String?,
+          : profilePicture // ignore: cast_nullable_to_non_nullable
+              as String?,
       profilePicturePath: freezed == profilePicturePath
           ? _value.profilePicturePath
-          : profilePicturePath as String?,
+          : profilePicturePath // ignore: cast_nullable_to_non_nullable
+              as String?,
       isActive: null == isActive
           ? _value.isActive
-          : isActive as bool,
+          : isActive // ignore: cast_nullable_to_non_nullable
+              as bool,
       isVerified: null == isVerified
           ? _value.isVerified
-          : isVerified as bool,
+          : isVerified // ignore: cast_nullable_to_non_nullable
+              as bool,
       bloodGroup: freezed == bloodGroup
           ? _value.bloodGroup
-          : bloodGroup as String?,
+          : bloodGroup // ignore: cast_nullable_to_non_nullable
+              as String?,
       parentName: freezed == parentName
           ? _value.parentName
-          : parentName as String?,
+          : parentName // ignore: cast_nullable_to_non_nullable
+              as String?,
       maritalStatus: freezed == maritalStatus
           ? _value.maritalStatus
-          : maritalStatus as String?,
+          : maritalStatus // ignore: cast_nullable_to_non_nullable
+              as String?,
       role: freezed == role
           ? _value.role
-          : role as String?,
+          : role // ignore: cast_nullable_to_non_nullable
+              as String?,
       lastLogin: freezed == lastLogin
           ? _value.lastLogin
-          : lastLogin as DateTime?,
+          : lastLogin // ignore: cast_nullable_to_non_nullable
+              as DateTime?,
     ) as $Val);
   }
 }
@@ -153,24 +201,23 @@ abstract class _$$UserProfileImplCopyWith<$Res>
       __$$UserProfileImplCopyWithImpl<$Res>;
   @override
   @useResult
-  $Res call({
-    int id,
-    String email,
-    String phone,
-    String firstName,
-    String? lastName,
-    DateTime? dateOfBirth,
-    String? gender,
-    String? profilePicture,
-    String? profilePicturePath,
-    bool isActive,
-    bool isVerified,
-    String? bloodGroup,
-    String? parentName,
-    String? maritalStatus,
-    String? role,
-    DateTime? lastLogin,
-  });
+  $Res call(
+      {int id,
+      String email,
+      String phone,
+      String firstName,
+      String? lastName,
+      DateTime? dateOfBirth,
+      String? gender,
+      String? profilePicture,
+      String? profilePicturePath,
+      bool isActive,
+      bool isVerified,
+      String? bloodGroup,
+      String? parentName,
+      String? maritalStatus,
+      String? role,
+      DateTime? lastLogin});
 }
 
 /// @nodoc
@@ -204,52 +251,68 @@ class __$$UserProfileImplCopyWithImpl<$Res>
     return _then(_$UserProfileImpl(
       id: null == id
           ? _value.id
-          : id as int,
+          : id // ignore: cast_nullable_to_non_nullable
+              as int,
       email: null == email
           ? _value.email
-          : email as String,
+          : email // ignore: cast_nullable_to_non_nullable
+              as String,
       phone: null == phone
           ? _value.phone
-          : phone as String,
+          : phone // ignore: cast_nullable_to_non_nullable
+              as String,
       firstName: null == firstName
           ? _value.firstName
-          : firstName as String,
+          : firstName // ignore: cast_nullable_to_non_nullable
+              as String,
       lastName: freezed == lastName
           ? _value.lastName
-          : lastName as String?,
+          : lastName // ignore: cast_nullable_to_non_nullable
+              as String?,
       dateOfBirth: freezed == dateOfBirth
           ? _value.dateOfBirth
-          : dateOfBirth as DateTime?,
+          : dateOfBirth // ignore: cast_nullable_to_non_nullable
+              as DateTime?,
       gender: freezed == gender
           ? _value.gender
-          : gender as String?,
+          : gender // ignore: cast_nullable_to_non_nullable
+              as String?,
       profilePicture: freezed == profilePicture
           ? _value.profilePicture
-          : profilePicture as String?,
+          : profilePicture // ignore: cast_nullable_to_non_nullable
+              as String?,
       profilePicturePath: freezed == profilePicturePath
           ? _value.profilePicturePath
-          : profilePicturePath as String?,
+          : profilePicturePath // ignore: cast_nullable_to_non_nullable
+              as String?,
       isActive: null == isActive
           ? _value.isActive
-          : isActive as bool,
+          : isActive // ignore: cast_nullable_to_non_nullable
+              as bool,
       isVerified: null == isVerified
           ? _value.isVerified
-          : isVerified as bool,
+          : isVerified // ignore: cast_nullable_to_non_nullable
+              as bool,
       bloodGroup: freezed == bloodGroup
           ? _value.bloodGroup
-          : bloodGroup as String?,
+          : bloodGroup // ignore: cast_nullable_to_non_nullable
+              as String?,
       parentName: freezed == parentName
           ? _value.parentName
-          : parentName as String?,
+          : parentName // ignore: cast_nullable_to_non_nullable
+              as String?,
       maritalStatus: freezed == maritalStatus
           ? _value.maritalStatus
-          : maritalStatus as String?,
+          : maritalStatus // ignore: cast_nullable_to_non_nullable
+              as String?,
       role: freezed == role
           ? _value.role
-          : role as String?,
+          : role // ignore: cast_nullable_to_non_nullable
+              as String?,
       lastLogin: freezed == lastLogin
           ? _value.lastLogin
-          : lastLogin as DateTime?,
+          : lastLogin // ignore: cast_nullable_to_non_nullable
+              as DateTime?,
     ));
   }
 }
@@ -257,55 +320,86 @@ class __$$UserProfileImplCopyWithImpl<$Res>
 /// @nodoc
 
 class _$UserProfileImpl extends _UserProfile {
-  const _$UserProfileImpl({
-    required this.id,
-    required this.email,
-    required this.phone,
-    required this.firstName,
-    this.lastName,
-    this.dateOfBirth,
-    this.gender,
-    this.profilePicture,
-    this.profilePicturePath,
-    required this.isActive,
-    required this.isVerified,
-    this.bloodGroup,
-    this.parentName,
-    this.maritalStatus,
-    this.role,
-    this.lastLogin,
-  }) : super._();
+  const _$UserProfileImpl(
+      {required this.id,
+      required this.email,
+      required this.phone,
+      required this.firstName,
+      this.lastName,
+      this.dateOfBirth,
+      this.gender,
+      this.profilePicture,
+      this.profilePicturePath,
+      required this.isActive,
+      required this.isVerified,
+      this.bloodGroup,
+      this.parentName,
+      this.maritalStatus,
+      this.role,
+      this.lastLogin})
+      : super._();
 
+  /// Unique user identifier
   @override
   final int id;
+
+  /// User's email address
   @override
   final String email;
+
+  /// User's phone number
   @override
   final String phone;
+
+  /// User's first name
   @override
   final String firstName;
+
+  /// User's last name (optional)
   @override
   final String? lastName;
+
+  /// Date of birth
   @override
   final DateTime? dateOfBirth;
+
+  /// Gender
   @override
   final String? gender;
+
+  /// Profile picture URL
   @override
   final String? profilePicture;
+
+  /// Profile picture path
   @override
   final String? profilePicturePath;
+
+  /// Whether user account is active
   @override
   final bool isActive;
+
+  /// Whether user is verified
   @override
   final bool isVerified;
+
+  /// Blood group
   @override
   final String? bloodGroup;
+
+  /// Parent's name
   @override
   final String? parentName;
+
+  /// Marital status
   @override
   final String? maritalStatus;
+
+  /// User role
   @override
   final String? role;
+
+  /// Last login timestamp
   @override
   final DateTime? lastLogin;
 
@@ -322,19 +416,30 @@ class _$UserProfileImpl extends _UserProfile {
             (identical(other.id, id) || other.id == id) &&
             (identical(other.email, email) || other.email == email) &&
             (identical(other.phone, phone) || other.phone == phone) &&
-            (identical(other.firstName, firstName) || other.firstName == firstName) &&
-            (identical(other.lastName, lastName) || other.lastName == lastName) &&
-            (identical(other.dateOfBirth, dateOfBirth) || other.dateOfBirth == dateOfBirth) &&
+            (identical(other.firstName, firstName) ||
+                other.firstName == firstName) &&
+            (identical(other.lastName, lastName) ||
+                other.lastName == lastName) &&
+            (identical(other.dateOfBirth, dateOfBirth) ||
+                other.dateOfBirth == dateOfBirth) &&
             (identical(other.gender, gender) || other.gender == gender) &&
-            (identical(other.profilePicture, profilePicture) || other.profilePicture == profilePicture) &&
-            (identical(other.profilePicturePath, profilePicturePath) || other.profilePicturePath == profilePicturePath) &&
-            (identical(other.isActive, isActive) || other.isActive == isActive) &&
-            (identical(other.isVerified, isVerified) || other.isVerified == isVerified) &&
-            (identical(other.bloodGroup, bloodGroup) || other.bloodGroup == bloodGroup) &&
-            (identical(other.parentName, parentName) || other.parentName == parentName) &&
-            (identical(other.maritalStatus, maritalStatus) || other.maritalStatus == maritalStatus) &&
+            (identical(other.profilePicture, profilePicture) ||
+                other.profilePicture == profilePicture) &&
+            (identical(other.profilePicturePath, profilePicturePath) ||
+                other.profilePicturePath == profilePicturePath) &&
+            (identical(other.isActive, isActive) ||
+                other.isActive == isActive) &&
+            (identical(other.isVerified, isVerified) ||
+                other.isVerified == isVerified) &&
+            (identical(other.bloodGroup, bloodGroup) ||
+                other.bloodGroup == bloodGroup) &&
+            (identical(other.parentName, parentName) ||
+                other.parentName == parentName) &&
+            (identical(other.maritalStatus, maritalStatus) ||
+                other.maritalStatus == maritalStatus) &&
             (identical(other.role, role) || other.role == role) &&
-            (identical(other.lastLogin, lastLogin) || other.lastLogin == lastLogin));
+            (identical(other.lastLogin, lastLogin) ||
+                other.lastLogin == lastLogin));
   }
 
   @override
@@ -365,57 +470,88 @@ class _$UserProfileImpl extends _UserProfile {
 }
 
 abstract class _UserProfile extends UserProfile {
-  const factory _UserProfile({
-    required final int id,
-    required final String email,
-    required final String phone,
-    required final String firstName,
-    final String? lastName,
-    final DateTime? dateOfBirth,
-    final String? gender,
-    final String? profilePicture,
-    final String? profilePicturePath,
-    required final bool isActive,
-    required final bool isVerified,
-    final String? bloodGroup,
-    final String? parentName,
-    final String? maritalStatus,
-    final String? role,
-    final DateTime? lastLogin,
-  }) = _$UserProfileImpl;
+  const factory _UserProfile(
+      {required final int id,
+      required final String email,
+      required final String phone,
+      required final String firstName,
+      final String? lastName,
+      final DateTime? dateOfBirth,
+      final String? gender,
+      final String? profilePicture,
+      final String? profilePicturePath,
+      required final bool isActive,
+      required final bool isVerified,
+      final String? bloodGroup,
+      final String? parentName,
+      final String? maritalStatus,
+      final String? role,
+      final DateTime? lastLogin}) = _$UserProfileImpl;
   const _UserProfile._() : super._();
 
   @override
+
+  /// Unique user identifier
   int get id;
   @override
+
+  /// User's email address
   String get email;
   @override
+
+  /// User's phone number
   String get phone;
   @override
+
+  /// User's first name
   String get firstName;
   @override
+
+  /// User's last name (optional)
   String? get lastName;
   @override
+
+  /// Date of birth
   DateTime? get dateOfBirth;
   @override
+
+  /// Gender
   String? get gender;
   @override
+
+  /// Profile picture URL
   String? get profilePicture;
   @override
+
+  /// Profile picture path
   String? get profilePicturePath;
   @override
+
+  /// Whether user account is active
   bool get isActive;
   @override
+
+  /// Whether user is verified
   bool get isVerified;
   @override
+
+  /// Blood group
   String? get bloodGroup;
   @override
+
+  /// Parent's name
   String? get parentName;
   @override
+
+  /// Marital status
   String? get maritalStatus;
   @override
+
+  /// User role
   String? get role;
   @override
+
+  /// Last login timestamp
   DateTime? get lastLogin;
   @override
   @JsonKey(ignore: true)

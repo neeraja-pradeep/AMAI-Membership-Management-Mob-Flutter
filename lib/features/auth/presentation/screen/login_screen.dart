@@ -41,8 +41,9 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
   }
 
   Future<void> _loadRememberMeCredentials() async {
-    final credentials =
-        await ref.read(authRepositoryProvider).getRememberMeCredentials();
+    final credentials = await ref
+        .read(authRepositoryProvider)
+        .getRememberMeCredentials();
     if (credentials.email != null && credentials.password != null) {
       setState(() {
         _emailController.text = credentials.email!;
@@ -88,9 +89,11 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
         case AuthStateAuthenticated():
           // Navigate to home screen on successful login
           // Navigator.pushReplacementNamed(context, '/home');
-          Navigator.of(
-            context,
-          ).push(MaterialPageRoute(builder: (context) => const MainNavigationScreen()));
+          Navigator.of(context).push(
+            MaterialPageRoute(
+              builder: (context) => const MainNavigationScreen(),
+            ),
+          );
           break;
         case AuthStateError(:final message):
           // Show error snackbar
@@ -104,206 +107,212 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
     });
 
     return Scaffold(
-      body: Container(
-        width: double.infinity,
-        height: double.infinity,
-
-        // Background Image
-        decoration: const BoxDecoration(
-          image: DecorationImage(
-            image: AssetImage("assets/background.jpg"),
-            fit: BoxFit.cover, // full screen
-          ),
-        ),
-        child: Stack(
-          children: [
-            // Main content
-            SingleChildScrollView(
-              child: Padding(
-                padding: EdgeInsets.symmetric(horizontal: 24.w),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: [
-                    SizedBox(height: 60.h),
-
-                    // Logo or Title
-                    Text(
-                      'Login',
-                      textAlign: TextAlign.center,
-                      style: TextStyle(
-                        fontSize: 30.sp,
-                        fontWeight: FontWeight.w700,
-                      ),
-                    ),
-
-                    SizedBox(height: 60.h),
-
-                    // Login Form
-                    Form(
-                      key: _formKey,
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.stretch,
-                        children: [
-                          const Text(
-                            "Email / Usermame",
-                            style: TextStyle(
-                              fontWeight: FontWeight.w500,
-                              fontSize: 20,
-                            ),
-                          ),
-                          SizedBox(height: 16.h),
-                          // Email field
-                          EmailField(controller: _emailController),
-
-                          SizedBox(height: 16.h),
-
-                          const Text(
-                            "Password",
-                            style: TextStyle(
-                              fontWeight: FontWeight.w500,
-                              fontSize: 20,
-                            ),
-                          ),
-                          SizedBox(height: 16.h),
-
-                          // Password field
-                          PasswordField(controller: _passwordController),
-
-                          SizedBox(height: 12.h),
-
-                          // Remember me checkbox
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              Row(
-                                children: [
-                                  SizedBox(
-                                    width: 24.w,
-                                    height: 24.h,
-                                    child: Checkbox(
-                                      value: _rememberMe,
-                                      onChanged: (value) {
-                                        setState(() {
-                                          _rememberMe = value ?? false;
-                                        });
-                                      },
-                                      activeColor: AppColors.brown,
-                                    ),
-                                  ),
-                                  SizedBox(width: 8.w),
-                                  Text(
-                                    'Remember me',
-                                    style: TextStyle(
-                                      fontSize: 14.sp,
-                                      color: Colors.grey[700],
-                                    ),
-                                  ),
-                                ],
-                              ),
-
-                              TextButton(
-                                onPressed: () {
-                                  Navigator.of(context).push(
-                                    MaterialPageRoute(
-                                      builder: (context) =>
-                                          const ForgotPasswordScreen(),
-                                    ),
-                                  );
-                                },
-                                child: const Text(
-                                  'Forgot Password ?',
-                                  style: TextStyle(
-                                    fontWeight: FontWeight.w500,
-                                    color: AppColors.brown,
-                                  ),
-                                ),
-                              ),
-                            ],
-                          ),
-
-                          SizedBox(height: 32.h),
-
-                          // Login button
-                          SizedBox(
-                            height: 50.h,
-                            child: ElevatedButton(
-                              onPressed: authState is AuthStateLoading
-                                  ? null
-                                  : _handleLogin,
-
-                              style: ElevatedButton.styleFrom(
-                                backgroundColor: AppColors.brown,
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(30.r),
-                                ),
-                                elevation: 0,
-                              ),
-                              child: authState is AuthStateLoading
-                                  ? SizedBox(
-                                      width: 24.w,
-                                      height: 24.h,
-                                      child: const CircularProgressIndicator(
-                                        strokeWidth: 2,
-                                        valueColor:
-                                            AlwaysStoppedAnimation<Color>(
-                                              Colors.white,
-                                            ),
-                                      ),
-                                    )
-                                  : Text(
-                                      'Login',
-                                      style: TextStyle(
-                                        fontSize: 16.sp,
-                                        fontWeight: FontWeight.w600,
-                                        color: Colors.white,
-                                      ),
-                                    ),
-                            ),
-                          ),
-
-                          SizedBox(height: 50.h),
-
-                          // Register button
-                          TextButton(
-                            onPressed: () async {
-                              Navigator.of(context).push(
-                                MaterialPageRoute(
-                                  builder: (context) => const RegisterScreen(),
-                                ),
-                              );
-                            },
-                            child: RichText(
-                              text: TextSpan(
-                                text: "New Member? ",
-                                style: TextStyle(
-                                  fontSize: 14.sp,
-                                  color: Colors.black,
-                                  fontWeight: FontWeight.w400,
-                                ),
-                                children: [
-                                  TextSpan(
-                                    text: "Register Here",
-                                    style: TextStyle(
-                                      fontSize: 14.sp,
-
-                                      decoration: TextDecoration.underline,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ],
-                ),
+      body: Stack(
+        children: [
+          Container(
+            width: double.infinity,
+            height: double.infinity,
+            decoration: const BoxDecoration(
+              image: DecorationImage(
+                image: AssetImage("assets/background.jpg"),
+                fit: BoxFit.cover,
               ),
             ),
+          ),
 
-            // Offline banner (SCENARIO 3)
-          ],
-        ),
+          // gradient overlay
+          Container(
+            width: double.infinity,
+            height: double.infinity,
+            decoration: const BoxDecoration(
+              gradient: AppColors.loginBackground,
+            ),
+          ),
+          // Main content
+          SingleChildScrollView(
+            child: Padding(
+              padding: EdgeInsets.symmetric(horizontal: 24.w),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  SizedBox(height: 60.h),
+
+                  // Logo or Title
+                  Text(
+                    'Login',
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                      fontSize: 30.sp,
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
+
+                  SizedBox(height: 60.h),
+
+                  // Login Form
+                  Form(
+                    key: _formKey,
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: [
+                        Text(
+                          "Email / Usermame",
+                          style: TextStyle(
+                            fontWeight: FontWeight.w500,
+                            fontSize: 16.sp,
+                          ),
+                        ),
+                        SizedBox(height: 12.h),
+                        // Email field
+                        EmailField(controller: _emailController),
+
+                        SizedBox(height: 24.h),
+
+                        Text(
+                          "Password",
+                          style: TextStyle(
+                            fontWeight: FontWeight.w500,
+                            fontSize: 16.sp,
+                          ),
+                        ),
+                        SizedBox(height: 12.h),
+
+                        // Password field
+                        PasswordField(controller: _passwordController),
+
+                        SizedBox(height: 16.h),
+
+                        // Remember me checkbox
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Row(
+                              children: [
+                                SizedBox(
+                                  width: 24.w,
+                                  height: 24.h,
+                                  child: Checkbox(
+                                    value: _rememberMe,
+                                    onChanged: (value) {
+                                      setState(() {
+                                        _rememberMe = value ?? false;
+                                      });
+                                    },
+                                    activeColor: AppColors.brown,
+                                  ),
+                                ),
+                                SizedBox(width: 8.w),
+                                Text(
+                                  'Remember me',
+                                  style: TextStyle(
+                                    fontSize: 14.sp,
+                                    color: Colors.grey[700],
+                                  ),
+                                ),
+                              ],
+                            ),
+
+                            TextButton(
+                              onPressed: () {
+                                Navigator.of(context).push(
+                                  MaterialPageRoute(
+                                    builder: (context) =>
+                                        const ForgotPasswordScreen(),
+                                  ),
+                                );
+                              },
+                              child: const Text(
+                                'Forgot Password ?',
+                                style: TextStyle(
+                                  fontWeight: FontWeight.w500,
+                                  color: AppColors.brown,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+
+                        SizedBox(height: 32.h),
+
+                        // Login button
+                        SizedBox(
+                          height: 50.h,
+                          child: ElevatedButton(
+                            onPressed: authState is AuthStateLoading
+                                ? null
+                                : _handleLogin,
+
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: AppColors.brown,
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(30.r),
+                              ),
+                              elevation: 0,
+                            ),
+                            child: authState is AuthStateLoading
+                                ? SizedBox(
+                                    width: 24.w,
+                                    height: 24.h,
+                                    child: const CircularProgressIndicator(
+                                      strokeWidth: 2,
+                                      valueColor: AlwaysStoppedAnimation<Color>(
+                                        Colors.white,
+                                      ),
+                                    ),
+                                  )
+                                : Text(
+                                    'Login',
+                                    style: TextStyle(
+                                      fontSize: 16.sp,
+                                      fontWeight: FontWeight.w600,
+                                      color: Colors.white,
+                                    ),
+                                  ),
+                          ),
+                        ),
+
+                        SizedBox(height: 180.h),
+
+                        // Register button
+                        TextButton(
+                          onPressed: () async {
+                            Navigator.of(context).push(
+                              MaterialPageRoute(
+                                builder: (context) => const RegisterScreen(),
+                              ),
+                            );
+                          },
+                          child: RichText(
+                            text: TextSpan(
+                              text: "New Member?   ",
+                              style: TextStyle(
+                                fontSize: 14.sp,
+                                color: Colors.black,
+                                fontWeight: FontWeight.w400,
+                              ),
+                              children: [
+                                TextSpan(
+                                  text: "Register Here",
+                                  style: TextStyle(
+                                    fontSize: 14.sp,
+
+                                    decoration: TextDecoration.underline,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+
+          // Offline banner (SCENARIO 3)
+        ],
       ),
     );
   }

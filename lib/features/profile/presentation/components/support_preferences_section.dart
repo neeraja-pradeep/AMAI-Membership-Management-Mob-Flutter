@@ -24,10 +24,10 @@ class SupportPreferencesSection extends StatelessWidget {
         color: AppColors.white,
         borderRadius: BorderRadius.circular(12.r),
         boxShadow: [
-          BoxShadow(
+          const BoxShadow(
             color: AppColors.cardShadow,
             blurRadius: 8,
-            offset: const Offset(0, 2),
+            offset: Offset(0, 2),
           ),
         ],
       ),
@@ -78,11 +78,7 @@ class SupportPreferencesSection extends StatelessWidget {
             padding: EdgeInsets.symmetric(vertical: 12.h),
             child: Row(
               children: [
-                Icon(
-                  icon,
-                  color: AppColors.grey600,
-                  size: 22.sp,
-                ),
+                Icon(icon, color: AppColors.grey600, size: 22.sp),
                 SizedBox(width: 12.w),
                 Expanded(
                   child: Text(
@@ -102,11 +98,7 @@ class SupportPreferencesSection extends StatelessWidget {
             ),
           ),
         ),
-        if (!isLast)
-          Divider(
-            color: AppColors.dividerLight,
-            height: 1,
-          ),
+        if (!isLast) const Divider(color: AppColors.dividerLight, height: 1),
       ],
     );
   }
