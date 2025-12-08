@@ -2,13 +2,12 @@ import 'dart:developer';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:myapp/features/navigation/presentation/screens/main_navigation_screen.dart';
 import 'package:razorpay_flutter/razorpay_flutter.dart';
 import 'package:myapp/app/theme/colors.dart';
-import '../../../../../app/router/app_router.dart';
 import '../../../application/notifiers/registration_state_notifier.dart';
 import '../../../application/states/registration_state.dart';
-import '../../components/registration_step_indicator.dart';
 
 class PaymentScreen extends ConsumerStatefulWidget {
   const PaymentScreen({super.key});
@@ -37,6 +36,27 @@ class _PaymentScreenState extends ConsumerState<PaymentScreen> {
   int? _userId;
 
   String? _selectedPaymentMethod = "razorpay";
+
+  // Payment method options
+  final List<PaymentMethod> _paymentMethods = [
+    PaymentMethod(
+      id: "razorpay",
+      name: "Razorpay",
+      icon: "assets/svg/razorpay.svg",
+    ),
+    PaymentMethod(
+      id: "googlepay",
+      name: "Google Pay",
+      icon: "assets/svg/googlepay.svg",
+    ),
+    PaymentMethod(id: "paytm", name: "Paytm", icon: "assets/svg/paytm.svg"),
+    PaymentMethod(
+      id: "card",
+      name: ".... .... .... ....6521",
+      icon: "assets/svg/mastercard.svg",
+      isCard: true,
+    ),
+  ];
 
   @override
   void initState() {
@@ -103,8 +123,11 @@ class _PaymentScreenState extends ConsumerState<PaymentScreen> {
 
       setState(() {
         totalPayable = (rawAmount is num) ? rawAmount.toDouble() : null;
-        subtotal = totalPayable;
-        gstAmount = 0.0;
+        // Calculate subtotal and GST (18%)
+        if (totalPayable != null) {
+          subtotal = (totalPayable! / 1.18);
+          gstAmount = totalPayable! - subtotal!;
+        }
         _isLoadingDetails = false;
       });
     } catch (e, st) {
@@ -193,342 +216,364 @@ class _PaymentScreenState extends ConsumerState<PaymentScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text("Payment")),
-      body: Stack(
-        children: [
-          SingleChildScrollView(
-            padding: EdgeInsets.all(24.w),
-            child: _isLoadingDetails
-                ? SizedBox(
-                    height: MediaQuery.of(context).size.height * 0.7,
-                    child: const Center(child: CircularProgressIndicator()),
-                  )
-                : Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      // Step Indicator
+      extendBodyBehindAppBar: true,
+      appBar: AppBar(
+        title: Text(
+          "Select Payment Method",
+          style: TextStyle(
+            fontSize: 20.sp,
+            fontWeight: FontWeight.w600,
+            color: AppColors.textPrimary,
+          ),
+        ),
+        centerTitle: true,
+        backgroundColor: Colors.transparent,
+        elevation: 0,
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back_ios, color: AppColors.textPrimary),
+          onPressed: () => Navigator.pop(context),
+        ),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.add, color: AppColors.textPrimary),
+            onPressed: () {
+              // Add new payment method action
+            },
+          ),
+        ],
+      ),
+      body: Container(
+        width: double.infinity,
+        height: double.infinity,
+        decoration: const BoxDecoration(
+          gradient: AppColors.lightBackgroundGradient,
+        ),
+        child: SafeArea(
+          child: Stack(
+            children: [
+              _isLoadingDetails
+                  ? const Center(child: CircularProgressIndicator())
+                  : SingleChildScrollView(
+                      padding: EdgeInsets.all(24.w),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          // Order Summary Card
+                          _buildOrderSummaryCard(),
 
-                      // Order Summary Card
-                      Container(
-                        width: double.infinity,
-                        padding: EdgeInsets.all(20.w),
-                        decoration: BoxDecoration(
-                          color: Colors.white,
-                          borderRadius: BorderRadius.circular(16.r),
-                          boxShadow: [
-                            BoxShadow(
-                              color: Colors.black.withOpacity(0.08),
-                              blurRadius: 10,
-                              offset: const Offset(0, 4),
+                          SizedBox(height: 16.h),
+
+                          // Payment Methods
+                          ..._paymentMethods.map(
+                            (method) => Padding(
+                              padding: EdgeInsets.only(bottom: 12.h),
+                              child: _buildPaymentMethodOption(method),
                             ),
-                          ],
-                        ),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Row(
-                              children: [
-                                Icon(
-                                  Icons.receipt_long,
-                                  color: AppColors.brown,
-                                  size: 24.sp,
-                                ),
-                                SizedBox(width: 10.w),
-                                Text(
-                                  "Order Summary",
-                                  style: TextStyle(
-                                    fontSize: 18.sp,
-                                    fontWeight: FontWeight.bold,
-                                  ),
-                                ),
-                              ],
-                            ),
-                            SizedBox(height: 20.h),
-                            _priceRow(
-                              "Membership Fee",
-                              totalPayable != null
-                                  ? "₹${totalPayable!.toStringAsFixed(2)}"
-                                  : "—",
-                            ),
-                            SizedBox(height: 12.h),
-                            _priceRow("GST (0%)", "₹0.00"),
-                            SizedBox(height: 16.h),
-                            Divider(color: Colors.grey[300], thickness: 1),
-                            SizedBox(height: 16.h),
-                            _priceRow(
-                              "Total Amount",
-                              totalPayable != null
-                                  ? "₹${totalPayable!.toStringAsFixed(2)}"
-                                  : "—",
-                              bold: true,
-                              highlight: true,
-                            ),
-                          ],
-                        ),
-                      ),
-
-                      SizedBox(height: 24.h),
-
-                      // Payment Method Section
-                      Text(
-                        "Payment Method",
-                        style: TextStyle(
-                          fontSize: 16.sp,
-                          fontWeight: FontWeight.w600,
-                        ),
-                      ),
-                      SizedBox(height: 12.h),
-
-                      // Razorpay Payment Option
-                      _buildRazorpayOption(),
-
-                      SizedBox(height: 32.h),
-
-                      // Pay Button
-                      SizedBox(
-                        width: double.infinity,
-                        height: 54.h,
-                        child: ElevatedButton(
-                          onPressed: _isProcessing ? null : _processPayment,
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: AppColors.brown,
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(12.r),
-                            ),
-                            elevation: 2,
                           ),
-                          child: _isProcessing
-                              ? SizedBox(
-                                  height: 24.h,
-                                  width: 24.w,
-                                  child: const CircularProgressIndicator(
-                                    color: Colors.white,
-                                    strokeWidth: 2,
-                                  ),
-                                )
-                              : Row(
-                                  mainAxisAlignment: MainAxisAlignment.center,
-                                  children: [
-                                    Icon(
-                                      Icons.lock,
-                                      size: 20.sp,
-                                      color: Colors.white,
+
+                          SizedBox(height: 24.h),
+
+                          // Back and Pay Now buttons
+                          Row(
+                            children: [
+                              Expanded(
+                                child: SizedBox(
+                                  height: 50.h,
+                                  child: OutlinedButton(
+                                    onPressed: () => Navigator.pop(context),
+                                    style: OutlinedButton.styleFrom(
+                                      side: const BorderSide(
+                                        color: AppColors.brown,
+                                      ),
+                                      shape: RoundedRectangleBorder(
+                                        borderRadius: BorderRadius.circular(
+                                          100.r,
+                                        ),
+                                      ),
                                     ),
-                                    SizedBox(width: 8.w),
-                                    Text(
-                                      totalPayable != null
-                                          ? "Pay ₹${totalPayable!.toStringAsFixed(2)}"
-                                          : "Pay Now",
+                                    child: Text(
+                                      "Back",
                                       style: TextStyle(
+                                        color: AppColors.brown,
                                         fontSize: 16.sp,
-                                        color: Colors.white,
                                         fontWeight: FontWeight.w600,
                                       ),
                                     ),
-                                  ],
+                                  ),
                                 ),
-                        ),
-                      ),
-
-                      SizedBox(height: 16.h),
-
-                      // Security Note
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Icon(
-                            Icons.shield,
-                            size: 16.sp,
-                            color: Colors.grey[600],
+                              ),
+                              SizedBox(width: 16.w),
+                              Expanded(
+                                child: SizedBox(
+                                  height: 50.h,
+                                  child: ElevatedButton(
+                                    onPressed: _isProcessing
+                                        ? null
+                                        : _processPayment,
+                                    style: ElevatedButton.styleFrom(
+                                      backgroundColor: AppColors.brown,
+                                      disabledBackgroundColor: Colors.grey[300],
+                                      shape: RoundedRectangleBorder(
+                                        borderRadius: BorderRadius.circular(
+                                          100.r,
+                                        ),
+                                      ),
+                                    ),
+                                    child: _isProcessing
+                                        ? SizedBox(
+                                            height: 20.h,
+                                            width: 20.w,
+                                            child:
+                                                const CircularProgressIndicator(
+                                                  color: Colors.white,
+                                                  strokeWidth: 2,
+                                                ),
+                                          )
+                                        : Text(
+                                            "Pay Now",
+                                            style: TextStyle(
+                                              color: Colors.white,
+                                              fontSize: 16.sp,
+                                              fontWeight: FontWeight.w600,
+                                            ),
+                                          ),
+                                  ),
+                                ),
+                              ),
+                            ],
                           ),
-                          SizedBox(width: 6.w),
-                          Text(
-                            "Secure payment powered by Razorpay",
-                            style: TextStyle(
-                              fontSize: 12.sp,
-                              color: Colors.grey[600],
-                            ),
-                          ),
+                          SizedBox(height: 24.h),
                         ],
                       ),
-                    ],
-                  ),
-          ),
+                    ),
 
-          /// SUCCESS CARD OVERLAY
-          if (_paymentComplete)
-            Container(
-              width: double.infinity,
-              height: double.infinity,
-              color: Colors.black.withOpacity(0.4),
-              child: Center(
-                child: Container(
-                  padding: EdgeInsets.all(22.w),
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.circular(16.r),
-                    boxShadow: [
-                      const BoxShadow(
-                        color: Colors.black26,
-                        blurRadius: 10,
-                        spreadRadius: 2,
-                      ),
-                    ],
-                  ),
-                  width: 300.w,
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Icon(
-                        Icons.check_circle,
-                        color: Colors.green,
-                        size: 60.sp,
-                      ),
-                      SizedBox(height: 16.h),
-                      Text(
-                        "Successfully Registered 🎉",
-                        textAlign: TextAlign.center,
-                        style: TextStyle(
-                          fontSize: 20.sp,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                      SizedBox(height: 12.h),
-                      Text(
-                        "Thank you for registering!\nYour application has been successfully submitted and is now pending administrative review.",
-                        textAlign: TextAlign.center,
-                        style: TextStyle(fontSize: 14.sp, height: 1.4),
-                      ),
-                      SizedBox(height: 20.h),
-                      TextButton(
-                        onPressed: () {
-                          Navigator.pushAndRemoveUntil(
-                            context,
-                            MaterialPageRoute(
-                              builder: (_) => const MainNavigationScreen(),
-                            ),
-                            (route) => false, // remove everything
-                          );
-                        },
-                        child: Text(
-                          "Back to Home",
-                          style: TextStyle(fontSize: 16.sp, color: Colors.blue),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-            ),
+              // Success Overlay
+              if (_paymentComplete) _buildSuccessOverlay(),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildOrderSummaryCard() {
+    return Container(
+      width: double.infinity,
+      padding: EdgeInsets.all(16.w),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(12.r),
+        border: Border.all(color: Colors.grey[300]!),
+      ),
+      child: Column(
+        children: [
+          _buildPriceRow(
+            "Subtotal",
+            subtotal != null ? "₹${subtotal!.toStringAsFixed(0)}" : "—",
+          ),
+          SizedBox(height: 12.h),
+          _buildPriceRow(
+            "GST (18%)",
+            gstAmount != null ? "₹${gstAmount!.toStringAsFixed(0)}" : "—",
+          ),
+          SizedBox(height: 12.h),
+          _buildPriceRow(
+            "Total Payable",
+            totalPayable != null ? "₹${totalPayable!.toStringAsFixed(0)}" : "—",
+            isBold: true,
+          ),
         ],
       ),
     );
   }
 
-  Widget _priceRow(
-    String label,
-    String value, {
-    bool bold = false,
-    bool highlight = false,
-  }) {
+  Widget _buildPriceRow(String label, String value, {bool isBold = false}) {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
         Text(
           label,
           style: TextStyle(
-            fontSize: bold ? 16.sp : 14.sp,
-            fontWeight: bold ? FontWeight.w600 : FontWeight.normal,
-            color: bold ? Colors.black : Colors.grey[700],
+            fontSize: 16.sp,
+            fontWeight: isBold ? FontWeight.w600 : FontWeight.w400,
+            color: AppColors.textPrimary,
           ),
         ),
         Text(
           value,
           style: TextStyle(
-            fontSize: bold ? 18.sp : 14.sp,
-            fontWeight: bold ? FontWeight.w700 : FontWeight.normal,
-            color: highlight ? AppColors.brown : Colors.black,
+            fontSize: 16.sp,
+            fontWeight: isBold ? FontWeight.w600 : FontWeight.w400,
+            color: AppColors.textPrimary,
           ),
         ),
       ],
     );
   }
 
-  Widget _buildRazorpayOption() {
-    final isSelected = _selectedPaymentMethod == "razorpay";
+  Widget _buildPaymentMethodOption(PaymentMethod method) {
+    final isSelected = _selectedPaymentMethod == method.id;
+
     return GestureDetector(
-      onTap: () => setState(() => _selectedPaymentMethod = "razorpay"),
+      onTap: () => setState(() => _selectedPaymentMethod = method.id),
       child: Container(
-        padding: EdgeInsets.all(16.w),
+        width: double.infinity,
+        padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 14.h),
         decoration: BoxDecoration(
           color: Colors.white,
           borderRadius: BorderRadius.circular(12.r),
-          border: Border.all(
-            color: isSelected ? AppColors.brown : Colors.grey[300]!,
-            width: isSelected ? 2 : 1,
-          ),
-          boxShadow: isSelected
-              ? [
-                  BoxShadow(
-                    color: AppColors.brown.withOpacity(0.15),
-                    blurRadius: 8,
-                    offset: const Offset(0, 2),
-                  ),
-                ]
-              : null,
+          border: Border.all(color: Colors.grey[300]!),
         ),
         child: Row(
           children: [
-            // Razorpay Logo Container
+            // Icon container
             Container(
-              width: 50.w,
-              height: 50.h,
+              width: 40.w,
+              height: 40.w,
               decoration: BoxDecoration(
-                color: const Color(0xFF072654),
-                borderRadius: BorderRadius.circular(8.r),
+                color: Colors.grey[100],
+                borderRadius: BorderRadius.circular(100.r),
               ),
               child: Center(
-                child: Text(
-                  "R",
-                  style: TextStyle(
-                    color: Colors.white,
-                    fontSize: 24.sp,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
+                child: SvgPicture.asset(method.icon, width: 24.w, height: 24.w),
               ),
             ),
             SizedBox(width: 16.w),
             Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    "Razorpay",
-                    style: TextStyle(
-                      fontSize: 16.sp,
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
-                  SizedBox(height: 4.h),
-                  Text(
-                    "Cards, UPI, Netbanking & Wallets",
-                    style: TextStyle(fontSize: 12.sp, color: Colors.grey[600]),
-                  ),
-                ],
+              child: Text(
+                method.name,
+                style: TextStyle(
+                  fontSize: 16.sp,
+                  fontWeight: FontWeight.w400,
+                  color: AppColors.textPrimary,
+                ),
               ),
             ),
-            Radio<String>(
-              value: "razorpay",
-              groupValue: _selectedPaymentMethod,
-              onChanged: (val) =>
-                  setState(() => _selectedPaymentMethod = val as String),
-              activeColor: AppColors.brown,
+            // Custom radio button
+            Container(
+              width: 24.w,
+              height: 24.w,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                border: Border.all(
+                  color: isSelected ? AppColors.brown : Colors.grey[400]!,
+                  width: 2,
+                ),
+              ),
+              child: isSelected
+                  ? Center(
+                      child: Container(
+                        width: 12.w,
+                        height: 12.w,
+                        decoration: const BoxDecoration(
+                          shape: BoxShape.circle,
+                          color: AppColors.brown,
+                        ),
+                      ),
+                    )
+                  : null,
             ),
           ],
         ),
       ),
     );
   }
+
+  Widget _buildSuccessOverlay() {
+    return Container(
+      width: double.infinity,
+      height: double.infinity,
+      color: Colors.black.withOpacity(0.5),
+      child: Center(
+        child: Container(
+          margin: EdgeInsets.symmetric(horizontal: 32.w),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(16.r),
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              // Confetti image at the top
+              ClipRRect(
+                borderRadius: BorderRadius.only(
+                  topLeft: Radius.circular(16.r),
+                  topRight: Radius.circular(16.r),
+                ),
+                child: Image.asset(
+                  'assets/payment/sucess.png',
+                  width: double.infinity,
+                  height: 150.h,
+                  fit: BoxFit.cover,
+                ),
+              ),
+
+              // Content section
+              Padding(
+                padding: EdgeInsets.symmetric(horizontal: 24.w, vertical: 20.h),
+                child: Column(
+                  children: [
+                    Text(
+                      "Successfully Registered!",
+                      textAlign: TextAlign.center,
+                      style: TextStyle(
+                        fontSize: 24.sp,
+                        fontWeight: FontWeight.w600,
+                        color: AppColors.textPrimary,
+                      ),
+                    ),
+                    SizedBox(height: 16.h),
+                    Text(
+                      "Thank you for registering! Your application has been successfully submitted and is now pending administrative review.",
+                      textAlign: TextAlign.center,
+                      style: TextStyle(
+                        fontSize: 14.sp,
+                        fontWeight: FontWeight.w400,
+                        color: AppColors.textSecondary,
+                        height: 1.5,
+                      ),
+                    ),
+                    SizedBox(height: 16.h),
+                    GestureDetector(
+                      onTap: () {
+                        Navigator.pushAndRemoveUntil(
+                          context,
+                          MaterialPageRoute(
+                            builder: (_) => const MainNavigationScreen(),
+                          ),
+                          (route) => false,
+                        );
+                      },
+                      child: Text(
+                        "Go to home",
+                        style: TextStyle(
+                          fontSize: 16.sp,
+                          fontWeight: FontWeight.w400,
+                          color: AppColors.textPrimary,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class PaymentMethod {
+  final String id;
+  final String name;
+  final String icon;
+  final bool isCard;
+
+  PaymentMethod({
+    required this.id,
+    required this.name,
+    required this.icon,
+    this.isCard = false,
+  });
 }

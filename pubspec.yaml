@@ -145,6 +145,7 @@ flutter:
     - assets/home/
     - assets/svg/
     - assets/auth/
+    - assets/payment/
 
     - .env
 
