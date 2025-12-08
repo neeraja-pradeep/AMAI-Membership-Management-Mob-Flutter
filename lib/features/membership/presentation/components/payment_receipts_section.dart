@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:intl/intl.dart';
+import 'package:url_launcher/url_launcher.dart';
 import 'package:myapp/app/theme/colors.dart';
 import 'package:myapp/features/membership/application/providers/membership_providers.dart';
 import 'package:myapp/features/membership/infrastructure/models/payment_receipt_model.dart';
@@ -293,15 +294,7 @@ class PaymentReceiptItem extends StatelessWidget {
                   size: 20.sp,
                   color: AppColors.primary,
                 ),
-                onPressed: () {
-                  // Static for now
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(
-                      content: Text('Download receipt coming soon'),
-                      duration: Duration(seconds: 1),
-                    ),
-                  );
-                },
+                onPressed: () => _downloadReceipt(context, receipt.receiptPdfUrl),
                 tooltip: 'Download Receipt',
                 constraints: BoxConstraints(
                   minWidth: 36.w,
@@ -334,6 +327,49 @@ class PaymentReceiptItem extends StatelessWidget {
       return DateFormat('dd MMM yyyy, hh:mm a').format(date);
     } catch (e) {
       return dateString;
+    }
+  }
+
+  /// Downloads the receipt PDF
+  Future<void> _downloadReceipt(BuildContext context, String? pdfUrl) async {
+    if (pdfUrl == null || pdfUrl.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Receipt PDF not available'),
+          backgroundColor: Colors.red,
+        ),
+      );
+      return;
+    }
+
+    String fullUrl = pdfUrl;
+    if (!pdfUrl.startsWith('http://') && !pdfUrl.startsWith('https://')) {
+      fullUrl = 'https://$pdfUrl';
+    }
+
+    try {
+      final uri = Uri.parse(fullUrl);
+      if (await canLaunchUrl(uri)) {
+        await launchUrl(uri, mode: LaunchMode.externalApplication);
+      } else {
+        if (context.mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('Could not open receipt PDF'),
+              backgroundColor: Colors.red,
+            ),
+          );
+        }
+      }
+    } catch (e) {
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Error opening receipt: $e'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
     }
   }
 }

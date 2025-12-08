@@ -20,6 +20,7 @@ PaymentReceiptModel _$PaymentReceiptModelFromJson(Map<String, dynamic> json) =>
           ? null
           : GatewayResponseModel.fromJson(
               json['gateway_response'] as Map<String, dynamic>),
+      receiptPdfUrl: json['receipt_pdf_url'] as String?,
     );
 
 Map<String, dynamic> _$PaymentReceiptModelToJson(PaymentReceiptModel instance) =>
@@ -33,6 +34,7 @@ Map<String, dynamic> _$PaymentReceiptModelToJson(PaymentReceiptModel instance) =
       'order_id': instance.orderId,
       'razorpay_payment_id': instance.razorpayPaymentId,
       'gateway_response': instance.gatewayResponse?.toJson(),
+      'receipt_pdf_url': instance.receiptPdfUrl,
     };
 
 GatewayResponseModel _$GatewayResponseModelFromJson(Map<String, dynamic> json) =>

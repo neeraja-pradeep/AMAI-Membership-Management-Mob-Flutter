@@ -16,6 +16,7 @@ class PaymentReceiptModel {
     this.orderId,
     this.razorpayPaymentId,
     this.gatewayResponse,
+    this.receiptPdfUrl,
   });
 
   /// Creates model from JSON map
@@ -48,6 +49,9 @@ class PaymentReceiptModel {
 
   @JsonKey(name: 'gateway_response')
   final GatewayResponseModel? gatewayResponse;
+
+  @JsonKey(name: 'receipt_pdf_url')
+  final String? receiptPdfUrl;
 
   /// Converts model to JSON map
   Map<String, dynamic> toJson() => _$PaymentReceiptModelToJson(this);
