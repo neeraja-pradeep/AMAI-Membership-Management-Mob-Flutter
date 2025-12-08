@@ -22,6 +22,7 @@ import 'package:myapp/features/aswas_plus/presentation/screens/aswas_plus_screen
 import 'package:myapp/features/profile/presentation/screens/profile_screen.dart';
 import 'package:myapp/features/profile/application/providers/profile_providers.dart';
 import 'package:myapp/features/academy/presentation/screens/academy_screen.dart';
+import 'package:myapp/features/home/presentation/screens/contact_details_screen.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 
 /// Home screen - primary landing screen after authentication
@@ -127,7 +128,11 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                         );
                       },
                       onContactsTap: () {
-                        // TODO: Navigate to Contacts
+                        Navigator.of(context).push(
+                          MaterialPageRoute<void>(
+                            builder: (context) => const ContactDetailsScreen(),
+                          ),
+                        );
                       },
                     );
                   },
