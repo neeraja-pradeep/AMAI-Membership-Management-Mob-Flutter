@@ -9,7 +9,6 @@ import '../../../../../app/router/app_router.dart';
 import '../../../application/notifiers/registration_state_notifier.dart';
 import '../../../domain/entities/registration/professional_details.dart';
 import '../../components/registration_step_indicator.dart';
-import '../../components/text_input_field.dart';
 
 class ProfessionalDetailsScreen extends ConsumerStatefulWidget {
   const ProfessionalDetailsScreen({super.key});
@@ -36,6 +35,8 @@ class _ProfessionalDetailsScreenState
   String? _selectedMedicalCouncilState;
   String? _selectedCountry;
   String? _selectedState;
+  String? _selectedMembershipDistrict;
+  String? _selectedMembershipArea;
 
   bool _isSubmitting = false;
 
@@ -85,6 +86,12 @@ class _ProfessionalDetailsScreenState
 
   static const List<String> dropdownCountry = ["India"];
 
+  // Sample districts - UI placeholder
+  static const List<String> dropdownDistricts = ["Select District"];
+
+  // Sample areas - UI placeholder
+  static const List<String> dropdownAreas = ["Select Area"];
+
   static const List<String> _qualificationOptions = [
     'UG',
     'PG',
@@ -97,8 +104,6 @@ class _ProfessionalDetailsScreenState
   static const List<String> _categoryOptions = [
     'RESEARCHER',
     'PG SCHOLAR',
-    'PVT PRACTICE',
-    'MANUFACTURER',
     'PG DIPLOMA SCHOLAR',
     'DEPT OF ISM',
     'DEPT OF NAM',
@@ -108,6 +113,8 @@ class _ProfessionalDetailsScreenState
     'PVT COLLEGE',
     'PVT SECTOR SERVICE',
     'RETD',
+    'PVT PRACTICE',
+    'MANUFACTURER',
     'MILITARY SERVICE',
     'CENTRAL GOVT',
     'ESI',
@@ -327,6 +334,10 @@ class _ProfessionalDetailsScreenState
     }
   }
 
+  void _handleBack() {
+    Navigator.pop(context);
+  }
+
   void _showError(String msg) => ScaffoldMessenger.of(
     context,
   ).showSnackBar(SnackBar(content: Text(msg), backgroundColor: Colors.red));
@@ -344,177 +355,489 @@ class _ProfessionalDetailsScreenState
       return const Scaffold(body: Center(child: CircularProgressIndicator()));
     }
 
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text(
-          "Register Here",
-          style: TextStyle(fontWeight: FontWeight.bold),
+    return WillPopScope(
+      onWillPop: () async {
+        _handleBack();
+        return false;
+      },
+      child: Scaffold(
+        extendBodyBehindAppBar: true,
+        appBar: AppBar(
+          backgroundColor: Colors.transparent,
+          elevation: 0,
+          centerTitle: true,
+          title: Text(
+            "Register Here",
+            style: TextStyle(
+              fontSize: 20.sp,
+              fontWeight: FontWeight.w600,
+              color: AppColors.textPrimary,
+            ),
+          ),
+          leading: IconButton(
+            icon: Icon(
+              Icons.arrow_back_ios,
+              color: AppColors.textPrimary,
+              size: 20.sp,
+            ),
+            onPressed: _handleBack,
+          ),
         ),
-      ),
-      body: SingleChildScrollView(
-        padding: EdgeInsets.all(24.w),
-        child: Form(
-          key: _formKey,
-          child: Column(
-            children: [
-              const RegistrationStepIndicator(currentStep: 2),
+        body: Container(
+          width: double.infinity,
+          height: double.infinity,
+          decoration: const BoxDecoration(
+            gradient: AppColors.lightBackgroundGradient,
+          ),
+          child: SafeArea(
+            child: SingleChildScrollView(
+              padding: EdgeInsets.all(24.w),
+              child: Form(
+                key: _formKey,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const RegistrationStepIndicator(currentStep: 2),
+                    SizedBox(height: 16.h),
 
-              if (role == "practitioner") _buildPractitionerUI(),
-              if (role == "house_surgeon") _buildHouseSurgeonUI(),
+                    // Section 1: Medical Council Registration Details
+                    _buildMedicalCouncilSection(),
 
-              SizedBox(height: 30.h),
-              _nextButton(),
-            ],
+                    SizedBox(height: 16.h),
+
+                    // Section 2: Desired Membership Area
+                    _buildDesiredMembershipAreaSection(),
+
+                    SizedBox(height: 16.h),
+
+                    // Section 3: Academic Details (only for practitioner)
+                    if (role == "practitioner") ...[
+                      _buildAcademicDetailsSection(),
+                      SizedBox(height: 16.h),
+                    ],
+
+                    // Section 4: Professional Details (only for practitioner)
+                    if (role == "practitioner") ...[
+                      _buildProfessionalDetailsSection(),
+                      SizedBox(height: 16.h),
+                    ],
+
+                    SizedBox(height: 16.h),
+
+                    // Back and Next buttons
+                    _buildBottomButtons(),
+                  ],
+                ),
+              ),
+            ),
           ),
         ),
       ),
     );
   }
 
-  Widget _buildHouseSurgeonUI() {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        _label("Medical Council State"),
-        _dropdown(dropdownStates, (v) => _selectedMedicalCouncilState = v),
-
-        SizedBox(height: 18.h),
-        _label("Provisional Registration Number"),
-        TextInputField(controller: _provisionalController),
-
-        SizedBox(height: 18.h),
-        _label("Council District Number"),
-        TextInputField(controller: _districtCouncilController),
-
-        SizedBox(height: 18.h),
-        _label("Country"),
-        _dropdown(dropdownCountry, (v) => _selectedCountry = v),
-
-        SizedBox(height: 18.h),
-        _label("State"),
-        _dropdown(dropdownStates, (v) => _selectedState = v),
-
-        SizedBox(height: 18.h),
-        _label("Membership District"),
-        TextInputField(controller: _membershipDistrictController),
-
-        SizedBox(height: 18.h),
-        _label("Membership Area"),
-        TextInputField(controller: _membershipAreaController),
-      ],
-    );
-  }
-
-  Widget _buildPractitionerUI() {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        _label("Medical Council State"),
-        _dropdown(dropdownStates, (v) => _selectedMedicalCouncilState = v),
-
-        SizedBox(height: 18.h),
-        _label("Medical Council Number"),
-        TextInputField(controller: _medicalCouncilNoController),
-
-        SizedBox(height: 18.h),
-        _label("Central Council Number"),
-        TextInputField(controller: _centralCouncilNoController),
-
-        SizedBox(height: 18.h),
-        _label("UG College"),
-        TextInputField(controller: _ugCollegeController),
-
-        SizedBox(height: 22.h),
-        Text(
-          "Qualifications",
-          style: TextStyle(fontWeight: FontWeight.w600, fontSize: 16.sp),
-        ),
-        Wrap(
-          spacing: 8,
-          children: _qualificationOptions.map((e) {
-            final selected = _selectedQualifications.contains(e);
-            return FilterChip(
-              selected: selected,
-              label: Text(e),
-              onSelected: (_) => setState(
-                () => selected
-                    ? _selectedQualifications.remove(e)
-                    : _selectedQualifications.add(e),
-              ),
-            );
-          }).toList(),
-        ),
-
-        SizedBox(height: 22.h),
-        Text(
-          "Professional Category",
-          style: TextStyle(fontWeight: FontWeight.w600, fontSize: 16.sp),
-        ),
-        Wrap(
-          spacing: 8,
-          runSpacing: 8,
-          children: _categoryOptions.map((e) {
-            final selected = _selectedCategories.contains(e);
-            return FilterChip(
-              selected: selected,
-              label: Text(e),
-              onSelected: (_) => setState(
-                () => selected
-                    ? _selectedCategories.remove(e)
-                    : _selectedCategories.add(e),
-              ),
-            );
-          }).toList(),
-        ),
-      ],
-    );
-  }
-
-  Widget _label(String text) => Text(
-    text,
-    style: TextStyle(fontSize: 16.sp, fontWeight: FontWeight.w500),
-  );
-
-  Widget _dropdown(List<String> data, Function(String?) callback) {
+  /// Section container with border
+  Widget _buildSectionContainer({
+    required String title,
+    required List<Widget> children,
+  }) {
     return Container(
-      padding: EdgeInsets.symmetric(horizontal: 16.w),
+      width: double.infinity,
+      padding: EdgeInsets.all(16.w),
       decoration: BoxDecoration(
+        color: Colors.white,
         borderRadius: BorderRadius.circular(12.r),
         border: Border.all(color: Colors.grey[300]!),
       ),
-      child: DropdownButtonFormField(
-        isExpanded: true,
-        decoration: const InputDecoration(border: InputBorder.none),
-        items: data
-            .map(
-              (e) => DropdownMenuItem(
-                value: e,
-                child: Text(e, overflow: TextOverflow.ellipsis),
-              ),
-            )
-            .toList(),
-        validator: (v) => v == null ? "Required" : null,
-        onChanged: callback,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            title,
+            style: TextStyle(
+              fontSize: 16.sp,
+              fontWeight: FontWeight.w600,
+              color: AppColors.textPrimary,
+            ),
+          ),
+          SizedBox(height: 16.h),
+          ...children,
+        ],
       ),
     );
   }
 
-  Widget _nextButton() {
-    return SizedBox(
-      height: 50.h,
-      width: double.infinity,
-      child: ElevatedButton(
-        onPressed: _isSubmitting ? null : _handleNext,
-        style: ElevatedButton.styleFrom(
-          backgroundColor: AppColors.brown,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(12.r),
+  /// Section 1: Medical Council Registration Details
+  Widget _buildMedicalCouncilSection() {
+    return _buildSectionContainer(
+      title: "Medical Council Registration Details",
+      children: [
+        _buildLabel("Medical Council State"),
+        SizedBox(height: 10.h),
+        _buildDropdown(
+          value: _selectedMedicalCouncilState,
+          hint: "Select Medical Council State",
+          items: dropdownStates,
+          onChanged: (v) => setState(() => _selectedMedicalCouncilState = v),
+        ),
+        SizedBox(height: 16.h),
+        _buildLabel("Medical Council Number"),
+        SizedBox(height: 10.h),
+        _buildTextField(
+          controller: _medicalCouncilNoController,
+          hintText: "Enter Medical Council Number",
+        ),
+        SizedBox(height: 16.h),
+        _buildLabel("Central Council Number"),
+        SizedBox(height: 10.h),
+        _buildTextField(
+          controller: _centralCouncilNoController,
+          hintText: "Enter Central Council Number",
+        ),
+        SizedBox(height: 16.h),
+        _buildLabel("UG College"),
+        SizedBox(height: 10.h),
+        _buildTextField(
+          controller: _ugCollegeController,
+          hintText: "Enter UG College",
+        ),
+      ],
+    );
+  }
+
+  /// Section 2: Desired Membership Area
+  Widget _buildDesiredMembershipAreaSection() {
+    return _buildSectionContainer(
+      title: "Desired Membership Area",
+      children: [
+        _buildLabel("Country"),
+        SizedBox(height: 10.h),
+        _buildDropdown(
+          value: _selectedCountry,
+          hint: "Select Area",
+          items: dropdownCountry,
+          onChanged: (v) => setState(() => _selectedCountry = v),
+        ),
+        SizedBox(height: 16.h),
+        _buildLabel("State"),
+        SizedBox(height: 10.h),
+        _buildDropdown(
+          value: _selectedState,
+          hint: "Select State",
+          items: dropdownStates,
+          onChanged: (v) => setState(() => _selectedState = v),
+        ),
+        SizedBox(height: 16.h),
+        _buildLabel("Membership District"),
+        SizedBox(height: 10.h),
+        _buildDropdown(
+          value: _selectedMembershipDistrict,
+          hint: "Select District",
+          items: dropdownDistricts,
+          onChanged: (v) => setState(() => _selectedMembershipDistrict = v),
+          isRequired: false,
+        ),
+        SizedBox(height: 16.h),
+        _buildLabel("Membership Area"),
+        SizedBox(height: 10.h),
+        _buildDropdown(
+          value: _selectedMembershipArea,
+          hint: "Select Area",
+          items: dropdownAreas,
+          onChanged: (v) => setState(() => _selectedMembershipArea = v),
+          isRequired: false,
+        ),
+      ],
+    );
+  }
+
+  /// Section 3: Academic Details
+  Widget _buildAcademicDetailsSection() {
+    return _buildSectionContainer(
+      title: "Academic Details",
+      children: [
+        Text(
+          "Select all that apply",
+          style: TextStyle(
+            fontSize: 14.sp,
+            fontWeight: FontWeight.w400,
+            color: AppColors.textSecondary,
           ),
         ),
-        child: _isSubmitting
-            ? const CircularProgressIndicator(color: Colors.white)
-            : const Text("Next", style: TextStyle(color: Colors.white)),
+        SizedBox(height: 12.h),
+        _buildCheckboxGrid(_qualificationOptions, _selectedQualifications),
+      ],
+    );
+  }
+
+  /// Section 4: Professional Details
+  Widget _buildProfessionalDetailsSection() {
+    return _buildSectionContainer(
+      title: "Professional Details",
+      children: [
+        Text(
+          "Select all that apply",
+          style: TextStyle(
+            fontSize: 14.sp,
+            fontWeight: FontWeight.w400,
+            color: AppColors.textSecondary,
+          ),
+        ),
+        SizedBox(height: 12.h),
+        _buildCheckboxList(_categoryOptions, _selectedCategories),
+      ],
+    );
+  }
+
+  /// Checkbox grid for Academic Details (2 columns)
+  Widget _buildCheckboxGrid(List<String> options, Set<String> selected) {
+    return Column(
+      children: [
+        for (int i = 0; i < options.length; i += 2)
+          Row(
+            children: [
+              Expanded(
+                child: _buildCheckboxItem(
+                  label: options[i],
+                  isSelected: selected.contains(options[i]),
+                  onChanged: (value) {
+                    setState(() {
+                      if (value == true) {
+                        selected.add(options[i]);
+                      } else {
+                        selected.remove(options[i]);
+                      }
+                    });
+                  },
+                ),
+              ),
+              if (i + 1 < options.length)
+                Expanded(
+                  child: _buildCheckboxItem(
+                    label: options[i + 1],
+                    isSelected: selected.contains(options[i + 1]),
+                    onChanged: (value) {
+                      setState(() {
+                        if (value == true) {
+                          selected.add(options[i + 1]);
+                        } else {
+                          selected.remove(options[i + 1]);
+                        }
+                      });
+                    },
+                  ),
+                )
+              else
+                const Expanded(child: SizedBox()),
+            ],
+          ),
+      ],
+    );
+  }
+
+  /// Checkbox list for Professional Details (single column)
+  Widget _buildCheckboxList(List<String> options, Set<String> selected) {
+    return Column(
+      children: options.map((option) {
+        return _buildCheckboxItem(
+          label: option,
+          isSelected: selected.contains(option),
+          onChanged: (value) {
+            setState(() {
+              if (value == true) {
+                selected.add(option);
+              } else {
+                selected.remove(option);
+              }
+            });
+          },
+        );
+      }).toList(),
+    );
+  }
+
+  /// Single checkbox item
+  Widget _buildCheckboxItem({
+    required String label,
+    required bool isSelected,
+    required ValueChanged<bool?> onChanged,
+  }) {
+    return InkWell(
+      onTap: () => onChanged(!isSelected),
+      child: Padding(
+        padding: EdgeInsets.symmetric(vertical: 6.h),
+        child: Row(
+          children: [
+            Container(
+              width: 20.w,
+              height: 20.h,
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(4.r),
+                border: Border.all(
+                  color: isSelected ? AppColors.brown : Colors.grey[400]!,
+                  width: 1.5,
+                ),
+                color: isSelected ? AppColors.brown : Colors.transparent,
+              ),
+              child: isSelected
+                  ? Icon(Icons.check, size: 14.sp, color: Colors.white)
+                  : null,
+            ),
+            SizedBox(width: 10.w),
+            Expanded(
+              child: Text(
+                label,
+                style: TextStyle(
+                  fontSize: 14.sp,
+                  fontWeight: FontWeight.w400,
+                  color: AppColors.textPrimary,
+                ),
+              ),
+            ),
+          ],
+        ),
       ),
+    );
+  }
+
+  /// Label widget
+  Widget _buildLabel(String text) {
+    return Text(
+      text,
+      style: TextStyle(
+        fontSize: 16.sp,
+        fontWeight: FontWeight.w400,
+        color: AppColors.textPrimary,
+      ),
+    );
+  }
+
+  /// TextField widget
+  Widget _buildTextField({
+    required TextEditingController controller,
+    required String hintText,
+    bool isRequired = true,
+  }) {
+    return TextFormField(
+      controller: controller,
+      decoration: InputDecoration(
+        hintText: hintText,
+        hintStyle: TextStyle(fontSize: 14.sp, color: AppColors.textHint),
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12.r),
+          borderSide: BorderSide(color: Colors.grey[300]!),
+        ),
+        enabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12.r),
+          borderSide: BorderSide(color: Colors.grey[300]!),
+        ),
+        focusedBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12.r),
+          borderSide: const BorderSide(color: AppColors.brown, width: 2),
+        ),
+        contentPadding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 12.h),
+      ),
+      validator: isRequired ? (v) => v!.isEmpty ? "Required" : null : null,
+    );
+  }
+
+  /// Dropdown widget
+  Widget _buildDropdown({
+    required String? value,
+    required String hint,
+    required List<String> items,
+    required ValueChanged<String?> onChanged,
+    bool isRequired = true,
+  }) {
+    return DropdownButtonFormField<String>(
+      value: value,
+      hint: Text(
+        hint,
+        style: TextStyle(fontSize: 14.sp, color: AppColors.textHint),
+      ),
+      decoration: InputDecoration(
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12.r),
+          borderSide: BorderSide(color: Colors.grey[300]!),
+        ),
+        enabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12.r),
+          borderSide: BorderSide(color: Colors.grey[300]!),
+        ),
+        focusedBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12.r),
+          borderSide: const BorderSide(color: AppColors.brown, width: 2),
+        ),
+        contentPadding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 12.h),
+      ),
+      isExpanded: true,
+      items: items
+          .map(
+            (e) => DropdownMenuItem(
+              value: e,
+              child: Text(
+                e,
+                overflow: TextOverflow.ellipsis,
+                style: TextStyle(fontSize: 14.sp),
+              ),
+            ),
+          )
+          .toList(),
+      onChanged: onChanged,
+      validator: isRequired ? (v) => v == null ? "Required" : null : null,
+    );
+  }
+
+  /// Bottom buttons: Back and Next
+  Widget _buildBottomButtons() {
+    return Row(
+      children: [
+        // Back button
+        Expanded(
+          child: OutlinedButton(
+            onPressed: _handleBack,
+            style: OutlinedButton.styleFrom(
+              minimumSize: Size.fromHeight(50.h),
+              side: const BorderSide(color: AppColors.brown),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(100.r),
+              ),
+            ),
+            child: Text(
+              "Back",
+              style: TextStyle(
+                fontSize: 16.sp,
+                fontWeight: FontWeight.w600,
+                color: AppColors.brown,
+              ),
+            ),
+          ),
+        ),
+        SizedBox(width: 16.w),
+        // Next button
+        Expanded(
+          child: ElevatedButton(
+            onPressed: _isSubmitting ? null : _handleNext,
+            style: ElevatedButton.styleFrom(
+              minimumSize: Size.fromHeight(50.h),
+              backgroundColor: AppColors.brown,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(100.r),
+              ),
+            ),
+            child: _isSubmitting
+                ? const CircularProgressIndicator(color: Colors.white)
+                : Text(
+                    "Next",
+                    style: TextStyle(
+                      fontSize: 16.sp,
+                      fontWeight: FontWeight.w600,
+                      color: Colors.white,
+                    ),
+                  ),
+          ),
+        ),
+      ],
     );
   }
 }

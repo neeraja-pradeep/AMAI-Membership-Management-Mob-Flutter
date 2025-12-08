@@ -820,55 +820,56 @@ class _AddressDetailsScreenState extends ConsumerState<AddressDetailsScreen> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         SizedBox(height: 16.h),
-        const Text("House/No Building"),
-        SizedBox(height: 10.h),
+        _buildLabel("House No / Building Name"),
+        SizedBox(height: 8.h),
         TextInputField(
           controller: address1,
-          hintText: "House No / Building Name",
+          hintText: "Enter house no / building name",
         ),
 
         SizedBox(height: 16.h),
-        const Text("Street / Locality / Area"),
-        SizedBox(height: 10.h),
-        TextInputField(controller: address2, hintText: "Street, Landmark"),
+        _buildLabel("Street / Locality / Area"),
+        SizedBox(height: 8.h),
+        TextInputField(controller: address2, hintText: "Enter street, landmark"),
 
         SizedBox(height: 16.h),
-        const Text("Country"),
-        SizedBox(height: 10.h),
-        _buildDropdown(["India"], country, onCountryChange),
-
-        SizedBox(height: 16.h),
-        const Text("State"),
-        SizedBox(height: 10.h),
-        _buildDropdown(_states[country] ?? [], state, onStateChange),
-
-        SizedBox(height: 16.h),
-        const Text("District"),
-        SizedBox(height: 10.h),
-        _buildDropdown(_districts[state] ?? [], district, onDistrictChange),
-
-        SizedBox(height: 16.h),
-        const Text("City / Post Office"),
-        SizedBox(height: 10.h),
+        _buildLabel("Post Office"),
+        SizedBox(height: 8.h),
         TextInputField(
           controller: city,
-          hintText: "City Name",
+          hintText: "Enter post office",
           inputFormatters: [
             FilteringTextInputFormatter.allow(RegExp(r'[a-zA-Z\s]')),
           ],
         ),
 
         SizedBox(height: 16.h),
-        const Text("Postal Code"),
-        SizedBox(height: 10.h),
+        _buildLabel("Post Code"),
+        SizedBox(height: 8.h),
         TextInputField(
           controller: postal,
+          hintText: "Enter post code",
           keyboardType: TextInputType.number,
           inputFormatters: [
             FilteringTextInputFormatter.digitsOnly,
             LengthLimitingTextInputFormatter(6),
           ],
         ),
+
+        SizedBox(height: 16.h),
+        _buildLabel("Country"),
+        SizedBox(height: 8.h),
+        _buildDropdown(["India"], country, onCountryChange, "Select Country"),
+
+        SizedBox(height: 16.h),
+        _buildLabel("State"),
+        SizedBox(height: 8.h),
+        _buildDropdown(_states[country] ?? [], state, onStateChange, "Select State"),
+
+        SizedBox(height: 16.h),
+        _buildLabel("District"),
+        SizedBox(height: 8.h),
+        _buildDropdown(_districts[state] ?? [], district, onDistrictChange, "Select District"),
       ],
     );
   }
@@ -876,7 +877,45 @@ class _AddressDetailsScreenState extends ConsumerState<AddressDetailsScreen> {
   Widget _buildLabel(String text) {
     return Text(
       text,
-      style: TextStyle(fontSize: 16.sp, fontWeight: FontWeight.w500),
+      style: TextStyle(
+        fontSize: 16.sp,
+        fontWeight: FontWeight.w400,
+        color: AppColors.textPrimary,
+      ),
+    );
+  }
+
+  Widget _buildSectionContainer({
+    required String title,
+    required List<Widget> children,
+    Widget? headerWidget,
+  }) {
+    return Container(
+      width: double.infinity,
+      padding: EdgeInsets.all(16.w),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(12.r),
+        border: Border.all(color: Colors.grey[300]!),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            title,
+            style: TextStyle(
+              fontSize: 16.sp,
+              fontWeight: FontWeight.w600,
+              color: AppColors.textPrimary,
+            ),
+          ),
+          if (headerWidget != null) ...[
+            SizedBox(height: 12.h),
+            headerWidget,
+          ],
+          ...children,
+        ],
+      ),
     );
   }
 
@@ -884,16 +923,38 @@ class _AddressDetailsScreenState extends ConsumerState<AddressDetailsScreen> {
     List<String> items,
     String? value,
     Function(String?) onChanged,
+    String hintText,
   ) {
     return DropdownButtonFormField<String>(
       value: items.contains(value) ? value : null,
+      isExpanded: true,
       decoration: InputDecoration(
-        border: OutlineInputBorder(borderRadius: BorderRadius.circular(12.r)),
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12.r),
+          borderSide: BorderSide(color: Colors.grey[300]!),
+        ),
+        enabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12.r),
+          borderSide: BorderSide(color: Colors.grey[300]!),
+        ),
+        focusedBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12.r),
+          borderSide: const BorderSide(color: AppColors.brown, width: 2),
+        ),
         contentPadding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 12.h),
       ),
-      hint: const Text("Select"),
+      hint: Text(
+        hintText,
+        overflow: TextOverflow.ellipsis,
+      ),
       items: items
-          .map((e) => DropdownMenuItem(value: e, child: Text(e)))
+          .map((e) => DropdownMenuItem(
+                value: e,
+                child: Text(
+                  e,
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ))
           .toList(),
       onChanged: onChanged,
       validator: (v) => v == null ? "Required" : null,
@@ -902,181 +963,259 @@ class _AddressDetailsScreenState extends ConsumerState<AddressDetailsScreen> {
 
   /// ---------------- CHECKBOX UI SECTION ----------------
 
-  Widget _toggleSection(String title, bool isSame, Function(bool) toggle) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        SizedBox(height: 30.h),
-
-        // Title
-        Text(
-          title,
-          style: TextStyle(fontSize: 18.sp, fontWeight: FontWeight.bold),
-        ),
-
-        SizedBox(height: 6.h),
-
-        // Checkbox
-        Row(
-          children: [
-            SizedBox(
-              height: 24.h,
-              width: 24.w,
-              child: Checkbox(
-                value: isSame,
-                activeColor: AppColors.brown,
-                onChanged: (v) => toggle(v ?? false),
+  Widget _buildCheckbox({
+    required String label,
+    required bool value,
+    required Function(bool) onChanged,
+  }) {
+    return GestureDetector(
+      onTap: () => onChanged(!value),
+      child: Row(
+        children: [
+          Container(
+            width: 20.w,
+            height: 20.w,
+            decoration: BoxDecoration(
+              color: value ? AppColors.brown : Colors.transparent,
+              borderRadius: BorderRadius.circular(4.r),
+              border: Border.all(
+                color: value ? AppColors.brown : Colors.grey[400]!,
+                width: 1.5,
               ),
             ),
-            SizedBox(width: 8.w),
-            Expanded(
-              child: Text(
-                "Same as Communication Address",
-                style: TextStyle(fontSize: 14.sp),
+            child: value
+                ? Icon(
+                    Icons.check,
+                    size: 14.sp,
+                    color: Colors.white,
+                  )
+                : null,
+          ),
+          SizedBox(width: 8.w),
+          Expanded(
+            child: Text(
+              label,
+              style: TextStyle(
+                fontSize: 14.sp,
+                fontWeight: FontWeight.w400,
+                color: AppColors.textPrimary,
               ),
             ),
-          ],
-        ),
-      ],
+          ),
+        ],
+      ),
     );
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      extendBodyBehindAppBar: true,
       appBar: AppBar(
-        title: const Text("Register Here"),
-        backgroundColor: Colors.white,
+        title: Text(
+          "Register Here",
+          style: TextStyle(
+            fontSize: 20.sp,
+            fontWeight: FontWeight.w600,
+            color: AppColors.textPrimary,
+          ),
+        ),
+        centerTitle: true,
+        backgroundColor: Colors.transparent,
         elevation: 0,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back),
+          icon: const Icon(Icons.arrow_back, color: AppColors.textPrimary),
           onPressed: () => Navigator.pop(context),
         ),
       ),
-      body: SingleChildScrollView(
-        padding: EdgeInsets.all(24.w),
-        child: Form(
-          key: _formKey,
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              const RegistrationStepIndicator(currentStep: 3),
+      body: Container(
+        width: double.infinity,
+        height: double.infinity,
+        decoration: const BoxDecoration(
+          gradient: AppColors.lightBackgroundGradient,
+        ),
+        child: SafeArea(
+          child: SingleChildScrollView(
+            padding: EdgeInsets.all(24.w),
+            child: Form(
+              key: _formKey,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const RegistrationStepIndicator(currentStep: 3),
+                  SizedBox(height: 24.h),
 
-              Text(
-                "Communication Address",
-                style: TextStyle(fontSize: 18.sp, fontWeight: FontWeight.bold),
-              ),
+                  // Section 1: Communication Address
+                  _buildSectionContainer(
+                    title: "Communication Address",
+                    children: [
+                      _buildAddressFields(
+                        address1: _addressLine1Controller,
+                        address2: _addressLine2Controller,
+                        city: _cityController,
+                        postal: _postalCodeController,
+                        country: _selectedCountry,
+                        state: _selectedState,
+                        district: _selectedDistrict,
+                        onCountryChange: (v) => setState(() => _selectedCountry = v),
+                        onStateChange: (v) => setState(() => _selectedState = v),
+                        onDistrictChange: (v) => setState(() => _selectedDistrict = v),
+                      ),
+                    ],
+                  ),
 
-              _buildAddressFields(
-                address1: _addressLine1Controller,
-                address2: _addressLine2Controller,
-                city: _cityController,
-                postal: _postalCodeController,
-                country: _selectedCountry,
-                state: _selectedState,
-                district: _selectedDistrict,
-                onCountryChange: (v) => setState(() => _selectedCountry = v),
-                onStateChange: (v) => setState(() => _selectedState = v),
-                onDistrictChange: (v) => setState(() => _selectedDistrict = v),
-              ),
-
-              /// APTA MAILING → ONLY for practitioner
-              if (_isPractitioner) ...[
-                _toggleSection("APTA Mailing Address", _useSameApta, (v) {
-                  setState(() {
-                    _useSameApta = v;
-                    if (v) {
-                      _copyCommunicationTo(
-                        _aptaAddress1,
-                        _aptaAddress2,
-                        _aptaCity,
-                        _aptaPostal,
-                        (c) => _aptaCountry = c,
-                        (s) => _aptaState = s,
-                        (d) => _aptaDistrict = d,
-                      );
-                    }
-                  });
-                }),
-
-                AnimatedSwitcher(
-                  duration: const Duration(milliseconds: 300),
-                  child: !_useSameApta
-                      ? _buildAddressFields(
-                          address1: _aptaAddress1,
-                          address2: _aptaAddress2,
-                          city: _aptaCity,
-                          postal: _aptaPostal,
-                          country: _aptaCountry,
-                          state: _aptaState,
-                          district: _aptaDistrict,
-                          onCountryChange: (v) =>
-                              setState(() => _aptaCountry = v),
-                          onStateChange: (v) => setState(() => _aptaState = v),
-                          onDistrictChange: (v) =>
-                              setState(() => _aptaDistrict = v),
-                        )
-                      : const SizedBox.shrink(),
-                ),
-              ],
-
-              /// PERMANENT (for all roles)
-              _toggleSection("Permanent Address", _useSamePermanent, (v) {
-                setState(() {
-                  _useSamePermanent = v;
-                  if (v) {
-                    _copyCommunicationTo(
-                      _permAddress1,
-                      _permAddress2,
-                      _permCity,
-                      _permPostal,
-                      (c) => _permCountry = c,
-                      (s) => _permState = s,
-                      (d) => _permDistrict = d,
-                    );
-                  }
-                });
-              }),
-
-              AnimatedSwitcher(
-                duration: const Duration(milliseconds: 300),
-                child: !_useSamePermanent
-                    ? _buildAddressFields(
-                        address1: _permAddress1,
-                        address2: _permAddress2,
-                        city: _permCity,
-                        postal: _permPostal,
-                        country: _permCountry,
-                        state: _permState,
-                        district: _permDistrict,
-                        onCountryChange: (v) =>
-                            setState(() => _permCountry = v),
-                        onStateChange: (v) => setState(() => _permState = v),
-                        onDistrictChange: (v) =>
-                            setState(() => _permDistrict = v),
-                      )
-                    : const SizedBox.shrink(),
-              ),
-
-              SizedBox(height: 40.h),
-              SizedBox(
-                height: 50.h,
-                width: double.infinity,
-                child: ElevatedButton(
-                  onPressed: _handleNext,
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: AppColors.brown,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12.r),
+                  /// Section 2: APTA MAILING → ONLY for practitioner
+                  if (_isPractitioner) ...[
+                    SizedBox(height: 16.h),
+                    _buildSectionContainer(
+                      title: "APTA Mailing Address",
+                      headerWidget: _buildCheckbox(
+                        label: "Same as Communication Address",
+                        value: _useSameApta,
+                        onChanged: (v) {
+                          setState(() {
+                            _useSameApta = v;
+                            if (v) {
+                              _copyCommunicationTo(
+                                _aptaAddress1,
+                                _aptaAddress2,
+                                _aptaCity,
+                                _aptaPostal,
+                                (c) => _aptaCountry = c,
+                                (s) => _aptaState = s,
+                                (d) => _aptaDistrict = d,
+                              );
+                            }
+                          });
+                        },
+                      ),
+                      children: [
+                        AnimatedSwitcher(
+                          duration: const Duration(milliseconds: 300),
+                          child: !_useSameApta
+                              ? _buildAddressFields(
+                                  address1: _aptaAddress1,
+                                  address2: _aptaAddress2,
+                                  city: _aptaCity,
+                                  postal: _aptaPostal,
+                                  country: _aptaCountry,
+                                  state: _aptaState,
+                                  district: _aptaDistrict,
+                                  onCountryChange: (v) =>
+                                      setState(() => _aptaCountry = v),
+                                  onStateChange: (v) => setState(() => _aptaState = v),
+                                  onDistrictChange: (v) =>
+                                      setState(() => _aptaDistrict = v),
+                                )
+                              : const SizedBox.shrink(),
+                        ),
+                      ],
                     ),
+                  ],
+
+                  // Section 3: Permanent Address (for all roles)
+                  SizedBox(height: 16.h),
+                  _buildSectionContainer(
+                    title: "Permanent Address",
+                    headerWidget: _buildCheckbox(
+                      label: "Same as Communication Address",
+                      value: _useSamePermanent,
+                      onChanged: (v) {
+                        setState(() {
+                          _useSamePermanent = v;
+                          if (v) {
+                            _copyCommunicationTo(
+                              _permAddress1,
+                              _permAddress2,
+                              _permCity,
+                              _permPostal,
+                              (c) => _permCountry = c,
+                              (s) => _permState = s,
+                              (d) => _permDistrict = d,
+                            );
+                          }
+                        });
+                      },
+                    ),
+                    children: [
+                      AnimatedSwitcher(
+                        duration: const Duration(milliseconds: 300),
+                        child: !_useSamePermanent
+                            ? _buildAddressFields(
+                                address1: _permAddress1,
+                                address2: _permAddress2,
+                                city: _permCity,
+                                postal: _permPostal,
+                                country: _permCountry,
+                                state: _permState,
+                                district: _permDistrict,
+                                onCountryChange: (v) =>
+                                    setState(() => _permCountry = v),
+                                onStateChange: (v) => setState(() => _permState = v),
+                                onDistrictChange: (v) =>
+                                    setState(() => _permDistrict = v),
+                              )
+                            : const SizedBox.shrink(),
+                      ),
+                    ],
                   ),
-                  child: Text(
-                    "Next",
-                    style: TextStyle(color: Colors.white, fontSize: 16.sp),
+
+                  SizedBox(height: 32.h),
+
+                  // Back and Next buttons
+                  Row(
+                    children: [
+                      Expanded(
+                        child: SizedBox(
+                          height: 50.h,
+                          child: OutlinedButton(
+                            onPressed: () => Navigator.pop(context),
+                            style: OutlinedButton.styleFrom(
+                              side: const BorderSide(color: AppColors.brown),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(100.r),
+                              ),
+                            ),
+                            child: Text(
+                              "Back",
+                              style: TextStyle(
+                                color: AppColors.brown,
+                                fontSize: 16.sp,
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
+                          ),
+                        ),
+                      ),
+                      SizedBox(width: 16.w),
+                      Expanded(
+                        child: SizedBox(
+                          height: 50.h,
+                          child: ElevatedButton(
+                            onPressed: _handleNext,
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: AppColors.brown,
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(100.r),
+                              ),
+                            ),
+                            child: Text(
+                              "Next",
+                              style: TextStyle(
+                                color: Colors.white,
+                                fontSize: 16.sp,
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
+                          ),
+                        ),
+                      ),
+                    ],
                   ),
-                ),
+                  SizedBox(height: 24.h),
+                ],
               ),
-            ],
+            ),
           ),
         ),
       ),

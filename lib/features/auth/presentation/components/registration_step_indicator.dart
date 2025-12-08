@@ -23,7 +23,7 @@ class RegistrationStepIndicator extends StatelessWidget {
           style: TextStyle(
             fontSize: 14.sp,
             fontWeight: FontWeight.w500,
-            color: Colors.grey[600],
+            color: AppColors.brown,
           ),
         ),
 
