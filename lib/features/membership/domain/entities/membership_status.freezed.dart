@@ -37,6 +37,9 @@ mixin _$MembershipStatus {
   /// Membership start date
   DateTime? get startDate => throw _privateConstructorUsedError;
 
+  /// URL to download membership PDF
+  String? get membershipPdfUrl => throw _privateConstructorUsedError;
+
   /// Create a copy of MembershipStatus
   /// with the given fields replaced by the non-null parameter values.
   @JsonKey(includeFromJson: false, includeToJson: false)
@@ -57,7 +60,8 @@ abstract class $MembershipStatusCopyWith<$Res> {
       DateTime validUntil,
       String memberName,
       String membershipNumber,
-      DateTime? startDate});
+      DateTime? startDate,
+      String? membershipPdfUrl});
 }
 
 /// @nodoc
@@ -82,6 +86,7 @@ class _$MembershipStatusCopyWithImpl<$Res, $Val extends MembershipStatus>
     Object? memberName = null,
     Object? membershipNumber = null,
     Object? startDate = freezed,
+    Object? membershipPdfUrl = freezed,
   }) {
     return _then(_value.copyWith(
       id: null == id
@@ -112,6 +117,10 @@ class _$MembershipStatusCopyWithImpl<$Res, $Val extends MembershipStatus>
           ? _value.startDate
           : startDate // ignore: cast_nullable_to_non_nullable
               as DateTime?,
+      membershipPdfUrl: freezed == membershipPdfUrl
+          ? _value.membershipPdfUrl
+          : membershipPdfUrl // ignore: cast_nullable_to_non_nullable
+              as String?,
     ) as $Val);
   }
 }
@@ -131,7 +140,8 @@ abstract class _$$MembershipStatusImplCopyWith<$Res>
       DateTime validUntil,
       String memberName,
       String membershipNumber,
-      DateTime? startDate});
+      DateTime? startDate,
+      String? membershipPdfUrl});
 }
 
 /// @nodoc
@@ -154,6 +164,7 @@ class __$$MembershipStatusImplCopyWithImpl<$Res>
     Object? memberName = null,
     Object? membershipNumber = null,
     Object? startDate = freezed,
+    Object? membershipPdfUrl = freezed,
   }) {
     return _then(_$MembershipStatusImpl(
       id: null == id
@@ -184,6 +195,10 @@ class __$$MembershipStatusImplCopyWithImpl<$Res>
           ? _value.startDate
           : startDate // ignore: cast_nullable_to_non_nullable
               as DateTime?,
+      membershipPdfUrl: freezed == membershipPdfUrl
+          ? _value.membershipPdfUrl
+          : membershipPdfUrl // ignore: cast_nullable_to_non_nullable
+              as String?,
     ));
   }
 }
@@ -198,7 +213,8 @@ class _$MembershipStatusImpl extends _MembershipStatus {
       required this.validUntil,
       required this.memberName,
       required this.membershipNumber,
-      this.startDate})
+      this.startDate,
+      this.membershipPdfUrl})
       : super._();
 
   /// Unique identifier for the membership
@@ -229,9 +245,13 @@ class _$MembershipStatusImpl extends _MembershipStatus {
   @override
   final DateTime? startDate;
 
+  /// URL to download membership PDF
+  @override
+  final String? membershipPdfUrl;
+
   @override
   String toString() {
-    return 'MembershipStatus(id: $id, isActive: $isActive, membershipType: $membershipType, validUntil: $validUntil, memberName: $memberName, membershipNumber: $membershipNumber, startDate: $startDate)';
+    return 'MembershipStatus(id: $id, isActive: $isActive, membershipType: $membershipType, validUntil: $validUntil, memberName: $memberName, membershipNumber: $membershipNumber, startDate: $startDate, membershipPdfUrl: $membershipPdfUrl)';
   }
 
   @override
@@ -251,12 +271,14 @@ class _$MembershipStatusImpl extends _MembershipStatus {
             (identical(other.membershipNumber, membershipNumber) ||
                 other.membershipNumber == membershipNumber) &&
             (identical(other.startDate, startDate) ||
-                other.startDate == startDate));
+                other.startDate == startDate) &&
+            (identical(other.membershipPdfUrl, membershipPdfUrl) ||
+                other.membershipPdfUrl == membershipPdfUrl));
   }
 
   @override
   int get hashCode => Object.hash(runtimeType, id, isActive, membershipType,
-      validUntil, memberName, membershipNumber, startDate);
+      validUntil, memberName, membershipNumber, startDate, membershipPdfUrl);
 
   /// Create a copy of MembershipStatus
   /// with the given fields replaced by the non-null parameter values.
@@ -276,7 +298,8 @@ abstract class _MembershipStatus extends MembershipStatus {
       required final DateTime validUntil,
       required final String memberName,
       required final String membershipNumber,
-      final DateTime? startDate}) = _$MembershipStatusImpl;
+      final DateTime? startDate,
+      final String? membershipPdfUrl}) = _$MembershipStatusImpl;
   const _MembershipStatus._() : super._();
 
   /// Unique identifier for the membership
@@ -306,6 +329,10 @@ abstract class _MembershipStatus extends MembershipStatus {
   /// Membership start date
   @override
   DateTime? get startDate;
+
+  /// URL to download membership PDF
+  @override
+  String? get membershipPdfUrl;
 
   /// Create a copy of MembershipStatus
   /// with the given fields replaced by the non-null parameter values.

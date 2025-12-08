@@ -18,6 +18,7 @@ class MembershipStatusModel {
     this.createdAt,
     this.updatedAt,
     this.user,
+    this.membershipPdfUrl,
   });
 
   /// Computed property to check if membership is active
@@ -57,6 +58,9 @@ class MembershipStatusModel {
   @JsonKey(name: 'user')
   final int? user;
 
+  @JsonKey(name: 'membership_pdf_url')
+  final String? membershipPdfUrl;
+
   /// Converts model to JSON map
   Map<String, dynamic> toJson() => _$MembershipStatusModelToJson(this);
 
@@ -70,6 +74,7 @@ class MembershipStatusModel {
       memberName: userFirstName,
       membershipNumber: membershipNumber,
       startDate: startDate != null ? _parseDate(startDate!) : null,
+      membershipPdfUrl: membershipPdfUrl,
     );
   }
 

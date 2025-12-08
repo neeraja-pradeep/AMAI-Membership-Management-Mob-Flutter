@@ -28,6 +28,9 @@ class MembershipStatus with _$MembershipStatus {
 
     /// Membership start date
     DateTime? startDate,
+
+    /// URL to download membership PDF
+    String? membershipPdfUrl,
   }) = _MembershipStatus;
 
   const MembershipStatus._();
@@ -83,5 +86,6 @@ class MembershipStatus with _$MembershipStatus {
         validUntil: DateTime.now(),
         memberName: '',
         membershipNumber: '',
+        membershipPdfUrl: null,
       );
 }

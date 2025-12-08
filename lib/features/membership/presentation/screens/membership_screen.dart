@@ -10,6 +10,7 @@ import 'package:myapp/features/membership/presentation/components/payment_receip
 import 'package:myapp/features/membership/presentation/components/qr_code_widget.dart';
 import 'package:myapp/features/aswas_plus/application/providers/renewal_providers.dart';
 import 'package:myapp/features/aswas_plus/presentation/screens/renew_membership_screen.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 /// Main Membership Screen
 /// Displays current membership status, digital card, and payment receipts
@@ -159,12 +160,7 @@ class _MembershipScreenState extends ConsumerState<MembershipScreen> {
               _showFullSizeQrDialog(membershipStatus.membershipNumber);
             },
             onDownloadPdf: () {
-              // Static for now
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(
-                  content: Text('Download PDF coming soon'),
-                ),
-              );
+              _downloadMembershipPdf(membershipStatus.membershipPdfUrl);
             },
           ),
 
@@ -292,11 +288,7 @@ class _MembershipScreenState extends ConsumerState<MembershipScreen> {
                       _showFullSizeQrDialog(cachedData.membershipNumber);
                     },
                     onDownloadPdf: () {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(
-                          content: Text('Download PDF coming soon'),
-                        ),
-                      );
+                      _downloadMembershipPdf(cachedData.membershipPdfUrl);
                     },
                   ),
                   SizedBox(height: 24.h),
@@ -339,6 +331,50 @@ class _MembershipScreenState extends ConsumerState<MembershipScreen> {
         ],
       ),
     );
+  }
+
+  /// Downloads the membership PDF
+  Future<void> _downloadMembershipPdf(String? pdfUrl) async {
+    if (pdfUrl == null || pdfUrl.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('PDF not available'),
+          backgroundColor: Colors.red,
+        ),
+      );
+      return;
+    }
+
+    // Ensure URL has https:// prefix
+    String fullUrl = pdfUrl;
+    if (!pdfUrl.startsWith('http://') && !pdfUrl.startsWith('https://')) {
+      fullUrl = 'https://$pdfUrl';
+    }
+
+    try {
+      final uri = Uri.parse(fullUrl);
+      if (await canLaunchUrl(uri)) {
+        await launchUrl(uri, mode: LaunchMode.externalApplication);
+      } else {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('Could not open PDF'),
+              backgroundColor: Colors.red,
+            ),
+          );
+        }
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Error opening PDF: $e'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    }
   }
 
   /// Shows a full-size QR code dialog

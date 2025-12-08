@@ -19,6 +19,7 @@ MembershipStatusModel _$MembershipStatusModelFromJson(
       createdAt: json['created_at'] as String?,
       updatedAt: json['updated_at'] as String?,
       user: (json['user'] as num?)?.toInt(),
+      membershipPdfUrl: json['membership_pdf_url'] as String?,
     );
 
 Map<String, dynamic> _$MembershipStatusModelToJson(
@@ -34,4 +35,5 @@ Map<String, dynamic> _$MembershipStatusModelToJson(
       'created_at': instance.createdAt,
       'updated_at': instance.updatedAt,
       'user': instance.user,
+      'membership_pdf_url': instance.membershipPdfUrl,
     };
