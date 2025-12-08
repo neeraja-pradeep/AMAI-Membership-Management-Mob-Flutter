@@ -83,9 +83,7 @@ class _ProfessionalDetailsScreenState
     "Other",
   ];
 
-  static const List<String> dropdownCountry = [
-    "India",
-  ];
+  static const List<String> dropdownCountry = ["India"];
 
   static const List<String> _qualificationOptions = [
     'UG',
@@ -359,10 +357,7 @@ class _ProfessionalDetailsScreenState
           key: _formKey,
           child: Column(
             children: [
-              const RegistrationStepIndicator(
-                currentStep: 2,
-                stepTitle: "Professional Details",
-              ),
+              const RegistrationStepIndicator(currentStep: 2),
 
               if (role == "practitioner") _buildPractitionerUI(),
               if (role == "house_surgeon") _buildHouseSurgeonUI(),
@@ -491,7 +486,12 @@ class _ProfessionalDetailsScreenState
         isExpanded: true,
         decoration: const InputDecoration(border: InputBorder.none),
         items: data
-            .map((e) => DropdownMenuItem(value: e, child: Text(e, overflow: TextOverflow.ellipsis)))
+            .map(
+              (e) => DropdownMenuItem(
+                value: e,
+                child: Text(e, overflow: TextOverflow.ellipsis),
+              ),
+            )
             .toList(),
         validator: (v) => v == null ? "Required" : null,
         onChanged: callback,

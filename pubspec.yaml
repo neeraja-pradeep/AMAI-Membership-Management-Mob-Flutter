@@ -144,6 +144,8 @@ flutter:
     - assets/
     - assets/home/
     - assets/svg/
+    - assets/auth/
+
     - .env
 
   # An image asset can refer to one or more resolution-specific "variants", see

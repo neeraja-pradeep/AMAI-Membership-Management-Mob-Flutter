@@ -269,10 +269,7 @@ class _DocumentUploadScreenState extends ConsumerState<DocumentUploadScreen> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const RegistrationStepIndicator(
-                  currentStep: 4,
-                  stepTitle: "Document Upload",
-                ),
+                const RegistrationStepIndicator(currentStep: 4),
 
                 if (isUploading)
                   Padding(
@@ -299,7 +296,9 @@ class _DocumentUploadScreenState extends ConsumerState<DocumentUploadScreen> {
                 _label(_certificateLabel()),
                 _uploadTile(
                   file: certificate,
-                  onPick: isUploading ? null : () => _pickFile(isProfile: false),
+                  onPick: isUploading
+                      ? null
+                      : () => _pickFile(isProfile: false),
                   onRemove: isUploading ? null : () => _removeFile(false),
                 ),
 

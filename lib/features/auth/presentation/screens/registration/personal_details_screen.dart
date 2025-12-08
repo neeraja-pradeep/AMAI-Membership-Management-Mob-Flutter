@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:intl/intl.dart';
 import 'package:myapp/app/theme/colors.dart';
 import 'package:myapp/features/auth/application/states/registration_state.dart';
@@ -11,7 +12,6 @@ import 'package:myapp/features/auth/domain/entities/user_role.dart';
 import '../../../../../app/router/app_router.dart';
 import '../../../application/notifiers/registration_state_notifier.dart';
 import '../../../domain/entities/registration/personal_details.dart';
-import '../../components/date_picker_field.dart';
 import '../../components/registration_step_indicator.dart';
 import '../../components/text_input_field.dart';
 import '../../widgets/exit_confirmation_dialog.dart';
@@ -262,219 +262,382 @@ class _PersonalDetailsScreenState extends ConsumerState<PersonalDetailsScreen> {
     return false;
   }
 
-  @override
-  Widget build(BuildContext context) {
-    return SafeArea(
-      child: WillPopScope(
-        onWillPop: _handleBack,
-        child: Scaffold(
-          appBar: AppBar(
-            title: const Text(
-              "Register Here",
-              style: TextStyle(fontWeight: FontWeight.bold),
+  Future<void> _selectDate(BuildContext context) async {
+    final DateTime? picked = await showDatePicker(
+      context: context,
+      initialDate: _dateOfBirth ?? DateTime.now(),
+      firstDate: DateTime(1900),
+      lastDate: DateTime.now(),
+      builder: (context, child) {
+        return Theme(
+          data: Theme.of(context).copyWith(
+            colorScheme: const ColorScheme.light(
+              primary: AppColors.brown,
+              onPrimary: Colors.white,
+              surface: Colors.white,
+              onSurface: Colors.black,
             ),
           ),
-          body: SingleChildScrollView(
-            padding: EdgeInsets.all(24.w),
-            child: Form(
-              key: _formKey,
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  const RegistrationStepIndicator(
-                    currentStep: 1,
-                    stepTitle: "Personal Details",
-                  ),
-                  const Text("First Name"),
-                  SizedBox(height: 10.h),
-                  TextInputField(
-                    controller: _firstNameController,
-                    hintText: "First Name",
-                    onChanged: (_) => _autoSave(),
-                    validator: (v) => v!.isEmpty ? "Required" : null,
-                  ),
-                  SizedBox(height: 16.h),
+          child: child!,
+        );
+      },
+    );
 
-                  const Text("Last Name"),
-                  SizedBox(height: 10.h),
-                  TextInputField(
-                    controller: _lastNameController,
-                    hintText: "Last Name",
-                    onChanged: (_) => _autoSave(),
-                    validator: (v) => v!.isEmpty ? "Required" : null,
-                  ),
-                  SizedBox(height: 16.h),
+    if (picked != null) {
+      setState(() {
+        _dateOfBirth = picked;
+        _dobController.text = DateFormat('yyyy-MM-dd').format(picked);
+      });
+      _autoSave();
+    }
+  }
 
-                  const Text("Email"),
-                  SizedBox(height: 10.h),
-                  TextInputField(
-                    controller: _emailController,
-                    keyboardType: TextInputType.emailAddress,
-                    hintText: "your.email@gmail.com",
-                    onChanged: (_) => _autoSave(),
-                    validator: (v) => v!.isEmpty ? "Required" : null,
-                  ),
-
-                  SizedBox(height: 16.h),
-                  const Text("Mobile Number"),
-                  SizedBox(height: 10.h),
-                  TextFormField(
-                    controller: _phoneController,
-                    maxLength: 10,
-                    keyboardType: TextInputType.phone,
-                    onChanged: (_) => _autoSave(),
-                    validator: (v) => v!.length != 10 ? "Invalid" : null,
-                    decoration: InputDecoration(
-                      prefixText: "+91 ",
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(12.r),
+  @override
+  Widget build(BuildContext context) {
+    return WillPopScope(
+      onWillPop: _handleBack,
+      child: Scaffold(
+        extendBodyBehindAppBar: true,
+        appBar: AppBar(
+          backgroundColor: Colors.transparent,
+          elevation: 0,
+          centerTitle: true,
+          title: Text(
+            "Register Here",
+            style: TextStyle(
+              fontSize: 20.sp,
+              fontWeight: FontWeight.w600,
+              color: AppColors.textPrimary,
+            ),
+          ),
+          leading: IconButton(
+            icon: Icon(
+              Icons.arrow_back_ios,
+              color: AppColors.textPrimary,
+              size: 20.sp,
+            ),
+            onPressed: () => _handleBack(),
+          ),
+        ),
+        body: Container(
+          width: double.infinity,
+          height: double.infinity,
+          decoration: const BoxDecoration(
+            gradient: AppColors.lightBackgroundGradient,
+          ),
+          child: SafeArea(
+            child: SingleChildScrollView(
+              padding: EdgeInsets.all(24.w),
+              child: Form(
+                key: _formKey,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    const RegistrationStepIndicator(currentStep: 1),
+                    Text(
+                      "Name",
+                      style: TextStyle(
+                        fontSize: 16.sp,
+                        fontWeight: FontWeight.w400,
                       ),
                     ),
-                  ),
-
-                  SizedBox(height: 16.h),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      const Text("Whatsapp Number"),
-                      Row(
-                        children: [
-                          SizedBox(
-                            height: 24.h,
-                            width: 24.w,
-                            child: Checkbox(
-                              value: _sameAsPhone,
-                              activeColor: AppColors.brown,
-                              onChanged: (v) {
-                                setState(() {
-                                  _sameAsPhone = v ?? false;
-                                  if (_sameAsPhone) {
-                                    _waPhoneController.text =
-                                        _phoneController.text;
-                                  }
-                                });
-                                _autoSave();
-                              },
-                            ),
-                          ),
-                          SizedBox(width: 4.w),
-                          Text(
-                            "Same as phone",
-                            style: TextStyle(fontSize: 12.sp),
-                          ),
-                        ],
-                      ),
-                    ],
-                  ),
-                  SizedBox(height: 10.h),
-                  TextFormField(
-                    controller: _waPhoneController,
-                    maxLength: 10,
-                    enabled: !_sameAsPhone,
-                    keyboardType: TextInputType.phone,
-                    onChanged: (_) => _autoSave(),
-                    validator: (v) => v!.length != 10 ? "Invalid" : null,
-                    decoration: InputDecoration(
-                      prefixText: "+91 ",
-                      filled: _sameAsPhone,
-                      fillColor: _sameAsPhone ? Colors.grey[200] : null,
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(12.r),
-                      ),
-                    ),
-                  ),
-
-                  SizedBox(height: 16.h),
-                  const Text("Date of Birth"),
-                  DatePickerField(
-                    controller: _dobController,
-                    onDateSelected: (date) {
-                      setState(() => _dateOfBirth = date);
-                      _autoSave();
-                    },
-                    validator: (v) => v!.isEmpty ? "Required" : null,
-                  ),
-
-                  SizedBox(height: 16.h),
-                  const Text("Gender"),
-                  Row(
-                    children: [
-                      Radio<String>(
-                        value: "male",
-                        groupValue: _selectedGender,
-                        activeColor: AppColors.brown,
-                        onChanged: (v) {
-                          setState(() => _selectedGender = v);
-                          _autoSave();
-                        },
-                      ),
-                      const Text("Male"),
-                      Radio<String>(
-                        value: "female",
-                        groupValue: _selectedGender,
-                        activeColor: AppColors.brown,
-                        onChanged: (v) {
-                          setState(() => _selectedGender = v);
-                          _autoSave();
-                        },
-                      ),
-                      const Text("Female"),
-                      Radio<String>(
-                        value: "other",
-                        groupValue: _selectedGender,
-                        activeColor: AppColors.brown,
-                        onChanged: (v) {
-                          setState(() => _selectedGender = v);
-                          _autoSave();
-                        },
-                      ),
-                      const Text("Other"),
-                    ],
-                  ),
-
-                  SizedBox(height: 16.h),
-                  const Text("Blood Group"),
-                  SizedBox(height: 10.h),
-                  DropdownButtonFormField<String>(
-                    value: _selectedBloodGroup,
-                    decoration: InputDecoration(
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(12.r),
-                      ),
-                      contentPadding: EdgeInsets.symmetric(
-                        horizontal: 16.w,
-                        vertical: 12.h,
-                      ),
-                    ),
-                    items: ['A+', 'A-', 'B+', 'B-', 'AB+', 'AB-', 'O+', 'O-']
-                        .map((e) => DropdownMenuItem(value: e, child: Text(e)))
-                        .toList(),
-                    onChanged: (v) {
-                      setState(() => _selectedBloodGroup = v);
-                      _autoSave();
-                    },
-                    validator: (v) => v == null ? "Required" : null,
-                  ),
-
-                  SizedBox(height: 20.h),
-
-                  if (role == 'house_surgeon' || role == 'student') ...[
-                    const Text("Institution Name"),
                     SizedBox(height: 10.h),
                     TextInputField(
-                      controller: _institutionController,
-                      hintText: "Enter institution name",
+                      controller: _firstNameController,
+                      hintText: "Enter your name",
                       onChanged: (_) => _autoSave(),
                       validator: (v) => v!.isEmpty ? "Required" : null,
                     ),
-                    SizedBox(height: 20.h),
-                  ],
 
-                  if (role == 'house_surgeon' || role == 'practitioner') ...[
-                    const Text("APTA Magazine Type"),
+                    SizedBox(height: 16.h),
+
+                    Text(
+                      "Email",
+                      style: TextStyle(
+                        fontSize: 16.sp,
+                        fontWeight: FontWeight.w400,
+                      ),
+                    ),
+                    SizedBox(height: 10.h),
+                    TextInputField(
+                      controller: _emailController,
+                      keyboardType: TextInputType.emailAddress,
+                      hintText: "Enter your Email",
+                      onChanged: (_) => _autoSave(),
+                      validator: (v) => v!.isEmpty ? "Required" : null,
+                    ),
+
+                    SizedBox(height: 16.h),
+                    Text(
+                      "Mobile Number",
+                      style: TextStyle(
+                        fontSize: 16.sp,
+                        fontWeight: FontWeight.w400,
+                      ),
+                    ),
+                    SizedBox(height: 10.h),
+                    TextFormField(
+                      controller: _phoneController,
+                      maxLength: 10,
+                      keyboardType: TextInputType.phone,
+                      onChanged: (_) => _autoSave(),
+                      validator: (v) => v!.length != 10 ? "Invalid" : null,
+                      decoration: InputDecoration(
+                        hintText: "Enter your mobile number",
+                        prefixIcon: Padding(
+                          padding: EdgeInsets.symmetric(horizontal: 12.w),
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Image.asset(
+                                'assets/auth/indiaFlag.png',
+                                height: 18.h,
+                                width: 18.h,
+                              ),
+                              SizedBox(width: 8.w),
+                              Text(
+                                "+91",
+                                style: TextStyle(
+                                  fontSize: 14.sp,
+                                  fontWeight: FontWeight.w500,
+                                  color: AppColors.textPrimary,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                        prefixIconConstraints: const BoxConstraints(
+                          minWidth: 0,
+                          minHeight: 0,
+                        ),
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(12.r),
+                        ),
+                        counterText: '',
+                      ),
+                    ),
+
+                    SizedBox(height: 16.h),
+                    // Same as Mobile checkbox above WhatsApp Number
+                    Row(
+                      children: [
+                        SizedBox(
+                          height: 24.h,
+                          width: 24.w,
+                          child: Checkbox(
+                            value: _sameAsPhone,
+                            activeColor: AppColors.brown,
+                            onChanged: (v) {
+                              setState(() {
+                                _sameAsPhone = v ?? false;
+                                if (_sameAsPhone) {
+                                  _waPhoneController.text =
+                                      _phoneController.text;
+                                }
+                              });
+                              _autoSave();
+                            },
+                          ),
+                        ),
+                        SizedBox(width: 4.w),
+                        Text(
+                          "Same as Mobile no.",
+                          style: TextStyle(fontSize: 12.sp),
+                        ),
+                      ],
+                    ),
+                    SizedBox(height: 10.h),
+                    Text(
+                      "Whatsapp Number",
+                      style: TextStyle(
+                        fontSize: 16.sp,
+                        fontWeight: FontWeight.w400,
+                      ),
+                    ),
+                    SizedBox(height: 10.h),
+                    TextFormField(
+                      controller: _waPhoneController,
+                      maxLength: 10,
+                      enabled: !_sameAsPhone,
+                      keyboardType: TextInputType.phone,
+                      onChanged: (_) => _autoSave(),
+                      validator: (v) => v!.length != 10 ? "Invalid" : null,
+                      decoration: InputDecoration(
+                        hintText: "Enter your WhatsApp number",
+                        prefixIcon: Padding(
+                          padding: EdgeInsets.symmetric(horizontal: 12.w),
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Image.asset(
+                                'assets/auth/indiaFlag.png',
+                                height: 18.h,
+                                width: 18.h,
+                              ),
+                              SizedBox(width: 8.w),
+                              Text(
+                                "+91",
+                                style: TextStyle(
+                                  fontSize: 14.sp,
+                                  fontWeight: FontWeight.w500,
+                                  color: AppColors.textPrimary,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                        prefixIconConstraints: const BoxConstraints(
+                          minWidth: 0,
+                          minHeight: 0,
+                        ),
+                        filled: _sameAsPhone,
+                        fillColor: _sameAsPhone ? Colors.grey[200] : null,
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(12.r),
+                        ),
+                        counterText: '',
+                      ),
+                    ),
+
+                    SizedBox(height: 16.h),
+                    Text(
+                      "Date of Birth",
+                      style: TextStyle(
+                        fontSize: 16.sp,
+                        fontWeight: FontWeight.w400,
+                      ),
+                    ),
+                    SizedBox(height: 10.h),
+                    TextFormField(
+                      controller: _dobController,
+                      readOnly: true,
+                      onTap: () => _selectDate(context),
+                      validator: (v) => v!.isEmpty ? "Required" : null,
+                      decoration: InputDecoration(
+                        hintText: "Select date of birth",
+                        suffixIcon: Padding(
+                          padding: EdgeInsets.all(12.w),
+                          child: SvgPicture.asset(
+                            'assets/svg/calander.svg',
+                            height: 20.h,
+                            width: 20.h,
+                          ),
+                        ),
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(12.r),
+                        ),
+                      ),
+                    ),
+
+                    SizedBox(height: 16.h),
+                    Text(
+                      "Gender",
+                      style: TextStyle(
+                        fontSize: 16.sp,
+                        fontWeight: FontWeight.w400,
+                      ),
+                    ),
+                    Row(
+                      children: [
+                        Radio<String>(
+                          value: "male",
+                          groupValue: _selectedGender,
+                          activeColor: AppColors.brown,
+                          onChanged: (v) {
+                            setState(() => _selectedGender = v);
+                            _autoSave();
+                          },
+                        ),
+                        const Text("Male"),
+                        Radio<String>(
+                          value: "female",
+                          groupValue: _selectedGender,
+                          activeColor: AppColors.brown,
+                          onChanged: (v) {
+                            setState(() => _selectedGender = v);
+                            _autoSave();
+                          },
+                        ),
+                        const Text("Female"),
+                        Radio<String>(
+                          value: "other",
+                          groupValue: _selectedGender,
+                          activeColor: AppColors.brown,
+                          onChanged: (v) {
+                            setState(() => _selectedGender = v);
+                            _autoSave();
+                          },
+                        ),
+                        const Text("Other"),
+                      ],
+                    ),
+
+                    SizedBox(height: 16.h),
+
+                    if (role == 'house_surgeon' || role == 'student') ...[
+                      Text(
+                        "Institution Name",
+                        style: TextStyle(
+                          fontSize: 16.sp,
+                          fontWeight: FontWeight.w400,
+                        ),
+                      ),
+                      SizedBox(height: 10.h),
+                      TextInputField(
+                        controller: _institutionController,
+                        hintText: "Enter institution name",
+                        onChanged: (_) => _autoSave(),
+                        validator: (v) => v!.isEmpty ? "Required" : null,
+                      ),
+                      SizedBox(height: 16.h),
+                    ],
+
+                    if (role == 'house_surgeon' || role == 'practitioner') ...[
+                      Text(
+                        "APTA Magazine Type",
+                        style: TextStyle(
+                          fontSize: 16.sp,
+                          fontWeight: FontWeight.w400,
+                        ),
+                      ),
+                      SizedBox(height: 10.h),
+                      DropdownButtonFormField<String>(
+                        value: _selectedMagazineType,
+                        hint: const Text("Select Type"),
+                        decoration: InputDecoration(
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(12.r),
+                          ),
+                          contentPadding: EdgeInsets.symmetric(
+                            horizontal: 16.w,
+                            vertical: 12.h,
+                          ),
+                        ),
+                        items: ["Physical Copy", "Digital Copy", "Both"]
+                            .map(
+                              (e) => DropdownMenuItem(value: e, child: Text(e)),
+                            )
+                            .toList(),
+                        onChanged: (v) {
+                          setState(() => _selectedMagazineType = v);
+                          _autoSave();
+                        },
+                        validator: (v) => v == null ? "Required" : null,
+                      ),
+                      SizedBox(height: 16.h),
+                    ],
+
+                    Text(
+                      "Blood Group",
+                      style: TextStyle(
+                        fontSize: 16.sp,
+                        fontWeight: FontWeight.w400,
+                      ),
+                    ),
                     SizedBox(height: 10.h),
                     DropdownButtonFormField<String>(
-                      value: _selectedMagazineType,
+                      value: _selectedBloodGroup,
+                      hint: const Text("Select Blood Group"),
                       decoration: InputDecoration(
                         border: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(12.r),
@@ -484,47 +647,56 @@ class _PersonalDetailsScreenState extends ConsumerState<PersonalDetailsScreen> {
                           vertical: 12.h,
                         ),
                       ),
-                      items: ["Physical Copy", "Digital Copy", "Both"]
+                      items: ['A+', 'A-', 'B+', 'B-', 'AB+', 'AB-', 'O+', 'O-']
                           .map(
                             (e) => DropdownMenuItem(value: e, child: Text(e)),
                           )
                           .toList(),
                       onChanged: (v) {
-                        setState(() => _selectedMagazineType = v);
+                        setState(() => _selectedBloodGroup = v);
                         _autoSave();
                       },
                       validator: (v) => v == null ? "Required" : null,
                     ),
-                    SizedBox(height: 20.h),
-                  ],
 
-                  if (role == 'student') ...[
-                    const Text("BAMS Start Year"),
+                    SizedBox(height: 16.h),
+
+                    if (role == 'student') ...[
+                      Text(
+                        "BAMS Start Year",
+                        style: TextStyle(
+                          fontSize: 16.sp,
+                          fontWeight: FontWeight.w400,
+                        ),
+                      ),
+                      SizedBox(height: 10.h),
+                      TextFormField(
+                        controller: _bamsStartYearController,
+                        maxLength: 4,
+                        keyboardType: TextInputType.number,
+                        onChanged: (_) => _autoSave(),
+                        validator: (v) => RegExp(r'^\d{4}$').hasMatch(v ?? "")
+                            ? null
+                            : "Enter valid year",
+                      ),
+                      SizedBox(height: 20.h),
+                    ],
+
                     SizedBox(height: 10.h),
-                    TextFormField(
-                      controller: _bamsStartYearController,
-                      maxLength: 4,
-                      keyboardType: TextInputType.number,
-                      onChanged: (_) => _autoSave(),
-                      validator: (v) => RegExp(r'^\d{4}$').hasMatch(v ?? "")
-                          ? null
-                          : "Enter valid year",
-                    ),
-                    SizedBox(height: 20.h),
-                  ],
+                    ElevatedButton(
+                      onPressed: _handleNext,
+                      style: ElevatedButton.styleFrom(
+                        minimumSize: Size.fromHeight(50.h),
 
-                  SizedBox(height: 30.h),
-                  ElevatedButton(
-                    onPressed: _handleNext,
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: AppColors.brown,
+                        backgroundColor: AppColors.brown,
+                      ),
+                      child: const Text(
+                        "Next",
+                        style: TextStyle(color: Colors.white),
+                      ),
                     ),
-                    child: const Text(
-                      "Next",
-                      style: TextStyle(color: Colors.white),
-                    ),
-                  ),
-                ],
+                  ],
+                ),
               ),
             ),
           ),

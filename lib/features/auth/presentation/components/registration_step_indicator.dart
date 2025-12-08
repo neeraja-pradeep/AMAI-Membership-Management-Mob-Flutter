@@ -7,13 +7,11 @@ import 'package:myapp/app/theme/colors.dart';
 class RegistrationStepIndicator extends StatelessWidget {
   final int currentStep;
   final int totalSteps;
-  final String stepTitle;
 
   const RegistrationStepIndicator({
     super.key,
     required this.currentStep,
     this.totalSteps = 4,
-    required this.stepTitle,
   });
 
   @override
@@ -28,27 +26,20 @@ class RegistrationStepIndicator extends StatelessWidget {
             color: Colors.grey[600],
           ),
         ),
-        SizedBox(height: 8.h),
-        Text(
-          stepTitle,
-          style: TextStyle(
-            fontSize: 20.sp,
-            fontWeight: FontWeight.bold,
-          ),
-        ),
+
         SizedBox(height: 16.h),
         Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: List.generate(totalSteps, (index) {
-            final isActive = index < currentStep;
-            final isCurrent = index == currentStep - 1;
+            final isFilled = index < currentStep;
+
             return Container(
-              margin: EdgeInsets.symmetric(horizontal: 4.w),
-              width: isCurrent ? 24.w : 10.w,
-              height: 10.h,
+              margin: EdgeInsets.symmetric(horizontal: 6.w),
+              width: 12.w,
+              height: 12.w,
               decoration: BoxDecoration(
-                color: isActive ? AppColors.brown : Colors.grey[300],
-                borderRadius: BorderRadius.circular(5.r),
+                shape: BoxShape.circle,
+                color: isFilled ? AppColors.brown : Colors.grey.shade300,
               ),
             );
           }),
