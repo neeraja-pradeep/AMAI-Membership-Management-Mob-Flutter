@@ -83,9 +83,9 @@ class _EditAddressScreenState extends ConsumerState<EditAddressScreen> {
   }
 
   /// Pre-fills address fields from API data
-  void _prefillAddressData() {
-    final addressesAsync = ref.read(addressesProvider);
-    addressesAsync.whenData((addresses) {
+  Future<void> _prefillAddressData() async {
+    try {
+      final addresses = await ref.read(addressesProvider.future);
       if (addresses.isEmpty) return;
 
       // Find communications address first, then fall back to first address
@@ -97,6 +97,8 @@ class _EditAddressScreenState extends ConsumerState<EditAddressScreen> {
         }
       }
       addressToUse ??= addresses.first;
+
+      if (!mounted) return;
 
       setState(() {
         // Pre-fill text fields
@@ -128,7 +130,9 @@ class _EditAddressScreenState extends ConsumerState<EditAddressScreen> {
           }
         }
       });
-    });
+    } catch (e) {
+      // Handle error silently - fields will remain empty
+    }
   }
 
   @override
