@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:myapp/app/theme/colors.dart';
-import 'package:myapp/core/widgets/app_button.dart';
 import 'package:myapp/features/home/presentation/components/status_badge.dart';
 import 'package:myapp/features/membership/domain/entities/membership_status.dart';
 
@@ -27,7 +27,7 @@ class CurrentStatusCard extends ConsumerWidget {
       width: double.infinity,
       padding: EdgeInsets.all(16.w),
       decoration: BoxDecoration(
-        color: AppColors.cardBackground,
+        color: AppColors.white,
         borderRadius: BorderRadius.circular(12.r),
         boxShadow: [
           BoxShadow(
@@ -44,8 +44,8 @@ class CurrentStatusCard extends ConsumerWidget {
           _buildHeaderRow(),
           SizedBox(height: 16.h),
 
-          // Valid until
-          _buildValidUntil(),
+          // Membership type and validity row
+          _buildMembershipInfo(),
 
           // Renewal button (conditional)
           if (membershipStatus.shouldShowRenewalButton) ...[
@@ -65,8 +65,8 @@ class CurrentStatusCard extends ConsumerWidget {
         Text(
           'Current Status',
           style: TextStyle(
-            fontSize: 16.sp,
-            fontWeight: FontWeight.w600,
+            fontSize: 14.sp,
+            fontWeight: FontWeight.w500,
             color: AppColors.textPrimary,
           ),
         ),
@@ -79,28 +79,58 @@ class CurrentStatusCard extends ConsumerWidget {
     );
   }
 
-  /// Builds the valid until row
-  Widget _buildValidUntil() {
+  /// Builds the membership info row with icon, type, and validity
+  Widget _buildMembershipInfo() {
     return Row(
+      crossAxisAlignment: CrossAxisAlignment.center,
       children: [
-        Text(
-          'Valid Until: ',
-          style: TextStyle(
-            fontSize: 14.sp,
-            fontWeight: FontWeight.w400,
-            color: AppColors.textSecondary,
+        // Card SVG icon
+        Container(
+          width: 40.w,
+          height: 40.w,
+          decoration: BoxDecoration(
+            color: AppColors.primaryLight,
+            borderRadius: BorderRadius.circular(8.r),
+          ),
+          child: Center(
+            child: SvgPicture.asset(
+              'assets/svg/card.svg',
+              width: 24.w,
+              height: 24.w,
+            ),
           ),
         ),
-        Text(
-          membershipStatus.formattedValidUntil,
-          style: TextStyle(
-            fontSize: 14.sp,
-            fontWeight: FontWeight.w600,
-            color: membershipStatus.isExpired
-                ? AppColors.error
-                : membershipStatus.isExpiringSoon
-                    ? AppColors.warning
-                    : AppColors.textPrimary,
+        SizedBox(width: 12.w),
+
+        // Membership type and validity
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                membershipStatus.membershipType.isNotEmpty
+                    ? membershipStatus.membershipType
+                    : 'Regular',
+                style: TextStyle(
+                  fontSize: 14.sp,
+                  fontWeight: FontWeight.w600,
+                  color: AppColors.textPrimary,
+                ),
+              ),
+              SizedBox(height: 2.h),
+              Text(
+                'Valid till ${membershipStatus.formattedValidUntil}',
+                style: TextStyle(
+                  fontSize: 12.sp,
+                  fontWeight: FontWeight.w400,
+                  color: membershipStatus.isExpired
+                      ? AppColors.error
+                      : membershipStatus.isExpiringSoon
+                          ? AppColors.warning
+                          : AppColors.textSecondary,
+                ),
+              ),
+            ],
           ),
         ),
       ],
@@ -111,10 +141,24 @@ class CurrentStatusCard extends ConsumerWidget {
   Widget _buildRenewalButton() {
     return SizedBox(
       width: double.infinity,
-      child: AppButton(
-        text: membershipStatus.isActive ? 'Renew Membership' : 'Renew Now',
+      child: ElevatedButton(
         onPressed: onRenewalPressed ?? () {},
-        variant: AppButtonVariant.primary,
+        style: ElevatedButton.styleFrom(
+          backgroundColor: AppColors.primary,
+          foregroundColor: AppColors.white,
+          padding: EdgeInsets.symmetric(vertical: 12.h),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(8.r),
+          ),
+          elevation: 0,
+        ),
+        child: Text(
+          membershipStatus.isActive ? 'Renew Membership' : 'Renew Now',
+          style: TextStyle(
+            fontSize: 14.sp,
+            fontWeight: FontWeight.w600,
+          ),
+        ),
       ),
     );
   }
@@ -130,7 +174,7 @@ class CurrentStatusCardShimmer extends StatelessWidget {
       width: double.infinity,
       padding: EdgeInsets.all(16.w),
       decoration: BoxDecoration(
-        color: AppColors.cardBackground,
+        color: AppColors.white,
         borderRadius: BorderRadius.circular(12.r),
         boxShadow: [
           BoxShadow(
@@ -147,18 +191,27 @@ class CurrentStatusCardShimmer extends StatelessWidget {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              _buildShimmerBox(width: 100.w, height: 20.h),
+              _buildShimmerBox(width: 100.w, height: 18.h),
               _buildShimmerBox(width: 60.w, height: 24.h),
             ],
           ),
           SizedBox(height: 16.h),
 
-          // Valid until shimmer
-          _buildShimmerBox(width: 180.w, height: 16.h),
-          SizedBox(height: 16.h),
-
-          // Button shimmer
-          _buildShimmerBox(width: double.infinity, height: 44.h),
+          // Membership info shimmer
+          Row(
+            children: [
+              _buildShimmerBox(width: 40.w, height: 40.w),
+              SizedBox(width: 12.w),
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  _buildShimmerBox(width: 80.w, height: 14.h),
+                  SizedBox(height: 4.h),
+                  _buildShimmerBox(width: 140.w, height: 12.h),
+                ],
+              ),
+            ],
+          ),
         ],
       ),
     );

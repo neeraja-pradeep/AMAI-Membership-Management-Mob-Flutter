@@ -36,15 +36,24 @@ class _MembershipScreenState extends ConsumerState<MembershipScreen> {
     final state = ref.watch(membershipScreenStateProvider);
 
     return Scaffold(
-      backgroundColor: AppColors.background,
+      extendBodyBehindAppBar: true,
       appBar: _buildAppBar(context),
-      body: RefreshIndicator(
-        onRefresh: () async {
-          // Refresh both membership status and payment receipts
-          ref.invalidate(paymentReceiptsProvider);
-          await ref.read(membershipScreenStateProvider.notifier).refresh();
-        },
-        child: _buildBody(state),
+      body: Container(
+        width: double.infinity,
+        height: double.infinity,
+        decoration: const BoxDecoration(
+          gradient: AppColors.lightBackgroundGradient,
+        ),
+        child: SafeArea(
+          child: RefreshIndicator(
+            onRefresh: () async {
+              // Refresh both membership status and payment receipts
+              ref.invalidate(paymentReceiptsProvider);
+              await ref.read(membershipScreenStateProvider.notifier).refresh();
+            },
+            child: _buildBody(state),
+          ),
+        ),
       ),
     );
   }
@@ -52,7 +61,7 @@ class _MembershipScreenState extends ConsumerState<MembershipScreen> {
   /// Builds the custom app bar
   PreferredSizeWidget _buildAppBar(BuildContext context) {
     return AppBar(
-      backgroundColor: AppColors.surface,
+      backgroundColor: Colors.transparent,
       elevation: 0,
       leading: IconButton(
         icon: Icon(
@@ -65,7 +74,7 @@ class _MembershipScreenState extends ConsumerState<MembershipScreen> {
       title: Text(
         'Membership',
         style: TextStyle(
-          fontSize: 18.sp,
+          fontSize: 20.sp,
           fontWeight: FontWeight.w600,
           color: AppColors.textPrimary,
         ),

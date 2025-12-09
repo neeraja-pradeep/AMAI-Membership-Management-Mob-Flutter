@@ -32,7 +32,7 @@ class DigitalMembershipCard extends StatelessWidget {
         Text(
           'Digital Membership Card',
           style: TextStyle(
-            fontSize: 16.sp,
+            fontSize: 14.sp,
             fontWeight: FontWeight.w600,
             color: AppColors.textPrimary,
           ),
@@ -54,7 +54,7 @@ class DigitalMembershipCard extends StatelessWidget {
       width: double.infinity,
       padding: EdgeInsets.all(24.w),
       decoration: BoxDecoration(
-        color: AppColors.cardBackground,
+        color: AppColors.white,
         borderRadius: BorderRadius.circular(12.r),
         boxShadow: [
           BoxShadow(
@@ -90,9 +90,9 @@ class DigitalMembershipCard extends StatelessWidget {
   Widget _buildActiveCard() {
     return Container(
       width: double.infinity,
-      padding: EdgeInsets.all(20.w),
+      padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 20.h),
       decoration: BoxDecoration(
-        color: AppColors.cardBackground,
+        color: AppColors.white,
         borderRadius: BorderRadius.circular(12.r),
         boxShadow: [
           BoxShadow(
@@ -106,10 +106,10 @@ class DigitalMembershipCard extends StatelessWidget {
         children: [
           // Card title
           Text(
-            'AMAI Digital Membership Card',
+            'AMAI Digital Membership',
             style: TextStyle(
-              fontSize: 18.sp,
-              fontWeight: FontWeight.w700,
+              fontSize: 14.sp,
+              fontWeight: FontWeight.w600,
               color: AppColors.textPrimary,
             ),
             textAlign: TextAlign.center,
@@ -120,85 +120,71 @@ class DigitalMembershipCard extends StatelessWidget {
           Text(
             'Show at events and check-ins',
             style: TextStyle(
-              fontSize: 14.sp,
+              fontSize: 12.sp,
               fontWeight: FontWeight.w400,
               color: AppColors.textSecondary,
             ),
             textAlign: TextAlign.center,
           ),
-          SizedBox(height: 20.h),
+          SizedBox(height: 16.h),
 
           // QR Code
           QrCodeWidget(
             data: membershipStatus.membershipNumber,
-            size: 180.w,
+            size: 120.w,
           ),
-          SizedBox(height: 20.h),
+          SizedBox(height: 16.h),
 
-          // Action buttons
-          _buildActionButtons(),
+          // View Full Screen QR button
+          GestureDetector(
+            onTap: onViewFullSize ?? () {},
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Icon(
+                  Icons.fullscreen,
+                  size: 18.sp,
+                  color: AppColors.textSecondary,
+                ),
+                SizedBox(width: 6.w),
+                Text(
+                  'View Full Screen QR',
+                  style: TextStyle(
+                    fontSize: 12.sp,
+                    fontWeight: FontWeight.w400,
+                    color: AppColors.textSecondary,
+                  ),
+                ),
+              ],
+            ),
+          ),
+          SizedBox(height: 16.h),
+
+          // Download as PDF button
+          SizedBox(
+            width: double.infinity,
+            child: OutlinedButton(
+              onPressed: onDownloadPdf ?? () {},
+              style: OutlinedButton.styleFrom(
+                foregroundColor: AppColors.primary,
+                side: const BorderSide(color: AppColors.grey300),
+                padding: EdgeInsets.symmetric(vertical: 12.h),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(100.r),
+                ),
+              ),
+              child: Text(
+                'Download as PDF',
+                style: TextStyle(
+                  fontSize: 14.sp,
+                  fontWeight: FontWeight.w500,
+                  color: AppColors.primary,
+                ),
+              ),
+            ),
+          ),
         ],
       ),
-    );
-  }
-
-  /// Builds the action buttons row
-  Widget _buildActionButtons() {
-    return Row(
-      children: [
-        // View Full Size button
-        Expanded(
-          child: OutlinedButton.icon(
-            onPressed: onViewFullSize ?? () {},
-            icon: Icon(
-              Icons.fullscreen,
-              size: 18.sp,
-            ),
-            label: Text(
-              'View Full Size',
-              style: TextStyle(
-                fontSize: 14.sp,
-                fontWeight: FontWeight.w500,
-              ),
-            ),
-            style: OutlinedButton.styleFrom(
-              foregroundColor: AppColors.primary,
-              side: const BorderSide(color: AppColors.primary),
-              padding: EdgeInsets.symmetric(vertical: 12.h),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(8.r),
-              ),
-            ),
-          ),
-        ),
-        SizedBox(width: 12.w),
-
-        // Download as PDF button
-        Expanded(
-          child: OutlinedButton.icon(
-            onPressed: onDownloadPdf ?? () {},
-            icon: Icon(
-              Icons.download,
-              size: 18.sp,
-            ),
-            label: Text(
-              'Download PDF',
-              style: TextStyle(
-                fontSize: 14.sp,
-                fontWeight: FontWeight.w500,
-              ),
-            ),
-            style: OutlinedButton.styleFrom(
-              foregroundColor: AppColors.textSecondary,
-              side: const BorderSide(color: AppColors.grey300),
-              padding: EdgeInsets.symmetric(vertical: 12.h),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(8.r),
-              ),
-            ),
-          ),
-        ),
-      ],
     );
   }
 }
@@ -213,15 +199,15 @@ class DigitalMembershipCardShimmer extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         // Section heading shimmer
-        _buildShimmerBox(width: 180.w, height: 20.h),
+        _buildShimmerBox(width: 160.w, height: 16.h),
         SizedBox(height: 12.h),
 
         // Card container shimmer
         Container(
           width: double.infinity,
-          padding: EdgeInsets.all(20.w),
+          padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 20.h),
           decoration: BoxDecoration(
-            color: AppColors.cardBackground,
+            color: AppColors.white,
             borderRadius: BorderRadius.circular(12.r),
             boxShadow: [
               BoxShadow(
@@ -234,25 +220,23 @@ class DigitalMembershipCardShimmer extends StatelessWidget {
           child: Column(
             children: [
               // Title shimmer
-              _buildShimmerBox(width: 220.w, height: 22.h),
-              SizedBox(height: 8.h),
+              _buildShimmerBox(width: 180.w, height: 16.h),
+              SizedBox(height: 6.h),
 
               // Subtitle shimmer
-              _buildShimmerBox(width: 160.w, height: 16.h),
-              SizedBox(height: 20.h),
+              _buildShimmerBox(width: 140.w, height: 12.h),
+              SizedBox(height: 16.h),
 
               // QR code shimmer
-              _buildShimmerBox(width: 180.w, height: 180.w),
-              SizedBox(height: 20.h),
+              _buildShimmerBox(width: 120.w, height: 120.w),
+              SizedBox(height: 16.h),
 
-              // Buttons shimmer
-              Row(
-                children: [
-                  Expanded(child: _buildShimmerBox(width: double.infinity, height: 44.h)),
-                  SizedBox(width: 12.w),
-                  Expanded(child: _buildShimmerBox(width: double.infinity, height: 44.h)),
-                ],
-              ),
+              // View full screen shimmer
+              _buildShimmerBox(width: 120.w, height: 14.h),
+              SizedBox(height: 16.h),
+
+              // Button shimmer
+              _buildShimmerBox(width: double.infinity, height: 44.h),
             ],
           ),
         ),

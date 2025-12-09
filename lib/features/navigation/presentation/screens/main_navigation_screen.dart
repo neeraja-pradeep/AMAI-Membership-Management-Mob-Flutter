@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:myapp/app/theme/colors.dart';
 import 'package:myapp/features/home/application/providers/home_providers.dart';
 import 'package:myapp/features/home/presentation/screens/home_screen.dart';
@@ -67,26 +68,22 @@ class _MainNavigationScreenState extends ConsumerState<MainNavigationScreen> {
               children: [
                 _buildNavItem(
                   index: 0,
-                  icon: Icons.home_outlined,
-                  activeIcon: Icons.home,
+                  svgPath: 'assets/svg/home.svg',
                   label: 'Home',
                 ),
                 _buildNavItem(
                   index: 1,
-                  icon: Icons.event_outlined,
-                  activeIcon: Icons.event,
+                  svgPath: 'assets/svg/events.svg',
                   label: 'Events',
                 ),
                 _buildNavItem(
                   index: 2,
-                  icon: Icons.library_books_outlined,
-                  activeIcon: Icons.library_books,
+                  svgPath: 'assets/svg/calander.svg',
                   label: 'Library',
                 ),
                 _buildNavItem(
                   index: 3,
-                  icon: Icons.person_outline,
-                  activeIcon: Icons.person,
+                  svgPath: 'assets/svg/profile.svg',
                   label: 'Profile',
                 ),
               ],
@@ -99,8 +96,7 @@ class _MainNavigationScreenState extends ConsumerState<MainNavigationScreen> {
 
   Widget _buildNavItem({
     required int index,
-    required IconData icon,
-    required IconData activeIcon,
+    required String svgPath,
     required String label,
   }) {
     final isSelected = _currentIndex == index;
@@ -115,17 +111,17 @@ class _MainNavigationScreenState extends ConsumerState<MainNavigationScreen> {
       behavior: HitTestBehavior.opaque,
       child: Container(
         padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 8.h),
-        decoration: BoxDecoration(
-          color: isSelected ? AppColors.primary.withOpacity(0.1) : Colors.transparent,
-          borderRadius: BorderRadius.circular(12.r),
-        ),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Icon(
-              isSelected ? activeIcon : icon,
-              color: isSelected ? AppColors.primary : AppColors.grey400,
-              size: 24.sp,
+            SvgPicture.asset(
+              svgPath,
+              width: 24.sp,
+              height: 24.sp,
+              colorFilter: ColorFilter.mode(
+                isSelected ? AppColors.brown : AppColors.grey400,
+                BlendMode.srcIn,
+              ),
             ),
             SizedBox(height: 4.h),
             Text(
@@ -133,7 +129,7 @@ class _MainNavigationScreenState extends ConsumerState<MainNavigationScreen> {
               style: TextStyle(
                 fontSize: 12.sp,
                 fontWeight: isSelected ? FontWeight.w600 : FontWeight.w400,
-                color: isSelected ? AppColors.primary : AppColors.grey400,
+                color: isSelected ? AppColors.brown : AppColors.grey400,
               ),
             ),
           ],

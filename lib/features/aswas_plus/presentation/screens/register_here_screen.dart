@@ -113,17 +113,17 @@ class _RegisterHereScreenState extends ConsumerState<RegisterHereScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppColors.background,
+      extendBodyBehindAppBar: true,
       appBar: AppBar(
         title: Text(
           'Register here',
           style: TextStyle(
-            fontSize: 18.sp,
+            fontSize: 20.sp,
             fontWeight: FontWeight.w600,
             color: AppColors.textPrimary,
           ),
         ),
-        backgroundColor: AppColors.white,
+        backgroundColor: Colors.transparent,
         elevation: 0,
         centerTitle: true,
         leading: IconButton(
@@ -135,8 +135,15 @@ class _RegisterHereScreenState extends ConsumerState<RegisterHereScreen> {
           onPressed: () => Navigator.of(context).pop(),
         ),
       ),
-      body: SingleChildScrollView(
-        padding: EdgeInsets.all(16.w),
+      body: Container(
+        width: double.infinity,
+        height: double.infinity,
+        decoration: const BoxDecoration(
+          gradient: AppColors.lightBackgroundGradient,
+        ),
+        child: SafeArea(
+          child: SingleChildScrollView(
+            padding: EdgeInsets.all(16.w),
         child: Form(
           key: _formKey,
           child: Column(
@@ -168,6 +175,8 @@ class _RegisterHereScreenState extends ConsumerState<RegisterHereScreen> {
 
               SizedBox(height: 24.h),
             ],
+          ),
+        ),
           ),
         ),
       ),

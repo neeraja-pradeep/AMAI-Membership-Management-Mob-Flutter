@@ -17,10 +17,7 @@ import 'reset_password_screen.dart';
 class OtpVerificationScreen extends ConsumerStatefulWidget {
   final String phoneNumber;
 
-  const OtpVerificationScreen({
-    required this.phoneNumber,
-    super.key,
-  });
+  const OtpVerificationScreen({required this.phoneNumber, super.key});
 
   @override
   ConsumerState<OtpVerificationScreen> createState() =>
@@ -32,10 +29,7 @@ class _OtpVerificationScreenState extends ConsumerState<OtpVerificationScreen> {
     6,
     (_) => TextEditingController(),
   );
-  final List<FocusNode> _focusNodes = List.generate(
-    6,
-    (_) => FocusNode(),
-  );
+  final List<FocusNode> _focusNodes = List.generate(6, (_) => FocusNode());
 
   bool _isResending = false;
   bool _isVerifying = false;
@@ -105,10 +99,7 @@ class _OtpVerificationScreenState extends ConsumerState<OtpVerificationScreen> {
           _startResendTimer();
         } else if (state is ForgotPasswordError) {
           ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text(state.message),
-              backgroundColor: Colors.red,
-            ),
+            SnackBar(content: Text(state.message), backgroundColor: Colors.red),
           );
         }
       }
@@ -155,19 +146,14 @@ class _OtpVerificationScreenState extends ConsumerState<OtpVerificationScreen> {
       if (success) {
         // OTP verified - navigate to reset password screen
         Navigator.of(context).push(
-          MaterialPageRoute(
-            builder: (context) => const ResetPasswordScreen(),
-          ),
+          MaterialPageRoute(builder: (context) => const ResetPasswordScreen()),
         );
       } else {
         // Show error from state
         final state = ref.read(forgotPasswordProvider);
         if (state is ForgotPasswordError) {
           ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text(state.message),
-              backgroundColor: Colors.red,
-            ),
+            SnackBar(content: Text(state.message), backgroundColor: Colors.red),
           );
         }
       }
@@ -203,14 +189,29 @@ class _OtpVerificationScreenState extends ConsumerState<OtpVerificationScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      extendBodyBehindAppBar: true,
+      appBar: AppBar(
+        title: Text(
+          'Verification',
+          style: TextStyle(
+            fontSize: 20.sp,
+            fontWeight: FontWeight.w600,
+            color: AppColors.textPrimary,
+          ),
+        ),
+        centerTitle: true,
+        backgroundColor: Colors.transparent,
+        elevation: 0,
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back_ios, color: AppColors.textPrimary),
+          onPressed: () => Navigator.of(context).pop(),
+        ),
+      ),
       body: Container(
         width: double.infinity,
         height: double.infinity,
         decoration: const BoxDecoration(
-          image: DecorationImage(
-            image: AssetImage("assets/background.jpg"),
-            fit: BoxFit.cover,
-          ),
+          gradient: AppColors.lightBackgroundGradient,
         ),
         child: SafeArea(
           child: SingleChildScrollView(
@@ -221,64 +222,28 @@ class _OtpVerificationScreenState extends ConsumerState<OtpVerificationScreen> {
                 children: [
                   SizedBox(height: 20.h),
 
-                  // Back button
-                  Align(
-                    alignment: Alignment.centerLeft,
-                    child: IconButton(
-                      onPressed: () => Navigator.of(context).pop(),
-                      icon: Icon(
-                        Icons.arrow_back_ios,
-                        size: 24.sp,
-                        color: Colors.black,
-                      ),
-                    ),
-                  ),
-
-                  SizedBox(height: 40.h),
-
-                  // Title
-                  Text(
-                    'Verify OTP',
-                    textAlign: TextAlign.center,
-                    style: TextStyle(
-                      fontSize: 30.sp,
-                      fontWeight: FontWeight.w700,
-                    ),
-                  ),
-
-                  SizedBox(height: 16.h),
-
                   // Subtitle with phone number
                   Text(
-                    'Enter the 6-digit code sent to',
+                    "We've sent a 6-digit OTP to your Phone Number.",
                     textAlign: TextAlign.center,
-                    style: TextStyle(
-                      fontSize: 14.sp,
-                      color: Colors.grey[600],
-                    ),
+                    style: TextStyle(fontSize: 14.sp, color: AppColors.textSecondary),
                   ),
 
-                  SizedBox(height: 8.h),
-
+                  SizedBox(height: 32.h),
                   Text(
-                    widget.phoneNumber,
-                    textAlign: TextAlign.center,
+                    "Enter OTP",
                     style: TextStyle(
                       fontSize: 16.sp,
-                      fontWeight: FontWeight.w600,
-                      color: AppColors.brown,
+                      fontWeight: FontWeight.w500,
                     ),
                   ),
-
-                  SizedBox(height: 60.h),
-
-                  // OTP input fields
+                  SizedBox(height: 12.h),
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                     children: List.generate(6, (index) {
                       return SizedBox(
-                        width: 45.w,
-                        height: 55.h,
+                        width: 48.w,
+                        height: 48.w,
                         child: RawKeyboardListener(
                           focusNode: FocusNode(),
                           onKey: (event) => _onOtpKeyDown(index, event),
@@ -299,11 +264,15 @@ class _OtpVerificationScreenState extends ConsumerState<OtpVerificationScreen> {
                               counterText: '',
                               border: OutlineInputBorder(
                                 borderRadius: BorderRadius.circular(12.r),
-                                borderSide: BorderSide(color: Colors.grey[300]!),
+                                borderSide: BorderSide(
+                                  color: Colors.grey[300]!,
+                                ),
                               ),
                               enabledBorder: OutlineInputBorder(
                                 borderRadius: BorderRadius.circular(12.r),
-                                borderSide: BorderSide(color: Colors.grey[300]!),
+                                borderSide: BorderSide(
+                                  color: Colors.grey[300]!,
+                                ),
                               ),
                               focusedBorder: OutlineInputBorder(
                                 borderRadius: BorderRadius.circular(12.r),
@@ -339,8 +308,9 @@ class _OtpVerificationScreenState extends ConsumerState<OtpVerificationScreen> {
                         ),
                       ),
                       TextButton(
-                        onPressed:
-                            _canResend && !_isResending ? _handleResendOtp : null,
+                        onPressed: _canResend && !_isResending
+                            ? _handleResendOtp
+                            : null,
                         child: _isResending
                             ? SizedBox(
                                 width: 16.w,
@@ -359,8 +329,9 @@ class _OtpVerificationScreenState extends ConsumerState<OtpVerificationScreen> {
                                 style: TextStyle(
                                   fontSize: 14.sp,
                                   fontWeight: FontWeight.w600,
-                                  color:
-                                      _canResend ? AppColors.brown : Colors.grey,
+                                  color: _canResend
+                                      ? AppColors.brown
+                                      : Colors.grey,
                                 ),
                               ),
                       ),

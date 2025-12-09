@@ -20,9 +20,9 @@ One year into this journey and the academy is happily overwhelmed with queries r
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppColors.background,
+      extendBodyBehindAppBar: true,
       appBar: AppBar(
-        backgroundColor: AppColors.white,
+        backgroundColor: Colors.transparent,
         elevation: 0,
         leading: IconButton(
           icon: Icon(
@@ -34,16 +34,24 @@ One year into this journey and the academy is happily overwhelmed with queries r
         ),
         title: Text(
           'Academy',
-          style: AppTypography.titleLarge.copyWith(
-            color: AppColors.textPrimary,
+          style: TextStyle(
+            fontSize: 20.sp,
             fontWeight: FontWeight.w600,
+            color: AppColors.textPrimary,
           ),
         ),
-        centerTitle: false,
+        centerTitle: true,
       ),
-      body: SingleChildScrollView(
-        padding: EdgeInsets.all(16.w),
-        child: Column(
+      body: Container(
+        width: double.infinity,
+        height: double.infinity,
+        decoration: const BoxDecoration(
+          gradient: AppColors.lightBackgroundGradient,
+        ),
+        child: SafeArea(
+          child: SingleChildScrollView(
+            padding: EdgeInsets.all(16.w),
+            child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             // Description text
@@ -60,6 +68,8 @@ One year into this journey and the academy is happily overwhelmed with queries r
             _buildContactCard(),
             SizedBox(height: 24.h),
           ],
+        ),
+          ),
         ),
       ),
     );

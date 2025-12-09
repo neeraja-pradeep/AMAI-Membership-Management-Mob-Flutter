@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:myapp/app/theme/colors.dart';
 
 import '../../application/providers/forgot_password_provider.dart';
@@ -25,72 +26,45 @@ class PasswordResetSuccessDialog extends ConsumerWidget {
       backgroundColor: Colors.transparent,
       insetPadding: EdgeInsets.symmetric(horizontal: 24.w),
       child: Container(
-        padding: EdgeInsets.all(32.r),
+        padding: EdgeInsets.symmetric(horizontal: 24.w, vertical: 32.h),
         decoration: BoxDecoration(
           color: Colors.white,
-          borderRadius: BorderRadius.circular(24.r),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withOpacity(0.1),
-              blurRadius: 20,
-              offset: const Offset(0, 10),
-            ),
-          ],
+          borderRadius: BorderRadius.circular(16.r),
         ),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            // Success icon with animated container
-            Container(
-              width: 100.w,
-              height: 100.h,
-              decoration: BoxDecoration(
-                color: Colors.green[50],
-                shape: BoxShape.circle,
-              ),
-              child: Icon(
-                Icons.check_circle,
-                size: 60.sp,
-                color: Colors.green[600],
-              ),
-            ),
-
-            SizedBox(height: 24.h),
-
             // Success title
             Text(
-              'Successful!',
+              'Password Reset Successfully',
               textAlign: TextAlign.center,
               style: TextStyle(
-                fontSize: 24.sp,
-                fontWeight: FontWeight.bold,
-                color: Colors.grey[800],
-              ),
-            ),
-
-            SizedBox(height: 12.h),
-
-            // Success message
-            Text(
-              'Your password has been reset successfully.',
-              textAlign: TextAlign.center,
-              style: TextStyle(
-                fontSize: 14.sp,
-                color: Colors.grey[600],
-                height: 1.5,
+                fontSize: 18.sp,
+                fontWeight: FontWeight.w600,
+                color: AppColors.textPrimary,
               ),
             ),
 
             SizedBox(height: 8.h),
 
+            // Success message
             Text(
-              'You can now login with your new password.',
+              'You can now log in with your new password',
               textAlign: TextAlign.center,
               style: TextStyle(
                 fontSize: 14.sp,
-                color: Colors.grey[600],
-                height: 1.5,
+                fontWeight: FontWeight.w400,
+                color: AppColors.textSecondary,
               ),
+            ),
+
+            SizedBox(height: 24.h),
+
+            // Success icon
+            SvgPicture.asset(
+              'assets/svg/sucess.svg',
+              width: 80.w,
+              height: 80.w,
             ),
 
             SizedBox(height: 32.h),
@@ -104,7 +78,7 @@ class PasswordResetSuccessDialog extends ConsumerWidget {
                 style: ElevatedButton.styleFrom(
                   backgroundColor: AppColors.brown,
                   shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(30.r),
+                    borderRadius: BorderRadius.circular(100.r),
                   ),
                   elevation: 0,
                 ),

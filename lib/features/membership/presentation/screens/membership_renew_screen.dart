@@ -24,24 +24,32 @@ class _MembershipRenewScreenState extends ConsumerState<MembershipRenewScreen> {
     final membershipState = ref.watch(membershipScreenStateProvider);
 
     return Scaffold(
-      backgroundColor: AppColors.background,
+      extendBodyBehindAppBar: true,
       appBar: AppBar(
         title: Text(
           'Renew Membership',
           style: TextStyle(
-            fontSize: 18.sp,
+            fontSize: 20.sp,
             fontWeight: FontWeight.w600,
             color: AppColors.textPrimary,
           ),
         ),
-        backgroundColor: AppColors.white,
+        backgroundColor: Colors.transparent,
         elevation: 0,
+        centerTitle: true,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: AppColors.textPrimary),
+          icon: const Icon(Icons.arrow_back_ios, color: AppColors.textPrimary),
           onPressed: () => Navigator.of(context).pop(),
         ),
       ),
-      body: Column(
+      body: Container(
+        width: double.infinity,
+        height: double.infinity,
+        decoration: const BoxDecoration(
+          gradient: AppColors.lightBackgroundGradient,
+        ),
+        child: SafeArea(
+          child: Column(
         children: [
           Expanded(
             child: SingleChildScrollView(
@@ -84,6 +92,8 @@ class _MembershipRenewScreenState extends ConsumerState<MembershipRenewScreen> {
           // Bottom Buttons
           _buildBottomButtons(),
         ],
+          ),
+        ),
       ),
     );
   }

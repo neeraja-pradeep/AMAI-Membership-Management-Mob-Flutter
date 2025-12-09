@@ -159,22 +159,29 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
     final state = ref.watch(profileStateProvider);
 
     return Scaffold(
-      backgroundColor: AppColors.background,
+      extendBodyBehindAppBar: true,
       appBar: AppBar(
         automaticallyImplyLeading: false,
         title: Text(
           'Profile',
           style: TextStyle(
-            fontSize: 18.sp,
+            fontSize: 20.sp,
             fontWeight: FontWeight.w600,
             color: AppColors.textPrimary,
           ),
         ),
-        backgroundColor: AppColors.white,
+        backgroundColor: Colors.transparent,
         elevation: 0,
         centerTitle: true,
       ),
-      body: state.when(
+      body: Container(
+        width: double.infinity,
+        height: double.infinity,
+        decoration: const BoxDecoration(
+          gradient: AppColors.lightBackgroundGradient,
+        ),
+        child: SafeArea(
+          child: state.when(
         initial: () => const ProfileLoadingShimmer(),
         loading: (previousData) {
           if (previousData != null) {
@@ -192,6 +199,8 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
           }
           return _buildErrorState(failure.message);
         },
+          ),
+        ),
       ),
     );
   }

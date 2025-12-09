@@ -205,18 +205,19 @@ class _RegistrationPaymentScreenState
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppColors.background,
+      extendBodyBehindAppBar: true,
       appBar: AppBar(
         title: Text(
           'Select Payment Method',
           style: TextStyle(
-            fontSize: 18.sp,
+            fontSize: 20.sp,
             fontWeight: FontWeight.w600,
             color: AppColors.textPrimary,
           ),
         ),
-        backgroundColor: AppColors.white,
+        backgroundColor: Colors.transparent,
         elevation: 0,
+        centerTitle: true,
         leading: IconButton(
           icon: Icon(
             Icons.arrow_back_ios,
@@ -226,7 +227,14 @@ class _RegistrationPaymentScreenState
           onPressed: () => Navigator.of(context).pop(),
         ),
       ),
-      body: Column(
+      body: Container(
+        width: double.infinity,
+        height: double.infinity,
+        decoration: const BoxDecoration(
+          gradient: AppColors.lightBackgroundGradient,
+        ),
+        child: SafeArea(
+          child: Column(
         children: [
           Expanded(
             child: SingleChildScrollView(
@@ -276,6 +284,8 @@ class _RegistrationPaymentScreenState
           // Pay Now Button
           _buildPayNowButton(),
         ],
+          ),
+        ),
       ),
     );
   }

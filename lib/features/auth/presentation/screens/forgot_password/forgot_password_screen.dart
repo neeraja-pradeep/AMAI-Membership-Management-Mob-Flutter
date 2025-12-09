@@ -33,9 +33,9 @@ class _ForgotPasswordScreenState extends ConsumerState<ForgotPasswordScreen> {
   Future<void> _handleSendCode() async {
     if (_formKey.currentState?.validate() ?? false) {
       final phoneNumber = '+91${_phoneController.text.trim()}';
-      ref.read(forgotPasswordProvider.notifier).sendOtp(
-            phoneNumber: phoneNumber,
-          );
+      ref
+          .read(forgotPasswordProvider.notifier)
+          .sendOtp(phoneNumber: phoneNumber);
     }
   }
 
@@ -50,31 +50,45 @@ class _ForgotPasswordScreenState extends ConsumerState<ForgotPasswordScreen> {
         // Navigate to OTP verification screen
         Navigator.of(context).push(
           MaterialPageRoute(
-            builder: (context) => OtpVerificationScreen(
-              phoneNumber: next.phoneNumber,
-            ),
+            builder: (context) =>
+                OtpVerificationScreen(phoneNumber: next.phoneNumber),
           ),
         );
       } else if (next is ForgotPasswordError) {
         // Show error snackbar
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(next.message),
-            backgroundColor: Colors.red,
-          ),
+          SnackBar(content: Text(next.message), backgroundColor: Colors.red),
         );
       }
     });
 
     return Scaffold(
+      extendBodyBehindAppBar: true,
+      appBar: AppBar(
+        title: Text(
+          'Forgot Password',
+          style: TextStyle(
+            fontSize: 20.sp,
+            fontWeight: FontWeight.w600,
+            color: AppColors.textPrimary,
+          ),
+        ),
+        centerTitle: true,
+        backgroundColor: Colors.transparent,
+        elevation: 0,
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back_ios, color: AppColors.textPrimary),
+          onPressed: () {
+            ref.read(forgotPasswordProvider.notifier).reset();
+            Navigator.of(context).pop();
+          },
+        ),
+      ),
       body: Container(
         width: double.infinity,
         height: double.infinity,
         decoration: const BoxDecoration(
-          image: DecorationImage(
-            image: AssetImage("assets/background.jpg"),
-            fit: BoxFit.cover,
-          ),
+          gradient: AppColors.lightBackgroundGradient,
         ),
         child: SafeArea(
           child: SingleChildScrollView(
@@ -85,47 +99,14 @@ class _ForgotPasswordScreenState extends ConsumerState<ForgotPasswordScreen> {
                 children: [
                   SizedBox(height: 20.h),
 
-                  // Back button
-                  Align(
-                    alignment: Alignment.centerLeft,
-                    child: IconButton(
-                      onPressed: () {
-                        ref.read(forgotPasswordProvider.notifier).reset();
-                        Navigator.of(context).pop();
-                      },
-                      icon: Icon(
-                        Icons.arrow_back_ios,
-                        size: 24.sp,
-                        color: Colors.black,
-                      ),
-                    ),
+                  // Subtitle
+                  Text(
+                    'Enter Your Phone Number. we will send you a link to reset your password.',
+                    textAlign: TextAlign.center,
+                    style: TextStyle(fontSize: 14.sp, color: AppColors.textSecondary),
                   ),
 
                   SizedBox(height: 40.h),
-
-                  // Title
-                  Text(
-                    'Forgot Password',
-                    textAlign: TextAlign.center,
-                    style: TextStyle(
-                      fontSize: 30.sp,
-                      fontWeight: FontWeight.w700,
-                    ),
-                  ),
-
-                  SizedBox(height: 16.h),
-
-                  // Subtitle
-                  Text(
-                    'Enter your phone number to receive a verification code',
-                    textAlign: TextAlign.center,
-                    style: TextStyle(
-                      fontSize: 14.sp,
-                      color: Colors.grey[600],
-                    ),
-                  ),
-
-                  SizedBox(height: 60.h),
 
                   // Phone number form
                   Form(
@@ -137,7 +118,7 @@ class _ForgotPasswordScreenState extends ConsumerState<ForgotPasswordScreen> {
                           "Phone Number",
                           style: TextStyle(
                             fontWeight: FontWeight.w500,
-                            fontSize: 20.sp,
+                            fontSize: 16.sp,
                           ),
                         ),
 
@@ -254,7 +235,7 @@ class _ForgotPasswordScreenState extends ConsumerState<ForgotPasswordScreen> {
                           ),
                         ),
 
-                        SizedBox(height: 24.h),
+                        SizedBox(height: 250.h),
 
                         // Back to login
                         TextButton(
@@ -266,7 +247,7 @@ class _ForgotPasswordScreenState extends ConsumerState<ForgotPasswordScreen> {
                             'Back to Login',
                             style: TextStyle(
                               fontSize: 14.sp,
-                              color: AppColors.brown,
+                              color: AppColors.black,
                               fontWeight: FontWeight.w500,
                             ),
                           ),

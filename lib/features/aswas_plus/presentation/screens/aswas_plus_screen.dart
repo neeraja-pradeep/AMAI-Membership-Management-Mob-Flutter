@@ -42,12 +42,21 @@ class _AswasePlusScreenState extends ConsumerState<AswasePlusScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppColors.scaffoldBackground,
+      extendBodyBehindAppBar: true,
       appBar: _buildAppBar(),
-      body: RefreshIndicator(
-        onRefresh: _onRefresh,
-        color: AppColors.primary,
-        child: _buildBody(),
+      body: Container(
+        width: double.infinity,
+        height: double.infinity,
+        decoration: const BoxDecoration(
+          gradient: AppColors.lightBackgroundGradient,
+        ),
+        child: SafeArea(
+          child: RefreshIndicator(
+            onRefresh: _onRefresh,
+            color: AppColors.primary,
+            child: _buildBody(),
+          ),
+        ),
       ),
     );
   }
@@ -55,7 +64,7 @@ class _AswasePlusScreenState extends ConsumerState<AswasePlusScreen> {
   /// Builds the app bar
   PreferredSizeWidget _buildAppBar() {
     return AppBar(
-      backgroundColor: AppColors.white,
+      backgroundColor: Colors.transparent,
       elevation: 0,
       leading: IconButton(
         icon: Icon(
@@ -67,7 +76,8 @@ class _AswasePlusScreenState extends ConsumerState<AswasePlusScreen> {
       ),
       title: Text(
         'ASWAS PLUS',
-        style: AppTypography.titleMedium.copyWith(
+        style: TextStyle(
+          fontSize: 20.sp,
           fontWeight: FontWeight.w600,
           color: AppColors.textPrimary,
         ),

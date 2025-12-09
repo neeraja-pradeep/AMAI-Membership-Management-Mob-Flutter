@@ -36,9 +36,9 @@ class _ResetPasswordScreenState extends ConsumerState<ResetPasswordScreen> {
 
   Future<void> _handleResetPassword() async {
     if (_formKey.currentState?.validate() ?? false) {
-      ref.read(forgotPasswordProvider.notifier).resetPassword(
-            newPassword: _newPasswordController.text,
-          );
+      ref
+          .read(forgotPasswordProvider.notifier)
+          .resetPassword(newPassword: _newPasswordController.text);
     }
   }
 
@@ -59,23 +59,35 @@ class _ResetPasswordScreenState extends ConsumerState<ResetPasswordScreen> {
       } else if (next is ForgotPasswordError) {
         // Show error snackbar
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(next.message),
-            backgroundColor: Colors.red,
-          ),
+          SnackBar(content: Text(next.message), backgroundColor: Colors.red),
         );
       }
     });
 
     return Scaffold(
+      extendBodyBehindAppBar: true,
+      appBar: AppBar(
+        title: Text(
+          'Reset Password',
+          style: TextStyle(
+            fontSize: 20.sp,
+            fontWeight: FontWeight.w600,
+            color: AppColors.textPrimary,
+          ),
+        ),
+        centerTitle: true,
+        backgroundColor: Colors.transparent,
+        elevation: 0,
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back_ios, color: AppColors.textPrimary),
+          onPressed: () => Navigator.of(context).pop(),
+        ),
+      ),
       body: Container(
         width: double.infinity,
         height: double.infinity,
         decoration: const BoxDecoration(
-          image: DecorationImage(
-            image: AssetImage("assets/background.jpg"),
-            fit: BoxFit.cover,
-          ),
+          gradient: AppColors.lightBackgroundGradient,
         ),
         child: SafeArea(
           child: SingleChildScrollView(
@@ -86,44 +98,14 @@ class _ResetPasswordScreenState extends ConsumerState<ResetPasswordScreen> {
                 children: [
                   SizedBox(height: 20.h),
 
-                  // Back button
-                  Align(
-                    alignment: Alignment.centerLeft,
-                    child: IconButton(
-                      onPressed: () => Navigator.of(context).pop(),
-                      icon: Icon(
-                        Icons.arrow_back_ios,
-                        size: 24.sp,
-                        color: Colors.black,
-                      ),
-                    ),
+                  // Subtitle
+                  Text(
+                    'Create a new password for your account.',
+                    textAlign: TextAlign.center,
+                    style: TextStyle(fontSize: 14.sp, color: AppColors.textSecondary),
                   ),
 
                   SizedBox(height: 40.h),
-
-                  // Title
-                  Text(
-                    'Reset Password',
-                    textAlign: TextAlign.center,
-                    style: TextStyle(
-                      fontSize: 30.sp,
-                      fontWeight: FontWeight.w700,
-                    ),
-                  ),
-
-                  SizedBox(height: 16.h),
-
-                  // Subtitle
-                  Text(
-                    'Create a new password for your account',
-                    textAlign: TextAlign.center,
-                    style: TextStyle(
-                      fontSize: 14.sp,
-                      color: Colors.grey[600],
-                    ),
-                  ),
-
-                  SizedBox(height: 60.h),
 
                   // Password form
                   Form(
@@ -136,11 +118,11 @@ class _ResetPasswordScreenState extends ConsumerState<ResetPasswordScreen> {
                           "New Password",
                           style: TextStyle(
                             fontWeight: FontWeight.w500,
-                            fontSize: 20.sp,
+                            fontSize: 16.sp,
                           ),
                         ),
 
-                        SizedBox(height: 16.h),
+                        SizedBox(height: 12.h),
 
                         TextFormField(
                           controller: _newPasswordController,
@@ -210,11 +192,11 @@ class _ResetPasswordScreenState extends ConsumerState<ResetPasswordScreen> {
                           "Confirm Password",
                           style: TextStyle(
                             fontWeight: FontWeight.w500,
-                            fontSize: 20.sp,
+                            fontSize: 16.sp,
                           ),
                         ),
 
-                        SizedBox(height: 16.h),
+                        SizedBox(height: 12.h),
 
                         TextFormField(
                           controller: _confirmPasswordController,
