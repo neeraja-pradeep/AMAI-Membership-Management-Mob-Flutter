@@ -7,29 +7,33 @@ import 'package:myapp/app/theme/colors.dart';
 class NoteCard extends StatelessWidget {
   const NoteCard({super.key});
 
+  // Orange/Amber color for note card
+  static const Color _noteColor = Color(0xFFE67E22);
+  static const Color _noteBackgroundColor = Color(0xFFFDF2E9);
+
   @override
   Widget build(BuildContext context) {
     return Container(
       width: double.infinity,
       padding: EdgeInsets.all(16.w),
       decoration: BoxDecoration(
-        color: AppColors.infoLight,
+        color: _noteBackgroundColor,
         borderRadius: BorderRadius.circular(12.r),
         border: Border.all(
-          color: AppColors.info.withOpacity(0.3),
+          color: _noteColor.withOpacity(0.2),
           width: 1.w,
         ),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Heading
+          // Heading with warning icon
           Row(
             children: [
               Icon(
-                Icons.info_outline,
-                color: AppColors.info,
-                size: 18.sp,
+                Icons.warning_amber_rounded,
+                color: _noteColor,
+                size: 20.sp,
               ),
               SizedBox(width: 8.w),
               Text(
@@ -37,7 +41,7 @@ class NoteCard extends StatelessWidget {
                 style: TextStyle(
                   fontSize: 14.sp,
                   fontWeight: FontWeight.w600,
-                  color: AppColors.info,
+                  color: _noteColor,
                 ),
               ),
             ],

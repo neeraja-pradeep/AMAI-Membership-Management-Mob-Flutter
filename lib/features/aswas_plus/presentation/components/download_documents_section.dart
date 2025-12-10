@@ -14,42 +14,42 @@ class DownloadDocumentsSection extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final documentsAsync = ref.watch(aswasDocumentsProvider);
 
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        // Section heading
-        Text(
-          'Download Documents',
-          style: TextStyle(
-            fontSize: 16.sp,
-            fontWeight: FontWeight.w600,
-            color: AppColors.textPrimary,
+    return Container(
+      width: double.infinity,
+      padding: EdgeInsets.all(16.w),
+      decoration: BoxDecoration(
+        color: AppColors.cardBackground,
+        borderRadius: BorderRadius.circular(12.r),
+        boxShadow: [
+          BoxShadow(
+            color: AppColors.cardShadow,
+            blurRadius: 8.r,
+            offset: Offset(0, 2.h),
           ),
-        ),
-        SizedBox(height: 12.h),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // Section heading
+          Text(
+            'Downloads',
+            style: TextStyle(
+              fontSize: 16.sp,
+              fontWeight: FontWeight.w600,
+              color: AppColors.textPrimary,
+            ),
+          ),
+          SizedBox(height: 16.h),
 
-        // Documents list
-        Container(
-          width: double.infinity,
-          padding: EdgeInsets.all(16.w),
-          decoration: BoxDecoration(
-            color: AppColors.cardBackground,
-            borderRadius: BorderRadius.circular(12.r),
-            boxShadow: [
-              BoxShadow(
-                color: AppColors.cardShadow,
-                blurRadius: 8.r,
-                offset: Offset(0, 2.h),
-              ),
-            ],
-          ),
-          child: documentsAsync.when(
+          // Documents list
+          documentsAsync.when(
             loading: () => _buildLoadingState(),
             error: (error, stack) => _buildErrorState(context, ref),
             data: (documents) => _buildDocumentsList(context, documents),
           ),
-        ),
-      ],
+        ],
+      ),
     );
   }
 
@@ -153,23 +153,13 @@ class DownloadDocumentsSection extends ConsumerWidget {
           : null,
       borderRadius: BorderRadius.circular(8.r),
       child: Padding(
-        padding: EdgeInsets.symmetric(vertical: 4.h),
+        padding: EdgeInsets.symmetric(vertical: 8.h),
         child: Row(
           children: [
-            Container(
-              width: 40.w,
-              height: 40.h,
-              decoration: BoxDecoration(
-                color: isAvailable
-                    ? AppColors.primary.withOpacity(0.1)
-                    : AppColors.grey200,
-                borderRadius: BorderRadius.circular(8.r),
-              ),
-              child: Icon(
-                icon,
-                color: isAvailable ? AppColors.primary : AppColors.grey400,
-                size: 20.sp,
-              ),
+            Icon(
+              icon,
+              color: isAvailable ? AppColors.textSecondary : AppColors.grey400,
+              size: 20.sp,
             ),
             SizedBox(width: 12.w),
             Expanded(
@@ -177,17 +167,20 @@ class DownloadDocumentsSection extends ConsumerWidget {
                 label,
                 style: TextStyle(
                   fontSize: 14.sp,
-                  fontWeight: FontWeight.w500,
+                  fontWeight: FontWeight.w400,
                   color: isAvailable
                       ? AppColors.textPrimary
                       : AppColors.grey400,
                 ),
               ),
             ),
-            Icon(
-              Icons.download_outlined,
-              color: isAvailable ? AppColors.primary : AppColors.grey400,
-              size: 20.sp,
+            Text(
+              'Download',
+              style: TextStyle(
+                fontSize: 14.sp,
+                fontWeight: FontWeight.w500,
+                color: isAvailable ? AppColors.primary : AppColors.grey400,
+              ),
             ),
           ],
         ),
@@ -197,36 +190,39 @@ class DownloadDocumentsSection extends ConsumerWidget {
 
   /// Builds shimmer for document item
   Widget _buildDocumentItemShimmer() {
-    return Row(
-      children: [
-        Container(
-          width: 40.w,
-          height: 40.h,
-          decoration: BoxDecoration(
-            color: AppColors.grey200,
-            borderRadius: BorderRadius.circular(8.r),
+    return Padding(
+      padding: EdgeInsets.symmetric(vertical: 8.h),
+      child: Row(
+        children: [
+          Container(
+            width: 20.w,
+            height: 20.h,
+            decoration: BoxDecoration(
+              color: AppColors.grey200,
+              borderRadius: BorderRadius.circular(4.r),
+            ),
           ),
-        ),
-        SizedBox(width: 12.w),
-        Expanded(
-          child: Container(
+          SizedBox(width: 12.w),
+          Expanded(
+            child: Container(
+              height: 16.h,
+              decoration: BoxDecoration(
+                color: AppColors.grey200,
+                borderRadius: BorderRadius.circular(4.r),
+              ),
+            ),
+          ),
+          SizedBox(width: 12.w),
+          Container(
+            width: 60.w,
             height: 16.h,
             decoration: BoxDecoration(
               color: AppColors.grey200,
               borderRadius: BorderRadius.circular(4.r),
             ),
           ),
-        ),
-        SizedBox(width: 12.w),
-        Container(
-          width: 24.w,
-          height: 24.h,
-          decoration: BoxDecoration(
-            color: AppColors.grey200,
-            borderRadius: BorderRadius.circular(4.r),
-          ),
-        ),
-      ],
+        ],
+      ),
     );
   }
 
@@ -276,52 +272,49 @@ class DownloadDocumentsSectionShimmer extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        // Heading shimmer
-        _buildShimmerBox(width: 160.w, height: 20.h),
-        SizedBox(height: 12.h),
-
-        // Content card shimmer
-        Container(
-          width: double.infinity,
-          padding: EdgeInsets.all(16.w),
-          decoration: BoxDecoration(
-            color: AppColors.cardBackground,
-            borderRadius: BorderRadius.circular(12.r),
-            boxShadow: [
-              BoxShadow(
-                color: AppColors.cardShadow,
-                blurRadius: 8.r,
-                offset: Offset(0, 2.h),
-              ),
-            ],
+    return Container(
+      width: double.infinity,
+      padding: EdgeInsets.all(16.w),
+      decoration: BoxDecoration(
+        color: AppColors.cardBackground,
+        borderRadius: BorderRadius.circular(12.r),
+        boxShadow: [
+          BoxShadow(
+            color: AppColors.cardShadow,
+            blurRadius: 8.r,
+            offset: Offset(0, 2.h),
           ),
-          child: Column(
-            children: [
-              _buildDocumentItemShimmer(),
-              SizedBox(height: 16.h),
-              _buildDocumentItemShimmer(),
-              SizedBox(height: 16.h),
-              _buildDocumentItemShimmer(),
-            ],
-          ),
-        ),
-      ],
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // Heading shimmer
+          _buildShimmerBox(width: 100.w, height: 20.h),
+          SizedBox(height: 16.h),
+          _buildDocumentItemShimmer(),
+          Divider(height: 24.h, color: AppColors.grey200),
+          _buildDocumentItemShimmer(),
+          Divider(height: 24.h, color: AppColors.grey200),
+          _buildDocumentItemShimmer(),
+        ],
+      ),
     );
   }
 
   Widget _buildDocumentItemShimmer() {
-    return Row(
-      children: [
-        _buildShimmerBox(width: 40.w, height: 40.h),
-        SizedBox(width: 12.w),
-        Expanded(
-          child: _buildShimmerBox(width: 120.w, height: 16.h),
-        ),
-        _buildShimmerBox(width: 24.w, height: 24.h),
-      ],
+    return Padding(
+      padding: EdgeInsets.symmetric(vertical: 4.h),
+      child: Row(
+        children: [
+          _buildShimmerBox(width: 20.w, height: 20.h),
+          SizedBox(width: 12.w),
+          Expanded(
+            child: _buildShimmerBox(width: 120.w, height: 16.h),
+          ),
+          _buildShimmerBox(width: 60.w, height: 16.h),
+        ],
+      ),
     );
   }
 

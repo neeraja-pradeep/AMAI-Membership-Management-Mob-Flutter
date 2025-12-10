@@ -32,20 +32,20 @@ class NotEnrolledCard extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Heading
+          // Heading - Red text as per design
           Text(
-            "You're not yet enrolled in Aswas plus",
+            "You're not yet enrolled in Aswas Plus",
             style: TextStyle(
-              fontSize: 18.sp,
+              fontSize: 16.sp,
               fontWeight: FontWeight.w600,
-              color: AppColors.textPrimary,
+              color: AppColors.primary,
             ),
           ),
           SizedBox(height: 12.h),
 
           // Body text
           Text(
-            'Register now to enjoy member benefits including financial assistance during medical emergencies or accidents',
+            'Register now to enjoy member benefits including financial assistance during medical emergencies or accidents.',
             style: TextStyle(
               fontSize: 14.sp,
               fontWeight: FontWeight.w400,

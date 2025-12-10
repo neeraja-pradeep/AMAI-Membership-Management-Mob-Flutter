@@ -75,14 +75,26 @@ class _AswasePlusScreenState extends ConsumerState<AswasePlusScreen> {
         onPressed: () => Navigator.of(context).pop(),
       ),
       title: Text(
-        'ASWAS PLUS',
+        'Aswas Plus',
         style: TextStyle(
-          fontSize: 20.sp,
+          fontSize: 18.sp,
           fontWeight: FontWeight.w600,
           color: AppColors.textPrimary,
         ),
       ),
       centerTitle: true,
+      actions: [
+        IconButton(
+          icon: Icon(
+            Icons.notifications_outlined,
+            color: AppColors.textPrimary,
+            size: 24.sp,
+          ),
+          onPressed: () {
+            // TODO: Handle notification tap
+          },
+        ),
+      ],
     );
   }
 
