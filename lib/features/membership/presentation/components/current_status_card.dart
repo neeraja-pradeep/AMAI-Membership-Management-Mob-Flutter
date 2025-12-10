@@ -89,8 +89,8 @@ class CurrentStatusCard extends ConsumerWidget {
           width: 40.w,
           height: 40.w,
           decoration: BoxDecoration(
-            color: AppColors.primaryLight,
-            borderRadius: BorderRadius.circular(8.r),
+            color: AppColors.activeBadge.withOpacity(0.5),
+            borderRadius: BorderRadius.circular(100.r),
           ),
           child: Center(
             child: SvgPicture.asset(
@@ -126,8 +126,8 @@ class CurrentStatusCard extends ConsumerWidget {
                   color: membershipStatus.isExpired
                       ? AppColors.error
                       : membershipStatus.isExpiringSoon
-                          ? AppColors.warning
-                          : AppColors.textSecondary,
+                      ? AppColors.warning
+                      : AppColors.textSecondary,
                 ),
               ),
             ],
@@ -154,10 +154,7 @@ class CurrentStatusCard extends ConsumerWidget {
         ),
         child: Text(
           membershipStatus.isActive ? 'Renew Membership' : 'Renew Now',
-          style: TextStyle(
-            fontSize: 14.sp,
-            fontWeight: FontWeight.w600,
-          ),
+          style: TextStyle(fontSize: 14.sp, fontWeight: FontWeight.w600),
         ),
       ),
     );

@@ -74,12 +74,24 @@ class _MembershipScreenState extends ConsumerState<MembershipScreen> {
       title: Text(
         'Membership',
         style: TextStyle(
-          fontSize: 20.sp,
+          fontSize: 18.sp,
           fontWeight: FontWeight.w600,
           color: AppColors.textPrimary,
         ),
       ),
       centerTitle: true,
+      actions: [
+        IconButton(
+          icon: Icon(
+            Icons.notifications_outlined,
+            color: AppColors.textPrimary,
+            size: 24.sp,
+          ),
+          onPressed: () {
+            // TODO: Navigate to notifications
+          },
+        ),
+      ],
     );
   }
 
@@ -110,7 +122,7 @@ class _MembershipScreenState extends ConsumerState<MembershipScreen> {
             child: LinearProgressIndicator(
               backgroundColor: AppColors.grey200,
               valueColor:
-                  const AlwaysStoppedAnimation<Color>(AppColors.primary),
+                  AlwaysStoppedAnimation<Color>(AppColors.primary),
             ),
           ),
         ],

@@ -23,7 +23,7 @@ class PaymentReceiptsSection extends ConsumerWidget {
         Text(
           'Payment Receipts',
           style: TextStyle(
-            fontSize: 16.sp,
+            fontSize: 14.sp,
             fontWeight: FontWeight.w600,
             color: AppColors.textPrimary,
           ),
@@ -53,10 +53,10 @@ class PaymentReceiptsSection extends ConsumerWidget {
         color: AppColors.white,
         borderRadius: BorderRadius.circular(12.r),
         boxShadow: [
-          const BoxShadow(
+          BoxShadow(
             color: AppColors.cardShadow,
-            blurRadius: 8,
-            offset: Offset(0, 2),
+            blurRadius: 8.r,
+            offset: Offset(0, 2.h),
           ),
         ],
       ),
@@ -87,10 +87,10 @@ class PaymentReceiptsSection extends ConsumerWidget {
         color: AppColors.white,
         borderRadius: BorderRadius.circular(12.r),
         boxShadow: [
-          const BoxShadow(
+          BoxShadow(
             color: AppColors.cardShadow,
-            blurRadius: 8,
-            offset: Offset(0, 2),
+            blurRadius: 8.r,
+            offset: Offset(0, 2.h),
           ),
         ],
       ),
@@ -128,28 +128,14 @@ class PaymentReceiptsSection extends ConsumerWidget {
 
   /// Builds the receipts list
   Widget _buildReceiptsList(List<PaymentReceiptModel> receipts) {
-    return Container(
-      decoration: BoxDecoration(
-        color: AppColors.white,
-        borderRadius: BorderRadius.circular(12.r),
-        boxShadow: [
-          const BoxShadow(
-            color: AppColors.cardShadow,
-            blurRadius: 8,
-            offset: Offset(0, 2),
-          ),
-        ],
-      ),
-      child: ListView.separated(
-        shrinkWrap: true,
-        physics: const NeverScrollableScrollPhysics(),
-        itemCount: receipts.length,
-        separatorBuilder: (context, index) =>
-            const Divider(color: AppColors.dividerLight, height: 1),
-        itemBuilder: (context, index) {
-          return PaymentReceiptItem(receipt: receipts[index]);
-        },
-      ),
+    return ListView.separated(
+      shrinkWrap: true,
+      physics: const NeverScrollableScrollPhysics(),
+      itemCount: receipts.length,
+      separatorBuilder: (context, index) => SizedBox(height: 8.h),
+      itemBuilder: (context, index) {
+        return PaymentReceiptItem(receipt: receipts[index]);
+      },
     );
   }
 }
@@ -162,26 +148,21 @@ class PaymentReceiptItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: EdgeInsets.all(16.w),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          // Receipt icon
-          Container(
-            padding: EdgeInsets.all(8.w),
-            decoration: BoxDecoration(
-              color: AppColors.primaryLight,
-              borderRadius: BorderRadius.circular(8.r),
-            ),
-            child: Icon(
-              Icons.receipt_outlined,
-              size: 20.sp,
-              color: AppColors.primary,
-            ),
+    return Container(
+      padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 12.h),
+      decoration: BoxDecoration(
+        color: AppColors.white,
+        borderRadius: BorderRadius.circular(12.r),
+        boxShadow: [
+          BoxShadow(
+            color: AppColors.cardShadow,
+            blurRadius: 8.r,
+            offset: Offset(0, 2.h),
           ),
-          SizedBox(width: 12.w),
-
+        ],
+      ),
+      child: Row(
+        children: [
           // Receipt details
           Expanded(
             child: Column(
@@ -198,65 +179,26 @@ class PaymentReceiptItem extends StatelessWidget {
                 ),
                 SizedBox(height: 4.h),
 
-                // Amount
+                // Payment date and amount
                 Text(
-                  _formatAmount(receipt.amount, receipt.currency),
+                  '${_formatDate(receipt.paymentDate)} • ${_formatAmount(receipt.amount, receipt.currency)}',
                   style: TextStyle(
-                    fontSize: 16.sp,
-                    fontWeight: FontWeight.w700,
-                    color: AppColors.success,
+                    fontSize: 12.sp,
+                    fontWeight: FontWeight.w400,
+                    color: AppColors.textSecondary,
                   ),
-                ),
-                SizedBox(height: 4.h),
-
-                // Payment date and method
-                Row(
-                  children: [
-                    Text(
-                      _formatDate(receipt.paymentDate),
-                      style: TextStyle(
-                        fontSize: 12.sp,
-                        color: AppColors.textSecondary,
-                      ),
-                    ),
-                    SizedBox(width: 8.w),
-                    Container(
-                      padding: EdgeInsets.symmetric(
-                        horizontal: 6.w,
-                        vertical: 2.h,
-                      ),
-                      decoration: BoxDecoration(
-                        color: AppColors.grey100,
-                        borderRadius: BorderRadius.circular(4.r),
-                      ),
-                      child: Text(
-                        receipt.paymentMethod.toUpperCase(),
-                        style: TextStyle(
-                          fontSize: 10.sp,
-                          fontWeight: FontWeight.w500,
-                          color: AppColors.textSecondary,
-                        ),
-                      ),
-                    ),
-                  ],
                 ),
               ],
             ),
           ),
 
-          // Action icons (static for now)
+          // Action icons
           Row(
             mainAxisSize: MainAxisSize.min,
             children: [
               // View icon
-              IconButton(
-                icon: Icon(
-                  Icons.visibility_outlined,
-                  size: 20.sp,
-                  color: AppColors.primary,
-                ),
-                onPressed: () {
-                  // Static for now
+              GestureDetector(
+                onTap: () {
                   ScaffoldMessenger.of(context).showSnackBar(
                     const SnackBar(
                       content: Text('View receipt coming soon'),
@@ -264,23 +206,22 @@ class PaymentReceiptItem extends StatelessWidget {
                     ),
                   );
                 },
-                tooltip: 'View Receipt',
-                constraints: BoxConstraints(minWidth: 36.w, minHeight: 36.h),
-                padding: EdgeInsets.zero,
+                child: Icon(
+                  Icons.visibility_outlined,
+                  size: 20.sp,
+                  color: AppColors.textSecondary,
+                ),
               ),
+              SizedBox(width: 16.w),
 
               // Download icon
-              IconButton(
-                icon: Icon(
+              GestureDetector(
+                onTap: () => _downloadReceipt(context, receipt.receiptPdfUrl),
+                child: Icon(
                   Icons.download_outlined,
                   size: 20.sp,
-                  color: AppColors.primary,
+                  color: AppColors.textSecondary,
                 ),
-                onPressed: () =>
-                    _downloadReceipt(context, receipt.receiptPdfUrl),
-                tooltip: 'Download Receipt',
-                constraints: BoxConstraints(minWidth: 36.w, minHeight: 36.h),
-                padding: EdgeInsets.zero,
               ),
             ],
           ),
@@ -294,8 +235,8 @@ class PaymentReceiptItem extends StatelessWidget {
     final value = double.tryParse(amount) ?? 0.0;
     final formatter = NumberFormat.currency(
       locale: 'en_IN',
-      symbol: currency == 'INR' ? '\u20B9' : currency,
-      decimalDigits: 2,
+      symbol: currency == 'INR' ? '₹' : currency,
+      decimalDigits: 0,
     );
     return formatter.format(value);
   }
@@ -304,7 +245,7 @@ class PaymentReceiptItem extends StatelessWidget {
   String _formatDate(String dateString) {
     try {
       final date = DateTime.parse(dateString);
-      return DateFormat('dd MMM yyyy, hh:mm a').format(date);
+      return DateFormat('dd MMM yyyy').format(date);
     } catch (e) {
       return dateString;
     }
