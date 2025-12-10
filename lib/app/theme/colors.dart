@@ -1,5 +1,3 @@
-import 'dart:math';
-
 import 'package:flutter/material.dart';
 
 /// App color palette for AMAI application
@@ -53,12 +51,11 @@ class AppColors {
   static const LinearGradient lightBackgroundGradient = LinearGradient(
     begin: Alignment.topCenter,
     end: Alignment.bottomCenter,
-    stops: [0.0062, 0.9556],
+    stops: [0.0051, 0.5992],
     colors: [
-      Color(0xFFFFF6F6), // #FFF6F6
-      Color(0xFFFFFFFF), // #FFFFFF
+      Color(0xFFFFF6F6), // #FFF6F6 - light pink at top
+      Color(0xFFFFFFFF), // #FFFFFF - white at bottom
     ],
-    transform: GradientRotation(178.93 * pi / 180),
   );
 
   static const LinearGradient loginBackground = LinearGradient(

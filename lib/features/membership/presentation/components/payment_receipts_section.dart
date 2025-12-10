@@ -47,33 +47,12 @@ class PaymentReceiptsSection extends ConsumerWidget {
 
   /// Builds the empty state when no receipts
   Widget _buildEmptyState() {
-    return Container(
-      padding: EdgeInsets.all(24.w),
-      decoration: BoxDecoration(
-        color: AppColors.white,
-        borderRadius: BorderRadius.circular(12.r),
-        boxShadow: [
-          BoxShadow(
-            color: AppColors.cardShadow,
-            blurRadius: 8.r,
-            offset: Offset(0, 2.h),
-          ),
-        ],
-      ),
-      child: Center(
-        child: Column(
-          children: [
-            Icon(
-              Icons.receipt_long_outlined,
-              size: 48.sp,
-              color: AppColors.grey400,
-            ),
-            SizedBox(height: 12.h),
-            Text(
-              'No payment history',
-              style: TextStyle(fontSize: 14.sp, color: AppColors.textSecondary),
-            ),
-          ],
+    return Center(
+      child: Padding(
+        padding: EdgeInsets.symmetric(vertical: 24.h),
+        child: Text(
+          'No payment history',
+          style: TextStyle(fontSize: 14.sp, color: AppColors.textSecondary),
         ),
       ),
     );
@@ -81,20 +60,9 @@ class PaymentReceiptsSection extends ConsumerWidget {
 
   /// Builds the loading state
   Widget _buildLoadingState() {
-    return Container(
-      padding: EdgeInsets.all(24.w),
-      decoration: BoxDecoration(
-        color: AppColors.white,
-        borderRadius: BorderRadius.circular(12.r),
-        boxShadow: [
-          BoxShadow(
-            color: AppColors.cardShadow,
-            blurRadius: 8.r,
-            offset: Offset(0, 2.h),
-          ),
-        ],
-      ),
-      child: Center(
+    return Center(
+      child: Padding(
+        padding: EdgeInsets.symmetric(vertical: 24.h),
         child: CircularProgressIndicator(
           strokeWidth: 2.w,
           valueColor: const AlwaysStoppedAnimation<Color>(AppColors.primary),
@@ -105,12 +73,8 @@ class PaymentReceiptsSection extends ConsumerWidget {
 
   /// Builds the error state
   Widget _buildErrorState(String error) {
-    return Container(
-      padding: EdgeInsets.all(16.w),
-      decoration: BoxDecoration(
-        color: AppColors.errorLight,
-        borderRadius: BorderRadius.circular(12.r),
-      ),
+    return Padding(
+      padding: EdgeInsets.symmetric(vertical: 12.h),
       child: Row(
         children: [
           Icon(Icons.error_outline, size: 20.sp, color: AppColors.error),
@@ -132,7 +96,8 @@ class PaymentReceiptsSection extends ConsumerWidget {
       shrinkWrap: true,
       physics: const NeverScrollableScrollPhysics(),
       itemCount: receipts.length,
-      separatorBuilder: (context, index) => SizedBox(height: 8.h),
+      separatorBuilder: (context, index) =>
+          Divider(color: AppColors.divider, height: 1.h),
       itemBuilder: (context, index) {
         return PaymentReceiptItem(receipt: receipts[index]);
       },
@@ -148,19 +113,8 @@ class PaymentReceiptItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 12.h),
-      decoration: BoxDecoration(
-        color: AppColors.white,
-        borderRadius: BorderRadius.circular(12.r),
-        boxShadow: [
-          BoxShadow(
-            color: AppColors.cardShadow,
-            blurRadius: 8.r,
-            offset: Offset(0, 2.h),
-          ),
-        ],
-      ),
+    return Padding(
+      padding: EdgeInsets.symmetric(vertical: 12.h, horizontal: 4.w),
       child: Row(
         children: [
           // Receipt details
@@ -173,11 +127,11 @@ class PaymentReceiptItem extends StatelessWidget {
                   receipt.productName,
                   style: TextStyle(
                     fontSize: 14.sp,
-                    fontWeight: FontWeight.w600,
+                    fontWeight: FontWeight.w500,
                     color: AppColors.textPrimary,
                   ),
                 ),
-                SizedBox(height: 4.h),
+                SizedBox(height: 12.h),
 
                 // Payment date and amount
                 Text(
