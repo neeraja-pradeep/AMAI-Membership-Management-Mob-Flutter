@@ -76,7 +76,16 @@ class UserProfile with _$UserProfile {
       (profilePicturePath != null && profilePicturePath!.isNotEmpty);
 
   /// Get profile picture URL
-  String? get profilePictureUrl => profilePicture ?? profilePicturePath;
+  String? get profilePictureUrl {
+    final url = profilePicture ?? profilePicturePath;
+    if (url == null || url.isEmpty) return null;
+
+    // Add https:// protocol if URL doesn't have one
+    if (!url.startsWith('http://') && !url.startsWith('https://')) {
+      return 'https://$url';
+    }
+    return url;
+  }
 
   /// Get initials for avatar fallback
   String get initials {
