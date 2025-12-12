@@ -6,6 +6,8 @@ import '../states/auth_state.dart';
 import '../usecases/check_auth_usecase.dart';
 import '../usecases/login_usecase.dart';
 import '../usecases/logout_usecase.dart';
+import '../../../home/application/providers/home_providers.dart';
+import '../../../profile/application/providers/profile_providers.dart';
 
 /// Auth state notifier
 /// Controls authentication for the whole app.
@@ -13,15 +15,18 @@ class AuthStateNotifier extends StateNotifier<AuthState> {
   final LoginUseCase _loginUseCase;
   final LogoutUseCase _logoutUseCase;
   final CheckAuthUseCase _checkAuthUseCase;
+  final Ref _ref;
 
   AuthStateNotifier({
     required LoginUseCase loginUseCase,
     required LogoutUseCase logoutUseCase,
     required CheckAuthUseCase checkAuthUseCase,
-  }) : _loginUseCase = loginUseCase,
-       _logoutUseCase = logoutUseCase,
-       _checkAuthUseCase = checkAuthUseCase,
-       super(const AuthStateInitial()) {
+    required Ref ref,
+  })  : _loginUseCase = loginUseCase,
+        _logoutUseCase = logoutUseCase,
+        _checkAuthUseCase = checkAuthUseCase,
+        _ref = ref,
+        super(const AuthStateInitial()) {
     checkAuthentication();
   }
 
@@ -70,6 +75,15 @@ class AuthStateNotifier extends StateNotifier<AuthState> {
   /// Logout request
   Future<void> logout() async {
     await _logoutUseCase.execute();
+
+    // Clear all feature state providers to prevent cache persistence
+    await _ref.read(membershipStateProvider.notifier).clear();
+    await _ref.read(aswasStateProvider.notifier).clear();
+    await _ref.read(eventsStateProvider.notifier).clear();
+    await _ref.read(announcementsStateProvider.notifier).clear();
+    await _ref.read(nomineesStateProvider.notifier).clear();
+    _ref.read(profileStateProvider.notifier).clear();
+
     state = const AuthStateUnauthenticated();
   }
 }
@@ -82,6 +96,7 @@ final authProvider = StateNotifierProvider<AuthStateNotifier, AuthState>((ref) {
     loginUseCase: LoginUseCase(repo),
     logoutUseCase: LogoutUseCase(repo),
     checkAuthUseCase: CheckAuthUseCase(repo),
+    ref: ref,
   );
 });
 
