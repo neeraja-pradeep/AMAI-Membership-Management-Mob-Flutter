@@ -1,11 +1,59 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:myapp/app/theme/colors.dart';
+import 'package:myapp/features/home/application/providers/home_providers.dart';
+import 'package:myapp/features/home/infrastructure/models/area_admin_model.dart';
 
 /// Contact Details Screen
 /// Shows contact information and about AMAI section
-class ContactDetailsScreen extends StatelessWidget {
+class ContactDetailsScreen extends ConsumerStatefulWidget {
   const ContactDetailsScreen({super.key});
+
+  @override
+  ConsumerState<ContactDetailsScreen> createState() => _ContactDetailsScreenState();
+}
+
+class _ContactDetailsScreenState extends ConsumerState<ContactDetailsScreen> {
+  bool _isLoading = true;
+  AreaAdminsResponse? _areaAdmins;
+  String? _errorMessage;
+
+  @override
+  void initState() {
+    super.initState();
+    _fetchAreaAdmins();
+  }
+
+  /// Fetch area admins from API
+  Future<void> _fetchAreaAdmins() async {
+    try {
+      setState(() {
+        _isLoading = true;
+        _errorMessage = null;
+      });
+
+      final homeApi = ref.read(homeApiProvider);
+      final response = await homeApi.fetchAreaAdmins();
+
+      if (response.isSuccess && response.data != null) {
+        setState(() {
+          _areaAdmins = response.data;
+          _isLoading = false;
+        });
+      } else {
+        setState(() {
+          _errorMessage = 'Failed to load area admins';
+          _isLoading = false;
+        });
+      }
+    } catch (e) {
+      setState(() {
+        _errorMessage = 'Error: $e';
+        _isLoading = false;
+      });
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -54,6 +102,26 @@ class ContactDetailsScreen extends StatelessWidget {
 
             // About AMAI Card
             _buildAboutAmaiCard(),
+
+            SizedBox(height: 24.h),
+
+            // Area Admin Cards
+            if (_isLoading)
+              Center(
+                child: CircularProgressIndicator(
+                  color: AppColors.brown,
+                ),
+              )
+            else if (_errorMessage != null)
+              Text(
+                _errorMessage!,
+                style: TextStyle(
+                  fontSize: 14.sp,
+                  color: Colors.red,
+                ),
+              )
+            else if (_areaAdmins != null)
+              ..._buildAreaAdminCards(),
           ],
         ),
           ),
@@ -100,6 +168,116 @@ class ContactDetailsScreen extends StatelessWidget {
               fontWeight: FontWeight.w400,
               color: AppColors.textSecondary,
               height: 1.6,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  /// Builds area admin cards grouped by group name
+  List<Widget> _buildAreaAdminCards() {
+    final cards = <Widget>[];
+
+    if (_areaAdmins == null) return cards;
+
+    // Get all admins (both user and parent admins)
+    final allAdmins = _areaAdmins!.allAdmins;
+
+    // Create a card for each group for each admin
+    for (final admin in allAdmins) {
+      final userDetail = admin.userDetail;
+
+      // If admin has groups, create a card for each group
+      if (userDetail.groupsName.isNotEmpty) {
+        for (final groupName in userDetail.groupsName) {
+          cards.add(_buildAdminCard(
+            groupName: groupName,
+            firstName: userDetail.firstName,
+            email: userDetail.email,
+            phone: userDetail.phone,
+          ));
+          cards.add(SizedBox(height: 16.h));
+        }
+      } else {
+        // If no groups, create a card without group name
+        cards.add(_buildAdminCard(
+          groupName: 'Admin',
+          firstName: userDetail.firstName,
+          email: userDetail.email,
+          phone: userDetail.phone,
+        ));
+        cards.add(SizedBox(height: 16.h));
+      }
+    }
+
+    return cards;
+  }
+
+  /// Builds a single admin card
+  Widget _buildAdminCard({
+    required String groupName,
+    required String firstName,
+    required String email,
+    required String phone,
+  }) {
+    return Container(
+      width: double.infinity,
+      padding: EdgeInsets.all(16.w),
+      decoration: BoxDecoration(
+        color: AppColors.cardBackground,
+        borderRadius: BorderRadius.circular(12.r),
+        boxShadow: [
+          BoxShadow(
+            color: AppColors.cardShadow,
+            blurRadius: 8.r,
+            offset: Offset(0, 2.h),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // Group name as heading
+          Text(
+            groupName,
+            style: TextStyle(
+              fontSize: 16.sp,
+              fontWeight: FontWeight.w600,
+              color: AppColors.textPrimary,
+            ),
+          ),
+          SizedBox(height: 12.h),
+
+          // First name
+          Text(
+            firstName,
+            style: TextStyle(
+              fontSize: 14.sp,
+              fontWeight: FontWeight.w500,
+              color: AppColors.textPrimary,
+            ),
+          ),
+          SizedBox(height: 8.h),
+
+          // Email
+          Text(
+            email,
+            style: TextStyle(
+              fontSize: 14.sp,
+              fontWeight: FontWeight.w400,
+              color: AppColors.textSecondary,
+            ),
+          ),
+          SizedBox(height: 8.h),
+
+          // Phone
+          Text(
+            phone,
+            style: TextStyle(
+              fontSize: 14.sp,
+              fontWeight: FontWeight.w400,
+              color: AppColors.textSecondary,
             ),
           ),
         ],

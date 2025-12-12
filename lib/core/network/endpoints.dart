@@ -60,6 +60,10 @@ class Endpoints {
   static String membershipById(int id) =>
       '$apiPrefix/membership/v1/memberships/$id/';
 
+  /// Area admins endpoint
+  /// GET: Retrieve area admins for the authenticated user
+  static const String areaAdmins = '$apiPrefix/membership/v1/area-admins/';
+
   // ==================== Accounts ====================
 
   /// POST /api/accounts/addresses/
