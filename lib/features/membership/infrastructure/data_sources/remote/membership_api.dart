@@ -113,7 +113,8 @@ class MembershipApiImpl implements MembershipApi {
       Endpoints.paymentHistory,
       fromJson: (json) {
         if (json == null) return <PaymentReceiptModel>[];
-        final list = json as List<dynamic>;
+        final data = json as Map<String, dynamic>;
+        final list = data['results'] as List<dynamic>;
         return list
             .map((item) =>
                 PaymentReceiptModel.fromJson(item as Map<String, dynamic>))
