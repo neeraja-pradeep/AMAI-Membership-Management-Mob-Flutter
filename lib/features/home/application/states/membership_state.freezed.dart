@@ -24,7 +24,7 @@ mixin _$MembershipState {
     required TResult Function(Failure failure, MembershipCard? cachedData)
         error,
     required TResult Function() empty,
-    required TResult Function() pending,
+    required TResult Function(String? applicationDate) pending,
     required TResult Function() rejected,
   }) =>
       throw _privateConstructorUsedError;
@@ -35,7 +35,7 @@ mixin _$MembershipState {
     TResult? Function(MembershipCard membershipCard)? loaded,
     TResult? Function(Failure failure, MembershipCard? cachedData)? error,
     TResult? Function()? empty,
-    TResult? Function()? pending,
+    TResult? Function(String? applicationDate)? pending,
     TResult? Function()? rejected,
   }) =>
       throw _privateConstructorUsedError;
@@ -46,7 +46,7 @@ mixin _$MembershipState {
     TResult Function(MembershipCard membershipCard)? loaded,
     TResult Function(Failure failure, MembershipCard? cachedData)? error,
     TResult Function()? empty,
-    TResult Function()? pending,
+    TResult Function(String? applicationDate)? pending,
     TResult Function()? rejected,
     required TResult orElse(),
   }) =>
@@ -149,7 +149,7 @@ class _$InitialImpl extends _Initial {
     required TResult Function(Failure failure, MembershipCard? cachedData)
         error,
     required TResult Function() empty,
-    required TResult Function() pending,
+    required TResult Function(String? applicationDate) pending,
     required TResult Function() rejected,
   }) {
     return initial();
@@ -163,7 +163,7 @@ class _$InitialImpl extends _Initial {
     TResult? Function(MembershipCard membershipCard)? loaded,
     TResult? Function(Failure failure, MembershipCard? cachedData)? error,
     TResult? Function()? empty,
-    TResult? Function()? pending,
+    TResult? Function(String? applicationDate)? pending,
     TResult? Function()? rejected,
   }) {
     return initial?.call();
@@ -177,7 +177,7 @@ class _$InitialImpl extends _Initial {
     TResult Function(MembershipCard membershipCard)? loaded,
     TResult Function(Failure failure, MembershipCard? cachedData)? error,
     TResult Function()? empty,
-    TResult Function()? pending,
+    TResult Function(String? applicationDate)? pending,
     TResult Function()? rejected,
     required TResult orElse(),
   }) {
@@ -324,7 +324,7 @@ class _$LoadingImpl extends _Loading {
     required TResult Function(Failure failure, MembershipCard? cachedData)
         error,
     required TResult Function() empty,
-    required TResult Function() pending,
+    required TResult Function(String? applicationDate) pending,
     required TResult Function() rejected,
   }) {
     return loading(previousData);
@@ -338,7 +338,7 @@ class _$LoadingImpl extends _Loading {
     TResult? Function(MembershipCard membershipCard)? loaded,
     TResult? Function(Failure failure, MembershipCard? cachedData)? error,
     TResult? Function()? empty,
-    TResult? Function()? pending,
+    TResult? Function(String? applicationDate)? pending,
     TResult? Function()? rejected,
   }) {
     return loading?.call(previousData);
@@ -352,7 +352,7 @@ class _$LoadingImpl extends _Loading {
     TResult Function(MembershipCard membershipCard)? loaded,
     TResult Function(Failure failure, MembershipCard? cachedData)? error,
     TResult Function()? empty,
-    TResult Function()? pending,
+    TResult Function(String? applicationDate)? pending,
     TResult Function()? rejected,
     required TResult orElse(),
   }) {
@@ -500,7 +500,7 @@ class _$LoadedImpl extends _Loaded {
     required TResult Function(Failure failure, MembershipCard? cachedData)
         error,
     required TResult Function() empty,
-    required TResult Function() pending,
+    required TResult Function(String? applicationDate) pending,
     required TResult Function() rejected,
   }) {
     return loaded(membershipCard);
@@ -514,7 +514,7 @@ class _$LoadedImpl extends _Loaded {
     TResult? Function(MembershipCard membershipCard)? loaded,
     TResult? Function(Failure failure, MembershipCard? cachedData)? error,
     TResult? Function()? empty,
-    TResult? Function()? pending,
+    TResult? Function(String? applicationDate)? pending,
     TResult? Function()? rejected,
   }) {
     return loaded?.call(membershipCard);
@@ -528,7 +528,7 @@ class _$LoadedImpl extends _Loaded {
     TResult Function(MembershipCard membershipCard)? loaded,
     TResult Function(Failure failure, MembershipCard? cachedData)? error,
     TResult Function()? empty,
-    TResult Function()? pending,
+    TResult Function(String? applicationDate)? pending,
     TResult Function()? rejected,
     required TResult orElse(),
   }) {
@@ -689,7 +689,7 @@ class _$ErrorImpl extends _Error {
     required TResult Function(Failure failure, MembershipCard? cachedData)
         error,
     required TResult Function() empty,
-    required TResult Function() pending,
+    required TResult Function(String? applicationDate) pending,
     required TResult Function() rejected,
   }) {
     return error(failure, cachedData);
@@ -703,7 +703,7 @@ class _$ErrorImpl extends _Error {
     TResult? Function(MembershipCard membershipCard)? loaded,
     TResult? Function(Failure failure, MembershipCard? cachedData)? error,
     TResult? Function()? empty,
-    TResult? Function()? pending,
+    TResult? Function(String? applicationDate)? pending,
     TResult? Function()? rejected,
   }) {
     return error?.call(failure, cachedData);
@@ -717,7 +717,7 @@ class _$ErrorImpl extends _Error {
     TResult Function(MembershipCard membershipCard)? loaded,
     TResult Function(Failure failure, MembershipCard? cachedData)? error,
     TResult Function()? empty,
-    TResult Function()? pending,
+    TResult Function(String? applicationDate)? pending,
     TResult Function()? rejected,
     required TResult orElse(),
   }) {
@@ -831,7 +831,7 @@ class _$EmptyImpl extends _Empty {
     required TResult Function(Failure failure, MembershipCard? cachedData)
         error,
     required TResult Function() empty,
-    required TResult Function() pending,
+    required TResult Function(String? applicationDate) pending,
     required TResult Function() rejected,
   }) {
     return empty();
@@ -845,7 +845,7 @@ class _$EmptyImpl extends _Empty {
     TResult? Function(MembershipCard membershipCard)? loaded,
     TResult? Function(Failure failure, MembershipCard? cachedData)? error,
     TResult? Function()? empty,
-    TResult? Function()? pending,
+    TResult? Function(String? applicationDate)? pending,
     TResult? Function()? rejected,
   }) {
     return empty?.call();
@@ -859,7 +859,7 @@ class _$EmptyImpl extends _Empty {
     TResult Function(MembershipCard membershipCard)? loaded,
     TResult Function(Failure failure, MembershipCard? cachedData)? error,
     TResult Function()? empty,
-    TResult Function()? pending,
+    TResult Function(String? applicationDate)? pending,
     TResult Function()? rejected,
     required TResult orElse(),
   }) {
@@ -1106,7 +1106,7 @@ class _$RejectedImpl extends _Rejected {
     required TResult Function(Failure failure, MembershipCard? cachedData)
         error,
     required TResult Function() empty,
-    required TResult Function() pending,
+    required TResult Function(String? applicationDate) pending,
     required TResult Function() rejected,
   }) {
     return rejected();
@@ -1120,7 +1120,7 @@ class _$RejectedImpl extends _Rejected {
     TResult? Function(MembershipCard membershipCard)? loaded,
     TResult? Function(Failure failure, MembershipCard? cachedData)? error,
     TResult? Function()? empty,
-    TResult? Function()? pending,
+    TResult? Function(String? applicationDate)? pending,
     TResult? Function()? rejected,
   }) {
     return rejected?.call();
@@ -1134,7 +1134,7 @@ class _$RejectedImpl extends _Rejected {
     TResult Function(MembershipCard membershipCard)? loaded,
     TResult Function(Failure failure, MembershipCard? cachedData)? error,
     TResult Function()? empty,
-    TResult Function()? pending,
+    TResult Function(String? applicationDate)? pending,
     TResult Function()? rejected,
     required TResult orElse(),
   }) {
