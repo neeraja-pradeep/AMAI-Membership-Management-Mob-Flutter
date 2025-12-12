@@ -76,15 +76,19 @@ class AuthStateNotifier extends StateNotifier<AuthState> {
   Future<void> logout() async {
     await _logoutUseCase.execute();
 
-    // Clear all feature state providers to prevent cache persistence
-    await _ref.read(membershipStateProvider.notifier).clear();
-    await _ref.read(aswasStateProvider.notifier).clear();
-    await _ref.read(eventsStateProvider.notifier).clear();
-    await _ref.read(announcementsStateProvider.notifier).clear();
-    await _ref.read(nomineesStateProvider.notifier).clear();
-    _ref.read(profileStateProvider.notifier).clear();
-
+    // Set auth state to unauthenticated FIRST to trigger navigation
     state = const AuthStateUnauthenticated();
+
+    // Clear all feature state providers AFTER navigation starts
+    // Delay to allow navigation to complete and widgets to unmount
+    Future.delayed(const Duration(milliseconds: 500), () async {
+      await _ref.read(membershipStateProvider.notifier).clear();
+      await _ref.read(aswasStateProvider.notifier).clear();
+      await _ref.read(eventsStateProvider.notifier).clear();
+      await _ref.read(announcementsStateProvider.notifier).clear();
+      await _ref.read(nomineesStateProvider.notifier).clear();
+      _ref.read(profileStateProvider.notifier).clear();
+    });
   }
 }
 
