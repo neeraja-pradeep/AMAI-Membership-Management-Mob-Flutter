@@ -22,7 +22,7 @@ class Endpoints {
 
   /// POST /api/accounts/send-otp/
   /// Send OTP for forgot password
-  static const String otpSignIn = '/api/accounts/v1/send-otp/';
+  static const String otpSignIn = '/api/accounts/v1/otp-signin/';
 
   /// POST /api/accounts/verify-otp/
   /// Verify OTP for forgot password
@@ -124,11 +124,11 @@ class Endpoints {
 
   /// Registration payment initiation
   static const String initiatePayment =
-      "/api/membership/membership/v1/register/payment/";
+      "/api/membership/v1/membership/register/payment/";
 
   /// Registration payment verification
   static const String verifyPayment =
-      "/api/membership/membership/v1/register/verify/";
+      "/api/membership/v1/membership/register/verify/";
 
   // ==================== Insurance Endpoints ====================
 
