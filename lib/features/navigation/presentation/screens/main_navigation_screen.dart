@@ -6,6 +6,7 @@ import 'package:myapp/app/theme/colors.dart';
 import 'package:myapp/features/home/application/providers/home_providers.dart';
 import 'package:myapp/features/home/presentation/screens/home_screen.dart';
 import 'package:myapp/features/home/presentation/screens/registration_status_screen.dart';
+import 'package:myapp/features/navigation/application/providers/navigation_providers.dart';
 import 'package:myapp/features/profile/application/providers/profile_providers.dart';
 import 'package:myapp/features/profile/presentation/screens/profile_screen.dart';
 
@@ -33,6 +34,17 @@ class _MainNavigationScreenState extends ConsumerState<MainNavigationScreen> {
   @override
   Widget build(BuildContext context) {
     final membershipState = ref.watch(membershipStateProvider);
+    final tabIndex = ref.watch(currentTabIndexProvider);
+
+    // Sync provider state with local state
+    if (tabIndex != _currentIndex) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        setState(() {
+          _currentIndex = tabIndex;
+        });
+        _refreshProvidersForTab(tabIndex);
+      });
+    }
 
     // Show Registration Status screen when membership application is pending
     if (membershipState.isPending) {
@@ -105,6 +117,8 @@ class _MainNavigationScreenState extends ConsumerState<MainNavigationScreen> {
         setState(() {
           _currentIndex = index;
         });
+        // Update provider so other parts of the app can trigger tab changes
+        ref.read(currentTabIndexProvider.notifier).state = index;
         // Refresh relevant providers when switching tabs (uses if-modified-since)
         _refreshProvidersForTab(index);
       },

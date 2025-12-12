@@ -23,6 +23,7 @@ import 'package:myapp/features/profile/presentation/screens/profile_screen.dart'
 import 'package:myapp/features/profile/application/providers/profile_providers.dart';
 import 'package:myapp/features/academy/presentation/screens/academy_screen.dart';
 import 'package:myapp/features/home/presentation/screens/contact_details_screen.dart';
+import 'package:myapp/features/navigation/application/providers/navigation_providers.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 
 /// Home screen - primary landing screen after authentication
@@ -285,11 +286,8 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
 
         return GestureDetector(
           onTap: () {
-            Navigator.of(context).push(
-              MaterialPageRoute<void>(
-                builder: (context) => const ProfileScreen(),
-              ),
-            );
+            // Switch to Profile tab (index 3) instead of navigating to new screen
+            ref.read(currentTabIndexProvider.notifier).state = 3;
           },
           child: Container(
             width: 44.w,
