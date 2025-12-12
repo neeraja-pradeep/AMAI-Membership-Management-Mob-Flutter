@@ -78,7 +78,7 @@ class MembershipState with _$MembershipState {
 
   /// Whether membership application is pending approval
   bool get isPending => maybeWhen(
-        pending: () => true,
+        pending: (_) => true,
         orElse: () => false,
       );
 
