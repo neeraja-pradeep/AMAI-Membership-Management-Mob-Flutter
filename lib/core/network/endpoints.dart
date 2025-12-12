@@ -22,7 +22,7 @@ class Endpoints {
 
   /// POST /api/accounts/send-otp/
   /// Send OTP for forgot password
-  static const String otpSignIn = '/api/accounts/v1/otp-signin/';
+  static const String otpSignIn = '/api/accounts/v1/send-otp/';
 
   /// POST /api/accounts/verify-otp/
   /// Verify OTP for forgot password
