@@ -6,6 +6,7 @@ import 'package:myapp/app/theme/colors.dart';
 import 'package:myapp/features/home/application/providers/home_providers.dart';
 import 'package:myapp/features/navigation/presentation/screens/main_navigation_screen.dart';
 import 'package:myapp/features/home/presentation/screens/contact_details_screen.dart';
+import 'package:myapp/features/auth/application/providers/auth_provider.dart';
 
 /// Registration Status screen shown when membership application is pending, approved, or rejected
 /// Displays appropriate message based on status
@@ -49,10 +50,7 @@ class _RegistrationStatusScreenState
         centerTitle: true,
         backgroundColor: Colors.transparent,
         elevation: 0,
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back_ios, color: AppColors.textPrimary),
-          onPressed: () => Navigator.pop(context),
-        ),
+        automaticallyImplyLeading: false,
       ),
       body: Container(
         width: double.infinity,
@@ -88,6 +86,12 @@ class _RegistrationStatusScreenState
 
                   // Bottom Button
                   _buildBottomButton(),
+
+                  // Logout button for pending status
+                  if (!widget.isApproved && !widget.isRejected) ...[
+                    SizedBox(height: 16.h),
+                    _buildLogoutButton(),
+                  ],
 
                   SizedBox(height: 24.h),
                 ],
@@ -564,6 +568,41 @@ class _RegistrationStatusScreenState
             fontSize: 16.sp,
             fontWeight: FontWeight.w600,
             color: Colors.white,
+          ),
+        ),
+      ),
+    );
+  }
+
+  /// Builds the logout button for pending status
+  Widget _buildLogoutButton() {
+    return SizedBox(
+      width: double.infinity,
+      height: 50.h,
+      child: OutlinedButton(
+        onPressed: () async {
+          // Logout the user
+          await ref.read(authProvider.notifier).logout();
+          // Navigate to login screen
+          if (mounted) {
+            Navigator.of(context).pushNamedAndRemoveUntil(
+              '/login',
+              (route) => false,
+            );
+          }
+        },
+        style: OutlinedButton.styleFrom(
+          side: BorderSide(color: AppColors.brown, width: 2),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(100.r),
+          ),
+        ),
+        child: Text(
+          'Logout',
+          style: TextStyle(
+            fontSize: 16.sp,
+            fontWeight: FontWeight.w600,
+            color: AppColors.brown,
           ),
         ),
       ),
