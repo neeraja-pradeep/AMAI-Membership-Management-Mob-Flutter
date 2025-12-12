@@ -54,7 +54,9 @@ class HomeRepositoryImpl implements HomeRepository {
 
       // Handle pending application status
       if (response.isPendingApplication) {
-        return left(const PendingApplicationFailure());
+        return left(PendingApplicationFailure(
+          applicationDate: response.data?.applicationDate,
+        ));
       }
 
       // Handle rejected application status

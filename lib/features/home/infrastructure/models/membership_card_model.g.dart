@@ -60,6 +60,7 @@ MembershipDetailResponse _$MembershipDetailResponseFromJson(
               json['membership'] as Map<String, dynamic>),
       error: json['error'] as String?,
       applicationStatus: json['application_status'] as String?,
+      applicationDate: json['application_date'] as String?,
     );
 
 Map<String, dynamic> _$MembershipDetailResponseToJson(
@@ -68,4 +69,5 @@ Map<String, dynamic> _$MembershipDetailResponseToJson(
       'membership': instance.membership,
       'error': instance.error,
       'application_status': instance.applicationStatus,
+      'application_date': instance.applicationDate,
     };

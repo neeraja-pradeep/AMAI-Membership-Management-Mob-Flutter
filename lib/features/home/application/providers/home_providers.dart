@@ -134,7 +134,9 @@ class MembershipNotifier extends StateNotifier<MembershipState> {
       (failure) {
         // Check if this is a pending application failure
         if (failure is PendingApplicationFailure) {
-          state = const MembershipState.pending();
+          state = MembershipState.pending(
+            applicationDate: failure.applicationDate,
+          );
         } else if (failure is RejectedApplicationFailure) {
           state = const MembershipState.rejected();
         } else {
@@ -164,7 +166,9 @@ class MembershipNotifier extends StateNotifier<MembershipState> {
       (failure) {
         // Check if this is a pending application failure
         if (failure is PendingApplicationFailure) {
-          state = const MembershipState.pending();
+          state = MembershipState.pending(
+            applicationDate: failure.applicationDate,
+          );
         } else if (failure is RejectedApplicationFailure) {
           state = const MembershipState.rejected();
         } else {

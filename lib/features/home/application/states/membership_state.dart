@@ -30,7 +30,9 @@ class MembershipState with _$MembershipState {
   const factory MembershipState.empty() = _Empty;
 
   /// Pending approval state - membership application is under review
-  const factory MembershipState.pending() = _Pending;
+  const factory MembershipState.pending({
+    String? applicationDate,
+  }) = _Pending;
 
   /// Rejected state - membership application was rejected
   const factory MembershipState.rejected() = _Rejected;

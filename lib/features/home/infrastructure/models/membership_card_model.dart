@@ -124,6 +124,7 @@ class MembershipDetailResponse {
     this.membership,
     this.error,
     this.applicationStatus,
+    this.applicationDate,
   });
 
   factory MembershipDetailResponse.fromJson(Map<String, dynamic> json) =>
@@ -137,6 +138,9 @@ class MembershipDetailResponse {
 
   @JsonKey(name: 'application_status')
   final String? applicationStatus;
+
+  @JsonKey(name: 'application_date')
+  final String? applicationDate;
 
   /// Check if this is a pending application response
   bool get isPendingApplication =>

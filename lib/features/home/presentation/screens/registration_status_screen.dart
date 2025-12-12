@@ -356,6 +356,34 @@ class _RegistrationStatusScreenState
 
   /// Builds the Registration Timeline card
   Widget _buildTimelineCard() {
+    final membershipState = ref.watch(membershipStateProvider);
+
+    // Get application date from state
+    String? applicationDate;
+    membershipState.maybeWhen(
+      pending: (appDate) => applicationDate = appDate,
+      orElse: () {},
+    );
+
+    // Format application date for display
+    String submittedDate = 'January 15, 2025 | 2:30 PM';
+    String expectedDate = 'Expected: January 20, 2025';
+
+    if (applicationDate != null) {
+      try {
+        final dateTime = DateTime.parse(applicationDate!);
+        // Format as "Month Day, Year | HH:MM AM/PM"
+        final formattedDate = '${_getMonthName(dateTime.month)} ${dateTime.day}, ${dateTime.year} | ${_formatTime(dateTime)}';
+        submittedDate = formattedDate;
+
+        // Calculate expected date (application_date + 5 days)
+        final expectedDateTime = dateTime.add(const Duration(days: 5));
+        expectedDate = 'Expected: ${_getMonthName(expectedDateTime.month)} ${expectedDateTime.day}, ${expectedDateTime.year}';
+      } catch (e) {
+        // Keep default dates if parsing fails
+      }
+    }
+
     return Container(
       width: double.infinity,
       padding: EdgeInsets.all(20.w),
@@ -380,7 +408,7 @@ class _RegistrationStatusScreenState
           // Timeline items
           _buildTimelineItem(
             title: 'Registration Submitted',
-            subtitle: 'January 15, 2025 | 2:30 PM',
+            subtitle: submittedDate,
             isCompleted: true,
             isFirst: true,
           ),
@@ -388,7 +416,7 @@ class _RegistrationStatusScreenState
             title: 'Under Administrative Review',
             subtitle: widget.isApproved
                 ? 'Completed: January 18, 2025'
-                : 'Expected: January 20, 2025',
+                : expectedDate,
             isCompleted: widget.isApproved,
             isCurrent: !widget.isApproved && !widget.isRejected,
           ),
@@ -534,5 +562,23 @@ class _RegistrationStatusScreenState
         ),
       ),
     );
+  }
+
+  /// Helper method to get month name from month number
+  String _getMonthName(int month) {
+    const months = [
+      'January', 'February', 'March', 'April', 'May', 'June',
+      'July', 'August', 'September', 'October', 'November', 'December'
+    ];
+    return months[month - 1];
+  }
+
+  /// Helper method to format time in 12-hour format with AM/PM
+  String _formatTime(DateTime dateTime) {
+    final hour = dateTime.hour;
+    final minute = dateTime.minute.toString().padLeft(2, '0');
+    final period = hour >= 12 ? 'PM' : 'AM';
+    final displayHour = hour > 12 ? hour - 12 : (hour == 0 ? 12 : hour);
+    return '$displayHour:$minute $period';
   }
 }

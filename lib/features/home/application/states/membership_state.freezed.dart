@@ -940,21 +940,27 @@ class __$$PendingImplCopyWithImpl<$Res>
 /// @nodoc
 
 class _$PendingImpl extends _Pending {
-  const _$PendingImpl() : super._();
+  const _$PendingImpl({this.applicationDate}) : super._();
+
+  @override
+  final String? applicationDate;
 
   @override
   String toString() {
-    return 'MembershipState.pending()';
+    return 'MembershipState.pending(applicationDate: $applicationDate)';
   }
 
   @override
   bool operator ==(Object other) {
     return identical(this, other) ||
-        (other.runtimeType == runtimeType && other is _$PendingImpl);
+        (other.runtimeType == runtimeType &&
+            other is _$PendingImpl &&
+            (identical(other.applicationDate, applicationDate) ||
+                other.applicationDate == applicationDate));
   }
 
   @override
-  int get hashCode => runtimeType.hashCode;
+  int get hashCode => Object.hash(runtimeType, applicationDate);
 
   @override
   @optionalTypeArgs
@@ -965,10 +971,10 @@ class _$PendingImpl extends _Pending {
     required TResult Function(Failure failure, MembershipCard? cachedData)
         error,
     required TResult Function() empty,
-    required TResult Function() pending,
+    required TResult Function(String? applicationDate) pending,
     required TResult Function() rejected,
   }) {
-    return pending();
+    return pending(applicationDate);
   }
 
   @override
@@ -979,10 +985,10 @@ class _$PendingImpl extends _Pending {
     TResult? Function(MembershipCard membershipCard)? loaded,
     TResult? Function(Failure failure, MembershipCard? cachedData)? error,
     TResult? Function()? empty,
-    TResult? Function()? pending,
+    TResult? Function(String? applicationDate)? pending,
     TResult? Function()? rejected,
   }) {
-    return pending?.call();
+    return pending?.call(applicationDate);
   }
 
   @override
@@ -993,12 +999,12 @@ class _$PendingImpl extends _Pending {
     TResult Function(MembershipCard membershipCard)? loaded,
     TResult Function(Failure failure, MembershipCard? cachedData)? error,
     TResult Function()? empty,
-    TResult Function()? pending,
+    TResult Function(String? applicationDate)? pending,
     TResult Function()? rejected,
     required TResult orElse(),
   }) {
     if (pending != null) {
-      return pending();
+      return pending(applicationDate);
     }
     return orElse();
   }
@@ -1051,8 +1057,9 @@ class _$PendingImpl extends _Pending {
 }
 
 abstract class _Pending extends MembershipState {
-  const factory _Pending() = _$PendingImpl;
+  const factory _Pending({String? applicationDate}) = _$PendingImpl;
   const _Pending._() : super._();
+  String? get applicationDate;
 }
 
 /// @nodoc

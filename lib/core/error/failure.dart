@@ -105,7 +105,10 @@ class PendingApplicationFailure extends Failure {
   const PendingApplicationFailure({
     super.message = 'Your membership application is pending review.',
     super.code = 'PENDING_APPLICATION',
+    this.applicationDate,
   });
+
+  final String? applicationDate;
 
   @override
   String toUserMessage() =>
