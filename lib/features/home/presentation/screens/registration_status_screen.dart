@@ -535,7 +535,7 @@ class _RegistrationStatusScreenState
       width: double.infinity,
       height: 50.h,
       child: ElevatedButton(
-        onPressed: () {
+        onPressed: () async {
           if (widget.isApproved) {
             Navigator.pushAndRemoveUntil(
               context,
@@ -545,8 +545,15 @@ class _RegistrationStatusScreenState
               (route) => false,
             );
           } else if (widget.isRejected) {
-            // Go back to login
-            Navigator.popUntil(context, (route) => route.isFirst);
+            // Logout the user before going back to login
+            await ref.read(authProvider.notifier).logout();
+            // Navigate to login screen
+            if (mounted) {
+              Navigator.of(context).pushNamedAndRemoveUntil(
+                '/login',
+                (route) => false,
+              );
+            }
           } else {
             // Contact support action - navigate to contact details screen
             Navigator.of(context).push(
