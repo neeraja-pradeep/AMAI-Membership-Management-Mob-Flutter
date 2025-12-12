@@ -5,6 +5,7 @@ import 'package:flutter_svg/flutter_svg.dart';
 import 'package:myapp/app/theme/colors.dart';
 import 'package:myapp/features/home/application/providers/home_providers.dart';
 import 'package:myapp/features/navigation/presentation/screens/main_navigation_screen.dart';
+import 'package:myapp/features/home/presentation/screens/contact_details_screen.dart';
 
 /// Registration Status screen shown when membership application is pending, approved, or rejected
 /// Displays appropriate message based on status
@@ -543,7 +544,12 @@ class _RegistrationStatusScreenState
             // Go back to login
             Navigator.popUntil(context, (route) => route.isFirst);
           } else {
-            // Contact support action
+            // Contact support action - navigate to contact details screen
+            Navigator.of(context).push(
+              MaterialPageRoute<void>(
+                builder: (context) => const ContactDetailsScreen(),
+              ),
+            );
           }
         },
         style: ElevatedButton.styleFrom(
