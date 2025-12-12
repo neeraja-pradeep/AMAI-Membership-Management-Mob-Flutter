@@ -4,6 +4,7 @@ import 'package:myapp/features/aswas_plus/infrastructure/models/digital_product_
 import 'package:myapp/features/aswas_plus/infrastructure/models/nominee_model.dart';
 import 'package:myapp/features/aswas_plus/infrastructure/models/renewal_response_model.dart';
 import 'package:myapp/features/home/infrastructure/models/announcement_model.dart';
+import 'package:myapp/features/home/infrastructure/models/area_admin_model.dart';
 import 'package:myapp/features/home/infrastructure/models/aswas_card_model.dart';
 import 'package:myapp/features/home/infrastructure/models/event_model.dart';
 import 'package:myapp/features/home/infrastructure/models/membership_card_model.dart';
@@ -130,6 +131,13 @@ abstract class HomeApi {
   /// - List of document maps on success (200)
   /// - null data on error
   Future<HomeApiResponse<List<Map<String, dynamic>>>> fetchAswasDocuments();
+
+  /// Fetches area admins for the authenticated user
+  ///
+  /// Returns HomeApiResponse containing:
+  /// - AreaAdminsResponse on success (200)
+  /// - null data on error
+  Future<HomeApiResponse<AreaAdminsResponse>> fetchAreaAdmins();
 }
 
 /// Implementation of HomeApi using ApiClient
@@ -431,6 +439,27 @@ class HomeApiImpl implements HomeApi {
 
     return HomeApiResponse<List<Map<String, dynamic>>>(
       data: documents ?? [],
+      statusCode: response.statusCode,
+      timestamp: response.timestamp,
+    );
+  }
+
+  @override
+  Future<HomeApiResponse<AreaAdminsResponse>> fetchAreaAdmins() async {
+    final response = await apiClient.get<Map<String, dynamic>>(
+      Endpoints.areaAdmins,
+      fromJson: (json) => json as Map<String, dynamic>,
+    );
+
+    // Parse the response
+    AreaAdminsResponse? areaAdmins;
+
+    if (response.data != null) {
+      areaAdmins = AreaAdminsResponse.fromJson(response.data!);
+    }
+
+    return HomeApiResponse<AreaAdminsResponse>(
+      data: areaAdmins,
       statusCode: response.statusCode,
       timestamp: response.timestamp,
     );
