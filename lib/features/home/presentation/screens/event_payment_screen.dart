@@ -68,13 +68,16 @@ class _EventPaymentScreenState extends ConsumerState<EventPaymentScreen> {
       // Use amount from backend response (already includes taxes/fees)
       final backendAmount = double.parse(widget.bookingData['amount'].toString());
       final amountInPaise = (backendAmount * 100).toInt();
+      final currency = widget.bookingData['currency']?.toString() ?? 'INR';
 
       debugPrint('Backend amount: $backendAmount');
       debugPrint('Amount in paise: $amountInPaise');
+      debugPrint('Currency: $currency');
 
       final options = {
         'key': 'rzp_test_1DP5mmOlF5G5ag', // Replace with your Razorpay key
         'amount': amountInPaise, // Amount in paise from backend
+        'currency': currency, // Currency from backend
         'order_id': widget.bookingData['order_id'], // Razorpay order ID from backend
         'name': 'AMAI',
         'description': widget.event.title,
