@@ -127,39 +127,39 @@ class EventRegistrationSuccessScreen extends ConsumerWidget {
                 ),
               ),
               const Spacer(),
-              // View Status Button
-              SizedBox(
-                width: double.infinity,
-                height: 50.h,
-                child: ElevatedButton(
-                  onPressed: () {
-                    // Navigate to Main Navigation Screen with Events tab selected
-                    ref.read(currentTabIndexProvider.notifier).state = 1; // Events tab
-                    Navigator.of(context).pushAndRemoveUntil(
-                      MaterialPageRoute(
-                        builder: (context) => const MainNavigationScreen(),
-                      ),
-                      (route) => false, // Remove all previous routes
-                    );
-                  },
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: AppColors.brown,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(25.r),
-                    ),
-                    elevation: 0,
-                  ),
-                  child: Text(
-                    'View Status',
-                    style: TextStyle(
-                      fontSize: 16.sp,
-                      fontWeight: FontWeight.w600,
-                      color: AppColors.white,
-                    ),
-                  ),
-                ),
-              ),
-              SizedBox(height: 16.h),
+              // // View Status Button
+              // SizedBox(
+              //   width: double.infinity,
+              //   height: 50.h,
+              //   child: ElevatedButton(
+              //     onPressed: () {
+              //       // Navigate to Main Navigation Screen with Events tab selected
+              //       ref.read(currentTabIndexProvider.notifier).state = 1; // Events tab
+              //       Navigator.of(context).pushAndRemoveUntil(
+              //         MaterialPageRoute(
+              //           builder: (context) => const MainNavigationScreen(),
+              //         ),
+              //         (route) => false, // Remove all previous routes
+              //       );
+              //     },
+              //     style: ElevatedButton.styleFrom(
+              //       backgroundColor: AppColors.brown,
+              //       shape: RoundedRectangleBorder(
+              //         borderRadius: BorderRadius.circular(25.r),
+              //       ),
+              //       elevation: 0,
+              //     ),
+              //     child: Text(
+              //       'View Status',
+              //       style: TextStyle(
+              //         fontSize: 16.sp,
+              //         fontWeight: FontWeight.w600,
+              //         color: AppColors.white,
+              //       ),
+              //     ),
+              //   ),
+              // ),
+              // SizedBox(height: 16.h),
               // Back to Home Button
               SizedBox(
                 width: double.infinity,
