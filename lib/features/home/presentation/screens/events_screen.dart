@@ -5,6 +5,7 @@ import 'package:myapp/app/theme/colors.dart';
 import 'package:myapp/core/network/api_client_provider.dart';
 import 'package:myapp/features/home/domain/entities/upcoming_event.dart';
 import 'package:myapp/features/home/infrastructure/data_sources/remote/home_api.dart';
+import 'package:myapp/features/home/infrastructure/models/event_model.dart';
 import 'package:intl/intl.dart';
 
 /// Events screen with three tabs: Upcoming, Ongoing, and Past events
