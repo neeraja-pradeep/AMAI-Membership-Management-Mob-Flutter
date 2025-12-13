@@ -6,6 +6,7 @@ import 'package:myapp/core/network/api_client_provider.dart';
 import 'package:myapp/features/home/domain/entities/upcoming_event.dart';
 import 'package:myapp/features/home/infrastructure/data_sources/remote/home_api.dart';
 import 'package:myapp/features/home/presentation/screens/event_registration_success_screen.dart';
+import 'package:razorpay_flutter/razorpay_flutter.dart';
 
 /// Event payment screen for selecting payment method and processing payment
 class EventPaymentScreen extends ConsumerStatefulWidget {
@@ -25,6 +26,22 @@ class EventPaymentScreen extends ConsumerStatefulWidget {
 
 class _EventPaymentScreenState extends ConsumerState<EventPaymentScreen> {
   bool _isProcessing = false;
+  late Razorpay _razorpay;
+
+  @override
+  void initState() {
+    super.initState();
+    _razorpay = Razorpay();
+    _razorpay.on(Razorpay.EVENT_PAYMENT_SUCCESS, _handlePaymentSuccess);
+    _razorpay.on(Razorpay.EVENT_PAYMENT_ERROR, _handlePaymentError);
+    _razorpay.on(Razorpay.EVENT_EXTERNAL_WALLET, _handleExternalWallet);
+  }
+
+  @override
+  void dispose() {
+    _razorpay.clear();
+    super.dispose();
+  }
 
   double get _subtotal {
     final price = double.tryParse(widget.event.ticketPrice) ?? 0;
@@ -39,29 +56,45 @@ class _EventPaymentScreenState extends ConsumerState<EventPaymentScreen> {
     return _subtotal + _gst;
   }
 
-  Future<void> _handlePayNow() async {
+  void _handlePayNow() {
+    try {
+      final options = {
+        'key': 'rzp_test_1DP5mmOlF5G5ag', // Replace with your Razorpay key
+        'amount': (_total * 100).toInt(), // Amount in paise
+        'name': 'AMAI',
+        'description': widget.event.title,
+        'prefill': {
+          'contact': '',
+          'email': '',
+        },
+        'theme': {
+          'color': '#60212E',
+        }
+      };
+
+      _razorpay.open(options);
+    } catch (e) {
+      debugPrint('Error opening Razorpay: $e');
+      _showError('Failed to open payment gateway. Please try again.');
+    }
+  }
+
+  Future<void> _handlePaymentSuccess(PaymentSuccessResponse response) async {
+    debugPrint('Payment Success: ${response.paymentId}');
+
     setState(() {
       _isProcessing = true;
     });
 
     try {
-      // TODO: Integrate with Razorpay SDK
-      // For now, simulate Razorpay payment response
-      await Future.delayed(const Duration(seconds: 2));
-
-      // Simulate Razorpay success response
-      final razorpayOrderId = 'order_${DateTime.now().millisecondsSinceEpoch}';
-      final razorpayPaymentId = 'pay_${DateTime.now().millisecondsSinceEpoch}';
-      final razorpaySignature = 'sig_${DateTime.now().millisecondsSinceEpoch}';
-
       // Verify payment with backend
       final apiClient = ref.read(apiClientProvider);
       final homeApi = HomeApiImpl(apiClient: apiClient);
 
       final verificationResponse = await homeApi.verifyEventPayment(
-        razorpayOrderId: razorpayOrderId,
-        razorpayPaymentId: razorpayPaymentId,
-        razorpaySignature: razorpaySignature,
+        razorpayOrderId: response.orderId ?? '',
+        razorpayPaymentId: response.paymentId ?? '',
+        razorpaySignature: response.signature ?? '',
       );
 
       if (verificationResponse.data != null && mounted) {
@@ -80,9 +113,9 @@ class _EventPaymentScreenState extends ConsumerState<EventPaymentScreen> {
         }
       }
     } catch (e) {
-      debugPrint('Error processing payment: $e');
+      debugPrint('Error verifying payment: $e');
       if (mounted) {
-        _showError('Payment failed. Please try again.');
+        _showError('Payment verification failed. Please contact support.');
       }
     } finally {
       if (mounted) {
@@ -91,6 +124,16 @@ class _EventPaymentScreenState extends ConsumerState<EventPaymentScreen> {
         });
       }
     }
+  }
+
+  void _handlePaymentError(PaymentFailureResponse response) {
+    debugPrint('Payment Error: ${response.code} - ${response.message}');
+    _showError('Payment failed: ${response.message ?? 'Unknown error'}');
+  }
+
+  void _handleExternalWallet(ExternalWalletResponse response) {
+    debugPrint('External Wallet: ${response.walletName}');
+    _showError('External wallet selected: ${response.walletName}');
   }
 
   void _showError(String message) {
