@@ -508,8 +508,17 @@ class HomeApiImpl implements HomeApi {
   Future<HomeApiResponse<List<EventModel>>> fetchEventsFromUrl({
     required String url,
   }) async {
+    // Extract path from full URL if needed
+    // API returns full URLs like "http://amai.nexogms.com/api/bookings/v1/events/upcoming/?page=2"
+    // We need to extract "/api/bookings/v1/events/upcoming/?page=2"
+    String endpoint = url;
+    if (url.startsWith('http://') || url.startsWith('https://')) {
+      final uri = Uri.parse(url);
+      endpoint = uri.path + (uri.query.isNotEmpty ? '?${uri.query}' : '');
+    }
+
     final response = await apiClient.get<Map<String, dynamic>>(
-      url,
+      endpoint,
       fromJson: (json) => json as Map<String, dynamic>,
     );
 
