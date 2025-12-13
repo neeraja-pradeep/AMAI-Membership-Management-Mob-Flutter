@@ -52,6 +52,7 @@ class _ProfessionalDetailsScreenState
   // Dynamic states list loaded from API
   List<String> _medicalCouncilStates = [];
   List<String> _membershipStates = [];
+  List<String> _countries = [];
 
   static const List<String> dropdownStates = [
     "Andhra Pradesh",
@@ -218,7 +219,7 @@ class _ProfessionalDetailsScreenState
     });
   }
 
-  /// Load membership zones (states) from API with pagination
+  /// Load membership zones (countries and states) from API with pagination
   Future<void> _loadMembershipZones() async {
     if (_isLoadingStates) return;
 
@@ -230,11 +231,17 @@ class _ProfessionalDetailsScreenState
       final apiClient = ref.read(apiClientProvider);
       final registrationApi = RegistrationApi(apiClient: apiClient);
 
+      // Fetch countries (root-level zones with no parent)
+      final countriesResponse = await registrationApi.fetchMembershipZones();
+      final countriesData = MembershipZonesResponse.fromJson(countriesResponse);
+      final countries = countriesData.results.map((z) => z.zoneName).toList();
+
+      // Fetch states (zones with parent=2 for India)
       final List<MembershipZone> allZones = [];
       int? currentPage = 1;
       String? nextUrl;
 
-      // Fetch all pages
+      // Fetch all pages of states
       do {
         final response = await registrationApi.fetchMembershipZones(
           parent: 2, // India
@@ -252,6 +259,7 @@ class _ProfessionalDetailsScreenState
 
       if (mounted) {
         setState(() {
+          _countries = countries;
           _medicalCouncilStates = allZones.map((z) => z.zoneName).toList();
           _membershipStates = allZones.map((z) => z.zoneName).toList();
           _isLoadingStates = false;
@@ -262,7 +270,8 @@ class _ProfessionalDetailsScreenState
       if (mounted) {
         setState(() {
           _isLoadingStates = false;
-          // Fallback to static list
+          // Fallback to static lists
+          _countries = dropdownCountry;
           _medicalCouncilStates = dropdownStates;
           _membershipStates = dropdownStates;
         });
@@ -582,8 +591,9 @@ class _ProfessionalDetailsScreenState
         _buildDropdown(
           value: _selectedCountry,
           hint: "Select Area",
-          items: dropdownCountry,
+          items: _countries.isNotEmpty ? _countries : dropdownCountry,
           onChanged: (v) => setState(() => _selectedCountry = v),
+          isLoading: _isLoadingStates && _countries.isEmpty,
         ),
         SizedBox(height: 16.h),
         _buildLabel("State"),

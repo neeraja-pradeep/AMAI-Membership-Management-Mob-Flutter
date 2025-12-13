@@ -96,13 +96,17 @@ class RegistrationApi {
         .toList();
   }
 
-  /// Fetch membership zones (states) with pagination
-  /// Query params: parent=2 for India states, page for pagination
+  /// Fetch membership zones (states/countries) with pagination
+  /// Query params: parent for filtering by parent zone, page for pagination
+  /// If parent is null, fetches root-level zones (countries)
   Future<Map<String, dynamic>> fetchMembershipZones({
-    int parent = 2,
+    int? parent,
     int? page,
   }) async {
-    final queryParams = <String, dynamic>{'parent': parent};
+    final queryParams = <String, dynamic>{};
+    if (parent != null) {
+      queryParams['parent'] = parent;
+    }
     if (page != null) {
       queryParams['page'] = page;
     }
