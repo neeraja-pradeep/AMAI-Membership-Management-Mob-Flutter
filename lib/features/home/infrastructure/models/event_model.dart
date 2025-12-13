@@ -20,7 +20,7 @@ class EventModel {
     required this.ticketPrice,
     required this.isPublished,
     required this.isFull,
-    required this.availableSlots,
+    this.availableSlots,
     this.venueAddress,
     this.registrationStartDate,
     this.registrationEndDate,
@@ -86,7 +86,7 @@ class EventModel {
   final bool isFull;
 
   @JsonKey(name: 'available_slots')
-  final int availableSlots;
+  final int? availableSlots;
 
   @JsonKey(name: 'created_at')
   final String? createdAt;
@@ -122,7 +122,7 @@ class EventModel {
           : null,
       bannerImage: bannerImage,
       isFull: isFull,
-      availableSlots: availableSlots,
+      availableSlots: availableSlots ?? 0,
     );
   }
 

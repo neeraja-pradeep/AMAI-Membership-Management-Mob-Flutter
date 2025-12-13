@@ -19,7 +19,7 @@ EventModel _$EventModelFromJson(Map<String, dynamic> json) => EventModel(
       ticketPrice: json['ticket_price'] as String,
       isPublished: json['is_published'] as bool,
       isFull: json['is_full'] as bool,
-      availableSlots: (json['available_slots'] as num).toInt(),
+      availableSlots: (json['available_slots'] as num?)?.toInt(),
       venueAddress: json['venue_address'] as String?,
       registrationStartDate: json['registration_start_date'] as String?,
       registrationEndDate: json['registration_end_date'] as String?,
