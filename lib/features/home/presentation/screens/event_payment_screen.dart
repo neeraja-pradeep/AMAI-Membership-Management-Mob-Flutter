@@ -74,10 +74,13 @@ class _EventPaymentScreenState extends ConsumerState<EventPaymentScreen> {
       // Extract user details from booking data for prefill
       final booking = widget.bookingData['booking'] as Map<String, dynamic>?;
       final userEmail = booking?['user_email'] as String? ?? '';
+      final userPhone = booking?['user_phone'] as String? ?? '';
 
       debugPrint('Backend amount: $backendAmount');
       debugPrint('Amount in paise: $amountInPaise');
       debugPrint('Currency: $currency');
+      debugPrint('User email: $userEmail');
+      debugPrint('User phone: $userPhone');
 
       var options = {
         'key': RazorpayConfig.apiKey,
@@ -87,7 +90,7 @@ class _EventPaymentScreenState extends ConsumerState<EventPaymentScreen> {
         'description': RazorpayConfig.description,
         'order_id': widget.bookingData['order_id'],
         'timeout': RazorpayConfig.timeout,
-        'prefill': {'contact': '', 'email': userEmail},
+        'prefill': {'contact': userPhone, 'email': userEmail},
         'theme': {
           'color': '#${RazorpayConfig.themeColor.toRadixString(16).substring(2)}',
         },
