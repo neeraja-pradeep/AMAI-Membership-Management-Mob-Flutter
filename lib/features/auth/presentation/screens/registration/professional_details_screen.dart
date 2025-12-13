@@ -53,7 +53,9 @@ class _ProfessionalDetailsScreenState
   List<String> _medicalCouncilStates = [];
   List<String> _membershipStates = [];
   List<String> _countries = [];
+  List<String> _membershipDistricts = [];
   Map<String, int> _countryNameToId = {}; // Map country name to ID
+  Map<String, int> _stateNameToId = {}; // Map state name to ID
 
   static const List<String> dropdownStates = [
     "Andhra Pradesh",
@@ -321,8 +323,14 @@ class _ProfessionalDetailsScreenState
       if (mounted) {
         setState(() {
           _membershipStates = allZones.map((z) => z.zoneName).toList();
+          _stateNameToId = {for (var z in allZones) z.zoneName: z.id};
           _isLoadingStates = false;
         });
+
+        // Load membership districts if state is already selected
+        if (_selectedState != null && _stateNameToId.containsKey(_selectedState)) {
+          _loadDistrictsForState(_stateNameToId[_selectedState]!);
+        }
       }
     } catch (e) {
       debugPrint('Error loading states for country $countryId: $e');
@@ -330,6 +338,55 @@ class _ProfessionalDetailsScreenState
         setState(() {
           _isLoadingStates = false;
           _membershipStates = dropdownStates; // Fallback to static list
+        });
+      }
+    }
+  }
+
+  /// Load districts for a selected state
+  Future<void> _loadDistrictsForState(int stateId) async {
+    setState(() {
+      _isLoadingStates = true;
+      _membershipDistricts = [];
+      _selectedMembershipDistrict = null; // Clear selected district when state changes
+    });
+
+    try {
+      final apiClient = ref.read(apiClientProvider);
+      final registrationApi = RegistrationApi(apiClient: apiClient);
+
+      final List<MembershipZone> allZones = [];
+      int? currentPage = 1;
+      String? nextUrl;
+
+      // Fetch all pages of districts for the selected state
+      do {
+        final response = await registrationApi.fetchMembershipZones(
+          parent: stateId,
+          page: currentPage,
+        );
+
+        final zonesResponse = MembershipZonesResponse.fromJson(response);
+        allZones.addAll(zonesResponse.results);
+
+        nextUrl = zonesResponse.next;
+        if (nextUrl != null) {
+          currentPage = (currentPage ?? 1) + 1;
+        }
+      } while (nextUrl != null);
+
+      if (mounted) {
+        setState(() {
+          _membershipDistricts = allZones.map((z) => z.zoneName).toList();
+          _isLoadingStates = false;
+        });
+      }
+    } catch (e) {
+      debugPrint('Error loading districts for state $stateId: $e');
+      if (mounted) {
+        setState(() {
+          _isLoadingStates = false;
+          _membershipDistricts = dropdownDistricts; // Fallback to static list
         });
       }
     }
@@ -666,7 +723,13 @@ class _ProfessionalDetailsScreenState
           items: _membershipStates.isNotEmpty
               ? _membershipStates
               : dropdownStates,
-          onChanged: (v) => setState(() => _selectedState = v),
+          onChanged: (v) {
+            setState(() => _selectedState = v);
+            // Load districts for the selected state
+            if (v != null && _stateNameToId.containsKey(v)) {
+              _loadDistrictsForState(_stateNameToId[v]!);
+            }
+          },
           isLoading: _isLoadingStates && _membershipStates.isEmpty,
         ),
         SizedBox(height: 16.h),
@@ -675,9 +738,12 @@ class _ProfessionalDetailsScreenState
         _buildDropdown(
           value: _selectedMembershipDistrict,
           hint: "Select District",
-          items: dropdownDistricts,
+          items: _membershipDistricts.isNotEmpty
+              ? _membershipDistricts
+              : dropdownDistricts,
           onChanged: (v) => setState(() => _selectedMembershipDistrict = v),
           isRequired: false,
+          isLoading: _isLoadingStates && _membershipDistricts.isEmpty && _selectedState != null,
         ),
         SizedBox(height: 16.h),
         _buildLabel("Membership Area"),
