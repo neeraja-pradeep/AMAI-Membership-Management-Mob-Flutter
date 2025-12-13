@@ -7,7 +7,7 @@ class MembershipZone {
   final int rght;
   final int treeId;
   final int level;
-  final int parentZone;
+  final int? parentZone;
 
   const MembershipZone({
     required this.id,
@@ -16,7 +16,7 @@ class MembershipZone {
     required this.rght,
     required this.treeId,
     required this.level,
-    required this.parentZone,
+    this.parentZone,
   });
 
   factory MembershipZone.fromJson(Map<String, dynamic> json) {
@@ -27,7 +27,7 @@ class MembershipZone {
       rght: json['rght'] as int,
       treeId: json['tree_id'] as int,
       level: json['level'] as int,
-      parentZone: json['parent_zone'] as int,
+      parentZone: json['parent_zone'] as int?,
     );
   }
 
