@@ -54,8 +54,10 @@ class _ProfessionalDetailsScreenState
   List<String> _membershipStates = [];
   List<String> _countries = [];
   List<String> _membershipDistricts = [];
+  List<String> _membershipAreas = [];
   Map<String, int> _countryNameToId = {}; // Map country name to ID
   Map<String, int> _stateNameToId = {}; // Map state name to ID
+  Map<String, int> _districtNameToId = {}; // Map district name to ID
 
   static const List<String> dropdownStates = [
     "Andhra Pradesh",
@@ -378,8 +380,14 @@ class _ProfessionalDetailsScreenState
       if (mounted) {
         setState(() {
           _membershipDistricts = allZones.map((z) => z.zoneName).toList();
+          _districtNameToId = {for (var z in allZones) z.zoneName: z.id};
           _isLoadingStates = false;
         });
+
+        // Load membership areas if district is already selected
+        if (_selectedMembershipDistrict != null && _districtNameToId.containsKey(_selectedMembershipDistrict)) {
+          _loadAreasForDistrict(_districtNameToId[_selectedMembershipDistrict]!);
+        }
       }
     } catch (e) {
       debugPrint('Error loading districts for state $stateId: $e');
@@ -387,6 +395,55 @@ class _ProfessionalDetailsScreenState
         setState(() {
           _isLoadingStates = false;
           _membershipDistricts = dropdownDistricts; // Fallback to static list
+        });
+      }
+    }
+  }
+
+  /// Load areas for a selected district
+  Future<void> _loadAreasForDistrict(int districtId) async {
+    setState(() {
+      _isLoadingStates = true;
+      _membershipAreas = [];
+      _selectedMembershipArea = null; // Clear selected area when district changes
+    });
+
+    try {
+      final apiClient = ref.read(apiClientProvider);
+      final registrationApi = RegistrationApi(apiClient: apiClient);
+
+      final List<MembershipZone> allZones = [];
+      int? currentPage = 1;
+      String? nextUrl;
+
+      // Fetch all pages of areas for the selected district
+      do {
+        final response = await registrationApi.fetchMembershipZones(
+          parent: districtId,
+          page: currentPage,
+        );
+
+        final zonesResponse = MembershipZonesResponse.fromJson(response);
+        allZones.addAll(zonesResponse.results);
+
+        nextUrl = zonesResponse.next;
+        if (nextUrl != null) {
+          currentPage = (currentPage ?? 1) + 1;
+        }
+      } while (nextUrl != null);
+
+      if (mounted) {
+        setState(() {
+          _membershipAreas = allZones.map((z) => z.zoneName).toList();
+          _isLoadingStates = false;
+        });
+      }
+    } catch (e) {
+      debugPrint('Error loading areas for district $districtId: $e');
+      if (mounted) {
+        setState(() {
+          _isLoadingStates = false;
+          _membershipAreas = dropdownAreas; // Fallback to static list
         });
       }
     }
@@ -741,7 +798,13 @@ class _ProfessionalDetailsScreenState
           items: _membershipDistricts.isNotEmpty
               ? _membershipDistricts
               : dropdownDistricts,
-          onChanged: (v) => setState(() => _selectedMembershipDistrict = v),
+          onChanged: (v) {
+            setState(() => _selectedMembershipDistrict = v);
+            // Load areas for the selected district
+            if (v != null && _districtNameToId.containsKey(v)) {
+              _loadAreasForDistrict(_districtNameToId[v]!);
+            }
+          },
           isRequired: false,
           isLoading: _isLoadingStates && _membershipDistricts.isEmpty && _selectedState != null,
         ),
@@ -751,9 +814,12 @@ class _ProfessionalDetailsScreenState
         _buildDropdown(
           value: _selectedMembershipArea,
           hint: "Select Area",
-          items: dropdownAreas,
+          items: _membershipAreas.isNotEmpty
+              ? _membershipAreas
+              : dropdownAreas,
           onChanged: (v) => setState(() => _selectedMembershipArea = v),
           isRequired: false,
+          isLoading: _isLoadingStates && _membershipAreas.isEmpty && _selectedMembershipDistrict != null,
         ),
       ],
     );
