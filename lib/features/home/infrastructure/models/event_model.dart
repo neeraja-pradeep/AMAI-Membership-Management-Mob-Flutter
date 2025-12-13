@@ -169,7 +169,7 @@ class EventListResponse {
     final now = DateTime.now();
     return results
         .where((event) {
-          final endDate = EventModel._parseDateTime(event.eventEndDate);
+          final endDate = EventModel._parseDateTime(event.eventEndDate ?? event.eventDate);
           return event.isPublished && endDate.isAfter(now);
         })
         .toList()
