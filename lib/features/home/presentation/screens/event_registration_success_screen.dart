@@ -130,6 +130,21 @@ class EventRegistrationSuccessScreen extends StatelessWidget {
                 height: 50.h,
                 child: ElevatedButton(
                   onPressed: () {
+                    // Debug: Check navigation stack
+                    debugPrint('========== VIEW STATUS - NAVIGATION STACK DEBUG ==========');
+                    int routeCount = 0;
+                    final routes = <String>[];
+                    Navigator.popUntil(context, (route) {
+                      routeCount++;
+                      final routeInfo = 'Route $routeCount: ${route.settings.name ?? "unnamed"} (${route.runtimeType})';
+                      routes.add(routeInfo);
+                      debugPrint(routeInfo);
+                      return true; // Don't actually pop, just inspect
+                    });
+                    debugPrint('Total routes in stack: $routeCount');
+                    debugPrint('Routes (bottom to top): ${routes.reversed.join(" -> ")}');
+                    debugPrint('==========================================================');
+
                     // Navigate back to events screen
                     // Pop: Success screen -> Payment screen -> Event details screen
                     Navigator.of(context)
@@ -161,6 +176,21 @@ class EventRegistrationSuccessScreen extends StatelessWidget {
                 height: 50.h,
                 child: OutlinedButton(
                   onPressed: () {
+                    // Debug: Check navigation stack
+                    debugPrint('========== BACK TO HOME - NAVIGATION STACK DEBUG ==========');
+                    int routeCount = 0;
+                    final routes = <String>[];
+                    Navigator.popUntil(context, (route) {
+                      routeCount++;
+                      final routeInfo = 'Route $routeCount: ${route.settings.name ?? "unnamed"} (${route.runtimeType})';
+                      routes.add(routeInfo);
+                      debugPrint(routeInfo);
+                      return true; // Don't actually pop, just inspect
+                    });
+                    debugPrint('Total routes in stack: $routeCount');
+                    debugPrint('Routes (bottom to top): ${routes.reversed.join(" -> ")}');
+                    debugPrint('==========================================================');
+
                     // Navigate back to home/dashboard screen
                     // Pop: Success -> Payment -> Event details -> Events screen
                     Navigator.of(context)
