@@ -639,7 +639,7 @@ class HomeApiImpl implements HomeApi {
     final response = await apiClient.post<Map<String, dynamic>>(
       Endpoints.eventRegister,
       data: {
-        'event': eventId,
+        'event_id': eventId,
         'payment_mode': paymentMode,
       },
       fromJson: (json) => json as Map<String, dynamic>,
