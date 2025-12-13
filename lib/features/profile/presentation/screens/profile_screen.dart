@@ -131,9 +131,11 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
         (success) {
           ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(
-              content: Text('Profile picture updated successfully'),
+              content: Text(
+                'Profile picture updated successfully',
+                style: TextStyle(color: Colors.black),
+              ),
               backgroundColor: Colors.white,
-              contentTextStyle: TextStyle(color: Colors.black),
             ),
           );
           // Refresh profile to show updated picture

@@ -145,9 +145,9 @@ class _DocumentUploadScreenState extends ConsumerState<DocumentUploadScreen> {
         SnackBar(
           content: Text(
             "${isProfile ? "Profile Photo" : _certificateLabel()} uploaded successfully!",
+            style: TextStyle(color: Colors.black),
           ),
           backgroundColor: Colors.white,
-          contentTextStyle: TextStyle(color: Colors.black),
         ),
       );
     } on RegistrationError catch (e) {

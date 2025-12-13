@@ -6,6 +6,7 @@ import 'package:myapp/features/auth/application/states/registration_state.dart';
 import 'package:myapp/features/auth/domain/entities/registration/registration_error.dart';
 import 'package:myapp/features/auth/domain/entities/registration/membership_zone.dart';
 import 'package:myapp/core/network/api_client.dart';
+import 'package:myapp/core/network/api_client_provider.dart';
 import 'package:myapp/features/auth/infrastructure/data_sources/remote/registration_api.dart';
 
 import '../../../../../app/router/app_router.dart';

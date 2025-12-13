@@ -80,9 +80,11 @@ class _SelectPaymentMethodScreenState
           // Show success message
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
-              content: Text('Payment Successful! ID: $paymentId'),
+              content: Text(
+                'Payment Successful! ID: $paymentId',
+                style: TextStyle(color: Colors.black),
+              ),
               backgroundColor: Colors.white,
-              contentTextStyle: TextStyle(color: Colors.black),
             ),
           );
           // Navigate back to home

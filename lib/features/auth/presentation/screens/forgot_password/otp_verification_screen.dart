@@ -92,9 +92,11 @@ class _OtpVerificationScreenState extends ConsumerState<OtpVerificationScreen> {
         if (state is ForgotPasswordOtpSent) {
           ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(
-              content: Text('OTP sent successfully'),
+              content: Text(
+                'OTP sent successfully',
+                style: TextStyle(color: Colors.black),
+              ),
               backgroundColor: Colors.white,
-              contentTextStyle: TextStyle(color: Colors.black),
             ),
           );
           _startResendTimer();
