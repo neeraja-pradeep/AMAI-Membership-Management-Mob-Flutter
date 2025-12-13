@@ -204,6 +204,9 @@ class Endpoints {
   /// Event registration endpoint
   static const String eventRegister = '$apiPrefix/bookings/v1/events/register/';
 
+  /// Event payment verification endpoint
+  static const String eventVerifyPayment = '$apiPrefix/bookings/v1/events/verify-payment/';
+
   // ==================== Library Endpoints ====================
 
   /// Library documents endpoint

@@ -116,6 +116,21 @@ abstract class HomeApi {
     required String paymentMode,
   });
 
+  /// Verifies event payment after Razorpay payment
+  ///
+  /// [razorpayOrderId] - The Razorpay order ID
+  /// [razorpayPaymentId] - The Razorpay payment ID
+  /// [razorpaySignature] - The Razorpay signature
+  ///
+  /// Returns HomeApiResponse containing:
+  /// - Verification response on success (200)
+  /// - null data on error
+  Future<HomeApiResponse<Map<String, dynamic>>> verifyEventPayment({
+    required String razorpayOrderId,
+    required String razorpayPaymentId,
+    required String razorpaySignature,
+  });
+
   /// Fetches announcements
   ///
   /// [ifModifiedSince] - Timestamp for conditional request
@@ -626,6 +641,29 @@ class HomeApiImpl implements HomeApi {
       data: {
         'event': eventId,
         'payment_mode': paymentMode,
+      },
+      fromJson: (json) => json as Map<String, dynamic>,
+    );
+
+    return HomeApiResponse<Map<String, dynamic>>(
+      data: response.data,
+      statusCode: response.statusCode,
+      timestamp: response.timestamp,
+    );
+  }
+
+  @override
+  Future<HomeApiResponse<Map<String, dynamic>>> verifyEventPayment({
+    required String razorpayOrderId,
+    required String razorpayPaymentId,
+    required String razorpaySignature,
+  }) async {
+    final response = await apiClient.post<Map<String, dynamic>>(
+      Endpoints.eventVerifyPayment,
+      data: {
+        'razorpay_order_id': razorpayOrderId,
+        'razorpay_payment_id': razorpayPaymentId,
+        'razorpay_signature': razorpaySignature,
       },
       fromJson: (json) => json as Map<String, dynamic>,
     );

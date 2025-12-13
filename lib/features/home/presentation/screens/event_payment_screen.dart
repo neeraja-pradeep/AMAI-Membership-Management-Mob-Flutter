@@ -11,10 +11,12 @@ import 'package:myapp/features/home/presentation/screens/event_registration_succ
 class EventPaymentScreen extends ConsumerStatefulWidget {
   const EventPaymentScreen({
     required this.event,
+    required this.bookingData,
     super.key,
   });
 
   final UpcomingEvent event;
+  final Map<String, dynamic> bookingData;
 
   @override
   ConsumerState<EventPaymentScreen> createState() =>
@@ -43,34 +45,38 @@ class _EventPaymentScreenState extends ConsumerState<EventPaymentScreen> {
     });
 
     try {
+      // TODO: Integrate with Razorpay SDK
+      // For now, simulate Razorpay payment response
+      await Future.delayed(const Duration(seconds: 2));
+
+      // Simulate Razorpay success response
+      final razorpayOrderId = 'order_${DateTime.now().millisecondsSinceEpoch}';
+      final razorpayPaymentId = 'pay_${DateTime.now().millisecondsSinceEpoch}';
+      final razorpaySignature = 'sig_${DateTime.now().millisecondsSinceEpoch}';
+
+      // Verify payment with backend
       final apiClient = ref.read(apiClientProvider);
       final homeApi = HomeApiImpl(apiClient: apiClient);
 
-      // Register for event with online payment mode
-      final response = await homeApi.registerForEvent(
-        eventId: int.parse(widget.event.id),
-        paymentMode: 'online',
+      final verificationResponse = await homeApi.verifyEventPayment(
+        razorpayOrderId: razorpayOrderId,
+        razorpayPaymentId: razorpayPaymentId,
+        razorpaySignature: razorpaySignature,
       );
 
-      if (response.data != null && mounted) {
-        // TODO: Integrate with Razorpay payment gateway
-        // For now, simulate successful payment
-        await Future.delayed(const Duration(seconds: 2));
-
-        if (mounted) {
-          // Navigate to success screen
-          Navigator.pushReplacement(
-            context,
-            MaterialPageRoute(
-              builder: (context) => EventRegistrationSuccessScreen(
-                event: widget.event,
-              ),
+      if (verificationResponse.data != null && mounted) {
+        // Navigate to success screen
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(
+            builder: (context) => EventRegistrationSuccessScreen(
+              event: widget.event,
             ),
-          );
-        }
+          ),
+        );
       } else {
         if (mounted) {
-          _showError('Registration failed. Please try again.');
+          _showError('Payment verification failed. Please contact support.');
         }
       }
     } catch (e) {

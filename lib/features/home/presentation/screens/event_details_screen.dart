@@ -24,6 +24,7 @@ class EventDetailsScreen extends ConsumerStatefulWidget {
 
 class _EventDetailsScreenState extends ConsumerState<EventDetailsScreen> {
   bool _isLoading = false;
+  bool _isRegistering = false;
   UpcomingEvent? _event;
   String? _errorMessage;
 
@@ -67,13 +68,61 @@ class _EventDetailsScreenState extends ConsumerState<EventDetailsScreen> {
     }
   }
 
-  void _handleRegister() {
+  Future<void> _handleRegister() async {
     if (_event == null) return;
 
-    Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (context) => EventPaymentScreen(event: _event!),
+    setState(() {
+      _isRegistering = true;
+    });
+
+    try {
+      final apiClient = ref.read(apiClientProvider);
+      final homeApi = HomeApiImpl(apiClient: apiClient);
+
+      // Register for event with online payment mode
+      final response = await homeApi.registerForEvent(
+        eventId: widget.eventId,
+        paymentMode: 'online',
+      );
+
+      if (response.data != null && mounted) {
+        // Navigate to payment screen with booking details
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => EventPaymentScreen(
+              event: _event!,
+              bookingData: response.data!,
+            ),
+          ),
+        );
+      } else {
+        if (mounted) {
+          _showError('Registration failed. Please try again.');
+        }
+      }
+    } catch (e) {
+      debugPrint('Error registering for event: $e');
+      if (mounted) {
+        _showError('Registration failed. Please try again.');
+      }
+    } finally {
+      if (mounted) {
+        setState(() {
+          _isRegistering = false;
+        });
+      }
+    }
+  }
+
+  void _showError(String message) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(
+          message,
+          style: const TextStyle(color: Colors.white),
+        ),
+        backgroundColor: const Color(0xFF60212E),
       ),
     );
   }
@@ -296,7 +345,7 @@ class _EventDetailsScreenState extends ConsumerState<EventDetailsScreen> {
       width: double.infinity,
       height: 50.h,
       child: ElevatedButton(
-        onPressed: isRegistrationOpen ? _handleRegister : null,
+        onPressed: (isRegistrationOpen && !_isRegistering) ? _handleRegister : null,
         style: ElevatedButton.styleFrom(
           backgroundColor: isRegistrationOpen ? AppColors.brown : AppColors.grey300,
           shape: RoundedRectangleBorder(
@@ -304,14 +353,23 @@ class _EventDetailsScreenState extends ConsumerState<EventDetailsScreen> {
           ),
           elevation: 0,
         ),
-        child: Text(
-          'Register Now',
-          style: TextStyle(
-            fontSize: 16.sp,
-            fontWeight: FontWeight.w600,
-            color: isRegistrationOpen ? AppColors.white : AppColors.grey500,
-          ),
-        ),
+        child: _isRegistering
+            ? SizedBox(
+                height: 20.h,
+                width: 20.w,
+                child: const CircularProgressIndicator(
+                  strokeWidth: 2,
+                  valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                ),
+              )
+            : Text(
+                'Register Now',
+                style: TextStyle(
+                  fontSize: 16.sp,
+                  fontWeight: FontWeight.w600,
+                  color: isRegistrationOpen ? AppColors.white : AppColors.grey500,
+                ),
+              ),
       ),
     );
   }
