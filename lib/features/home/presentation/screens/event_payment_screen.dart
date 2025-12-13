@@ -7,6 +7,7 @@ import 'package:myapp/core/network/api_client_provider.dart';
 import 'package:myapp/features/home/domain/entities/upcoming_event.dart';
 import 'package:myapp/features/home/infrastructure/data_sources/remote/home_api.dart';
 import 'package:myapp/features/home/presentation/screens/event_registration_success_screen.dart';
+import 'package:myapp/features/profile/application/providers/profile_providers.dart';
 import 'package:razorpay_flutter/razorpay_flutter.dart';
 
 /// Event payment screen for selecting payment method and processing payment
@@ -71,23 +72,18 @@ class _EventPaymentScreenState extends ConsumerState<EventPaymentScreen> {
       final amountInPaise = (backendAmount * 100).toInt();
       final currency = widget.bookingData['currency']?.toString() ?? 'INR';
 
-      // Extract user details from booking data for prefill
-      final booking = widget.bookingData['booking'] as Map<String, dynamic>?;
-      debugPrint('========== BOOKING DATA DEBUG ==========');
-      debugPrint('Full booking data: $booking');
-      debugPrint('Available fields: ${booking?.keys.toList()}');
+      // Get user details from profile state for prefill
+      final profileState = ref.read(profileStateProvider);
+      final userProfile = profileState.userProfile;
 
-      final userEmail = booking?['user_email'] as String? ?? '';
-      final userPhone = booking?['user_phone'] as String? ??
-                       booking?['phone'] as String? ??
-                       booking?['contact'] as String? ??
-                       booking?['user_contact'] as String? ?? '';
+      final userEmail = userProfile?.email ?? '';
+      final userPhone = userProfile?.phone ?? '';
 
       debugPrint('Backend amount: $backendAmount');
       debugPrint('Amount in paise: $amountInPaise');
       debugPrint('Currency: $currency');
-      debugPrint('User email: $userEmail');
-      debugPrint('User phone extracted: $userPhone');
+      debugPrint('User email from profile: $userEmail');
+      debugPrint('User phone from profile: $userPhone');
 
       var options = {
         'key': RazorpayConfig.apiKey,
