@@ -134,7 +134,7 @@ class EventRegistrationSuccessScreen extends ConsumerWidget {
                 child: ElevatedButton(
                   onPressed: () {
                     // Navigate to Main Navigation Screen with Events tab selected
-                    ref.read(currentTabIndexProvider.notifier).setTabIndex(1); // Events tab
+                    ref.read(currentTabIndexProvider.notifier).state = 1; // Events tab
                     Navigator.of(context).pushAndRemoveUntil(
                       MaterialPageRoute(
                         builder: (context) => const MainNavigationScreen(),
@@ -167,7 +167,7 @@ class EventRegistrationSuccessScreen extends ConsumerWidget {
                 child: OutlinedButton(
                   onPressed: () {
                     // Navigate to Main Navigation Screen with Home tab selected
-                    ref.read(currentTabIndexProvider.notifier).setTabIndex(0); // Home tab
+                    ref.read(currentTabIndexProvider.notifier).state = 0; // Home tab
                     Navigator.of(context).pushAndRemoveUntil(
                       MaterialPageRoute(
                         builder: (context) => const MainNavigationScreen(),
