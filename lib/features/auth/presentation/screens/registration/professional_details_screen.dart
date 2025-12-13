@@ -4,6 +4,9 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:myapp/app/theme/colors.dart';
 import 'package:myapp/features/auth/application/states/registration_state.dart';
 import 'package:myapp/features/auth/domain/entities/registration/registration_error.dart';
+import 'package:myapp/features/auth/domain/entities/registration/membership_zone.dart';
+import 'package:myapp/core/network/api_client.dart';
+import 'package:myapp/features/auth/infrastructure/data_sources/remote/registration_api.dart';
 
 import '../../../../../app/router/app_router.dart';
 import '../../../application/notifiers/registration_state_notifier.dart';
@@ -39,10 +42,15 @@ class _ProfessionalDetailsScreenState
   String? _selectedMembershipArea;
 
   bool _isSubmitting = false;
+  bool _isLoadingStates = false;
 
   final Set<String> _selectedQualifications = {};
   final Set<String> _selectedCategories = {};
   String role = "";
+
+  // Dynamic states list loaded from API
+  List<String> _medicalCouncilStates = [];
+  List<String> _membershipStates = [];
 
   static const List<String> dropdownStates = [
     "Andhra Pradesh",
@@ -136,7 +144,10 @@ class _ProfessionalDetailsScreenState
     _membershipDistrictController = TextEditingController();
     _membershipAreaController = TextEditingController();
 
-    WidgetsBinding.instance.addPostFrameCallback((_) => _loadExistingData());
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _loadExistingData();
+      _loadMembershipZones();
+    });
   }
 
   @override
@@ -204,6 +215,58 @@ class _ProfessionalDetailsScreenState
           );
       }
     });
+  }
+
+  /// Load membership zones (states) from API with pagination
+  Future<void> _loadMembershipZones() async {
+    if (_isLoadingStates) return;
+
+    setState(() {
+      _isLoadingStates = true;
+    });
+
+    try {
+      final apiClient = ref.read(apiClientProvider);
+      final registrationApi = RegistrationApi(apiClient: apiClient);
+
+      final List<MembershipZone> allZones = [];
+      int? currentPage = 1;
+      String? nextUrl;
+
+      // Fetch all pages
+      do {
+        final response = await registrationApi.fetchMembershipZones(
+          parent: 2, // India
+          page: currentPage,
+        );
+
+        final zonesResponse = MembershipZonesResponse.fromJson(response);
+        allZones.addAll(zonesResponse.results);
+
+        nextUrl = zonesResponse.next;
+        if (nextUrl != null) {
+          currentPage = (currentPage ?? 1) + 1;
+        }
+      } while (nextUrl != null);
+
+      if (mounted) {
+        setState(() {
+          _medicalCouncilStates = allZones.map((z) => z.zoneName).toList();
+          _membershipStates = allZones.map((z) => z.zoneName).toList();
+          _isLoadingStates = false;
+        });
+      }
+    } catch (e) {
+      debugPrint('Error loading membership zones: $e');
+      if (mounted) {
+        setState(() {
+          _isLoadingStates = false;
+          // Fallback to static list
+          _medicalCouncilStates = dropdownStates;
+          _membershipStates = dropdownStates;
+        });
+      }
+    }
   }
 
   void _saveProfessionalDetails() {
@@ -477,8 +540,11 @@ class _ProfessionalDetailsScreenState
         _buildDropdown(
           value: _selectedMedicalCouncilState,
           hint: "Select Medical Council State",
-          items: dropdownStates,
+          items: _medicalCouncilStates.isNotEmpty
+              ? _medicalCouncilStates
+              : dropdownStates,
           onChanged: (v) => setState(() => _selectedMedicalCouncilState = v),
+          isLoading: _isLoadingStates && _medicalCouncilStates.isEmpty,
         ),
         SizedBox(height: 16.h),
         _buildLabel("Medical Council Number"),
@@ -524,8 +590,11 @@ class _ProfessionalDetailsScreenState
         _buildDropdown(
           value: _selectedState,
           hint: "Select State",
-          items: dropdownStates,
+          items: _membershipStates.isNotEmpty
+              ? _membershipStates
+              : dropdownStates,
           onChanged: (v) => setState(() => _selectedState = v),
+          isLoading: _isLoadingStates && _membershipStates.isEmpty,
         ),
         SizedBox(height: 16.h),
         _buildLabel("Membership District"),
@@ -748,7 +817,23 @@ class _ProfessionalDetailsScreenState
     required List<String> items,
     required ValueChanged<String?> onChanged,
     bool isRequired = true,
+    bool isLoading = false,
   }) {
+    if (isLoading) {
+      return Container(
+        height: 50.h,
+        decoration: BoxDecoration(
+          border: Border.all(color: Colors.grey[300]!),
+          borderRadius: BorderRadius.circular(12.r),
+        ),
+        child: const Center(
+          child: CircularProgressIndicator(
+            color: AppColors.brown,
+          ),
+        ),
+      );
+    }
+
     return DropdownButtonFormField<String>(
       value: value,
       hint: Text(

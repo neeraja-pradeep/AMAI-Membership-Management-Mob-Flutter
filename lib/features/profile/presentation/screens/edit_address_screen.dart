@@ -577,7 +577,7 @@ class _EditAddressScreenState extends ConsumerState<EditAddressScreen> {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
           content: Text('Please select a state'),
-          backgroundColor: AppColors.error,
+          backgroundColor: Color(0xFF60212E),
         ),
       );
       return;
@@ -629,7 +629,7 @@ class _EditAddressScreenState extends ConsumerState<EditAddressScreen> {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(failure.message),
-            backgroundColor: AppColors.error,
+            backgroundColor: Color(0xFF60212E),
           ),
         );
       },

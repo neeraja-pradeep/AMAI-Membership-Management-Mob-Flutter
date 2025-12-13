@@ -254,7 +254,7 @@ class _PersonalDetailsScreenState extends ConsumerState<PersonalDetailsScreen> {
 
   void _showError(String msg) => ScaffoldMessenger.of(
     context,
-  ).showSnackBar(SnackBar(content: Text(msg), backgroundColor: Colors.red));
+  ).showSnackBar(SnackBar(content: Text(msg), backgroundColor: Color(0xFF60212E)));
 
   Future<bool> _handleBack() async {
     final shouldExit = await showExitConfirmationDialog(context);

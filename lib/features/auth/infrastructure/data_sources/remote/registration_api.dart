@@ -96,6 +96,25 @@ class RegistrationApi {
         .toList();
   }
 
+  /// Fetch membership zones (states) with pagination
+  /// Query params: parent=2 for India states, page for pagination
+  Future<Map<String, dynamic>> fetchMembershipZones({
+    int parent = 2,
+    int? page,
+  }) async {
+    final queryParams = <String, dynamic>{'parent': parent};
+    if (page != null) {
+      queryParams['page'] = page;
+    }
+
+    final response = await _apiClient.get(
+      Endpoints.membershipZones,
+      queryParameters: queryParams,
+    );
+
+    return response.data as Map<String, dynamic>;
+  }
+
   /// Upload document file
   ///
   /// XCSRF token automatically included in request headers by ApiClient

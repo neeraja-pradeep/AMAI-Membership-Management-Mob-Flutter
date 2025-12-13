@@ -124,7 +124,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
               content: Text(failure.message),
-              backgroundColor: AppColors.error,
+              backgroundColor: Color(0xFF60212E),
             ),
           );
         },
@@ -132,7 +132,8 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
           ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(
               content: Text('Profile picture updated successfully'),
-              backgroundColor: AppColors.success,
+              backgroundColor: Colors.white,
+              contentTextStyle: TextStyle(color: Colors.black),
             ),
           );
           // Refresh profile to show updated picture
@@ -147,7 +148,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text('Error selecting image: $e'),
-            backgroundColor: AppColors.error,
+            backgroundColor: Color(0xFF60212E),
           ),
         );
       }

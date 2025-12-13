@@ -248,7 +248,7 @@ class DownloadDocumentsSection extends ConsumerWidget {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
               content: Text('Could not open $documentName'),
-              backgroundColor: AppColors.error,
+              backgroundColor: Color(0xFF60212E),
             ),
           );
         }
@@ -258,7 +258,7 @@ class DownloadDocumentsSection extends ConsumerWidget {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text('Error opening $documentName'),
-            backgroundColor: AppColors.error,
+            backgroundColor: Color(0xFF60212E),
           ),
         );
       }

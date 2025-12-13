@@ -93,13 +93,14 @@ class _OtpVerificationScreenState extends ConsumerState<OtpVerificationScreen> {
           ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(
               content: Text('OTP sent successfully'),
-              backgroundColor: Colors.green,
+              backgroundColor: Colors.white,
+              contentTextStyle: TextStyle(color: Colors.black),
             ),
           );
           _startResendTimer();
         } else if (state is ForgotPasswordError) {
           ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text(state.message), backgroundColor: Colors.red),
+            SnackBar(content: Text(state.message), backgroundColor: Color(0xFF60212E)),
           );
         }
       }
@@ -123,7 +124,7 @@ class _OtpVerificationScreenState extends ConsumerState<OtpVerificationScreen> {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
           content: Text('Please enter the complete 6-digit OTP'),
-          backgroundColor: Colors.red,
+          backgroundColor: Color(0xFF60212E),
         ),
       );
       return;
@@ -153,7 +154,7 @@ class _OtpVerificationScreenState extends ConsumerState<OtpVerificationScreen> {
         final state = ref.read(forgotPasswordProvider);
         if (state is ForgotPasswordError) {
           ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text(state.message), backgroundColor: Colors.red),
+            SnackBar(content: Text(state.message), backgroundColor: Color(0xFF60212E)),
           );
         }
       }

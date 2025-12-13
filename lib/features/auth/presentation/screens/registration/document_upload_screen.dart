@@ -146,7 +146,8 @@ class _DocumentUploadScreenState extends ConsumerState<DocumentUploadScreen> {
           content: Text(
             "${isProfile ? "Profile Photo" : _certificateLabel()} uploaded successfully!",
           ),
-          backgroundColor: Colors.green,
+          backgroundColor: Colors.white,
+          contentTextStyle: TextStyle(color: Colors.black),
         ),
       );
     } on RegistrationError catch (e) {
@@ -242,7 +243,7 @@ class _DocumentUploadScreenState extends ConsumerState<DocumentUploadScreen> {
   void _showError(String msg) {
     ScaffoldMessenger.of(
       context,
-    ).showSnackBar(SnackBar(backgroundColor: Colors.red, content: Text(msg)));
+    ).showSnackBar(SnackBar(backgroundColor: Color(0xFF60212E), content: Text(msg)));
   }
 
   @override

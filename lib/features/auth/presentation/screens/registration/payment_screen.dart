@@ -210,7 +210,7 @@ class _PaymentScreenState extends ConsumerState<PaymentScreen> {
   void _showError(String msg) {
     ScaffoldMessenger.of(
       context,
-    ).showSnackBar(SnackBar(content: Text(msg), backgroundColor: Colors.red));
+    ).showSnackBar(SnackBar(content: Text(msg), backgroundColor: Color(0xFF60212E)));
   }
 
   @override

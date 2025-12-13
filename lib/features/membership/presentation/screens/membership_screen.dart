@@ -360,7 +360,7 @@ class _MembershipScreenState extends ConsumerState<MembershipScreen> {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
           content: Text('PDF not available'),
-          backgroundColor: Colors.red,
+          backgroundColor: Color(0xFF60212E),
         ),
       );
       return;
@@ -381,7 +381,7 @@ class _MembershipScreenState extends ConsumerState<MembershipScreen> {
           ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(
               content: Text('Could not open PDF'),
-              backgroundColor: Colors.red,
+              backgroundColor: Color(0xFF60212E),
             ),
           );
         }
@@ -391,7 +391,7 @@ class _MembershipScreenState extends ConsumerState<MembershipScreen> {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text('Error opening PDF: $e'),
-            backgroundColor: Colors.red,
+            backgroundColor: Color(0xFF60212E),
           ),
         );
       }

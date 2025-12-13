@@ -333,7 +333,7 @@ class _MembershipRenewScreenState extends ConsumerState<MembershipRenewScreen> {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
               content: Text(failure.message),
-              backgroundColor: AppColors.error,
+              backgroundColor: Color(0xFF60212E),
             ),
           );
         },
@@ -357,7 +357,7 @@ class _MembershipRenewScreenState extends ConsumerState<MembershipRenewScreen> {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text('Error: ${e.toString()}'),
-            backgroundColor: AppColors.error,
+            backgroundColor: Color(0xFF60212E),
           ),
         );
       }

@@ -70,7 +70,7 @@ class _MembershipPaymentScreenState
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text('Payment verification failed: ${failure.message}'),
-            backgroundColor: AppColors.error,
+            backgroundColor: Color(0xFF60212E),
           ),
         );
       },
@@ -80,7 +80,8 @@ class _MembershipPaymentScreenState
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
               content: Text('Payment Successful! ID: $paymentId'),
-              backgroundColor: AppColors.success,
+              backgroundColor: Colors.white,
+              contentTextStyle: TextStyle(color: Colors.black),
             ),
           );
           // Navigate back to home
@@ -90,7 +91,7 @@ class _MembershipPaymentScreenState
           ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(
               content: Text('Payment verification failed'),
-              backgroundColor: AppColors.error,
+              backgroundColor: Color(0xFF60212E),
             ),
           );
         }
@@ -105,7 +106,7 @@ class _MembershipPaymentScreenState
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: Text('Payment Failed: ${response.message ?? 'Unknown error'}'),
-        backgroundColor: AppColors.error,
+        backgroundColor: Color(0xFF60212E),
       ),
     );
   }
@@ -150,7 +151,7 @@ class _MembershipPaymentScreenState
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text('Error: ${e.toString()}'),
-          backgroundColor: AppColors.error,
+          backgroundColor: Color(0xFF60212E),
         ),
       );
     }

@@ -65,7 +65,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
             content: Text('Passwords do not match'),
-            backgroundColor: Colors.red,
+            backgroundColor: Color(0xFF60212E),
           ),
         );
         return;

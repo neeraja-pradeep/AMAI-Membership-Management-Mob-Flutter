@@ -211,7 +211,7 @@ class PaymentReceiptItem extends StatelessWidget {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
           content: Text('Receipt PDF not available'),
-          backgroundColor: Colors.red,
+          backgroundColor: Color(0xFF60212E),
         ),
       );
       return;
@@ -231,7 +231,7 @@ class PaymentReceiptItem extends StatelessWidget {
           ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(
               content: Text('Could not open receipt PDF'),
-              backgroundColor: Colors.red,
+              backgroundColor: Color(0xFF60212E),
             ),
           );
         }
@@ -241,7 +241,7 @@ class PaymentReceiptItem extends StatelessWidget {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text('Error opening receipt: $e'),
-            backgroundColor: Colors.red,
+            backgroundColor: Color(0xFF60212E),
           ),
         );
       }

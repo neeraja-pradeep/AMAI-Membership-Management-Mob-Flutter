@@ -79,7 +79,7 @@ class _RegistrationPaymentScreenState
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text('Payment verification failed: ${failure.message}'),
-            backgroundColor: AppColors.error,
+            backgroundColor: Color(0xFF60212E),
           ),
         );
       },
@@ -92,7 +92,7 @@ class _RegistrationPaymentScreenState
           ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(
               content: Text('Payment verification failed'),
-              backgroundColor: AppColors.error,
+              backgroundColor: Color(0xFF60212E),
             ),
           );
         }
@@ -150,7 +150,7 @@ class _RegistrationPaymentScreenState
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: Text('Payment Failed: ${response.message ?? 'Unknown error'}'),
-        backgroundColor: AppColors.error,
+        backgroundColor: Color(0xFF60212E),
       ),
     );
   }
@@ -196,7 +196,7 @@ class _RegistrationPaymentScreenState
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text('Error: ${e.toString()}'),
-          backgroundColor: AppColors.error,
+          backgroundColor: Color(0xFF60212E),
         ),
       );
     }

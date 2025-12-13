@@ -108,6 +108,11 @@ class Endpoints {
   /// Fetch districts for dropdown (requires state_id query param)
   static const String districts = '/api/registration/v1/districts/';
 
+  /// GET /api/accounts/membership-zones/
+  /// Fetch membership zones (states) for dropdown with pagination
+  /// Query params: parent=2 for India states, page for pagination
+  static const String membershipZones = '/api/accounts/v1/membership-zones/';
+
   /// POST /api/registration/upload/
   /// Upload registration document
   static const String registrationUpload = '/api/registration/v1/upload/';

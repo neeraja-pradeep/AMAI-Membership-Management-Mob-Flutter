@@ -935,7 +935,7 @@ class _RegisterHereScreenState extends ConsumerState<RegisterHereScreen> {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
           content: Text('Please select marital status'),
-          backgroundColor: AppColors.error,
+          backgroundColor: Color(0xFF60212E),
         ),
       );
       return;
@@ -946,7 +946,7 @@ class _RegisterHereScreenState extends ConsumerState<RegisterHereScreen> {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
           content: Text('Please select date of birth'),
-          backgroundColor: AppColors.error,
+          backgroundColor: Color(0xFF60212E),
         ),
       );
       return;
@@ -958,7 +958,7 @@ class _RegisterHereScreenState extends ConsumerState<RegisterHereScreen> {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text('Please select relation for Nominee ${i + 1}'),
-            backgroundColor: AppColors.error,
+            backgroundColor: Color(0xFF60212E),
           ),
         );
         return;
@@ -971,7 +971,7 @@ class _RegisterHereScreenState extends ConsumerState<RegisterHereScreen> {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text('Please select date of birth for Nominee ${i + 1}'),
-            backgroundColor: AppColors.error,
+            backgroundColor: Color(0xFF60212E),
           ),
         );
         return;
@@ -1021,7 +1021,7 @@ class _RegisterHereScreenState extends ConsumerState<RegisterHereScreen> {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(failure.message),
-            backgroundColor: AppColors.error,
+            backgroundColor: Color(0xFF60212E),
           ),
         );
       },

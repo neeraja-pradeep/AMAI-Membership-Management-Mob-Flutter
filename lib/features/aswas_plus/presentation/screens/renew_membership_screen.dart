@@ -327,7 +327,7 @@ class _RenewMembershipScreenState extends ConsumerState<RenewMembershipScreen> {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
               content: Text(failure.message),
-              backgroundColor: AppColors.error,
+              backgroundColor: Color(0xFF60212E),
             ),
           );
         },
@@ -346,7 +346,7 @@ class _RenewMembershipScreenState extends ConsumerState<RenewMembershipScreen> {
             ScaffoldMessenger.of(context).showSnackBar(
               const SnackBar(
                 content: Text('Failed to initiate membership renewal'),
-                backgroundColor: AppColors.error,
+                backgroundColor: Color(0xFF60212E),
               ),
             );
           }
@@ -360,7 +360,7 @@ class _RenewMembershipScreenState extends ConsumerState<RenewMembershipScreen> {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text('Error: ${e.toString()}'),
-            backgroundColor: AppColors.error,
+            backgroundColor: Color(0xFF60212E),
           ),
         );
       }
@@ -383,7 +383,7 @@ class _RenewMembershipScreenState extends ConsumerState<RenewMembershipScreen> {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
               content: Text(failure.message),
-              backgroundColor: AppColors.error,
+              backgroundColor: Color(0xFF60212E),
             ),
           );
         },
@@ -402,7 +402,7 @@ class _RenewMembershipScreenState extends ConsumerState<RenewMembershipScreen> {
             ScaffoldMessenger.of(context).showSnackBar(
               const SnackBar(
                 content: Text('Failed to initiate renewal'),
-                backgroundColor: AppColors.error,
+                backgroundColor: Color(0xFF60212E),
               ),
             );
           }
@@ -416,7 +416,7 @@ class _RenewMembershipScreenState extends ConsumerState<RenewMembershipScreen> {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text('Error: ${e.toString()}'),
-            backgroundColor: AppColors.error,
+            backgroundColor: Color(0xFF60212E),
           ),
         );
       }
