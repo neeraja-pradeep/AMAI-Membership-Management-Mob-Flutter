@@ -92,6 +92,30 @@ abstract class HomeApi {
     required String ifModifiedSince,
   });
 
+  /// Fetches a single event by ID
+  ///
+  /// [eventId] - The ID of the event to fetch
+  ///
+  /// Returns HomeApiResponse containing:
+  /// - EventModel on success (200)
+  /// - null data on error
+  Future<HomeApiResponse<EventModel>> fetchEventById({
+    required int eventId,
+  });
+
+  /// Registers for an event
+  ///
+  /// [eventId] - The ID of the event to register for
+  /// [paymentMode] - Payment mode (online or offline)
+  ///
+  /// Returns HomeApiResponse containing:
+  /// - Registration response on success (200)
+  /// - null data on error
+  Future<HomeApiResponse<Map<String, dynamic>>> registerForEvent({
+    required int eventId,
+    required String paymentMode,
+  });
+
   /// Fetches announcements
   ///
   /// [ifModifiedSince] - Timestamp for conditional request
@@ -564,6 +588,50 @@ class HomeApiImpl implements HomeApi {
 
     return HomeApiResponse<AreaAdminsResponse>(
       data: areaAdmins,
+      statusCode: response.statusCode,
+      timestamp: response.timestamp,
+    );
+  }
+
+  @override
+  Future<HomeApiResponse<EventModel>> fetchEventById({
+    required int eventId,
+  }) async {
+    final response = await apiClient.get<Map<String, dynamic>>(
+      Endpoints.eventById(eventId),
+      fromJson: (json) => json as Map<String, dynamic>,
+    );
+
+    // Parse the response
+    EventModel? event;
+
+    if (response.data != null) {
+      event = EventModel.fromJson(response.data!);
+    }
+
+    return HomeApiResponse<EventModel>(
+      data: event,
+      statusCode: response.statusCode,
+      timestamp: response.timestamp,
+    );
+  }
+
+  @override
+  Future<HomeApiResponse<Map<String, dynamic>>> registerForEvent({
+    required int eventId,
+    required String paymentMode,
+  }) async {
+    final response = await apiClient.post<Map<String, dynamic>>(
+      Endpoints.eventRegister,
+      data: {
+        'event': eventId,
+        'payment_mode': paymentMode,
+      },
+      fromJson: (json) => json as Map<String, dynamic>,
+    );
+
+    return HomeApiResponse<Map<String, dynamic>>(
+      data: response.data,
       statusCode: response.statusCode,
       timestamp: response.timestamp,
     );

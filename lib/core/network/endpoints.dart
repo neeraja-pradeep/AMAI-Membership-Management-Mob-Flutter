@@ -201,6 +201,9 @@ class Endpoints {
   /// Single event endpoint
   static String eventById(int id) => '$apiPrefix/bookings/v1/events/$id/';
 
+  /// Event registration endpoint
+  static const String eventRegister = '$apiPrefix/bookings/v1/events/register/';
+
   // ==================== Library Endpoints ====================
 
   /// Library documents endpoint

@@ -6,6 +6,7 @@ import 'package:myapp/core/network/api_client_provider.dart';
 import 'package:myapp/features/home/domain/entities/upcoming_event.dart';
 import 'package:myapp/features/home/infrastructure/data_sources/remote/home_api.dart';
 import 'package:myapp/features/home/infrastructure/models/event_model.dart';
+import 'package:myapp/features/home/presentation/screens/event_details_screen.dart';
 import 'package:intl/intl.dart';
 
 /// Events screen with three tabs: Upcoming, Ongoing, and Past events
@@ -417,8 +418,14 @@ class _EventsScreenState extends ConsumerState<EventsScreen> {
     return GestureDetector(
       onTap: event.isRegistrationOpen
           ? () {
-              // TODO: Navigate to registration screen or show registration dialog
-              debugPrint('Register for event: ${event.id}');
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => EventDetailsScreen(
+                    eventId: int.parse(event.id),
+                  ),
+                ),
+              );
             }
           : null,
       child: Container(
