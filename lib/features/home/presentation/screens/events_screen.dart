@@ -22,6 +22,7 @@ class _EventsScreenState extends ConsumerState<EventsScreen> {
   bool _isLoading = false;
   bool _isLoadingMore = false;
   List<UpcomingEvent> _events = [];
+  Set<int> _registeredEventIds = {};
   String? _errorMessage;
   String? _nextUrl;
   String? _previousUrl;
@@ -50,6 +51,24 @@ class _EventsScreenState extends ConsumerState<EventsScreen> {
     }
   }
 
+  Future<void> _loadMyBookings() async {
+    try {
+      final apiClient = ref.read(apiClientProvider);
+      final homeApi = HomeApiImpl(apiClient: apiClient);
+
+      final response = await homeApi.fetchMyEventBookings();
+
+      if (response.data != null && mounted) {
+        setState(() {
+          _registeredEventIds = response.data!;
+        });
+      }
+    } catch (e) {
+      debugPrint('Error loading my bookings: $e');
+      // Don't show error for bookings, just continue
+    }
+  }
+
   Future<void> _loadEvents() async {
     setState(() {
       _isLoading = true;
@@ -58,6 +77,9 @@ class _EventsScreenState extends ConsumerState<EventsScreen> {
       _nextUrl = null;
       _previousUrl = null;
     });
+
+    // Load user's bookings first
+    await _loadMyBookings();
 
     try {
       final apiClient = ref.read(apiClientProvider);
@@ -304,13 +326,15 @@ class _EventsScreenState extends ConsumerState<EventsScreen> {
               ),
             );
           }
-          return _buildEventCard(_events[index]);
+          final event = _events[index];
+          final isRegistered = _registeredEventIds.contains(int.parse(event.id));
+          return _buildEventCard(event, isRegistered);
         },
       ),
     );
   }
 
-  Widget _buildEventCard(UpcomingEvent event) {
+  Widget _buildEventCard(UpcomingEvent event, bool isRegistered) {
     return Container(
       margin: EdgeInsets.only(bottom: 16.h),
       decoration: BoxDecoration(
@@ -365,7 +389,7 @@ class _EventsScreenState extends ConsumerState<EventsScreen> {
                 ),
                 SizedBox(height: 16.h),
                 // Register Button
-                _buildRegisterButton(event),
+                _buildRegisterButton(event, isRegistered),
               ],
             ),
           ),
@@ -431,11 +455,7 @@ class _EventsScreenState extends ConsumerState<EventsScreen> {
     );
   }
 
-  Widget _buildRegisterButton(UpcomingEvent event) {
-    // TODO: Check if user is already registered for this event
-    // For now, we'll show "Register Now" for all events
-    final bool isRegistered = false; // This should come from API
-
+  Widget _buildRegisterButton(UpcomingEvent event, bool isRegistered) {
     if (isRegistered) {
       return Column(
         children: [
@@ -462,8 +482,15 @@ class _EventsScreenState extends ConsumerState<EventsScreen> {
           // View Event button
           GestureDetector(
             onTap: () {
-              // TODO: Navigate to event details screen
-              debugPrint('View event: ${event.id}');
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => EventDetailsScreen(
+                    eventId: int.parse(event.id),
+                    isAlreadyRegistered: true,
+                  ),
+                ),
+              );
             },
             child: Container(
               width: double.infinity,

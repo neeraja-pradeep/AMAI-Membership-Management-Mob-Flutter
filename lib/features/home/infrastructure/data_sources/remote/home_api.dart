@@ -114,6 +114,13 @@ abstract class HomeApi {
     required String url,
   });
 
+  /// Fetches user's event bookings
+  ///
+  /// Returns HomeApiResponse containing:
+  /// - Set<int> of event IDs user is registered for
+  /// - null data on error
+  Future<HomeApiResponse<Set<int>>> fetchMyEventBookings();
+
   /// Fetches a single event by ID
   ///
   /// [eventId] - The ID of the event to fetch
@@ -549,6 +556,31 @@ class HomeApiImpl implements HomeApi {
       timestamp: response.timestamp,
       nextUrl: nextUrl,
       previousUrl: previousUrl,
+    );
+  }
+
+  @override
+  Future<HomeApiResponse<Set<int>>> fetchMyEventBookings() async {
+    final response = await apiClient.get<Map<String, dynamic>>(
+      Endpoints.myEventBookings,
+      fromJson: (json) => json as Map<String, dynamic>,
+    );
+
+    Set<int>? registeredEventIds;
+
+    if (response.data != null) {
+      final results = response.data!['results'] as List<dynamic>?;
+      if (results != null) {
+        registeredEventIds = results
+            .map((booking) => (booking as Map<String, dynamic>)['event'] as int)
+            .toSet();
+      }
+    }
+
+    return HomeApiResponse<Set<int>>(
+      data: registeredEventIds ?? {},
+      statusCode: response.statusCode,
+      timestamp: response.timestamp,
     );
   }
 

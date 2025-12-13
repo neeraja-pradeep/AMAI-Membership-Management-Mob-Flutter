@@ -12,10 +12,12 @@ import 'package:myapp/features/home/presentation/screens/event_payment_screen.da
 class EventDetailsScreen extends ConsumerStatefulWidget {
   const EventDetailsScreen({
     required this.eventId,
+    this.isAlreadyRegistered = false,
     super.key,
   });
 
   final int eventId;
+  final bool isAlreadyRegistered;
 
   @override
   ConsumerState<EventDetailsScreen> createState() =>
@@ -238,8 +240,8 @@ class _EventDetailsScreenState extends ConsumerState<EventDetailsScreen> {
                   _buildTextSection('Description', _event!.description),
                 ],
                 SizedBox(height: 32.h),
-                // Register Button
-                _buildRegisterButton(),
+                // Register Button (only shown if not already registered)
+                if (!widget.isAlreadyRegistered) _buildRegisterButton(),
               ],
             ),
           ),
