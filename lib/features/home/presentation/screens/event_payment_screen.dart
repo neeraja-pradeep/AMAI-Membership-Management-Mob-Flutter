@@ -92,11 +92,7 @@ class _EventPaymentScreenState extends ConsumerState<EventPaymentScreen> {
         'name': RazorpayConfig.companyName,
         'description': RazorpayConfig.description,
         'order_id': widget.bookingData['order_id'],
-        'timeout': RazorpayConfig.timeout,
         'prefill': {'contact': userPhone, 'email': userEmail},
-        'theme': {
-          'color': '#${RazorpayConfig.themeColor.toRadixString(16).substring(2)}',
-        },
       };
 
       debugPrint('Razorpay options: $options');
