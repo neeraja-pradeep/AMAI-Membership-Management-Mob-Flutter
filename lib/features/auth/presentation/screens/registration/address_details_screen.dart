@@ -5,6 +5,9 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:myapp/app/theme/colors.dart';
 import 'package:myapp/features/auth/application/states/registration_state.dart';
 import 'package:myapp/features/auth/domain/entities/registration/registration_error.dart';
+import 'package:myapp/core/network/api_client_provider.dart';
+import 'package:myapp/features/auth/infrastructure/data_sources/remote/registration_api.dart';
+import 'package:myapp/features/auth/domain/entities/registration/membership_zone.dart';
 import '../../../../../app/router/app_router.dart';
 import '../../../application/notifiers/registration_state_notifier.dart';
 import '../../../domain/entities/registration/address_details.dart';
@@ -56,6 +59,15 @@ class _AddressDetailsScreenState extends ConsumerState<AddressDetailsScreen> {
   String _role = 'practitioner';
 
   bool get _isPractitioner => _role == 'practitioner';
+
+  /// Dynamic data from API
+  List<String> _countries = [];
+  List<String> _statesForCountry = [];
+  List<String> _districtsForState = [];
+  Map<String, int> _countryNameToId = {};
+  Map<String, int> _stateNameToId = {};
+  Map<String, int> _districtNameToId = {};
+  bool _isLoadingData = false;
 
   final Map<String, List<String>> _states = {
     'India': [
@@ -567,7 +579,10 @@ class _AddressDetailsScreenState extends ConsumerState<AddressDetailsScreen> {
       _role = regState.registration.personalDetails!.membershipType;
     }
 
-    WidgetsBinding.instance.addPostFrameCallback((_) => _loadExistingData());
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _loadMembershipZones();
+      _loadExistingData();
+    });
   }
 
   @override
@@ -619,6 +634,165 @@ class _AddressDetailsScreenState extends ConsumerState<AddressDetailsScreen> {
       _cityController.text = data.city;
       _postalCodeController.text = data.postalCode;
     });
+  }
+
+  /// Load membership zones (countries) from API with pagination
+  Future<void> _loadMembershipZones() async {
+    if (_isLoadingData) return;
+
+    setState(() {
+      _isLoadingData = true;
+    });
+
+    try {
+      final apiClient = ref.read(apiClientProvider);
+      final registrationApi = RegistrationApi(apiClient: apiClient);
+
+      // Fetch countries (root-level zones with no parent)
+      final countriesResponse = await registrationApi.fetchMembershipZones();
+      final countriesData = MembershipZonesResponse.fromJson(countriesResponse);
+      final countries = countriesData.results.map((z) => z.zoneName).toList();
+      final countryMap = {for (var z in countriesData.results) z.zoneName: z.id};
+
+      if (mounted) {
+        setState(() {
+          _countries = countries;
+          _countryNameToId = countryMap;
+          _isLoadingData = false;
+        });
+
+        // Load states if country is already selected
+        if (_selectedCountry != null && _countryNameToId.containsKey(_selectedCountry)) {
+          _loadStatesForCountry(_countryNameToId[_selectedCountry]!);
+        }
+        if (_aptaCountry != null && _countryNameToId.containsKey(_aptaCountry)) {
+          _loadStatesForCountry(_countryNameToId[_aptaCountry]!);
+        }
+        if (_permCountry != null && _countryNameToId.containsKey(_permCountry)) {
+          _loadStatesForCountry(_countryNameToId[_permCountry]!);
+        }
+      }
+    } catch (e) {
+      debugPrint('Error loading membership zones: $e');
+      if (mounted) {
+        setState(() {
+          _isLoadingData = false;
+          // Fallback to static list
+          _countries = ["India"];
+        });
+      }
+    }
+  }
+
+  /// Load states for a selected country
+  Future<void> _loadStatesForCountry(int countryId) async {
+    setState(() {
+      _isLoadingData = true;
+      _statesForCountry = [];
+    });
+
+    try {
+      final apiClient = ref.read(apiClientProvider);
+      final registrationApi = RegistrationApi(apiClient: apiClient);
+
+      final List<MembershipZone> allZones = [];
+      int? currentPage = 1;
+      String? nextUrl;
+
+      // Fetch all pages of states for the selected country
+      do {
+        final response = await registrationApi.fetchMembershipZones(
+          parent: countryId,
+          page: currentPage,
+        );
+
+        final zonesResponse = MembershipZonesResponse.fromJson(response);
+        allZones.addAll(zonesResponse.results);
+
+        nextUrl = zonesResponse.next;
+        if (nextUrl != null) {
+          currentPage = (currentPage ?? 1) + 1;
+        }
+      } while (nextUrl != null);
+
+      if (mounted) {
+        setState(() {
+          _statesForCountry = allZones.map((z) => z.zoneName).toList();
+          _stateNameToId = {for (var z in allZones) z.zoneName: z.id};
+          _isLoadingData = false;
+        });
+
+        // Load districts if state is already selected
+        if (_selectedState != null && _stateNameToId.containsKey(_selectedState)) {
+          _loadDistrictsForState(_stateNameToId[_selectedState]!);
+        }
+        if (_aptaState != null && _stateNameToId.containsKey(_aptaState)) {
+          _loadDistrictsForState(_stateNameToId[_aptaState]!);
+        }
+        if (_permState != null && _stateNameToId.containsKey(_permState)) {
+          _loadDistrictsForState(_stateNameToId[_permState]!);
+        }
+      }
+    } catch (e) {
+      debugPrint('Error loading states for country $countryId: $e');
+      if (mounted) {
+        setState(() {
+          _isLoadingData = false;
+          // Fallback to static list
+          _statesForCountry = _states['India'] ?? [];
+        });
+      }
+    }
+  }
+
+  /// Load districts for a selected state
+  Future<void> _loadDistrictsForState(int stateId) async {
+    setState(() {
+      _isLoadingData = true;
+      _districtsForState = [];
+    });
+
+    try {
+      final apiClient = ref.read(apiClientProvider);
+      final registrationApi = RegistrationApi(apiClient: apiClient);
+
+      final List<MembershipZone> allZones = [];
+      int? currentPage = 1;
+      String? nextUrl;
+
+      // Fetch all pages of districts for the selected state
+      do {
+        final response = await registrationApi.fetchMembershipZones(
+          parent: stateId,
+          page: currentPage,
+        );
+
+        final zonesResponse = MembershipZonesResponse.fromJson(response);
+        allZones.addAll(zonesResponse.results);
+
+        nextUrl = zonesResponse.next;
+        if (nextUrl != null) {
+          currentPage = (currentPage ?? 1) + 1;
+        }
+      } while (nextUrl != null);
+
+      if (mounted) {
+        setState(() {
+          _districtsForState = allZones.map((z) => z.zoneName).toList();
+          _districtNameToId = {for (var z in allZones) z.zoneName: z.id};
+          _isLoadingData = false;
+        });
+      }
+    } catch (e) {
+      debugPrint('Error loading districts for state $stateId: $e');
+      if (mounted) {
+        setState(() {
+          _isLoadingData = false;
+          // Fallback to static list
+          _districtsForState = [];
+        });
+      }
+    }
   }
 
   /// Auto copy logic
@@ -859,17 +1033,35 @@ class _AddressDetailsScreenState extends ConsumerState<AddressDetailsScreen> {
         SizedBox(height: 16.h),
         _buildLabel("Country"),
         SizedBox(height: 8.h),
-        _buildDropdown(["India"], country, onCountryChange, "Select Country"),
+        _buildDropdown(
+          _countries.isNotEmpty ? _countries : ["India"],
+          country,
+          onCountryChange,
+          "Select Country",
+          isLoading: _isLoadingData && _countries.isEmpty,
+        ),
 
         SizedBox(height: 16.h),
         _buildLabel("State"),
         SizedBox(height: 8.h),
-        _buildDropdown(_states[country] ?? [], state, onStateChange, "Select State"),
+        _buildDropdown(
+          _statesForCountry.isNotEmpty ? _statesForCountry : _states[country] ?? [],
+          state,
+          onStateChange,
+          "Select State",
+          isLoading: _isLoadingData && _statesForCountry.isEmpty && country != null,
+        ),
 
         SizedBox(height: 16.h),
         _buildLabel("District"),
         SizedBox(height: 8.h),
-        _buildDropdown(_districts[state] ?? [], district, onDistrictChange, "Select District"),
+        _buildDropdown(
+          _districtsForState.isNotEmpty ? _districtsForState : _districts[state] ?? [],
+          district,
+          onDistrictChange,
+          "Select District",
+          isLoading: _isLoadingData && _districtsForState.isEmpty && state != null,
+        ),
       ],
     );
   }
@@ -923,8 +1115,24 @@ class _AddressDetailsScreenState extends ConsumerState<AddressDetailsScreen> {
     List<String> items,
     String? value,
     Function(String?) onChanged,
-    String hintText,
-  ) {
+    String hintText, {
+    bool isLoading = false,
+  }) {
+    if (isLoading) {
+      return Container(
+        height: 50.h,
+        decoration: BoxDecoration(
+          border: Border.all(color: Colors.grey[300]!),
+          borderRadius: BorderRadius.circular(12.r),
+        ),
+        child: const Center(
+          child: CircularProgressIndicator(
+            color: AppColors.brown,
+          ),
+        ),
+      );
+    }
+
     return DropdownButtonFormField<String>(
       value: items.contains(value) ? value : null,
       isExpanded: true,
@@ -1057,8 +1265,25 @@ class _AddressDetailsScreenState extends ConsumerState<AddressDetailsScreen> {
                         country: _selectedCountry,
                         state: _selectedState,
                         district: _selectedDistrict,
-                        onCountryChange: (v) => setState(() => _selectedCountry = v),
-                        onStateChange: (v) => setState(() => _selectedState = v),
+                        onCountryChange: (v) {
+                          setState(() {
+                            _selectedCountry = v;
+                            _selectedState = null;
+                            _selectedDistrict = null;
+                          });
+                          if (v != null && _countryNameToId.containsKey(v)) {
+                            _loadStatesForCountry(_countryNameToId[v]!);
+                          }
+                        },
+                        onStateChange: (v) {
+                          setState(() {
+                            _selectedState = v;
+                            _selectedDistrict = null;
+                          });
+                          if (v != null && _stateNameToId.containsKey(v)) {
+                            _loadDistrictsForState(_stateNameToId[v]!);
+                          }
+                        },
                         onDistrictChange: (v) => setState(() => _selectedDistrict = v),
                       ),
                     ],
@@ -1101,9 +1326,25 @@ class _AddressDetailsScreenState extends ConsumerState<AddressDetailsScreen> {
                                   country: _aptaCountry,
                                   state: _aptaState,
                                   district: _aptaDistrict,
-                                  onCountryChange: (v) =>
-                                      setState(() => _aptaCountry = v),
-                                  onStateChange: (v) => setState(() => _aptaState = v),
+                                  onCountryChange: (v) {
+                                    setState(() {
+                                      _aptaCountry = v;
+                                      _aptaState = null;
+                                      _aptaDistrict = null;
+                                    });
+                                    if (v != null && _countryNameToId.containsKey(v)) {
+                                      _loadStatesForCountry(_countryNameToId[v]!);
+                                    }
+                                  },
+                                  onStateChange: (v) {
+                                    setState(() {
+                                      _aptaState = v;
+                                      _aptaDistrict = null;
+                                    });
+                                    if (v != null && _stateNameToId.containsKey(v)) {
+                                      _loadDistrictsForState(_stateNameToId[v]!);
+                                    }
+                                  },
                                   onDistrictChange: (v) =>
                                       setState(() => _aptaDistrict = v),
                                 )
@@ -1149,9 +1390,25 @@ class _AddressDetailsScreenState extends ConsumerState<AddressDetailsScreen> {
                                 country: _permCountry,
                                 state: _permState,
                                 district: _permDistrict,
-                                onCountryChange: (v) =>
-                                    setState(() => _permCountry = v),
-                                onStateChange: (v) => setState(() => _permState = v),
+                                onCountryChange: (v) {
+                                  setState(() {
+                                    _permCountry = v;
+                                    _permState = null;
+                                    _permDistrict = null;
+                                  });
+                                  if (v != null && _countryNameToId.containsKey(v)) {
+                                    _loadStatesForCountry(_countryNameToId[v]!);
+                                  }
+                                },
+                                onStateChange: (v) {
+                                  setState(() {
+                                    _permState = v;
+                                    _permDistrict = null;
+                                  });
+                                  if (v != null && _stateNameToId.containsKey(v)) {
+                                    _loadDistrictsForState(_stateNameToId[v]!);
+                                  }
+                                },
                                 onDistrictChange: (v) =>
                                     setState(() => _permDistrict = v),
                               )
