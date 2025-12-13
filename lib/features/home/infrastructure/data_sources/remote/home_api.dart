@@ -306,10 +306,10 @@ class HomeApiImpl implements HomeApi {
   Future<HomeApiResponse<List<EventModel>>> fetchEvents({
     required String ifModifiedSince,
   }) async {
-    final response = await apiClient.get<List<dynamic>>(
+    final response = await apiClient.get<Map<String, dynamic>>(
       Endpoints.events,
       ifModifiedSince: ifModifiedSince.isNotEmpty ? ifModifiedSince : null,
-      fromJson: (json) => json as List<dynamic>,
+      fromJson: (json) => json as Map<String, dynamic>,
     );
 
     // Handle 304 Not Modified
@@ -321,40 +321,44 @@ class HomeApiImpl implements HomeApi {
       );
     }
 
-    // Parse the response - API returns direct array of upcoming events
+    // Parse the response - API returns paginated response with results array
     List<EventModel>? events;
 
     if (response.data != null) {
       debugPrint('========== EVENTS PARSING DEBUG ==========');
-      debugPrint('Total events received: ${response.data!.length}');
 
-      events = [];
-      for (var i = 0; i < response.data!.length; i++) {
-        try {
-          final json = response.data![i] as Map<String, dynamic>;
-          debugPrint('Parsing event $i: ${json['title']}');
-          debugPrint('Event $i data: $json');
-          final event = EventModel.fromJson(json);
-          if (event.isPublished) {
-            events.add(event);
+      final results = response.data!['results'] as List<dynamic>?;
+      if (results != null) {
+        debugPrint('Total events received: ${results.length}');
+
+        events = [];
+        for (var i = 0; i < results.length; i++) {
+          try {
+            final json = results[i] as Map<String, dynamic>;
+            debugPrint('Parsing event $i: ${json['title']}');
+            debugPrint('Event $i data: $json');
+            final event = EventModel.fromJson(json);
+            if (event.isPublished) {
+              events.add(event);
+            }
+          } catch (e, stackTrace) {
+            debugPrint('========== ERROR PARSING EVENT $i ==========');
+            debugPrint('Error: $e');
+            debugPrint('JSON: ${results[i]}');
+            debugPrint('Stack trace: $stackTrace');
+            debugPrint('==========================================');
+            rethrow;
           }
-        } catch (e, stackTrace) {
-          debugPrint('========== ERROR PARSING EVENT $i ==========');
-          debugPrint('Error: $e');
-          debugPrint('JSON: ${response.data![i]}');
-          debugPrint('Stack trace: $stackTrace');
-          debugPrint('==========================================');
-          rethrow;
         }
+
+        events.sort((a, b) {
+          final dateA = DateTime.tryParse(a.eventDate) ?? DateTime.now();
+          final dateB = DateTime.tryParse(b.eventDate) ?? DateTime.now();
+          return dateA.compareTo(dateB);
+        });
+
+        debugPrint('Successfully parsed ${events.length} published events');
       }
-
-      events.sort((a, b) {
-        final dateA = DateTime.tryParse(a.eventDate) ?? DateTime.now();
-        final dateB = DateTime.tryParse(b.eventDate) ?? DateTime.now();
-        return dateA.compareTo(dateB);
-      });
-
-      debugPrint('Successfully parsed ${events.length} published events');
       debugPrint('=========================================');
     }
 
@@ -369,10 +373,10 @@ class HomeApiImpl implements HomeApi {
   Future<HomeApiResponse<List<EventModel>>> fetchOngoingEvents({
     required String ifModifiedSince,
   }) async {
-    final response = await apiClient.get<List<dynamic>>(
+    final response = await apiClient.get<Map<String, dynamic>>(
       Endpoints.ongoingEvents,
       ifModifiedSince: ifModifiedSince.isNotEmpty ? ifModifiedSince : null,
-      fromJson: (json) => json as List<dynamic>,
+      fromJson: (json) => json as Map<String, dynamic>,
     );
 
     // Handle 304 Not Modified
@@ -384,19 +388,22 @@ class HomeApiImpl implements HomeApi {
       );
     }
 
-    // Parse the response - API returns direct array of ongoing events
+    // Parse the response - API returns paginated response with results array
     List<EventModel>? events;
 
     if (response.data != null) {
-      events = response.data!
-          .map((json) => EventModel.fromJson(json as Map<String, dynamic>))
-          .where((event) => event.isPublished)
-          .toList()
-        ..sort((a, b) {
-          final dateA = DateTime.tryParse(a.eventDate) ?? DateTime.now();
-          final dateB = DateTime.tryParse(b.eventDate) ?? DateTime.now();
-          return dateA.compareTo(dateB);
-        });
+      final results = response.data!['results'] as List<dynamic>?;
+      if (results != null) {
+        events = results
+            .map((json) => EventModel.fromJson(json as Map<String, dynamic>))
+            .where((event) => event.isPublished)
+            .toList()
+          ..sort((a, b) {
+            final dateA = DateTime.tryParse(a.eventDate) ?? DateTime.now();
+            final dateB = DateTime.tryParse(b.eventDate) ?? DateTime.now();
+            return dateA.compareTo(dateB);
+          });
+      }
     }
 
     return HomeApiResponse<List<EventModel>>(
@@ -410,10 +417,10 @@ class HomeApiImpl implements HomeApi {
   Future<HomeApiResponse<List<EventModel>>> fetchPastEvents({
     required String ifModifiedSince,
   }) async {
-    final response = await apiClient.get<List<dynamic>>(
+    final response = await apiClient.get<Map<String, dynamic>>(
       Endpoints.pastEvents,
       ifModifiedSince: ifModifiedSince.isNotEmpty ? ifModifiedSince : null,
-      fromJson: (json) => json as List<dynamic>,
+      fromJson: (json) => json as Map<String, dynamic>,
     );
 
     // Handle 304 Not Modified
@@ -425,19 +432,22 @@ class HomeApiImpl implements HomeApi {
       );
     }
 
-    // Parse the response - API returns direct array of past events
+    // Parse the response - API returns paginated response with results array
     List<EventModel>? events;
 
     if (response.data != null) {
-      events = response.data!
-          .map((json) => EventModel.fromJson(json as Map<String, dynamic>))
-          .where((event) => event.isPublished)
-          .toList()
-        ..sort((a, b) {
-          final dateA = DateTime.tryParse(a.eventDate) ?? DateTime.now();
-          final dateB = DateTime.tryParse(b.eventDate) ?? DateTime.now();
-          return dateB.compareTo(dateA); // Reverse sort for past events (most recent first)
-        });
+      final results = response.data!['results'] as List<dynamic>?;
+      if (results != null) {
+        events = results
+            .map((json) => EventModel.fromJson(json as Map<String, dynamic>))
+            .where((event) => event.isPublished)
+            .toList()
+          ..sort((a, b) {
+            final dateA = DateTime.tryParse(a.eventDate) ?? DateTime.now();
+            final dateB = DateTime.tryParse(b.eventDate) ?? DateTime.now();
+            return dateB.compareTo(dateA); // Reverse sort for past events (most recent first)
+          });
+      }
     }
 
     return HomeApiResponse<List<EventModel>>(
