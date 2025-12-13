@@ -130,11 +130,12 @@ class EventRegistrationSuccessScreen extends StatelessWidget {
                 height: 50.h,
                 child: ElevatedButton(
                   onPressed: () {
-                    // Navigate to registration status screen
-                    // TODO: Implement navigation to registration status screen
-                    Navigator.pop(context);
-                    Navigator.pop(context);
-                    Navigator.pop(context);
+                    // Navigate back to events screen
+                    // Pop success screen -> pop payment screen -> pop event details screen
+                    int count = 0;
+                    Navigator.popUntil(context, (route) {
+                      return count++ == 3;
+                    });
                   },
                   style: ElevatedButton.styleFrom(
                     backgroundColor: AppColors.brown,
@@ -160,8 +161,14 @@ class EventRegistrationSuccessScreen extends StatelessWidget {
                 height: 50.h,
                 child: OutlinedButton(
                   onPressed: () {
-                    // Navigate back to home
-                    Navigator.popUntil(context, (route) => route.isFirst);
+                    // Navigate back to home screen (bottom navigation)
+                    // Pop all screens until we reach a named route or the main dashboard
+                    int count = 0;
+                    Navigator.popUntil(context, (route) {
+                      // Pop until we've gone back far enough (usually 4-5 screens from success screen)
+                      // Or until we hit a route that's not anonymous (has a name)
+                      return count++ >= 4 || (route.settings.name != null && route.settings.name != '/');
+                    });
                   },
                   style: OutlinedButton.styleFrom(
                     side: const BorderSide(color: AppColors.brown),
