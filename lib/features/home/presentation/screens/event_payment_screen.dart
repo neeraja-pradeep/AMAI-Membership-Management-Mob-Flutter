@@ -71,24 +71,26 @@ class _EventPaymentScreenState extends ConsumerState<EventPaymentScreen> {
       final amountInPaise = (backendAmount * 100).toInt();
       final currency = widget.bookingData['currency']?.toString() ?? 'INR';
 
+      // Extract user details from booking data for prefill
+      final booking = widget.bookingData['booking'] as Map<String, dynamic>?;
+      final userEmail = booking?['user_email'] as String? ?? '';
+      final userName = booking?['user_name'] as String? ?? '';
+
       debugPrint('Backend amount: $backendAmount');
       debugPrint('Amount in paise: $amountInPaise');
       debugPrint('Currency: $currency');
 
       final options = {
-        'key': RazorpayConfig.apiKey, // Razorpay key from .env file
-        'amount': amountInPaise, // Amount in paise from backend
-        'currency': currency, // Currency from backend
-        'order_id': widget.bookingData['order_id'], // Razorpay order ID from backend
-        'name': 'AMAI',
-        'description': widget.event.title,
+        'key': RazorpayConfig.apiKey,
+        'order_id': widget.bookingData['order_id'],
+        'amount': amountInPaise,
+        'currency': currency,
+        'name': 'AMAI Membership',
+        'description': 'Event Booking Fee',
         'prefill': {
+          'email': userEmail,
           'contact': '',
-          'email': '',
         },
-        'theme': {
-          'color': '#60212E',
-        }
       };
 
       debugPrint('Razorpay options: $options');
