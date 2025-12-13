@@ -61,6 +61,7 @@ class _EventPaymentScreenState extends ConsumerState<EventPaymentScreen> {
       final options = {
         'key': 'rzp_test_1DP5mmOlF5G5ag', // Replace with your Razorpay key
         'amount': (_total * 100).toInt(), // Amount in paise
+        'order_id': widget.bookingData['order_id'], // Razorpay order ID from backend
         'name': 'AMAI',
         'description': widget.event.title,
         'prefill': {
@@ -92,7 +93,7 @@ class _EventPaymentScreenState extends ConsumerState<EventPaymentScreen> {
       final homeApi = HomeApiImpl(apiClient: apiClient);
 
       final verificationResponse = await homeApi.verifyEventPayment(
-        razorpayOrderId: response.orderId ?? '',
+        razorpayOrderId: widget.bookingData['order_id'] ?? '',
         razorpayPaymentId: response.paymentId ?? '',
         razorpaySignature: response.signature ?? '',
       );
