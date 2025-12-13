@@ -31,6 +31,10 @@ class _EventPaymentScreenState extends ConsumerState<EventPaymentScreen> {
   @override
   void initState() {
     super.initState();
+    debugPrint('========== BOOKING DATA DEBUG ==========');
+    debugPrint('Full bookingData: ${widget.bookingData}');
+    debugPrint('order_id value: ${widget.bookingData['order_id']}');
+    debugPrint('========================================');
     _razorpay = Razorpay();
     _razorpay.on(Razorpay.EVENT_PAYMENT_SUCCESS, _handlePaymentSuccess);
     _razorpay.on(Razorpay.EVENT_PAYMENT_ERROR, _handlePaymentError);
@@ -58,6 +62,10 @@ class _EventPaymentScreenState extends ConsumerState<EventPaymentScreen> {
 
   void _handlePayNow() {
     try {
+      debugPrint('========== PAY NOW DEBUG ==========');
+      debugPrint('Extracting order_id: ${widget.bookingData['order_id']}');
+      debugPrint('Total amount: ${(_total * 100).toInt()}');
+
       final options = {
         'key': 'rzp_test_1DP5mmOlF5G5ag', // Replace with your Razorpay key
         'amount': (_total * 100).toInt(), // Amount in paise
@@ -73,9 +81,15 @@ class _EventPaymentScreenState extends ConsumerState<EventPaymentScreen> {
         }
       };
 
+      debugPrint('Razorpay options: $options');
+      debugPrint('Opening Razorpay...');
       _razorpay.open(options);
-    } catch (e) {
+      debugPrint('Razorpay opened successfully');
+    } catch (e, stackTrace) {
+      debugPrint('========== RAZORPAY ERROR ==========');
       debugPrint('Error opening Razorpay: $e');
+      debugPrint('Stack trace: $stackTrace');
+      debugPrint('====================================');
       _showError('Failed to open payment gateway. Please try again.');
     }
   }
