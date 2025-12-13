@@ -64,11 +64,17 @@ class _EventPaymentScreenState extends ConsumerState<EventPaymentScreen> {
     try {
       debugPrint('========== PAY NOW DEBUG ==========');
       debugPrint('Extracting order_id: ${widget.bookingData['order_id']}');
-      debugPrint('Total amount: ${(_total * 100).toInt()}');
+
+      // Use amount from backend response (already includes taxes/fees)
+      final backendAmount = double.parse(widget.bookingData['amount'].toString());
+      final amountInPaise = (backendAmount * 100).toInt();
+
+      debugPrint('Backend amount: $backendAmount');
+      debugPrint('Amount in paise: $amountInPaise');
 
       final options = {
         'key': 'rzp_test_1DP5mmOlF5G5ag', // Replace with your Razorpay key
-        'amount': (_total * 100).toInt(), // Amount in paise
+        'amount': amountInPaise, // Amount in paise from backend
         'order_id': widget.bookingData['order_id'], // Razorpay order ID from backend
         'name': 'AMAI',
         'description': widget.event.title,
