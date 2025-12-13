@@ -324,15 +324,37 @@ class HomeApiImpl implements HomeApi {
     List<EventModel>? events;
 
     if (response.data != null) {
-      events = response.data!
-          .map((json) => EventModel.fromJson(json as Map<String, dynamic>))
-          .where((event) => event.isPublished)
-          .toList()
-        ..sort((a, b) {
-          final dateA = DateTime.tryParse(a.eventDate) ?? DateTime.now();
-          final dateB = DateTime.tryParse(b.eventDate) ?? DateTime.now();
-          return dateA.compareTo(dateB);
-        });
+      debugPrint('========== EVENTS PARSING DEBUG ==========');
+      debugPrint('Total events received: ${response.data!.length}');
+
+      events = [];
+      for (var i = 0; i < response.data!.length; i++) {
+        try {
+          final json = response.data![i] as Map<String, dynamic>;
+          debugPrint('Parsing event $i: ${json['title']}');
+          debugPrint('Event $i data: $json');
+          final event = EventModel.fromJson(json);
+          if (event.isPublished) {
+            events.add(event);
+          }
+        } catch (e, stackTrace) {
+          debugPrint('========== ERROR PARSING EVENT $i ==========');
+          debugPrint('Error: $e');
+          debugPrint('JSON: ${response.data![i]}');
+          debugPrint('Stack trace: $stackTrace');
+          debugPrint('==========================================');
+          rethrow;
+        }
+      }
+
+      events.sort((a, b) {
+        final dateA = DateTime.tryParse(a.eventDate) ?? DateTime.now();
+        final dateB = DateTime.tryParse(b.eventDate) ?? DateTime.now();
+        return dateA.compareTo(dateB);
+      });
+
+      debugPrint('Successfully parsed ${events.length} published events');
+      debugPrint('=========================================');
     }
 
     return HomeApiResponse<List<EventModel>>(
