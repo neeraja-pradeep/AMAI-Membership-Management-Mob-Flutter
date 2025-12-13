@@ -125,6 +125,7 @@ class MembershipNotifier extends StateNotifier<MembershipState> {
   /// Initialize by fetching fresh data from API
   /// Called on app launch - does NOT use if-modified-since
   Future<void> initialize() async {
+    print('[MembershipNotifier] initialize() called, current state: $state');
     state = const MembershipState.loading();
 
     final usecase = _ref.read(fetchMembershipUsecaseProvider);
@@ -132,6 +133,7 @@ class MembershipNotifier extends StateNotifier<MembershipState> {
 
     result.fold(
       (failure) {
+        print('[MembershipNotifier] initialize() failed: $failure');
         // Check if this is a pending application failure
         if (failure is PendingApplicationFailure) {
           state = MembershipState.pending(
@@ -144,6 +146,7 @@ class MembershipNotifier extends StateNotifier<MembershipState> {
         }
       },
       (membershipCard) {
+        print('[MembershipNotifier] initialize() success, membership: ${membershipCard != null ? "found" : "null"}');
         if (membershipCard != null) {
           state = MembershipState.loaded(membershipCard: membershipCard);
         } else {
@@ -156,7 +159,9 @@ class MembershipNotifier extends StateNotifier<MembershipState> {
   /// Refresh membership card using if-modified-since
   /// Called on pull-to-refresh - uses stored timestamp
   Future<void> refresh() async {
+    print('[MembershipNotifier] refresh() called, current state: $state');
     final previousData = state.currentData;
+    print('[MembershipNotifier] Previous data: ${previousData != null ? "exists" : "null"}');
     state = MembershipState.loading(previousData: previousData);
 
     final usecase = _ref.read(fetchMembershipUsecaseProvider);
@@ -164,6 +169,7 @@ class MembershipNotifier extends StateNotifier<MembershipState> {
 
     result.fold(
       (failure) {
+        print('[MembershipNotifier] refresh() failed: $failure');
         // Check if this is a pending application failure
         if (failure is PendingApplicationFailure) {
           state = MembershipState.pending(
@@ -180,14 +186,17 @@ class MembershipNotifier extends StateNotifier<MembershipState> {
         }
       },
       (membershipCard) {
+        print('[MembershipNotifier] refresh() success, membership: ${membershipCard != null ? "found (200 OK)" : "null (304 Not Modified)"}');
         if (membershipCard != null) {
           // Got fresh data (200 OK)
           state = MembershipState.loaded(membershipCard: membershipCard);
         } else {
           // 304 Not Modified - keep in-memory data
           if (previousData != null) {
+            print('[MembershipNotifier] Using previousData from cache');
             state = MembershipState.loaded(membershipCard: previousData);
           } else {
+            print('[MembershipNotifier] No previousData available, setting to empty');
             state = const MembershipState.empty();
           }
         }

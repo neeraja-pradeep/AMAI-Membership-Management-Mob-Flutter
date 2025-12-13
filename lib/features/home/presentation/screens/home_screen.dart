@@ -44,8 +44,10 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
   @override
   void initState() {
     super.initState();
+    print('[HomeScreen] initState() called');
     // Initialize data fetch when screen loads
     WidgetsBinding.instance.addPostFrameCallback((_) {
+      print('[HomeScreen] Calling initialize() on all providers');
       ref.read(membershipStateProvider.notifier).initialize();
       ref.read(aswasStateProvider.notifier).initialize();
       ref.read(eventsStateProvider.notifier).initialize();

@@ -37,14 +37,19 @@ class _MainNavigationScreenState extends ConsumerState<MainNavigationScreen> {
     final membershipState = ref.watch(membershipStateProvider);
     final tabIndex = ref.watch(currentTabIndexProvider);
 
+    print('[MainNavigationScreen] build() - tabIndex: $tabIndex, _currentIndex: $_currentIndex');
+
     // Sync provider state with local state
     if (tabIndex != _currentIndex) {
+      print('[MainNavigationScreen] Tab changed from $_currentIndex to $tabIndex, will refresh providers');
       WidgetsBinding.instance.addPostFrameCallback((_) {
         setState(() {
           _currentIndex = tabIndex;
         });
         _refreshProvidersForTab(tabIndex);
       });
+    } else {
+      print('[MainNavigationScreen] Tab unchanged ($_currentIndex == $tabIndex), skipping refresh');
     }
 
     // Show Registration Status screen when membership application is pending
@@ -156,15 +161,20 @@ class _MainNavigationScreenState extends ConsumerState<MainNavigationScreen> {
   /// Refreshes relevant providers when switching to a tab
   /// Uses if-modified-since strategy for efficient data fetching
   void _refreshProvidersForTab(int tabIndex) {
+    print('[MainNavigationScreen] _refreshProvidersForTab($tabIndex) called');
     switch (tabIndex) {
       case 0: // Home tab
+        print('[MainNavigationScreen] Refreshing membership and aswas providers');
         ref.read(membershipStateProvider.notifier).refresh();
         ref.read(aswasStateProvider.notifier).refresh();
         break;
       case 3: // Profile tab
+        print('[MainNavigationScreen] Refreshing profile and nominees providers');
         ref.read(profileStateProvider.notifier).refresh();
         ref.read(nomineesStateProvider.notifier).refresh();
         break;
+      default:
+        print('[MainNavigationScreen] No refresh needed for tab $tabIndex');
     }
   }
 }
