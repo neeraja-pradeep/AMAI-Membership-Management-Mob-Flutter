@@ -53,6 +53,7 @@ class _ProfessionalDetailsScreenState
   List<String> _medicalCouncilStates = [];
   List<String> _membershipStates = [];
   List<String> _countries = [];
+  Map<String, int> _countryNameToId = {}; // Map country name to ID
 
   static const List<String> dropdownStates = [
     "Andhra Pradesh",
@@ -235,6 +236,7 @@ class _ProfessionalDetailsScreenState
       final countriesResponse = await registrationApi.fetchMembershipZones();
       final countriesData = MembershipZonesResponse.fromJson(countriesResponse);
       final countries = countriesData.results.map((z) => z.zoneName).toList();
+      final countryMap = {for (var z in countriesData.results) z.zoneName: z.id};
 
       // Fetch states (zones with parent=2 for India)
       final List<MembershipZone> allZones = [];
@@ -260,10 +262,15 @@ class _ProfessionalDetailsScreenState
       if (mounted) {
         setState(() {
           _countries = countries;
+          _countryNameToId = countryMap;
           _medicalCouncilStates = allZones.map((z) => z.zoneName).toList();
-          _membershipStates = allZones.map((z) => z.zoneName).toList();
           _isLoadingStates = false;
         });
+
+        // Load membership states if country is already selected
+        if (_selectedCountry != null && _countryNameToId.containsKey(_selectedCountry)) {
+          _loadStatesForCountry(_countryNameToId[_selectedCountry]!);
+        }
       }
     } catch (e) {
       debugPrint('Error loading membership zones: $e');
@@ -274,6 +281,55 @@ class _ProfessionalDetailsScreenState
           _countries = dropdownCountry;
           _medicalCouncilStates = dropdownStates;
           _membershipStates = dropdownStates;
+        });
+      }
+    }
+  }
+
+  /// Load states for a selected country
+  Future<void> _loadStatesForCountry(int countryId) async {
+    setState(() {
+      _isLoadingStates = true;
+      _membershipStates = [];
+      _selectedState = null; // Clear selected state when country changes
+    });
+
+    try {
+      final apiClient = ref.read(apiClientProvider);
+      final registrationApi = RegistrationApi(apiClient: apiClient);
+
+      final List<MembershipZone> allZones = [];
+      int? currentPage = 1;
+      String? nextUrl;
+
+      // Fetch all pages of states for the selected country
+      do {
+        final response = await registrationApi.fetchMembershipZones(
+          parent: countryId,
+          page: currentPage,
+        );
+
+        final zonesResponse = MembershipZonesResponse.fromJson(response);
+        allZones.addAll(zonesResponse.results);
+
+        nextUrl = zonesResponse.next;
+        if (nextUrl != null) {
+          currentPage = (currentPage ?? 1) + 1;
+        }
+      } while (nextUrl != null);
+
+      if (mounted) {
+        setState(() {
+          _membershipStates = allZones.map((z) => z.zoneName).toList();
+          _isLoadingStates = false;
+        });
+      }
+    } catch (e) {
+      debugPrint('Error loading states for country $countryId: $e');
+      if (mounted) {
+        setState(() {
+          _isLoadingStates = false;
+          _membershipStates = dropdownStates; // Fallback to static list
         });
       }
     }
@@ -592,7 +648,13 @@ class _ProfessionalDetailsScreenState
           value: _selectedCountry,
           hint: "Select Area",
           items: _countries.isNotEmpty ? _countries : dropdownCountry,
-          onChanged: (v) => setState(() => _selectedCountry = v),
+          onChanged: (v) {
+            setState(() => _selectedCountry = v);
+            // Load states for the selected country
+            if (v != null && _countryNameToId.containsKey(v)) {
+              _loadStatesForCountry(_countryNameToId[v]!);
+            }
+          },
           isLoading: _isLoadingStates && _countries.isEmpty,
         ),
         SizedBox(height: 16.h),
