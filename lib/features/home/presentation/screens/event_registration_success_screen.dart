@@ -1,10 +1,13 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:myapp/app/theme/colors.dart';
 import 'package:myapp/features/home/domain/entities/upcoming_event.dart';
+import 'package:myapp/features/navigation/application/providers/navigation_providers.dart';
+import 'package:myapp/features/navigation/presentation/screens/main_navigation_screen.dart';
 
 /// Event registration success screen shown after successful payment
-class EventRegistrationSuccessScreen extends StatelessWidget {
+class EventRegistrationSuccessScreen extends ConsumerWidget {
   const EventRegistrationSuccessScreen({
     required this.event,
     super.key,
@@ -13,7 +16,7 @@ class EventRegistrationSuccessScreen extends StatelessWidget {
   final UpcomingEvent event;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     return Scaffold(
       backgroundColor: AppColors.background,
       body: SafeArea(
@@ -130,27 +133,14 @@ class EventRegistrationSuccessScreen extends StatelessWidget {
                 height: 50.h,
                 child: ElevatedButton(
                   onPressed: () {
-                    // Debug: Check navigation stack
-                    debugPrint('========== VIEW STATUS - NAVIGATION STACK DEBUG ==========');
-                    int routeCount = 0;
-                    final routes = <String>[];
-                    Navigator.popUntil(context, (route) {
-                      routeCount++;
-                      final routeInfo = 'Route $routeCount: ${route.settings.name ?? "unnamed"} (${route.runtimeType})';
-                      routes.add(routeInfo);
-                      debugPrint(routeInfo);
-                      return true; // Don't actually pop, just inspect
-                    });
-                    debugPrint('Total routes in stack: $routeCount');
-                    debugPrint('Routes (bottom to top): ${routes.reversed.join(" -> ")}');
-                    debugPrint('==========================================================');
-
-                    // Navigate back to events screen
-                    // Pop: Success screen -> Payment screen -> Event details screen
-                    Navigator.of(context)
-                      ..pop() // Pop success screen
-                      ..pop() // Pop payment screen
-                      ..pop(); // Pop event details screen
+                    // Navigate to Main Navigation Screen with Events tab selected
+                    ref.read(currentTabIndexProvider.notifier).setTabIndex(1); // Events tab
+                    Navigator.of(context).pushAndRemoveUntil(
+                      MaterialPageRoute(
+                        builder: (context) => const MainNavigationScreen(),
+                      ),
+                      (route) => false, // Remove all previous routes
+                    );
                   },
                   style: ElevatedButton.styleFrom(
                     backgroundColor: AppColors.brown,
@@ -176,28 +166,14 @@ class EventRegistrationSuccessScreen extends StatelessWidget {
                 height: 50.h,
                 child: OutlinedButton(
                   onPressed: () {
-                    // Debug: Check navigation stack
-                    debugPrint('========== BACK TO HOME - NAVIGATION STACK DEBUG ==========');
-                    int routeCount = 0;
-                    final routes = <String>[];
-                    Navigator.popUntil(context, (route) {
-                      routeCount++;
-                      final routeInfo = 'Route $routeCount: ${route.settings.name ?? "unnamed"} (${route.runtimeType})';
-                      routes.add(routeInfo);
-                      debugPrint(routeInfo);
-                      return true; // Don't actually pop, just inspect
-                    });
-                    debugPrint('Total routes in stack: $routeCount');
-                    debugPrint('Routes (bottom to top): ${routes.reversed.join(" -> ")}');
-                    debugPrint('==========================================================');
-
-                    // Navigate back to home/dashboard screen
-                    // Pop: Success -> Payment -> Event details -> Events screen
-                    Navigator.of(context)
-                      ..pop() // Pop success screen
-                      ..pop() // Pop payment screen
-                      ..pop() // Pop event details screen
-                      ..pop(); // Pop events screen to reach dashboard
+                    // Navigate to Main Navigation Screen with Home tab selected
+                    ref.read(currentTabIndexProvider.notifier).setTabIndex(0); // Home tab
+                    Navigator.of(context).pushAndRemoveUntil(
+                      MaterialPageRoute(
+                        builder: (context) => const MainNavigationScreen(),
+                      ),
+                      (route) => false, // Remove all previous routes
+                    );
                   },
                   style: OutlinedButton.styleFrom(
                     side: const BorderSide(color: AppColors.brown),
