@@ -19,6 +19,8 @@ class HomeApiResponse<T> {
     this.isPendingApplication = false,
     this.isRejectedApplication = false,
     this.applicationDate,
+    this.nextUrl,
+    this.previousUrl,
   });
 
   final T? data;
@@ -27,12 +29,20 @@ class HomeApiResponse<T> {
   final bool isPendingApplication;
   final bool isRejectedApplication;
   final String? applicationDate;
+  final String? nextUrl;
+  final String? previousUrl;
 
   /// Check if response is 304 Not Modified
   bool get isNotModified => statusCode == 304;
 
   /// Check if response is successful
   bool get isSuccess => statusCode >= 200 && statusCode < 300;
+
+  /// Check if there are more pages available
+  bool get hasNextPage => nextUrl != null;
+
+  /// Check if there are previous pages available
+  bool get hasPreviousPage => previousUrl != null;
 }
 
 /// Abstract interface for Home API operations
@@ -91,6 +101,17 @@ abstract class HomeApi {
   /// - null data on not modified (304)
   Future<HomeApiResponse<List<EventModel>>> fetchPastEvents({
     required String ifModifiedSince,
+  });
+
+  /// Fetches events from a pagination URL
+  ///
+  /// [url] - The pagination URL (from next or previous field in response)
+  ///
+  /// Returns HomeApiResponse containing:
+  /// - List<EventModel> on success (200)
+  /// - null data on error
+  Future<HomeApiResponse<List<EventModel>>> fetchEventsFromUrl({
+    required String url,
   });
 
   /// Fetches a single event by ID
@@ -323,13 +344,21 @@ class HomeApiImpl implements HomeApi {
 
     // Parse the response - API returns paginated response with results array
     List<EventModel>? events;
+    String? nextUrl;
+    String? previousUrl;
 
     if (response.data != null) {
       debugPrint('========== EVENTS PARSING DEBUG ==========');
 
+      // Extract pagination URLs
+      nextUrl = response.data!['next'] as String?;
+      previousUrl = response.data!['previous'] as String?;
+
       final results = response.data!['results'] as List<dynamic>?;
       if (results != null) {
         debugPrint('Total events received: ${results.length}');
+        debugPrint('Next URL: $nextUrl');
+        debugPrint('Previous URL: $previousUrl');
 
         events = [];
         for (var i = 0; i < results.length; i++) {
@@ -366,6 +395,8 @@ class HomeApiImpl implements HomeApi {
       data: events ?? [],
       statusCode: response.statusCode,
       timestamp: response.timestamp,
+      nextUrl: nextUrl,
+      previousUrl: previousUrl,
     );
   }
 
@@ -390,8 +421,14 @@ class HomeApiImpl implements HomeApi {
 
     // Parse the response - API returns paginated response with results array
     List<EventModel>? events;
+    String? nextUrl;
+    String? previousUrl;
 
     if (response.data != null) {
+      // Extract pagination URLs
+      nextUrl = response.data!['next'] as String?;
+      previousUrl = response.data!['previous'] as String?;
+
       final results = response.data!['results'] as List<dynamic>?;
       if (results != null) {
         events = results
@@ -410,6 +447,8 @@ class HomeApiImpl implements HomeApi {
       data: events ?? [],
       statusCode: response.statusCode,
       timestamp: response.timestamp,
+      nextUrl: nextUrl,
+      previousUrl: previousUrl,
     );
   }
 
@@ -434,8 +473,14 @@ class HomeApiImpl implements HomeApi {
 
     // Parse the response - API returns paginated response with results array
     List<EventModel>? events;
+    String? nextUrl;
+    String? previousUrl;
 
     if (response.data != null) {
+      // Extract pagination URLs
+      nextUrl = response.data!['next'] as String?;
+      previousUrl = response.data!['previous'] as String?;
+
       final results = response.data!['results'] as List<dynamic>?;
       if (results != null) {
         events = results
@@ -454,6 +499,47 @@ class HomeApiImpl implements HomeApi {
       data: events ?? [],
       statusCode: response.statusCode,
       timestamp: response.timestamp,
+      nextUrl: nextUrl,
+      previousUrl: previousUrl,
+    );
+  }
+
+  @override
+  Future<HomeApiResponse<List<EventModel>>> fetchEventsFromUrl({
+    required String url,
+  }) async {
+    final response = await apiClient.get<Map<String, dynamic>>(
+      url,
+      fromJson: (json) => json as Map<String, dynamic>,
+    );
+
+    // Parse the response - API returns paginated response with results array
+    List<EventModel>? events;
+    String? nextUrl;
+    String? previousUrl;
+
+    if (response.data != null) {
+      // Extract pagination URLs
+      nextUrl = response.data!['next'] as String?;
+      previousUrl = response.data!['previous'] as String?;
+
+      final results = response.data!['results'] as List<dynamic>?;
+      if (results != null) {
+        events = results
+            .map((json) => EventModel.fromJson(json as Map<String, dynamic>))
+            .where((event) => event.isPublished)
+            .toList();
+
+        // Don't sort here - preserve the order from API which is already sorted
+      }
+    }
+
+    return HomeApiResponse<List<EventModel>>(
+      data: events ?? [],
+      statusCode: response.statusCode,
+      timestamp: response.timestamp,
+      nextUrl: nextUrl,
+      previousUrl: previousUrl,
     );
   }
 

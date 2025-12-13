@@ -20,21 +20,43 @@ class EventsScreen extends ConsumerStatefulWidget {
 class _EventsScreenState extends ConsumerState<EventsScreen> {
   int _selectedTabIndex = 0;
   bool _isLoading = false;
+  bool _isLoadingMore = false;
   List<UpcomingEvent> _events = [];
   String? _errorMessage;
+  String? _nextUrl;
+  String? _previousUrl;
+  final ScrollController _scrollController = ScrollController();
 
   @override
   void initState() {
     super.initState();
+    _scrollController.addListener(_onScroll);
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _loadEvents();
     });
+  }
+
+  @override
+  void dispose() {
+    _scrollController.removeListener(_onScroll);
+    _scrollController.dispose();
+    super.dispose();
+  }
+
+  void _onScroll() {
+    if (_scrollController.position.pixels >= _scrollController.position.maxScrollExtent - 200) {
+      // Load more when within 200 pixels of the bottom
+      _loadMoreEvents();
+    }
   }
 
   Future<void> _loadEvents() async {
     setState(() {
       _isLoading = true;
       _errorMessage = null;
+      _events = []; // Clear existing events when loading fresh
+      _nextUrl = null;
+      _previousUrl = null;
     });
 
     try {
@@ -61,11 +83,15 @@ class _EventsScreenState extends ConsumerState<EventsScreen> {
       if (response.data != null && mounted) {
         setState(() {
           _events = response.data!.map((model) => model.toDomain()).toList();
+          _nextUrl = response.nextUrl;
+          _previousUrl = response.previousUrl;
           _isLoading = false;
         });
       } else if (mounted) {
         setState(() {
           _events = [];
+          _nextUrl = null;
+          _previousUrl = null;
           _isLoading = false;
         });
       }
@@ -75,6 +101,44 @@ class _EventsScreenState extends ConsumerState<EventsScreen> {
         setState(() {
           _errorMessage = 'Failed to load events. Please try again.';
           _isLoading = false;
+        });
+      }
+    }
+  }
+
+  Future<void> _loadMoreEvents() async {
+    // Don't load more if already loading or no next page
+    if (_isLoadingMore || _nextUrl == null || _isLoading) {
+      return;
+    }
+
+    setState(() {
+      _isLoadingMore = true;
+    });
+
+    try {
+      final apiClient = ref.read(apiClientProvider);
+      final homeApi = HomeApiImpl(apiClient: apiClient);
+
+      final response = await homeApi.fetchEventsFromUrl(url: _nextUrl!);
+
+      if (response.data != null && mounted) {
+        setState(() {
+          _events.addAll(response.data!.map((model) => model.toDomain()).toList());
+          _nextUrl = response.nextUrl;
+          _previousUrl = response.previousUrl;
+          _isLoadingMore = false;
+        });
+      } else if (mounted) {
+        setState(() {
+          _isLoadingMore = false;
+        });
+      }
+    } catch (e) {
+      debugPrint('Error loading more events: $e');
+      if (mounted) {
+        setState(() {
+          _isLoadingMore = false;
         });
       }
     }
@@ -227,9 +291,19 @@ class _EventsScreenState extends ConsumerState<EventsScreen> {
       onRefresh: _loadEvents,
       color: AppColors.brown,
       child: ListView.builder(
+        controller: _scrollController,
         padding: EdgeInsets.all(24.w),
-        itemCount: _events.length,
+        itemCount: _events.length + (_isLoadingMore ? 1 : 0),
         itemBuilder: (context, index) {
+          // Show loading indicator at the bottom
+          if (index == _events.length) {
+            return Padding(
+              padding: EdgeInsets.symmetric(vertical: 24.h),
+              child: const Center(
+                child: CircularProgressIndicator(color: AppColors.brown),
+              ),
+            );
+          }
           return _buildEventCard(_events[index]);
         },
       ),
