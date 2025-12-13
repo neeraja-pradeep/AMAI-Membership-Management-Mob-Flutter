@@ -126,7 +126,9 @@ class MembershipNotifier extends StateNotifier<MembershipState> {
   /// Called on app launch - does NOT use if-modified-since
   Future<void> initialize() async {
     print('[MembershipNotifier] initialize() called, current state: $state');
-    state = const MembershipState.loading();
+    // Preserve previous data if available to prevent data loss during concurrent refresh
+    final previousData = state.currentData;
+    state = MembershipState.loading(previousData: previousData);
 
     final usecase = _ref.read(fetchMembershipUsecaseProvider);
     final result = await usecase();
@@ -142,7 +144,7 @@ class MembershipNotifier extends StateNotifier<MembershipState> {
         } else if (failure is RejectedApplicationFailure) {
           state = const MembershipState.rejected();
         } else {
-          state = MembershipState.error(failure: failure);
+          state = MembershipState.error(failure: failure, cachedData: previousData);
         }
       },
       (membershipCard) {
@@ -231,14 +233,16 @@ class AswasNotifier extends StateNotifier<AswasState> {
   /// Initialize by fetching fresh data from API
   /// Called on app launch - does NOT use if-modified-since
   Future<void> initialize() async {
-    state = const AswasState.loading();
+    // Preserve previous data if available to prevent data loss during concurrent refresh
+    final previousData = state.currentData;
+    state = AswasState.loading(previousData: previousData);
 
     final usecase = _ref.read(fetchAswasUsecaseProvider);
     final result = await usecase();
 
     result.fold(
       (failure) {
-        state = AswasState.error(failure: failure);
+        state = AswasState.error(failure: failure, cachedData: previousData);
       },
       (aswasPlus) {
         if (aswasPlus != null) {
@@ -310,14 +314,16 @@ class EventsNotifier extends StateNotifier<EventsState> {
   /// Initialize by fetching fresh data from API
   /// Called on app launch - does NOT use if-modified-since
   Future<void> initialize() async {
-    state = const EventsState.loading();
+    // Preserve previous data if available to prevent data loss during concurrent refresh
+    final previousData = state.currentData;
+    state = EventsState.loading(previousData: previousData);
 
     final usecase = _ref.read(fetchEventsUsecaseProvider);
     final result = await usecase();
 
     result.fold(
       (failure) {
-        state = EventsState.error(failure: failure);
+        state = EventsState.error(failure: failure, cachedData: previousData);
       },
       (events) {
         if (events != null && events.isNotEmpty) {
@@ -393,14 +399,16 @@ class AnnouncementsNotifier extends StateNotifier<AnnouncementsState> {
   /// Initialize by fetching fresh data from API
   /// Called on app launch - does NOT use if-modified-since
   Future<void> initialize() async {
-    state = const AnnouncementsState.loading();
+    // Preserve previous data if available to prevent data loss during concurrent refresh
+    final previousData = state.currentData;
+    state = AnnouncementsState.loading(previousData: previousData);
 
     final usecase = _ref.read(fetchAnnouncementsUsecaseProvider);
     final result = await usecase();
 
     result.fold(
       (failure) {
-        state = AnnouncementsState.error(failure: failure);
+        state = AnnouncementsState.error(failure: failure, cachedData: previousData);
       },
       (announcements) {
         if (announcements != null && announcements.isNotEmpty) {
@@ -476,14 +484,16 @@ class NomineesNotifier extends StateNotifier<NomineesState> {
   /// Initialize by fetching fresh data from API
   /// Called on app launch - does NOT use if-modified-since
   Future<void> initialize() async {
-    state = const NomineesState.loading();
+    // Preserve previous data if available to prevent data loss during concurrent refresh
+    final previousData = state.currentData;
+    state = NomineesState.loading(previousData: previousData);
 
     final usecase = _ref.read(fetchNomineesUsecaseProvider);
     final result = await usecase();
 
     result.fold(
       (failure) {
-        state = NomineesState.error(failure: failure);
+        state = NomineesState.error(failure: failure, cachedData: previousData);
       },
       (nominees) {
         if (nominees != null && nominees.isNotEmpty) {
