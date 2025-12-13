@@ -10,12 +10,12 @@ class EventModel {
   const EventModel({
     required this.id,
     required this.title,
-    required this.description,
+    this.description,
     required this.eventType,
     required this.eventDate,
-    required this.eventEndDate,
+    this.eventEndDate,
     required this.venue,
-    required this.maxCapacity,
+    this.maxCapacity,
     required this.currentBookings,
     required this.ticketPrice,
     required this.isPublished,
@@ -41,7 +41,7 @@ class EventModel {
   final String title;
 
   @JsonKey(name: 'description')
-  final String description;
+  final String? description;
 
   @JsonKey(name: 'event_type')
   final String eventType;
@@ -50,7 +50,7 @@ class EventModel {
   final String eventDate;
 
   @JsonKey(name: 'event_end_date')
-  final String eventEndDate;
+  final String? eventEndDate;
 
   @JsonKey(name: 'venue')
   final String venue;
@@ -59,7 +59,7 @@ class EventModel {
   final String? venueAddress;
 
   @JsonKey(name: 'max_capacity')
-  final int maxCapacity;
+  final int? maxCapacity;
 
   @JsonKey(name: 'current_bookings')
   final int currentBookings;
@@ -102,13 +102,15 @@ class EventModel {
     return UpcomingEvent(
       id: id.toString(),
       title: title,
-      description: description,
+      description: description ?? '',
       eventType: eventType,
       eventDate: _parseDateTime(eventDate),
-      eventEndDate: _parseDateTime(eventEndDate),
+      eventEndDate: eventEndDate != null
+          ? _parseDateTime(eventEndDate!)
+          : _parseDateTime(eventDate),
       venue: venue,
       venueAddress: venueAddress,
-      maxCapacity: maxCapacity,
+      maxCapacity: maxCapacity ?? 0,
       currentBookings: currentBookings,
       ticketPrice: ticketPrice,
       isPublished: isPublished,
