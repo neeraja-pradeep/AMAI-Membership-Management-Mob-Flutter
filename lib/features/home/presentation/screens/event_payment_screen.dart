@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:myapp/app/theme/colors.dart';
+import 'package:myapp/core/config/razorpay_config.dart';
 import 'package:myapp/core/network/api_client_provider.dart';
 import 'package:myapp/features/home/domain/entities/upcoming_event.dart';
 import 'package:myapp/features/home/infrastructure/data_sources/remote/home_api.dart';
@@ -75,7 +76,7 @@ class _EventPaymentScreenState extends ConsumerState<EventPaymentScreen> {
       debugPrint('Currency: $currency');
 
       final options = {
-        'key': 'rzp_test_1DP5mmOlF5G5ag', // Replace with your Razorpay key
+        'key': RazorpayConfig.apiKey, // Razorpay key from .env file
         'amount': amountInPaise, // Amount in paise from backend
         'currency': currency, // Currency from backend
         'order_id': widget.bookingData['order_id'], // Razorpay order ID from backend
