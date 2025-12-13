@@ -148,12 +148,17 @@ class _EventPaymentScreenState extends ConsumerState<EventPaymentScreen> {
   }
 
   void _handlePaymentError(PaymentFailureResponse response) {
-    debugPrint('Payment Error: ${response.code} - ${response.message}');
+    debugPrint('========== RAZORPAY PAYMENT ERROR ==========');
+    debugPrint('Error Code: ${response.code}');
+    debugPrint('Error Message: ${response.message}');
+    debugPrint('===========================================');
     _showError('Payment failed: ${response.message ?? 'Unknown error'}');
   }
 
   void _handleExternalWallet(ExternalWalletResponse response) {
-    debugPrint('External Wallet: ${response.walletName}');
+    debugPrint('========== EXTERNAL WALLET SELECTED ==========');
+    debugPrint('Wallet Name: ${response.walletName}');
+    debugPrint('==============================================');
     _showError('External wallet selected: ${response.walletName}');
   }
 
