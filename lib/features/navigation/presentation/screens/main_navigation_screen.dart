@@ -5,6 +5,7 @@ import 'package:flutter_svg/flutter_svg.dart';
 import 'package:myapp/app/theme/colors.dart';
 import 'package:myapp/features/home/application/providers/home_providers.dart';
 import 'package:myapp/features/home/presentation/screens/home_screen.dart';
+import 'package:myapp/features/home/presentation/screens/events_screen.dart';
 import 'package:myapp/features/home/presentation/screens/registration_status_screen.dart';
 import 'package:myapp/features/navigation/application/providers/navigation_providers.dart';
 import 'package:myapp/features/profile/application/providers/profile_providers.dart';
@@ -26,7 +27,7 @@ class _MainNavigationScreenState extends ConsumerState<MainNavigationScreen> {
 
   final List<Widget> _screens = [
     const HomeScreen(),
-    const _EventsPlaceholderScreen(),
+    const EventsScreen(),
     const _LibraryPlaceholderScreen(),
     const ProfileScreen(),
   ];

@@ -192,6 +192,12 @@ class Endpoints {
   /// Upcoming events list endpoint
   static const String events = '$apiPrefix/bookings/v1/events/upcoming/';
 
+  /// Ongoing events list endpoint
+  static const String ongoingEvents = '$apiPrefix/bookings/v1/events/ongoing/';
+
+  /// Past events list endpoint
+  static const String pastEvents = '$apiPrefix/bookings/v1/events/past/';
+
   /// Single event endpoint
   static String eventById(int id) => '$apiPrefix/bookings/v1/events/$id/';
 
